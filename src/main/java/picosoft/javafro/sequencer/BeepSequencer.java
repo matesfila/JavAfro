@@ -73,6 +73,23 @@ import java.util.Objects;
  */
 public final class BeepSequencer implements Sequencer {
 
+    private volatile boolean stopped;
+    private SourceDataLine activeLine;
+
+    /** Stops this sequencer permanently and discards queued audio immediately. */
+    public synchronized void stop() {
+        stopped = true;
+        if (activeLine != null) {
+            activeLine.stop();
+            activeLine.flush();
+            activeLine.close();
+        }
+    }
+
+    public boolean isStopped() {
+        return stopped;
+    }
+
     private record Voice(Instrument instrument, long start, long length) {
         long end() {
             return start + length;
@@ -102,9 +119,18 @@ public final class BeepSequencer implements Sequencer {
         int patternLength = validatedTracks.stream().mapToInt(track -> track.pattern().length()).max().orElseThrow();
 
         AudioFormat format = AudioConstants.audioFormat();
+        if (stopped) {
+            return;
+        }
         try (SourceDataLine line = AudioSystem.getSourceDataLine(format)) {
             line.open(format);
-            line.start();
+            synchronized (this) {
+                if (stopped) {
+                    return;
+                }
+                activeLine = line;
+                line.start();
+            }
 
             byte[] buffer = new byte[AudioConstants.SAMPLES_PER_BUFFER * 2];
             List<Voice> voices = new ArrayList<>();
@@ -112,6 +138,9 @@ public final class BeepSequencer implements Sequencer {
             long remainder = 0;
             for (int repeat = 0; repeat < repetitions; repeat++) {
                 for (int pulse = 0; pulse < patternLength; pulse++) {
+                    if (stopped) {
+                        return;
+                    }
                     // Carry fractional samples forward so rounding does not accumulate tempo drift.
                     long numerator = AudioConstants.SAMPLE_RATE * 60L + remainder;
                     long pulseSamples = numerator / sixteenthNotesPerMinute;
@@ -131,15 +160,24 @@ public final class BeepSequencer implements Sequencer {
 
             long tailEnd = voices.stream().mapToLong(Voice::end).max().orElse(position);
             render(line, buffer, voices, position, tailEnd - position, validatedTracks.size());
-            line.drain();
+            if (!stopped) {
+                line.drain();
+            }
+        } finally {
+            synchronized (this) {
+                activeLine = null;
+            }
         }
     }
 
     /** Vyrenderuje {@code count} vzoriek od pozície {@code from}, zapíše ich do linky a vráti novú pozíciu. */
-    private static long render(SourceDataLine line, byte[] buffer, List<Voice> voices, long from, long count, int trackCount) {
+    private long render(SourceDataLine line, byte[] buffer, List<Voice> voices, long from, long count, int trackCount) {
         long position = from;
         long end = from + count;
         while (position < end) {
+            if (stopped) {
+                return position;
+            }
             int block = (int) Math.min(AudioConstants.SAMPLES_PER_BUFFER, end - position);
             for (int i = 0; i < block; i++, position++) {
                 double mixed = 0;

@@ -161,6 +161,20 @@ public class PomodoroTimerView extends JFrame {
         cancelButton.setEnabled(running);
     }
 
+    public void setAwaitingAcknowledgement() {
+        minutesSpinner.setEnabled(false);
+        startButton.setEnabled(false);
+        cancelButton.setEnabled(false);
+    }
+
+    /** Called on the EDT; returns when OK is pressed or the dialog is closed. */
+    public void showCompletionDialog() {
+        restoreWindow();
+        JOptionPane.showMessageDialog(this,
+                "Your focus session is complete.\nPress OK to stop the alarm and prepare the next session.",
+                "Session complete", JOptionPane.PLAIN_MESSAGE);
+    }
+
     public void showStatus(String status) {
         statusLabel.setText(status);
         statusLabel.setForeground(switch (status) {
@@ -193,14 +207,13 @@ public class PomodoroTimerView extends JFrame {
         }
     }
 
-    private void restoreFromTray() {
-        if (!inTray) {
-            return;
+    public void restoreWindow() {
+        if (inTray) {
+            inTray = false;
+            systemTray.remove(trayIcon);
         }
-        inTray = false;
-        systemTray.remove(trayIcon);
+        setExtendedState(getExtendedState() & ~Frame.ICONIFIED);
         setVisible(true);
-        setExtendedState(Frame.NORMAL);
         toFront();
         requestFocus();
     }
@@ -211,7 +224,7 @@ public class PomodoroTimerView extends JFrame {
 
         PopupMenu menu = new PopupMenu();
         MenuItem openItem = new MenuItem("Open");
-        openItem.addActionListener(e -> SwingUtilities.invokeLater(this::restoreFromTray));
+        openItem.addActionListener(e -> SwingUtilities.invokeLater(this::restoreWindow));
         menu.add(openItem);
 
         MenuItem exitItem = new MenuItem("Exit");
@@ -228,11 +241,11 @@ public class PomodoroTimerView extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    SwingUtilities.invokeLater(PomodoroTimerView.this::restoreFromTray);
+                    SwingUtilities.invokeLater(PomodoroTimerView.this::restoreWindow);
                 }
             }
         });
-        icon.addActionListener(e -> SwingUtilities.invokeLater(this::restoreFromTray));
+        icon.addActionListener(e -> SwingUtilities.invokeLater(this::restoreWindow));
         return icon;
     }
 
