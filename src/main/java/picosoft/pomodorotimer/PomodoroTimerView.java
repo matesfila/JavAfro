@@ -1,26 +1,14 @@
-package picosoft;
+package picosoft.pomodorotimer;
 
-import picosoft.javafro.instruments.DundunInstrument;
-import picosoft.javafro.instruments.KensereniInstrument;
-import picosoft.javafro.instruments.SangbanInstrument;
-import picosoft.javafro.sequencer.BeepSequencer;
-import picosoft.javafro.sequencer.BeepTrack;
-
-import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.text.ParseException;
-import java.util.concurrent.TimeUnit;
 
-/**
- * Simple Pomodoro countdown with Start / Cancel controls.
- * Minimizes to the system tray when supported (e.g. on Windows).
- * Uses only standard Java APIs; no external dependencies.
- */
-public class PomodoroTimer extends JFrame {
+/** Swing window and system tray presentation. */
+public class PomodoroTimerView extends JFrame {
 
     private final JSpinner minutesSpinner = new JSpinner(new SpinnerNumberModel(25, 1, 999, 1));
     private final JLabel countdownLabel = new JLabel("25:00", SwingConstants.CENTER);
@@ -28,14 +16,11 @@ public class PomodoroTimer extends JFrame {
     private final JButton startButton = new JButton("Start");
     private final JButton cancelButton = new JButton("Cancel");
 
-    private final Timer timer;
-    private long deadlineNanos;
-
     private final SystemTray systemTray = SystemTray.isSupported() ? SystemTray.getSystemTray() : null;
     private TrayIcon trayIcon;
     private boolean inTray;
 
-    public PomodoroTimer() {
+    public PomodoroTimerView() {
         super("Pomodoro Timer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
@@ -58,12 +43,7 @@ public class PomodoroTimer extends JFrame {
         add(center, BorderLayout.CENTER);
         add(controls, BorderLayout.SOUTH);
 
-        timer = new Timer(200, e -> refreshCountdown());
         cancelButton.setEnabled(false);
-
-        minutesSpinner.addChangeListener(e -> showInitialDuration());
-        startButton.addActionListener(e -> startCountdown());
-        cancelButton.addActionListener(e -> cancelCountdown());
 
         if (systemTray != null) {
             trayIcon = createTrayIcon();
@@ -78,74 +58,28 @@ public class PomodoroTimer extends JFrame {
         setLocationRelativeTo(null);
     }
 
-    private void startCountdown() {
-        try {
-            minutesSpinner.commitEdit();
-        } catch (ParseException e) {
-            JOptionPane.showMessageDialog(this, "Enter a valid number of minutes.");
-            return;
-        }
-
-        int minutes = (Integer) minutesSpinner.getValue();
-        deadlineNanos = System.nanoTime() + TimeUnit.MINUTES.toNanos(minutes);
-
-        minutesSpinner.setEnabled(false);
-        startButton.setEnabled(false);
-        cancelButton.setEnabled(true);
-        statusLabel.setText("Running");
-
-        showDuration(TimeUnit.MINUTES.toSeconds(minutes));
-        timer.start();
+    public int getSelectedMinutes() throws ParseException {
+        minutesSpinner.commitEdit();
+        return (Integer) minutesSpinner.getValue();
     }
 
-    private void refreshCountdown() {
-        long remainingNanos = deadlineNanos - System.nanoTime();
-        if (remainingNanos <= 0) {
-            timer.stop();
-            showDuration(0);
-            resetControls();
-            statusLabel.setText("Finished");
+    public void onStart(Runnable action) { startButton.addActionListener(e -> action.run()); }
+    public void onCancel(Runnable action) { cancelButton.addActionListener(e -> action.run()); }
+    public void onDurationChanged(Runnable action) { minutesSpinner.addChangeListener(e -> action.run()); }
 
-            // Do not run user code on the Swing Event Dispatch Thread (EDT).
-            Thread worker = new Thread(() -> {
-                try {
-                    onTimerFinished();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    SwingUtilities.invokeLater(() -> statusLabel.setText("Action failed"));
-                }
-            }, "PomodoroTimer-onTimerFinished");
-            worker.start();
-            return;
-        }
-
-        // Round up so the timer initially shows the full selected duration.
-        long remainingSeconds = TimeUnit.NANOSECONDS.toSeconds(remainingNanos);
-        if (remainingNanos % TimeUnit.SECONDS.toNanos(1) != 0) {
-            remainingSeconds++;
-        }
-        showDuration(remainingSeconds);
+    public void setRunning(boolean running) {
+        minutesSpinner.setEnabled(!running);
+        startButton.setEnabled(!running);
+        cancelButton.setEnabled(running);
     }
 
-    private void cancelCountdown() {
-        timer.stop();
-        resetControls();
-        showInitialDuration();
-        statusLabel.setText("Cancelled");
+    public void showStatus(String status) { statusLabel.setText(status); }
+
+    public void showInvalidDuration() {
+        JOptionPane.showMessageDialog(this, "Enter a valid number of minutes.");
     }
 
-    private void resetControls() {
-        minutesSpinner.setEnabled(true);
-        startButton.setEnabled(true);
-        cancelButton.setEnabled(false);
-    }
-
-    private void showInitialDuration() {
-        int minutes = (Integer) minutesSpinner.getValue();
-        showDuration(TimeUnit.MINUTES.toSeconds(minutes));
-    }
-
-    private void showDuration(long totalSeconds) {
+    public void showDuration(long totalSeconds) {
         countdownLabel.setText(String.format("%02d:%02d", totalSeconds / 60, totalSeconds % 60));
     }
 
@@ -198,7 +132,7 @@ public class PomodoroTimer extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isLeftMouseButton(e)) {
-                    SwingUtilities.invokeLater(PomodoroTimer.this::restoreFromTray);
+                    SwingUtilities.invokeLater(PomodoroTimerView.this::restoreFromTray);
                 }
             }
         });
@@ -224,24 +158,4 @@ public class PomodoroTimer extends JFrame {
         return image;
     }
 
-    /**
-     * Called once after each normally completed countdown (not on Cancel).
-     * Runs on a background thread, NOT on the Swing EDT.
-     * Use SwingUtilities.invokeLater(...) to update Swing components from here.
-     */
-    protected void onTimerFinished() {
-        try {
-            new BeepSequencer().playPattern(java.util.List.of(
-                    new BeepTrack("x...x...x.x.x...", new DundunInstrument()),
-                    new BeepTrack("..x...xx", new SangbanInstrument()),
-                    new BeepTrack("x.xx.xx.", new KensereniInstrument())
-            ), 32, 116);
-        } catch (LineUnavailableException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PomodoroTimer().setVisible(true));
-    }
 }
