@@ -9,12 +9,16 @@ import picosoft.javafro.sequencer.BeepTrack;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.text.ParseException;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Simple Pomodoro countdown with Start / Cancel controls.
- * Uses only standard Java Swing (no external dependencies).
+ * Minimizes to the system tray when supported (e.g. on Windows).
+ * Uses only standard Java APIs; no external dependencies.
  */
 public class PomodoroTimer extends JFrame {
 
@@ -26,6 +30,10 @@ public class PomodoroTimer extends JFrame {
 
     private final Timer timer;
     private long deadlineNanos;
+
+    private final SystemTray systemTray = SystemTray.isSupported() ? SystemTray.getSystemTray() : null;
+    private TrayIcon trayIcon;
+    private boolean inTray;
 
     public PomodoroTimer() {
         super("Pomodoro Timer");
@@ -56,6 +64,15 @@ public class PomodoroTimer extends JFrame {
         minutesSpinner.addChangeListener(e -> showInitialDuration());
         startButton.addActionListener(e -> startCountdown());
         cancelButton.addActionListener(e -> cancelCountdown());
+
+        if (systemTray != null) {
+            trayIcon = createTrayIcon();
+            addWindowStateListener(e -> {
+                if ((e.getNewState() & Frame.ICONIFIED) != 0) {
+                    minimizeToTray();
+                }
+            });
+        }
 
         setSize(320, 210);
         setLocationRelativeTo(null);
@@ -88,7 +105,17 @@ public class PomodoroTimer extends JFrame {
             showDuration(0);
             resetControls();
             statusLabel.setText("Finished");
-            onTimerFinished();
+
+            // Do not run user code on the Swing Event Dispatch Thread (EDT).
+            Thread worker = new Thread(() -> {
+                try {
+                    onTimerFinished();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    SwingUtilities.invokeLater(() -> statusLabel.setText("Action failed"));
+                }
+            }, "PomodoroTimer-onTimerFinished");
+            worker.start();
             return;
         }
 
@@ -122,7 +149,86 @@ public class PomodoroTimer extends JFrame {
         countdownLabel.setText(String.format("%02d:%02d", totalSeconds / 60, totalSeconds % 60));
     }
 
-    /** Called exactly once after a countdown finishes normally (not on Cancel). */
+    private void minimizeToTray() {
+        if (systemTray == null || inTray) {
+            return;
+        }
+        try {
+            systemTray.add(trayIcon);
+            inTray = true;
+            setVisible(false);
+        } catch (AWTException e) {
+            // If the tray is unavailable, keep the window normally minimized.
+            e.printStackTrace();
+        }
+    }
+
+    private void restoreFromTray() {
+        if (!inTray) {
+            return;
+        }
+        inTray = false;
+        systemTray.remove(trayIcon);
+        setVisible(true);
+        setExtendedState(Frame.NORMAL);
+        toFront();
+        requestFocus();
+    }
+
+    private TrayIcon createTrayIcon() {
+        TrayIcon icon = new TrayIcon(createTrayImage(), "Pomodoro Timer");
+        icon.setImageAutoSize(true);
+
+        PopupMenu menu = new PopupMenu();
+        MenuItem openItem = new MenuItem("Open");
+        openItem.addActionListener(e -> SwingUtilities.invokeLater(this::restoreFromTray));
+        menu.add(openItem);
+
+        MenuItem exitItem = new MenuItem("Exit");
+        exitItem.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+            systemTray.remove(icon);
+            dispose();
+            System.exit(0);
+        }));
+        menu.add(exitItem);
+        icon.setPopupMenu(menu);
+
+        // Left-click restores the window; double-click works as well.
+        icon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    SwingUtilities.invokeLater(PomodoroTimer.this::restoreFromTray);
+                }
+            }
+        });
+        icon.addActionListener(e -> SwingUtilities.invokeLater(this::restoreFromTray));
+        return icon;
+    }
+
+    private static Image createTrayImage() {
+        BufferedImage image = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setColor(new Color(0xD95F45));
+            g.fillOval(4, 4, 56, 56);
+            g.setColor(Color.WHITE);
+            g.setStroke(new BasicStroke(5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawOval(12, 12, 40, 40);
+            g.drawLine(32, 32, 32, 19);
+            g.drawLine(32, 32, 42, 37);
+        } finally {
+            g.dispose();
+        }
+        return image;
+    }
+
+    /**
+     * Called once after each normally completed countdown (not on Cancel).
+     * Runs on a background thread, NOT on the Swing EDT.
+     * Use SwingUtilities.invokeLater(...) to update Swing components from here.
+     */
     protected void onTimerFinished() {
         try {
             new BeepSequencer().playPattern(java.util.List.of(
