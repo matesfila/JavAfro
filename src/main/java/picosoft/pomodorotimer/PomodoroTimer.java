@@ -5,9 +5,11 @@ import picosoft.javafro.instruments.KensereniInstrument;
 import picosoft.javafro.instruments.SangbanInstrument;
 import picosoft.javafro.sequencer.BeepSequencer;
 import picosoft.javafro.sequencer.BeepTrack;
+import picosoft.windows.WindowsDesktop;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
+import java.awt.*;
 import java.text.ParseException;
 
 /** Controller connecting the countdown model and Swing view. */
@@ -47,9 +49,12 @@ public class PomodoroTimer {
             timer.stop();
             view.setRunning(false);
             view.showStatus("Finished");
+            // Read Swing components on the EDT before starting the background action.
+            boolean playSound = view.isPlaySoundSelected();
+            boolean showDesktop = view.isShowDesktopSelected();
             Thread worker = new Thread(() -> {
                 try {
-                    onTimerFinished();
+                    onTimerFinished(playSound, showDesktop);
                 } catch (Exception e) {
                     e.printStackTrace();
                     SwingUtilities.invokeLater(() -> view.showStatus("Action failed"));
@@ -81,20 +86,49 @@ public class PomodoroTimer {
      * Called once after each normally completed countdown (not on Cancel).
      * Runs on a background thread, NOT on the Swing EDT.
      * Use SwingUtilities.invokeLater(...) to update Swing components from here.
+     * The options are captured from the view when the countdown finishes.
      */
-    protected void onTimerFinished() {
+    protected void onTimerFinished(boolean playSound, boolean showDesktop) {
         try {
-            new BeepSequencer().playPattern(java.util.List.of(
-                    new BeepTrack("x...x...x.x.x...", new DundunInstrument()),
-                    new BeepTrack("..x...xx", new SangbanInstrument()),
-                    new BeepTrack("x.xx.xx.", new KensereniInstrument())
-            ), 8, 116);
-        } catch (LineUnavailableException e) {
-            throw new RuntimeException(e);
+            if (playSound) {
+                TimerFineshedEvents.playsound();
+            }
+        } finally {
+            // Attempt the desktop action even if sound playback fails.
+            if (showDesktop) {
+                TimerFineshedEvents.showDeskop();
+            }
+        }
+    }
+
+    public static class TimerFineshedEvents {
+
+        public static void playsound() {
+            try {
+                new BeepSequencer().playPattern(java.util.List.of(
+                        new BeepTrack("x...x...x.x.x...", new DundunInstrument()),
+                        new BeepTrack("..x...xx", new SangbanInstrument()),
+                        new BeepTrack("x.xx.xx.", new KensereniInstrument())
+                ), 8, 116);
+            } catch (LineUnavailableException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+        public static void showDeskop() {
+            try {
+                WindowsDesktop.showDesktop();
+            } catch (AWTException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PomodoroTimer().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            PomodoroTimerView.configureLookAndFeel();
+            new PomodoroTimer().setVisible(true);
+        });
     }
 }
