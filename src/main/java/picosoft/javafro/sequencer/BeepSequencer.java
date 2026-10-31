@@ -9,6 +9,7 @@ import javax.sound.sampled.SourceDataLine;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Prehráva rytmické patterny viacerých trackov súčasne v zadanom tempe.
@@ -97,12 +98,38 @@ public final class BeepSequencer implements Sequencer {
     }
 
     @Override
+    public void playPattern(Rhythm rhythm, int repetitions, int humanize) throws LineUnavailableException {
+        if (rhythm == null) {
+            throw new IllegalArgumentException("Rhythm must not be null.");
+        }
+        playPattern(rhythm.tracks(), repetitions, rhythm.bpm(), humanize);
+    }
+
+    @Override
     public void playPattern(String pattern, int repetitions, int bpm) throws LineUnavailableException {
-        playPattern(List.of(new BeepTrack(pattern, new BeepInstrument())), repetitions, bpm);
+        playPattern(pattern, repetitions, bpm, 0);
+    }
+
+    @Override
+    public void playPattern(String pattern, int repetitions, int bpm, int humanize) throws LineUnavailableException {
+        playPattern(List.of(new BeepTrack(pattern, new BeepInstrument())), repetitions, bpm, humanize);
     }
 
     @Override
     public void playPattern(List<? extends Track> tracks, int repetitions, int bpm) throws LineUnavailableException {
+        playPattern(tracks, repetitions, bpm, 0);
+    }
+
+    /**
+     * Randomizes each hit independently by up to ±30 ms at 100, capped at a
+     * quarter of a sixteenth note. The range scales linearly from zero.
+     * Tempo stays fixed; starts before the beginning are clamped to zero.
+     */
+    @Override
+    public void playPattern(List<? extends Track> tracks, int repetitions, int bpm, int humanize) throws LineUnavailableException {
+        if (humanize < 0 || humanize > 100) {
+            throw new IllegalArgumentException("Humanize must be between 0 and 100.");
+        }
         if (tracks == null || tracks.isEmpty() || tracks.stream().anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException("At least one non-null track is required; tracks must not contain null.");
         }
@@ -118,6 +145,8 @@ public final class BeepSequencer implements Sequencer {
         }
         int patternLength = validatedTracks.stream().mapToInt(track -> track.pattern().length()).max().orElseThrow();
 
+        long maxOffset = Math.round(Math.min(AudioConstants.SAMPLE_RATE * 0.030,
+                AudioConstants.SAMPLE_RATE * 60.0 / sixteenthNotesPerMinute / 4) * humanize / 100.0);
         AudioFormat format = AudioConstants.audioFormat();
         if (stopped) {
             return;
@@ -135,6 +164,7 @@ public final class BeepSequencer implements Sequencer {
             byte[] buffer = new byte[AudioConstants.SAMPLES_PER_BUFFER * 2];
             List<Voice> voices = new ArrayList<>();
             long position = 0;
+            long renderedPosition = 0;
             long remainder = 0;
             for (int repeat = 0; repeat < repetitions; repeat++) {
                 for (int pulse = 0; pulse < patternLength; pulse++) {
@@ -150,16 +180,20 @@ public final class BeepSequencer implements Sequencer {
                         if (track.pattern().charAt(pulse % track.pattern().length()) == 'x') {
                             long length = track.instrument().lengthSamples(pulseSamples);
                             if (length > 0) {
-                                voices.add(new Voice(track.instrument(), position, length));
+                                voices.add(new Voice(track.instrument(), humanizedStart(position, maxOffset), length));
                             }
                         }
                     }
-                    position = render(line, buffer, voices, position, pulseSamples, validatedTracks.size());
+                    position += pulseSamples;
+                    // Leave room for early hits in the next pulse, including across repeats.
+                    long renderUntil = Math.max(0, position - maxOffset);
+                    renderedPosition = render(line, buffer, voices, renderedPosition,
+                            renderUntil - renderedPosition, validatedTracks.size());
                 }
             }
 
-            long tailEnd = voices.stream().mapToLong(Voice::end).max().orElse(position);
-            render(line, buffer, voices, position, tailEnd - position, validatedTracks.size());
+            long tailEnd = Math.max(position, voices.stream().mapToLong(Voice::end).max().orElse(position));
+            render(line, buffer, voices, renderedPosition, tailEnd - renderedPosition, validatedTracks.size());
             if (!stopped) {
                 line.drain();
             }
@@ -194,5 +228,12 @@ public final class BeepSequencer implements Sequencer {
             voices.removeIf(voice -> voice.end() <= blockEnd);
         }
         return position;
+    }
+
+    static long humanizedStart(long position, long maxOffset) {
+        if (maxOffset == 0) {
+            return position;
+        }
+        return Math.max(0, position + ThreadLocalRandom.current().nextLong(-maxOffset, maxOffset + 1));
     }
 }
