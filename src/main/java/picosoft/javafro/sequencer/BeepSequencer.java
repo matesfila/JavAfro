@@ -39,9 +39,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * <p>Pri vzorkovacej frekvencii {@code Fs = 44100} pripadá na šestnástinu
  * {@code Fs * 60 / (4 * BPM)} vzoriek. Napríklad pri 120 BPM je to
  * 5 512,5 vzorky. Keďže do výstupu možno zapísať iba celý počet vzoriek,
- * premenná {@code remainder} prenáša zvyšok delenia do ďalšieho pulzu:
+ * premenná {@code remainder} prenáša zlomok vzorky do ďalšieho pulzu:
  * v tomto príklade sa striedajú dĺžky 5 512 a 5 513 vzoriek.
- * Zvyšok sa zachováva aj medzi opakovaniami patternu.</p>
+ * Zvyšok sa zachováva aj medzi opakovaniami patternu a pri zmene tempa.</p>
  *
  * <h2>Hlasy, syntéza a miešanie</h2>
  * <p>Na začiatku každého pulzu sa pre každý track s {@code x} na pozícii
@@ -77,6 +77,22 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class BeepSequencer implements Sequencer {
 
+    @FunctionalInterface
+    interface LineFactory {
+        SourceDataLine create(AudioFormat format) throws LineUnavailableException;
+    }
+
+    private final LineFactory lineFactory;
+
+    public BeepSequencer() {
+        this(AudioSystem::getSourceDataLine);
+    }
+
+    // Allows audio scheduling to be verified without a physical audio device.
+    BeepSequencer(LineFactory lineFactory) {
+        this.lineFactory = Objects.requireNonNull(lineFactory);
+    }
+
     private volatile boolean stopped;
     private SourceDataLine activeLine;
 
@@ -108,6 +124,14 @@ public final class BeepSequencer implements Sequencer {
         playPattern(rhythm.tracks(), repetitions, rhythm.bpm(), humanize, rhythm.stepsPerBeat());
     }
 
+    /** Blocks until stop() is called; live controls are sampled before each new step. */
+    public void playContinuously(Rhythm rhythm, PlaybackSettings settings) throws LineUnavailableException {
+        if (rhythm == null || settings == null) {
+            throw new IllegalArgumentException("Rhythm and playback settings must not be null.");
+        }
+        play(rhythm.tracks(), 0, settings, rhythm.stepsPerBeat());
+    }
+
     @Override
     public void playPattern(String pattern, int repetitions, int bpm) throws LineUnavailableException {
         playPattern(pattern, repetitions, bpm, 0);
@@ -135,9 +159,14 @@ public final class BeepSequencer implements Sequencer {
 
     private void playPattern(List<? extends Track> tracks, int repetitions, int bpm, int humanize,
                              int stepsPerBeat) throws LineUnavailableException {
-        if (humanize < 0 || humanize > 100) {
-            throw new IllegalArgumentException("Humanize must be between 0 and 100.");
+        if (repetitions <= 0) {
+            throw new IllegalArgumentException("Repetitions must be greater than zero.");
         }
+        play(tracks, repetitions, new PlaybackSettings(bpm, humanize), stepsPerBeat);
+    }
+
+    private void play(List<? extends Track> tracks, int repetitions, PlaybackSettings settings,
+                      int stepsPerBeat) throws LineUnavailableException {
         if (tracks == null || tracks.isEmpty() || tracks.stream().anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException("At least one non-null track is required; tracks must not contain null.");
         }
@@ -145,23 +174,18 @@ public final class BeepSequencer implements Sequencer {
                 .map(track -> new BeepTrack(track.pattern(), track.instrument()))
                 .map(track -> new BeepTrack(track.pattern().replace("|", ""), track.instrument()))
                 .toList();
-        if (repetitions <= 0 || bpm <= 0) {
-            throw new IllegalArgumentException("Repetitions and BPM must be greater than zero.");
-        }
-        long stepsPerMinute = bpm * (long) stepsPerBeat;
-        if (AudioConstants.SAMPLE_RATE * 60L / stepsPerMinute < 4) {
-            throw new IllegalArgumentException("BPM is too high to render an audible pulse at the current sample rate.");
-        }
+        validateTempo(settings.snapshot().bpm(), stepsPerBeat);
         int patternLength = validatedTracks.stream().mapToInt(track -> track.pattern().length()).max().orElseThrow();
 
-        long maxOffset = Math.round(Math.min(AudioConstants.SAMPLE_RATE * 0.030,
-                AudioConstants.SAMPLE_RATE * 60.0 / stepsPerMinute / 4) * humanize / 100.0);
+        // A fixed lookbehind also accommodates a sudden increase in humanization or decrease in tempo.
+        long lookbehind = Math.round(AudioConstants.SAMPLE_RATE * 0.030);
         AudioFormat format = AudioConstants.audioFormat();
         if (stopped) {
             return;
         }
-        try (SourceDataLine line = AudioSystem.getSourceDataLine(format)) {
-            line.open(format);
+        try (SourceDataLine line = lineFactory.create(format)) {
+            // About 46 ms queued audio, so live controls remain responsive.
+            line.open(format, 2048 * format.getFrameSize());
             synchronized (this) {
                 if (stopped) {
                     return;
@@ -174,16 +198,22 @@ public final class BeepSequencer implements Sequencer {
             List<Voice> voices = new ArrayList<>();
             long position = 0;
             long renderedPosition = 0;
-            long remainder = 0;
-            for (int repeat = 0; repeat < repetitions; repeat++) {
+            double remainder = 0;
+            int repeat = 0;
+            while (!stopped && (repetitions == 0 || repeat < repetitions)) {
                 for (int pulse = 0; pulse < patternLength; pulse++) {
                     if (stopped) {
                         return;
                     }
-                    // Carry fractional samples forward so rounding does not accumulate tempo drift.
-                    long numerator = AudioConstants.SAMPLE_RATE * 60L + remainder;
-                    long pulseSamples = numerator / stepsPerMinute;
-                    remainder = numerator % stepsPerMinute;
+                    PlaybackSettings.Values controls = settings.snapshot();
+                    validateTempo(controls.bpm(), stepsPerBeat);
+                    // Fractional samples remain meaningful even when the tempo changes.
+                    double exactSamples = AudioConstants.SAMPLE_RATE * 60.0 / (controls.bpm() * (long) stepsPerBeat) + remainder;
+                    long pulseSamples = (long) exactSamples;
+                    remainder = exactSamples - pulseSamples;
+                    long maxOffset = Math.round(Math.min(lookbehind,
+                            AudioConstants.SAMPLE_RATE * 60.0 / (controls.bpm() * (long) stepsPerBeat) / 4)
+                            * controls.humanize() / 100.0);
 
                     for (BeepTrack track : validatedTracks) {
                         if (track.pattern().charAt(pulse % track.pattern().length()) == 'x') {
@@ -195,10 +225,11 @@ public final class BeepSequencer implements Sequencer {
                     }
                     position += pulseSamples;
                     // Leave room for early hits in the next pulse, including across repeats.
-                    long renderUntil = Math.max(0, position - maxOffset);
+                    long renderUntil = Math.max(0, position - lookbehind);
                     renderedPosition = render(line, buffer, voices, renderedPosition,
                             renderUntil - renderedPosition, validatedTracks.size());
                 }
+                if (repetitions != 0) repeat++;
             }
 
             long tailEnd = Math.max(position, voices.stream().mapToLong(Voice::end).max().orElse(position));
@@ -232,7 +263,12 @@ public final class BeepSequencer implements Sequencer {
                 }
                 AudioConstants.putSample(buffer, i, mixed / trackCount);
             }
-            line.write(buffer, 0, block * 2);
+            try {
+                line.write(buffer, 0, block * 2);
+            } catch (IllegalStateException exception) {
+                if (stopped) return position;
+                throw exception;
+            }
             long blockEnd = position;
             voices.removeIf(voice -> voice.end() <= blockEnd);
         }
@@ -244,5 +280,11 @@ public final class BeepSequencer implements Sequencer {
             return position;
         }
         return Math.max(0, position + ThreadLocalRandom.current().nextLong(-maxOffset, maxOffset + 1));
+    }
+
+    private static void validateTempo(int bpm, int stepsPerBeat) {
+        if (AudioConstants.SAMPLE_RATE * 60L / (bpm * (long) stepsPerBeat) < 4) {
+            throw new IllegalArgumentException("BPM is too high to render an audible pulse at the current sample rate.");
+        }
     }
 }

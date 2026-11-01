@@ -2,6 +2,42 @@
 
 Pomodoro časovač so Swing GUI a zvukovým upozornením.
 
+## Swing prehrávač rytmov
+
+`picosoft.javafro.AfroJavaPlayer` otvorí editor YAML a ovládanie prehrávania:
+
+```powershell
+mvn package
+& "$env:JAVA_HOME/bin/java.exe" -cp target/FocusTimer.jar picosoft.javafro.AfroJavaPlayer
+```
+
+Voliteľný argument je cesta k YAML súboru. V okne je aj tlačidlo **Otvoriť YAML…**.
+Predvolene sa načíta `rhythms/djole.yaml`. Editor RSyntaxTextArea zvýrazňuje YAML syntax,
+zobrazuje čísla riadkov a pri stlačení Tab odsádza dvoma medzerami.
+Má veľkú plochu s neproporcionálnym
+písmom a posuvníkmi pre dlhšie zápisy. Musí obsahovať práve jeden rytmus.
+
+**Play** načíta aktuálny YAML a prehráva základné patterny nepretržite až po **Stop**.
+Posuvníky **Tempo** a **Humanize** fungujú aj počas prehrávania bez reštartovania
+rytmu. Zmena sa použije od ďalšieho generovaného kroku, s malým oneskorením daným
+už pripraveným zvukom. Tempo posuvníka má pri prehrávaní prednosť pred BPM v editore;
+pri otvorení súboru sa posuvník inicializuje jeho BPM. Zmeny YAML sa použijú pri
+ďalšom Play. Zatvorenie okna zastaví aj zvuk. Existujúci spúšťač FocusTimer zostáva
+Pomodoro aplikáciou.
+
+Nepretržité prehrávanie možno použiť aj bez GUI (blokuje volajúce vlákno):
+
+```java
+PlaybackSettings controls = new PlaybackSettings(rhythm.bpm(), 40);
+BeepSequencer sequencer = new BeepSequencer();
+// Spusti vo vlastnom vlákne:
+sequencer.playContinuously(rhythm, controls);
+// Z ovládacieho vlákna: controls.setBpm(140); controls.setHumanize(70);
+// Zastavenie: sequencer.stop(); na ďalšie prehrávanie vytvor nový sequencer.
+```
+
+Pôvodné metódy s počtom opakovaní zostávajú dostupné.
+
 ## Rhythm
 
 `Rhythm` z balíka `picosoft.javafro.base` spája názov, tracky a tempo rytmu:
