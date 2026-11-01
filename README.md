@@ -61,10 +61,11 @@ Djole:
   name: "Djole"
   bpm: 116
   timeSignature: "4/4"
+  stepsPerBeat: 4
   tracks:
-    dundun:    "x.......|x.x....."
-    sangban:   "....x...|....x..."
-    kensereni: "..xx..xx|..xx..xx"
+    dundun:    "x.......x.x....."
+    sangban:   "....x.......x..."
+    kensereni: "..xx..xx..xx..xx"
 ```
 
 `RhythmLoader.load(Path)` alebo `RhythmLoader.load(InputStream)` v balíku
@@ -74,12 +75,19 @@ s názvom súboru bez prípony `.yaml` (vrátane veľkosti písmen).
 Povinné polia sú `name`, `bpm` a `tracks`;
 podporované nástroje sú `dundun`, `sangban` a `kensereni`.
 `timeSignature` je voliteľné, predvolene `"4/4"`. Podporované sú kladné metrá
-s menovateľom 4 alebo 8. V `Rhythm` každý znak `x` alebo `.` predstavuje osminu;
+s menovateľom 4 alebo 8. Bez `stepsPerBeat` každý znak `x` alebo `.` predstavuje osminu;
 `|` oddeľuje takty, nezaberá čas a nespúšťa zvuk. Každý takt musí byť úplný:
 
 - `4/4`: 8 znakov na takt, napr. `"x.......|x.x....."`.
 - `8/4`: 16 znakov na takt, napr. `"x.......x.x....."`.
 - `12/8`: 12 znakov na takt, napr. `"x..x..x..x.."`.
+
+Pri `stepsPerBeat: 4` predstavuje znak šestnástinu: jeden 4/4 takt má 16 znakov,
+ako v príklade Djole vyššie. Dĺžka kroku je vždy `60 / (bpm * stepsPerBeat)` sekúnd.
+Pipe iba označuje hranicu taktu a nemení rýchlosť. Rovnakých 16 krokov môže byť
+jeden 4/4 takt bez pipe alebo dva 2/4 takty s pipe uprostred; pri rovnakých
+BPM a `stepsPerBeat: 4` znejú rovnako dlho. Predvolený Djole má pri 116 BPM
+cyklus dlhý približne 2,069 sekundy (štyri beaty).
 
 V zložených osminových metrách (6/8, 9/8, 12/8 atď.) BPM označuje bodkovanú
 štvrťovú dobu: tri osminy na beat. Inde BPM označuje štvrťovú dobu: dve osminy

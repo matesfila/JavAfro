@@ -3,8 +3,9 @@ djole:
   name: "Djole"
   bpm: 116
   timeSignature: "4/4"
+  stepsPerBeat: 4
 
   tracks:
-    dundun:     "x.......|x.x....."
-    sangban:    "....x...|....x..."
-    kensereni:  "..xx..xx|..xx..xx"
+    dundun:     "x.......x.x....."
+    sangban:    "....x.......x..."
+    kensereni:  "..xx..xx..xx..xx"

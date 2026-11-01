@@ -86,7 +86,8 @@ public class RhythmLoaderTest {
     public void bundledDjoleIsValid() throws Exception {
         try (var input = getClass().getResourceAsStream("/rhythms/djole.yaml")) {
             Rhythm rhythm = RhythmLoader.load(input).get("djole");
-            assertEquals("x.......|x.x.....", rhythm.tracks().getFirst().pattern());
+            assertEquals("x.......x.x.....", rhythm.tracks().getFirst().pattern());
+            assertEquals(4, rhythm.stepsPerBeat());
             assertEquals(new TimeSignature(4, 4), rhythm.timeSignature());
         }
     }

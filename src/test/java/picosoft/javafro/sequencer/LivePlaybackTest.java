@@ -3,6 +3,8 @@ package picosoft.javafro.sequencer;
 import org.junit.Test;
 import picosoft.javafro.base.Instrument;
 import picosoft.javafro.base.Rhythm;
+import picosoft.javafro.base.TimeSignature;
+import picosoft.javafro.io.RhythmLoader;
 
 import javax.sound.sampled.SourceDataLine;
 import java.io.ByteArrayOutputStream;
@@ -46,6 +48,44 @@ public class LivePlaybackTest {
             public double sample(long index) { return 1; }
             public long lengthSamples(long pulseSamples) { return 1; }
         };
+    }
+
+    private int renderedFrames(Rhythm definition, int bpm) throws Exception {
+        var sink = new AudioSink();
+        var tracks = definition.tracks().stream()
+                .map(track -> new BeepTrack(track.pattern(), impulse())).toList();
+        var rhythm = new Rhythm(definition.name(), tracks, bpm, definition.timeSignature(), definition.stepsPerBeat());
+        new BeepSequencer(format -> sink.line).playPattern(rhythm, 1, 0);
+        return sink.bytes.size() / 2;
+    }
+
+    @Test
+    public void djoleCycleIsFourBeatsAndMatchesImportedTiming() throws Exception {
+        try (var input = getClass().getResourceAsStream("/rhythms/djole.yaml");
+             var imported = getClass().getResourceAsStream("/rhythms/imported/Djole.yaml")) {
+            var djole = RhythmLoader.load(input).get("djole");
+            var original = RhythmLoader.load(imported).get("Djole");
+            assertEquals(88200, renderedFrames(djole, 120)); // Four beats at 120 BPM = two seconds.
+            assertEquals(renderedFrames(original, 120), renderedFrames(djole, 120));
+            assertEquals(44100, renderedFrames(djole, 240));
+            assertEquals(44100 * 240.0 / 116, renderedFrames(djole, 116), 1.0);
+        }
+    }
+
+    @Test
+    public void meterAndSubdivisionDetermineDurationWhilePipesOnlyMarkBars() throws Exception {
+        var sixteenths = new Rhythm("4/4", List.of(new BeepTrack("x...............", impulse())),
+                120, new TimeSignature(4, 4), 4);
+        var split = new Rhythm("2/4", List.of(new BeepTrack("x.......|........", impulse())),
+                120, new TimeSignature(2, 4), 4);
+        var compound = new Rhythm("12/8", List.of(new BeepTrack("x..x..x..x..", impulse())),
+                120, new TimeSignature(12, 8));
+        var eightFour = new Rhythm("8/4", List.of(new BeepTrack("x...............", impulse())),
+                120, new TimeSignature(8, 4));
+        assertEquals(88200, renderedFrames(sixteenths, 120));
+        assertEquals(88200, renderedFrames(split, 120));
+        assertEquals(88200, renderedFrames(compound, 120));
+        assertEquals(176400, renderedFrames(eightFour, 120));
     }
 
     @Test
