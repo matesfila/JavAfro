@@ -38,6 +38,39 @@ sequencer.playContinuously(rhythm, controls);
 
 Pôvodné metódy s počtom opakovaní zostávajú dostupné.
 
+### Swing
+
+Každá hodnota `swing` je nezávislý posun jedného pulzu od rovnej pozície:
+
+```yaml
+stepsPerBeat: 4
+swing: [0, -0.4, 0, 0]
+```
+
+Počet hodnôt musí byť presne `stepsPerBeat`. Rozsah je −1 až +1; nula znamená
+presnú pozíciu, záporné číslo skorší úder a kladné neskorší. Krajné hodnoty
+posúvajú pulz o polovicu štandardného kroku. V príklade príde iba druhý pulz
+skôr o 20 % kroku; ostatné zostanú na svojich miestach. Pri 120 BPM a štyroch
+pulzoch sú pozície 0, 100, 250 a 375 ms. Ďalší beat stále začína v 500 ms.
+
+Neutrálne nastavenie je `[0, 0, 0, 0]`, pri troch pulzoch `[0, 0, 0]`.
+Vynechané `swing` znamená samé nuly. Starý zápis dĺžok medzier sa už nepoužíva.
+Medzery sa odvodzujú z pozícií vrátane hranice beatov; neposúva sa BPM ani ostatné
+pulzy. Krajné susedné posuny +1 a −1 môžu spojiť dva pulzy v rovnakom čase,
+ale neprehodia ich poradie. Prvý úder pred začiatkom prehrávania sa oreže na nulu.
+
+UI má jeden posuvník pre každý pulz (štyri pri Djole, tri pri triolovom delení).
+Všetky majú rovnaký pevný rozsah −1 až +1 a krok 0,01. Žiadny nemení hodnotu
+ani rozsah iného posuvníka. Zmeny sa používajú od ďalšieho generovaného beatu.
+Humanizácia pridáva náhodné odchýlky okolo swingových pozícií, pričom rešpektuje
+najkratšiu odvodenú medzeru. Pri spojených pulzoch je jej rozsah nulový.
+Pre skoršie údery si prehrávač pripravuje krátky úsek zvuku dopredu; živé zmeny
+preto majú oneskorenie podľa tempa a delenia beatu.
+
+Načítanie súboru alebo zmena YAML a ďalší Play nastavia posuvníky podľa YAML.
+Posuvníky nemenia zdrojový YAML; bez jeho úpravy zostanú ich nastavenia zachované
+aj po Stop/Play. Swing je zatiaľ spoločný pre všetky tracky.
+
 ## Rhythm
 
 `Rhythm` z balíka `picosoft.javafro.base` spája názov, tracky a tempo rytmu:

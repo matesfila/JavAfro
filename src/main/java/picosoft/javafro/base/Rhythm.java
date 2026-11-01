@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Objects;
 
 /** A named rhythm with its tracks and default tempo; playback settings are separate. */
-public record Rhythm(String name, List<? extends Track> tracks, int bpm, TimeSignature timeSignature, int stepsPerBeat) {
+public record Rhythm(String name, List<? extends Track> tracks, int bpm, TimeSignature timeSignature, int stepsPerBeat, Swing swing) {
+    public Rhythm(String name, List<? extends Track> tracks, int bpm, TimeSignature timeSignature, int stepsPerBeat) {
+        this(name, tracks, bpm, timeSignature, stepsPerBeat, Swing.straight(stepsPerBeat));
+    }
     public Rhythm(String name, List<? extends Track> tracks, int bpm) {
         this(name, tracks, bpm, new TimeSignature(4, 4));
     }
@@ -25,6 +28,9 @@ public record Rhythm(String name, List<? extends Track> tracks, int bpm, TimeSig
         }
         if (timeSignature == null) {
             throw new IllegalArgumentException("Time signature must not be null.");
+        }
+        if (swing == null || swing.offsets().size() != stepsPerBeat) {
+            throw new IllegalArgumentException("Swing must have one position offset per pulse in a beat.");
         }
         for (Track track : tracks) {
             timeSignature.validatePattern(track.pattern(), stepsPerBeat);

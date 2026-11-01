@@ -24,6 +24,10 @@ public final class RhythmPlayerPanel extends JPanel {
     private final JSlider humanize = new JSlider(0, 100, 40);
     private final JLabel status = new JLabel("Pripravené");
     private PlaybackSettings settings;
+    private final SwingControls swingControls = new SwingControls(swing -> {
+        if (settings != null) settings.setSwing(swing);
+    });
+    private String swingYaml;
     private BeepSequencer sequencer;
     private SwingWorker<Void, Void> worker;
 
@@ -67,6 +71,9 @@ public final class RhythmPlayerPanel extends JPanel {
         JPanel sliders = new JPanel(new GridLayout(2, 1, 0, 8));
         sliders.add(sliderRow("Tempo", tempo, " BPM"));
         sliders.add(sliderRow("Humanize", humanize, " %"));
+        JPanel liveControls = new JPanel(new BorderLayout(0, 8));
+        liveControls.add(sliders, BorderLayout.NORTH);
+        liveControls.add(swingControls, BorderLayout.CENTER);
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         play.setName("playButton");
         stop.setName("stopButton");
@@ -78,9 +85,9 @@ public final class RhythmPlayerPanel extends JPanel {
         status.setName("playbackStatus");
         buttons.add(status);
         JPanel footer = new JPanel(new BorderLayout(0, 12));
-        footer.add(sliders, BorderLayout.NORTH);
+        footer.add(liveControls, BorderLayout.NORTH);
         footer.add(buttons, BorderLayout.CENTER);
-        footer.add(new JLabel("Tempo určuje posuvník. Zmeny YAML sa použijú pri ďalšom Play."), BorderLayout.SOUTH);
+        footer.add(new JLabel("Tempo a swing určujú posuvníky. Zmeny YAML sa použijú pri ďalšom Play."), BorderLayout.SOUTH);
         add(footer, BorderLayout.SOUTH);
         tempo.addChangeListener(event -> { if (settings != null) settings.setBpm(tempo.getValue()); });
         humanize.addChangeListener(event -> { if (settings != null) settings.setHumanize(humanize.getValue()); });
@@ -118,6 +125,8 @@ public final class RhythmPlayerPanel extends JPanel {
         tempo.setMaximum(Math.max(300, rhythm.bpm()));
         tempo.setMinimum(Math.min(20, rhythm.bpm()));
         tempo.setValue(rhythm.bpm());
+        swingControls.setSwing(rhythm.swing());
+        swingYaml = yaml;
         status.setText("Pripravené · " + rhythm.name());
     }
 
@@ -136,7 +145,11 @@ public final class RhythmPlayerPanel extends JPanel {
         final Rhythm rhythm;
         try { rhythm = parseRhythm(editor.getText()); }
         catch (IllegalArgumentException exception) { showError(exception); return; }
-        settings = new PlaybackSettings(tempo.getValue(), humanize.getValue());
+        if (!editor.getText().equals(swingYaml)) {
+            swingControls.setSwing(rhythm.swing());
+            swingYaml = editor.getText();
+        }
+        settings = new PlaybackSettings(tempo.getValue(), humanize.getValue(), swingControls.value());
         BeepSequencer session = new BeepSequencer();
         PlaybackSettings controls = settings;
         sequencer = session;

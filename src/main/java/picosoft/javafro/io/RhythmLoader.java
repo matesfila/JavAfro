@@ -8,6 +8,7 @@ import picosoft.javafro.base.Instrument;
 import picosoft.javafro.base.Rhythm;
 import picosoft.javafro.base.Track;
 import picosoft.javafro.base.TimeSignature;
+import picosoft.javafro.base.Swing;
 import picosoft.javafro.instruments.DundunInstrument;
 import picosoft.javafro.instruments.KensereniInstrument;
 import picosoft.javafro.instruments.SangbanInstrument;
@@ -66,7 +67,7 @@ public final class RhythmLoader {
     private static Rhythm rhythm(Object value) {
         Map<?, ?> definition = mapping(value, "Definition");
         for (Object key : definition.keySet()) {
-            if (!Set.of("name", "bpm", "tracks", "timeSignature", "stepsPerBeat", "legacy").contains(key)) {
+            if (!Set.of("name", "bpm", "tracks", "timeSignature", "stepsPerBeat", "swing", "legacy").contains(key)) {
                 throw new IllegalArgumentException("Unknown rhythm field: " + key);
             }
         }
@@ -86,6 +87,20 @@ public final class RhythmLoader {
             stepsPerBeat = steps;
         }
         timeSignature.stepsPerBar(stepsPerBeat);
+        Swing swing = Swing.straight(stepsPerBeat);
+        if (definition.containsKey("swing")) {
+            if (!(definition.get("swing") instanceof List<?> values)) {
+                throw new IllegalArgumentException("Swing must be a list of pulse offsets between -1 and 1.");
+            }
+            var gaps = new ArrayList<Number>();
+            for (Object gap : values) {
+                if (!(gap instanceof Number number)) {
+                    throw new IllegalArgumentException("Swing pulse offsets must be numbers.");
+                }
+                gaps.add(number);
+            }
+            swing = Swing.of(stepsPerBeat, gaps);
+        }
         if (definition.containsKey("legacy")) {
             mapping(definition.get("legacy"), "Legacy archive");
         }
@@ -120,7 +135,7 @@ public final class RhythmLoader {
                 throw new IllegalArgumentException("Track '" + instrument + "': " + exception.getMessage(), exception);
             }
         }
-        return new Rhythm(name, tracks, bpm, timeSignature, stepsPerBeat);
+        return new Rhythm(name, tracks, bpm, timeSignature, stepsPerBeat, swing);
     }
 
     private static Instrument instrument(String id) {
