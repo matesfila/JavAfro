@@ -34,20 +34,20 @@ aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.
 - Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť.
 - Play opakuje základné patterny nepretržite. Stop zruší aj naplánované údery.
-- Tempo, humanize a nezávislé posuvníky swingu fungujú za behu. Zmena sa prejaví
+- Tempo, humanize a nezávislé posuvníky dialectu fungujú za behu. Zmena sa prejaví
   pri ďalšom plánovanom beate; už naplánovaný zvuk má krátky predstih.
 - Úpravy zdrojového YAML sa použijú pri ďalšom Play. Pred otvorením iného súboru
-  zastav prehrávanie. Uložiť stiahne YAML vrátane aktuálneho BPM a swingu,
+  zastav prehrávanie. Uložiť stiahne YAML vrátane aktuálneho BPM a dialectu,
   pričom zachová aj dáta `legacy` a komentáre. Humanize je nastavenie prehrávača.
 
 ## Časovanie a formát
 
-Formát zodpovedá Java triede Rhythm: `timeSignature`, `stepsPerBeat`, `swing`,
+Formát zodpovedá Java triede Rhythm: `timeSignature`, `stepsPerBeat`, `dialect`,
 tri tracky `dundun`, `sangban`, `kensereni`, string alebo objekt `base`/`variations`.
 Znak `x` hrá úder, `.` ticho, `|` oddeľuje celé takty bez pridaného času.
 Variácie a pôvodné `legacy` dáta zostávajú zachované, automaticky sa nehrajú.
 
-Swing má jednu hodnotu od −1 do +1 pre každý pulz: 0 je presná poloha,
+Dialect má jednu hodnotu od −1 do +1 pre každý pulz: 0 je presná poloha,
 ±1 posúva o polovicu rovného kroku. Posuny aj humanizácia rešpektujú tempo.
 Pri 12/8 je predvolený počet pulzov 3 a BPM počíta bodkované štvrťové doby.
 Web Audio plánuje údery podľa zvukových hodín; časovač iba dopĺňa plán.
@@ -72,5 +72,5 @@ sa zastaví a zobrazí výzvu na opätovné Play. Spoľahlivé hranie na zamknut
 telefóne alebo na pozadí sa negarantuje. Táto verzia ešte nemá PWA ani offline cache.
 Testy v prehliadači na počítači nenahrádzajú overenie na fyzickom iPhone.
 
-Automatické testy kontrolujú všetky zdieľané YAML, pravidlá taktu, swing,
+Automatické testy kontrolujú všetky zdieľané YAML, pravidlá taktu, dialect,
 humanizáciu, nepretržité časovanie a zastavenie zvuku počas načítavania/prerušenia.

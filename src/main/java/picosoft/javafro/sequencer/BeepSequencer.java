@@ -122,7 +122,7 @@ public final class BeepSequencer implements Sequencer {
             throw new IllegalArgumentException("Rhythm must not be null.");
         }
         if (repetitions <= 0) throw new IllegalArgumentException("Repetitions must be greater than zero.");
-        play(rhythm.tracks(), repetitions, new PlaybackSettings(rhythm.bpm(), humanize), rhythm.stepsPerBeat(), rhythm.swing());
+        play(rhythm.tracks(), repetitions, new PlaybackSettings(rhythm.bpm(), humanize), rhythm.stepsPerBeat(), rhythm.dialect());
     }
 
     /** Blocks until stop() is called; live controls are sampled before each new step. */
@@ -130,7 +130,7 @@ public final class BeepSequencer implements Sequencer {
         if (rhythm == null || settings == null) {
             throw new IllegalArgumentException("Rhythm and playback settings must not be null.");
         }
-        play(rhythm.tracks(), 0, settings, rhythm.stepsPerBeat(), rhythm.swing());
+        play(rhythm.tracks(), 0, settings, rhythm.stepsPerBeat(), rhythm.dialect());
     }
 
     @Override
@@ -163,11 +163,11 @@ public final class BeepSequencer implements Sequencer {
         if (repetitions <= 0) {
             throw new IllegalArgumentException("Repetitions must be greater than zero.");
         }
-        play(tracks, repetitions, new PlaybackSettings(bpm, humanize), stepsPerBeat, Swing.straight(stepsPerBeat));
+        play(tracks, repetitions, new PlaybackSettings(bpm, humanize), stepsPerBeat, Dialect.straight(stepsPerBeat));
     }
 
     private void play(List<? extends Track> tracks, int repetitions, PlaybackSettings settings,
-                      int stepsPerBeat, Swing swing) throws LineUnavailableException {
+                      int stepsPerBeat, Dialect dialect) throws LineUnavailableException {
         if (tracks == null || tracks.isEmpty() || tracks.stream().anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException("At least one non-null track is required; tracks must not contain null.");
         }
@@ -175,9 +175,9 @@ public final class BeepSequencer implements Sequencer {
                 .map(track -> new BeepTrack(track.pattern(), track.instrument()))
                 .map(track -> new BeepTrack(track.pattern().replace("|", ""), track.instrument()))
                 .toList();
-        Swing activeSwing = settings.snapshot().swing() == null ? swing : settings.snapshot().swing();
-        if (activeSwing.offsets().size() != stepsPerBeat) throw new IllegalArgumentException("Swing does not match steps per beat.");
-        double shortestGap = activeSwing.minimumGap();
+        Dialect activeDialect = settings.snapshot().dialect() == null ? dialect : settings.snapshot().dialect();
+        if (activeDialect.offsets().size() != stepsPerBeat) throw new IllegalArgumentException("Dialect does not match steps per beat.");
+        double shortestGap = activeDialect.minimumGap();
         validateTempo(settings.snapshot().bpm(), stepsPerBeat);
         int patternLength = validatedTracks.stream().mapToInt(track -> track.pattern().length()).max().orElseThrow();
 
@@ -207,7 +207,7 @@ public final class BeepSequencer implements Sequencer {
             long renderedPosition = 0;
             double remainder = 0;
             int repeat = 0;
-            int swingStep = 0;
+            int dialectStep = 0;
             while (!stopped && (repetitions == 0 || repeat < repetitions)) {
                 for (int pulse = 0; pulse < patternLength; pulse++) {
                     if (stopped) {
@@ -215,17 +215,17 @@ public final class BeepSequencer implements Sequencer {
                     }
                     PlaybackSettings.Values controls = settings.snapshot();
                     // Apply the new pulse positions together at the next beat.
-                    if (swingStep == 0) {
-                        activeSwing = controls.swing() == null ? swing : controls.swing();
-                        if (activeSwing.offsets().size() != stepsPerBeat) throw new IllegalArgumentException("Swing does not match steps per beat.");
-                        shortestGap = activeSwing.minimumGap();
+                    if (dialectStep == 0) {
+                        activeDialect = controls.dialect() == null ? dialect : controls.dialect();
+                        if (activeDialect.offsets().size() != stepsPerBeat) throw new IllegalArgumentException("Dialect does not match steps per beat.");
+                        shortestGap = activeDialect.minimumGap();
                     }
                     validateTempo(controls.bpm(), stepsPerBeat);
                     // Fractional samples remain meaningful even when the tempo changes.
                     double straightSamples = AudioConstants.SAMPLE_RATE * 60.0 / (controls.bpm() * (long) stepsPerBeat);
-                    long swingOffset = Math.round(straightSamples * activeSwing.offsets().get(swingStep) / 2);
+                    long dialectOffset = Math.round(straightSamples * activeDialect.offsets().get(dialectStep) / 2);
                     double exactSamples = straightSamples + remainder;
-                    swingStep = (swingStep + 1) % stepsPerBeat;
+                    dialectStep = (dialectStep + 1) % stepsPerBeat;
                     long pulseSamples = (long) exactSamples;
                     remainder = exactSamples - pulseSamples;
                     long maxOffset = Math.round(Math.min(humanizeLimit,
@@ -236,7 +236,7 @@ public final class BeepSequencer implements Sequencer {
                         if (track.pattern().charAt(pulse % track.pattern().length()) == 'x') {
                             long length = track.instrument().lengthSamples(pulseSamples);
                             if (length > 0) {
-                                long start = humanizedStart(Math.max(0, position + swingOffset), maxOffset);
+                                long start = humanizedStart(Math.max(0, position + dialectOffset), maxOffset);
                                 voices.add(new Voice(track.instrument(), Math.max(renderedPosition, start), length));
                             }
                         }

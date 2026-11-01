@@ -3,6 +3,7 @@
   bpm: 115
   timeSignature: "12/8"
   stepsPerBeat: 3
+  dialect: [0, -0.33, 0]
   tracks:
     dundun:
       base: ".......xx.xx"

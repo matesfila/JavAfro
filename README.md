@@ -6,7 +6,7 @@ Prehrávač afrických rytmov so Swing GUI, YAML editorom a zvukovými samplami.
 
 V adresári [web](web/README.md) je React/TypeScript verzia s YAML editorom,
 rovnakými rytmami a samplami, nepretržitým prehrávaním, tempom, humanizáciou
-a swingom. Spustenie: `cd web`, `npm ci`, `npm run dev`.
+a dialectom. Spustenie: `cd web`, `npm ci`, `npm run dev`.
 Nepotrebuje Java backend; produkčný build vytvorí statický adresár `web/dist`.
 
 ## Samostatný PomodoroTimer
@@ -28,7 +28,7 @@ Voliteľný argument je cesta k jednému YAML súboru na disku (UTF-8).
 Bez argumentu sa otvorí prázdny editor; predvolený rytmus z resources sa nenačítava.
 Relatívna cesta sa vyhodnocuje voči pracovnému priečinku. V okne je aj tlačidlo **Otvoriť YAML…**.
 Jeden súbor `.yaml` alebo `.yml` možno tiež presunúť z Prieskumníka priamo do okna
-alebo editora. Načíta sa jeho obsah, tempo a swing. Počas prehrávania treba najprv
+alebo editora. Načíta sa jeho obsah, tempo a dialect. Počas prehrávania treba najprv
 stlačiť Stop. Viac súborov, priečinky a iné prípony sa odmietnu; pri neplatnom YAML
 zostane doterajší obsah zachovaný. Bežné kopírovanie a vkladanie textu funguje naďalej.
 Editor RSyntaxTextArea zvýrazňuje YAML syntax,
@@ -65,13 +65,13 @@ absolútnu cestu k aktuálne zvolenému súboru vrátane prípadných medzier.
 Konfigurácia používa modul `JavAfro`, hlavný vstup `picosoft.javafro.AfroJavaPlayer`
 a pracovný priečinok koreňa projektu. Pred spustením sa vykoná Build.
 
-### Swing
+### Dialect
 
-Každá hodnota `swing` je nezávislý posun jedného pulzu od rovnej pozície:
+Každá hodnota `dialect` je nezávislý posun jedného pulzu od rovnej pozície:
 
 ```yaml
 stepsPerBeat: 4
-swing: [0, -0.4, 0, 0]
+dialect: [0, -0.4, 0, 0]
 ```
 
 Počet hodnôt musí byť presne `stepsPerBeat`. Rozsah je −1 až +1; nula znamená
@@ -81,7 +81,7 @@ skôr o 20 % kroku; ostatné zostanú na svojich miestach. Pri 120 BPM a štyroc
 pulzoch sú pozície 0, 100, 250 a 375 ms. Ďalší beat stále začína v 500 ms.
 
 Neutrálne nastavenie je `[0, 0, 0, 0]`, pri troch pulzoch `[0, 0, 0]`.
-Vynechané `swing` znamená samé nuly. Starý zápis dĺžok medzier sa už nepoužíva.
+Vynechané `dialect` znamená samé nuly. Starý zápis dĺžok medzier sa už nepoužíva.
 Medzery sa odvodzujú z pozícií vrátane hranice beatov; neposúva sa BPM ani ostatné
 pulzy. Krajné susedné posuny +1 a −1 môžu spojiť dva pulzy v rovnakom čase,
 ale neprehodia ich poradie. Prvý úder pred začiatkom prehrávania sa oreže na nulu.
@@ -89,14 +89,14 @@ ale neprehodia ich poradie. Prvý úder pred začiatkom prehrávania sa oreže n
 UI má jeden posuvník pre každý pulz (štyri pri Djole, tri pri triolovom delení).
 Všetky majú rovnaký pevný rozsah −1 až +1 a krok 0,01. Žiadny nemení hodnotu
 ani rozsah iného posuvníka. Zmeny sa používajú od ďalšieho generovaného beatu.
-Humanizácia pridáva náhodné odchýlky okolo swingových pozícií, pričom rešpektuje
+Humanizácia pridáva náhodné odchýlky okolo dialectových pozícií, pričom rešpektuje
 najkratšiu odvodenú medzeru. Pri spojených pulzoch je jej rozsah nulový.
 Pre skoršie údery si prehrávač pripravuje krátky úsek zvuku dopredu; živé zmeny
 preto majú oneskorenie podľa tempa a delenia beatu.
 
 Načítanie súboru alebo zmena YAML a ďalší Play nastavia posuvníky podľa YAML.
 Posuvníky nemenia zdrojový YAML; bez jeho úpravy zostanú ich nastavenia zachované
-aj po Stop/Play. Swing je zatiaľ spoločný pre všetky tracky.
+aj po Stop/Play. Dialect je zatiaľ spoločný pre všetky tracky.
 
 ## Rhythm
 

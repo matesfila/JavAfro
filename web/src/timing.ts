@@ -2,7 +2,7 @@ import type { Instrument, Rhythm } from './rhythm';
 
 export const DEFAULT_HUMANIZE = 21;
 
-export interface Controls { bpm: number; humanize: number; swing: number[] }
+export interface Controls { bpm: number; humanize: number; dialect: number[] }
 export interface Hit { instrument: Instrument; time: number }
 
 export function validateControls(controls: Controls, steps: number) {
@@ -10,10 +10,10 @@ export function validateControls(controls: Controls, steps: number) {
     throw new Error('Tempo je mimo rozsahu prehrávača.');
   }
   if (!Number.isFinite(controls.humanize) || controls.humanize < 0 || controls.humanize > 100) throw new Error('Humanize musí byť 0–100.');
-  if (controls.swing.length !== steps || controls.swing.some(n => !Number.isFinite(n) || Math.abs(n) > 1)) throw new Error('Neplatné pozície pulzov.');
+  if (controls.dialect.length !== steps || controls.dialect.some(n => !Number.isFinite(n) || Math.abs(n) > 1)) throw new Error('Neplatné pozície pulzov.');
 }
-export function minimumGap(swing: number[]): number {
-  return Math.min(1, ...swing.map((n, i) => 1 + (swing[(i + 1) % swing.length] - n) / 2));
+export function minimumGap(dialect: number[]): number {
+  return Math.min(1, ...dialect.map((n, i) => 1 + (dialect[(i + 1) % dialect.length] - n) / 2));
 }
 
 /** Times are seconds on the audio clock, independent from timers or UI frames. */
@@ -21,12 +21,12 @@ export function planBeat(rhythm: Rhythm, controls: Controls, beatStart: number,
                          stepIndex: number, random: () => number = Math.random): { hits: Hit[]; end: number; nextStep: number } {
   validateControls(controls, rhythm.stepsPerBeat);
   const step = 60 / (controls.bpm * rhythm.stepsPerBeat);
-  const jitter = Math.min(0.030, step * minimumGap(controls.swing) / 4) * controls.humanize / 100;
+  const jitter = Math.min(0.030, step * minimumGap(controls.dialect) / 4) * controls.humanize / 100;
   const hits: Hit[] = [];
   for (let pulse = 0; pulse < rhythm.stepsPerBeat; pulse++) {
     const position = (stepIndex + pulse) % rhythm.length;
     const nominal = beatStart + pulse * step;
-    const shifted = Math.max(0, nominal + step * controls.swing[pulse] / 2);
+    const shifted = Math.max(0, nominal + step * controls.dialect[pulse] / 2);
     for (const track of rhythm.tracks) {
       const pattern = track.base.replaceAll('|', '');
       if (pattern[position % pattern.length] === 'x') {

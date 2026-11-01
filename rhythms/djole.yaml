@@ -4,7 +4,7 @@ djole:
   bpm: 116
   timeSignature: "4/4"
   stepsPerBeat: 4
-  swing: [0, 0, 0, 0]
+  dialect: [0, 0, 0, 0]
 
   tracks:
     dundun:     "x.......x.x....."

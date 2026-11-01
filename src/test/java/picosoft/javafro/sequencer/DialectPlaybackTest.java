@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import static org.junit.Assert.*;
 
-public class SwingPlaybackTest {
+public class DialectPlaybackTest {
     private static SourceDataLine sink(ByteArrayOutputStream pcm) {
-        return (SourceDataLine) Proxy.newProxyInstance(SwingPlaybackTest.class.getClassLoader(),
+        return (SourceDataLine) Proxy.newProxyInstance(DialectPlaybackTest.class.getClassLoader(),
                 new Class<?>[]{SourceDataLine.class}, (proxy, method, args) -> {
                     if (method.getName().equals("write")) {
                         pcm.write((byte[]) args[0], (Integer) args[1], (Integer) args[2]);
@@ -35,8 +35,8 @@ public class SwingPlaybackTest {
     @Test
     public void offsetsMoveOnlySelectedPulsesAndKeepTempo() throws Exception {
         var pcm = new ByteArrayOutputStream();
-        var rhythm = new Rhythm("Swing", List.of(new BeepTrack("xxxxxxxxxxxxxxxx", impulse())),
-                120, new TimeSignature(4, 4), 4, Swing.of(4, List.of(0, -0.4, 0, 0)));
+        var rhythm = new Rhythm("Dialect", List.of(new BeepTrack("xxxxxxxxxxxxxxxx", impulse())),
+                120, new TimeSignature(4, 4), 4, Dialect.of(4, List.of(0, -0.4, 0, 0)));
         new BeepSequencer(format -> sink(pcm)).playPattern(rhythm, 2, 0);
         assertEquals(176400, pcm.size() / 2);
         var hits = onsets(pcm.toByteArray());
@@ -50,7 +50,7 @@ public class SwingPlaybackTest {
     public void endpointPositionsCanCoincideWithoutChangingOtherPulses() throws Exception {
         var pcm = new ByteArrayOutputStream();
         var rhythm = new Rhythm("Endpoints", List.of(new BeepTrack("xxxx", impulse())), 120,
-                new TimeSignature(1, 4), 4, Swing.of(4, List.of(1, -1, 0, 0)));
+                new TimeSignature(1, 4), 4, Dialect.of(4, List.of(1, -1, 0, 0)));
         new BeepSequencer(format -> sink(pcm)).playPattern(rhythm, 1, 100);
         assertEquals(List.of(2756, 11025, 16537), onsets(pcm.toByteArray()));
         assertEquals(22050, pcm.size() / 2);
@@ -60,7 +60,7 @@ public class SwingPlaybackTest {
     public void firstPulseMayMoveAcrossBeatAndLoopBoundaries() throws Exception {
         var pcm = new ByteArrayOutputStream();
         var rhythm = new Rhythm("Early", List.of(new BeepTrack("x...............", impulse())),
-                120, new TimeSignature(4, 4), 4, Swing.of(4, List.of(-1, 0, 0, 0)));
+                120, new TimeSignature(4, 4), 4, Dialect.of(4, List.of(-1, 0, 0, 0)));
         new BeepSequencer(format -> sink(pcm)).playPattern(rhythm, 3, 0);
         assertEquals(List.of(0, 85444, 173644), onsets(pcm.toByteArray()));
         assertEquals(264600, pcm.size() / 2);
@@ -68,14 +68,14 @@ public class SwingPlaybackTest {
     @Test
     public void liveOffsetsTakeEffectOnNextBeatAndSurviveTempoAndHumanizeControls() throws Exception {
         var pcm = new ByteArrayOutputStream();
-        var controls = new PlaybackSettings(120, 0, Swing.straight(4));
+        var controls = new PlaybackSettings(120, 0, Dialect.straight(4));
         var sequencer = new BeepSequencer(format -> sink(pcm));
         int[] count = {0};
         Instrument instrument = new Instrument() {
             public double sample(long index) { return 1; }
             public long lengthSamples(long samples) {
                 count[0]++;
-                if (count[0] == 1) controls.setSwing(Swing.of(4, List.of(0, -0.4, 0, 0)));
+                if (count[0] == 1) controls.setDialect(Dialect.of(4, List.of(0, -0.4, 0, 0)));
                 if (count[0] == 40) sequencer.stop();
                 return 1;
             }
@@ -86,19 +86,19 @@ public class SwingPlaybackTest {
         assertEquals(List.of(0, 5512, 11025, 16537), hits.subList(0, 4));
         assertEquals(List.of(22050, 26460, 33075, 38587), hits.subList(4, 8));
         controls.setBpm(130); controls.setHumanize(60);
-        assertEquals(Swing.of(4, List.of(0, -0.4, 0, 0)), controls.snapshot().swing());
+        assertEquals(Dialect.of(4, List.of(0, -0.4, 0, 0)), controls.snapshot().dialect());
     }
-    private Rhythm load(String swing) {
-        String yaml = "Test:\n  name: Test\n  bpm: 120\n  stepsPerBeat: 4\n  swing: " + swing
+    private Rhythm load(String dialect) {
+        String yaml = "Test:\n  name: Test\n  bpm: 120\n  stepsPerBeat: 4\n  dialect: " + dialect
                 + "\n  tracks:\n    dundun: x...............\n";
         return RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8))).get("Test");
     }
     @Test
     public void validatesIndependentOffsetsWithoutSumOrGapConstraints() {
-        assertEquals(Swing.straight(4), load("[0, 0, 0, 0]").swing());
-        assertEquals(0.0, load("[1, -1, 1, -1]").swing().minimumGap(), 0);
-        assertEquals(List.of(1.0, 1.0, 1.0, 1.0), load("[1, 1, 1, 1]").swing().offsets());
-        assertThrows(UnsupportedOperationException.class, () -> load("[0, 0, 0, 0]").swing().offsets().clear());
+        assertEquals(Dialect.straight(4), load("[0, 0, 0, 0]").dialect());
+        assertEquals(0.0, load("[1, -1, 1, -1]").dialect().minimumGap(), 0);
+        assertEquals(List.of(1.0, 1.0, 1.0, 1.0), load("[1, 1, 1, 1]").dialect().offsets());
+        assertThrows(UnsupportedOperationException.class, () -> load("[0, 0, 0, 0]").dialect().offsets().clear());
         for (String invalid : List.of("[]", "null", "[0, 0, 0]", "[1.1, 0, 0, 0]", "[-1.1, 0, 0, 0]",
                 "[.nan, 0, 0, 0]", "[.inf, 0, 0, 0]", "['0', 0, 0, 0]")) {
             assertThrows(IllegalArgumentException.class, () -> load(invalid));

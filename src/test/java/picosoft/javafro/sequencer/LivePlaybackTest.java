@@ -55,7 +55,7 @@ public class LivePlaybackTest {
         var sink = new AudioSink();
         var tracks = definition.tracks().stream()
                 .map(track -> new BeepTrack(track.pattern(), impulse())).toList();
-        var rhythm = new Rhythm(definition.name(), tracks, bpm, definition.timeSignature(), definition.stepsPerBeat(), definition.swing());
+        var rhythm = new Rhythm(definition.name(), tracks, bpm, definition.timeSignature(), definition.stepsPerBeat(), definition.dialect());
         new BeepSequencer(format -> sink.line).playPattern(rhythm, 1, 0);
         return sink.bytes.size() / 2;
     }
@@ -126,7 +126,7 @@ public class LivePlaybackTest {
         long grid = 0;
         int checked = 0;
         for (int i = 0; i < 19; i++) {
-            // Stop discards the lookahead needed for early swing positions.
+            // Stop discards the lookahead needed for early dialect positions.
             if (i >= 4 && grid * 2 + 1 < pcm.length) {
                 // Humanize was disabled live: later hits must land exactly on the changing tempo grid.
                 assertTrue(pcm[(int) grid * 2] != 0 || pcm[(int) grid * 2 + 1] != 0);

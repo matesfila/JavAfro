@@ -25,6 +25,12 @@ public class ImportedRhythmsTest {
             for (Path file : files) {
                 String id = file.getFileName().toString().replaceFirst("\\.yaml$", "");
                 assertEquals(file.toString(), java.util.Set.of(id), RhythmLoader.load(file).keySet());
+                Map<?, ?> document = new Yaml().load(Files.readString(file));
+                Map<?, ?> definition = (Map<?, ?>) document.get(id);
+                assertTrue(file.toString(), definition.containsKey("dialect"));
+                assertFalse(file.toString(), definition.containsKey("swing"));
+                Rhythm rhythm = RhythmLoader.load(file).get(id);
+                assertEquals(java.util.Collections.nCopies(rhythm.stepsPerBeat(), 0.0), rhythm.dialect().offsets());
             }
         }
     }

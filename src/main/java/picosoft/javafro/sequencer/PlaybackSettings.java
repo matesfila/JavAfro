@@ -1,12 +1,12 @@
 package picosoft.javafro.sequencer;
 
-import picosoft.javafro.base.Swing;
+import picosoft.javafro.base.Dialect;
 
 /** Thread-safe live controls, shared by the UI and the audio thread. */
 public final class PlaybackSettings {
     public static final int DEFAULT_HUMANIZE = 21;
 
-    public record Values(int bpm, int humanize, Swing swing) {
+    public record Values(int bpm, int humanize, Dialect dialect) {
         public Values(int bpm, int humanize) { this(bpm, humanize, null); }
     }
 
@@ -16,9 +16,9 @@ public final class PlaybackSettings {
         this(bpm, humanize, null);
     }
 
-    public PlaybackSettings(int bpm, int humanize, Swing swing) {
+    public PlaybackSettings(int bpm, int humanize, Dialect dialect) {
         validate(bpm, humanize);
-        values = new Values(bpm, humanize, swing);
+        values = new Values(bpm, humanize, dialect);
     }
 
     public Values snapshot() {
@@ -27,20 +27,20 @@ public final class PlaybackSettings {
 
     public synchronized void setBpm(int bpm) {
         validate(bpm, values.humanize());
-        values = new Values(bpm, values.humanize(), values.swing());
+        values = new Values(bpm, values.humanize(), values.dialect());
     }
 
     public synchronized void setHumanize(int humanize) {
         validate(values.bpm(), humanize);
-        values = new Values(values.bpm(), humanize, values.swing());
+        values = new Values(values.bpm(), humanize, values.dialect());
     }
 
     /** Pulse offsets are applied together at the next beat boundary. */
-    public synchronized void setSwing(Swing swing) {
-        if (swing == null || (values.swing() != null && swing.offsets().size() != values.swing().offsets().size())) {
-            throw new IllegalArgumentException("Live swing must keep the same number of steps per beat.");
+    public synchronized void setDialect(Dialect dialect) {
+        if (dialect == null || (values.dialect() != null && dialect.offsets().size() != values.dialect().offsets().size())) {
+            throw new IllegalArgumentException("Live dialect must keep the same number of steps per beat.");
         }
-        values = new Values(values.bpm(), values.humanize(), swing);
+        values = new Values(values.bpm(), values.humanize(), dialect);
     }
 
     private static void validate(int bpm, int humanize) {

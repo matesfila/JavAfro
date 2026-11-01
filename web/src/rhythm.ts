@@ -5,7 +5,7 @@ export type Instrument = typeof instruments[number];
 export interface Track { instrument: Instrument; base: string; variations: string[] }
 export interface Rhythm {
   id: string; name: string; bpm: number; timeSignature: string;
-  stepsPerBeat: number; stepsPerBar: number; swing: number[]; tracks: Track[]; length: number;
+  stepsPerBeat: number; stepsPerBar: number; dialect: number[]; tracks: Track[]; length: number;
 }
 export interface CatalogEntry {
   id: string; key: string; name: string; bpm: number; timeSignature: string; imported: boolean;
@@ -47,7 +47,7 @@ export function parseRhythm(source: string): Rhythm {
   if (ids.length !== 1) throw new Error('Editor musí obsahovať práve jeden rytmus.');
   const id = text(ids[0], 'Identifikátor');
   const data = record(definitions[id], id);
-  keys(data, ['name', 'bpm', 'timeSignature', 'stepsPerBeat', 'swing', 'tracks', 'legacy'], id);
+  keys(data, ['name', 'bpm', 'timeSignature', 'stepsPerBeat', 'dialect', 'tracks', 'legacy'], id);
   const name = text(data.name, 'Názov');
   const bpm = integer(data.bpm, 'BPM');
   const timeSignature = data.timeSignature === undefined ? '4/4' : text(data.timeSignature, 'Metrum');
@@ -59,9 +59,9 @@ export function parseRhythm(source: string): Rhythm {
   const stepsPerBeat = data.stepsPerBeat === undefined ? defaultSteps : integer(data.stepsPerBeat, 'stepsPerBeat', 10000);
   const stepsPerBar = (denominator === 4 ? numerator * 2 : numerator) * stepsPerBeat / defaultSteps;
   if (!Number.isInteger(stepsPerBar) || stepsPerBar > 2147483647) throw new Error('Metrum a delenie nevytvárajú celý počet krokov na takt.');
-  const swing: number[] = data.swing === undefined ? Array(stepsPerBeat).fill(0) : data.swing as number[];
-  if (!Array.isArray(swing) || swing.length !== stepsPerBeat || swing.some(n => typeof n !== 'number' || !Number.isFinite(n) || Math.abs(n) > 1)) {
-    throw new Error(`Swing musí obsahovať ${stepsPerBeat} hodnôt medzi −1 a +1.`);
+  const dialect: number[] = data.dialect === undefined ? Array(stepsPerBeat).fill(0) : data.dialect as number[];
+  if (!Array.isArray(dialect) || dialect.length !== stepsPerBeat || dialect.some(n => typeof n !== 'number' || !Number.isFinite(n) || Math.abs(n) > 1)) {
+    throw new Error(`Dialect musí obsahovať ${stepsPerBeat} hodnôt medzi −1 a +1.`);
   }
   if ('legacy' in data) record(data.legacy, 'Legacy archív');
   const rawTracks = record(data.tracks, 'Tracks');
@@ -83,6 +83,6 @@ export function parseRhythm(source: string): Rhythm {
       return { instrument: instrument as Instrument, base: pattern(base, stepsPerBar), variations };
     } catch (error) { throw new Error(`${instrument}: ${(error as Error).message}`); }
   });
-  return { id, name, bpm, timeSignature, stepsPerBeat, stepsPerBar, swing: [...swing], tracks,
+  return { id, name, bpm, timeSignature, stepsPerBeat, stepsPerBar, dialect: [...dialect], tracks,
     length: Math.max(...tracks.map(t => t.base.replaceAll('|', '').length)) };
 }

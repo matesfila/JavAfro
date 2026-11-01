@@ -25,7 +25,7 @@ export function App() {
   const [isLoading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [beat, setBeat] = useState(-1);
-  const [controls, setControls] = useState<Controls>({ bpm: 116, humanize: DEFAULT_HUMANIZE, swing: [0, 0, 0, 0] });
+  const [controls, setControls] = useState<Controls>({ bpm: 116, humanize: DEFAULT_HUMANIZE, dialect: [0, 0, 0, 0] });
   const controlsRef = useRef(controls); controlsRef.current = controls;
   const syncedSource = useRef('');
   const playingSource = useRef('');
@@ -41,7 +41,7 @@ export function App() {
     const parsed = parseRhythm(text);
     setSource(text); setFileName(filename); setSelected(selection); setRhythm(parsed); setValidation('');
     syncedSource.current = text;
-    updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, swing: [...parsed.swing] });
+    updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] });
     setMessage(`Pripravené · ${parsed.name}`);
   }
 
@@ -86,7 +86,7 @@ export function App() {
 
   useEffect(() => {
     if (rhythm && !busy && syncedSource.current !== source) {
-      updateControls({ bpm: rhythm.bpm, humanize: controlsRef.current.humanize, swing: [...rhythm.swing] });
+      updateControls({ bpm: rhythm.bpm, humanize: controlsRef.current.humanize, dialect: [...rhythm.dialect] });
       syncedSource.current = source;
     }
   }, [rhythm, source, busy]);
@@ -109,7 +109,7 @@ export function App() {
     try {
       const parsed = parseRhythm(source);
       if (syncedSource.current !== source) {
-        updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, swing: [...parsed.swing] });
+        updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] });
         syncedSource.current = source;
       }
       setStarting(true); setPlayingRhythm(parsed); setMessage('Pripravujem zvuky bubnov…');
@@ -133,13 +133,13 @@ export function App() {
       const { parseDocument } = await import('yaml');
       const document = parseDocument(source, { version: '1.1' });
       document.setIn([parsed.id, 'bpm'], controlsRef.current.bpm);
-      document.setIn([parsed.id, 'swing'], controlsRef.current.swing);
+      document.setIn([parsed.id, 'dialect'], controlsRef.current.dialect);
       const exported = document.toString();
       const url = URL.createObjectURL(new Blob([exported], { type: 'application/yaml;charset=utf-8' }));
       const link = documentNode(url, fileName); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       setSource(exported); syncedSource.current = exported;
-      setMessage('YAML pripravený na uloženie vrátane nastaveného tempa a swingu.');
+      setMessage('YAML pripravený na uloženie vrátane nastaveného tempa a dialectu.');
     } catch (error) { setMessage((error as Error).message); }
   }
 
@@ -207,19 +207,19 @@ export function App() {
             <input id="humanize" type="range" min="0" max="100" value={controls.humanize} onChange={event => updateControls({ ...controls, humanize: Number(event.target.value) })} />
             <div className="range-ends"><span>Presne</span><span>Ľudsky</span></div>
           </div>
-          <div className="live-note"><span className="live-symbol">↗</span><p>Tempo, humanize aj swing môžeš meniť počas hrania.<small>Nové nastavenia sa použijú pri ďalšom plánovanom beate.</small></p></div>
+          <div className="live-note"><span className="live-symbol">↗</span><p>Tempo, humanize aj dialect môžeš meniť počas hrania.<small>Nové nastavenia sa použijú pri ďalšom plánovanom beate.</small></p></div>
           <div className="beat-monitor" aria-label="Prehratý beat"><span>PULZ ŠTÚDIA</span><div>{Array.from({ length: 4 }, (_, i) => <span key={i} className={isPlaying && beat % 4 === i ? 'lit' : ''} />)}</div></div>
         </aside>
 
-        <section className="swing-card card" aria-label="Swing pulzov"><div className="card-header"><div><span className="section-number">03</span><h2>Swing</h2><span className="swing-subtitle">Každý pulz má svoje miesto.</span></div>
-          <button className="text-button" onClick={() => updateControls({ ...controls, swing: controls.swing.map(() => 0) })}>Vynulovať</button></div>
-          <div className="swing-scroll"><div className="swing-grid" style={{ gridTemplateColumns: `repeat(${controls.swing.length}, minmax(145px, 1fr))` }}>
-            {controls.swing.map((offset, i) => <div className="pulse-control" key={`${controls.swing.length}-${i}`}><div><label htmlFor={`swing-${i}`}><span className="pulse-number">{String(i + 1).padStart(2, '0')}</span> Pulz</label><output htmlFor={`swing-${i}`}>{offset > 0 ? '+' : ''}{offset.toFixed(2)}</output></div>
-              <input id={`swing-${i}`} aria-label={`Swing pulz ${i + 1}`} type="range" min="-1" max="1" step="0.01" value={offset} onChange={event => {
-                const swing = [...controls.swing]; swing[i] = Number(event.target.value); updateControls({ ...controls, swing });
-              }} /><div className="swing-scale"><span>−1</span><span>0</span><span>+1</span></div></div>)}
+        <section className="dialect-card card" aria-label="Dialect pulzov"><div className="card-header"><div><span className="section-number">03</span><h2>Dialect</h2><span className="dialect-subtitle">Každý pulz má svoje miesto.</span></div>
+          <button className="text-button" onClick={() => updateControls({ ...controls, dialect: controls.dialect.map(() => 0) })}>Vynulovať</button></div>
+          <div className="dialect-scroll"><div className="dialect-grid" style={{ gridTemplateColumns: `repeat(${controls.dialect.length}, minmax(145px, 1fr))` }}>
+            {controls.dialect.map((offset, i) => <div className="pulse-control" key={`${controls.dialect.length}-${i}`}><div><label htmlFor={`dialect-${i}`}><span className="pulse-number">{String(i + 1).padStart(2, '0')}</span> Pulz</label><output htmlFor={`dialect-${i}`}>{offset > 0 ? '+' : ''}{offset.toFixed(2)}</output></div>
+              <input id={`dialect-${i}`} aria-label={`Dialect pulz ${i + 1}`} type="range" min="-1" max="1" step="0.01" value={offset} onChange={event => {
+                const dialect = [...controls.dialect]; dialect[i] = Number(event.target.value); updateControls({ ...controls, dialect });
+              }} /><div className="dialect-scale"><span>−1</span><span>0</span><span>+1</span></div></div>)}
           </div></div>
-          <p className="swing-help"><span>Skôr ← <strong>0 = presne</strong> → Neskôr</span><span>Nezávislé posuny · ± polovica kroku · rovnaké BPM</span></p>
+          <p className="dialect-help"><span>Skôr ← <strong>0 = presne</strong> → Neskôr</span><span>Nezávislé posuny · ± polovica kroku · rovnaké BPM</span></p>
         </section>
       </div>
       <footer className="studio-footer"><div><img src={asset('icons/djembe.svg')} alt="" /><span>{displayedRhythm?.tracks.map(t => instrumentNames[t.instrument]).join(' · ') || 'Dundun · Sangban · Kenkeni'}<small>Reálne nahrávky bubnov · JIMMYJAMES112 / Freesound · CC0</small></span></div>

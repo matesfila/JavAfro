@@ -9,7 +9,7 @@ const source = `Test:
   bpm: 120
   timeSignature: "4/4"
   stepsPerBeat: 4
-  swing: [0, -0.4, 0, 0]
+  dialect: [0, -0.4, 0, 0]
   tracks:
     dundun: "x.......x.x....."
     sangban:
@@ -26,7 +26,11 @@ describe('YAML compatibility with Java', () => {
         const file = path.join(folder, entry.name);
         if (entry.isDirectory()) visit(file);
         else if (entry.name.endsWith('.yaml')) {
-          const rhythm = parseRhythm(readFileSync(file, 'utf8'));
+          const yaml = readFileSync(file, 'utf8');
+          const rhythm = parseRhythm(yaml);
+          expect(yaml).toMatch(/^  dialect: \[/m);
+          expect(yaml).not.toMatch(/^  swing:/m);
+          expect(rhythm.dialect).toEqual(Array(rhythm.stepsPerBeat).fill(0));
           expect(rhythm.id).toBe(entry.name.replace(/\.yaml$/, ''));
           expect(rhythm.tracks.length).toBeGreaterThan(0);
           names.push(rhythm.id);
@@ -37,12 +41,17 @@ describe('YAML compatibility with Java', () => {
     expect(names).toEqual(expect.arrayContaining(['djole', 'Soli', 'Kon_Masi', 'Soko'.toLowerCase()]));
   });
 
-  it('retains base patterns, variations and independent swing offsets', () => {
+  it('retains base patterns, variations and independent dialect offsets', () => {
     const rhythm = parseRhythm(source);
     expect(rhythm.length).toBe(16);
     expect(rhythm.stepsPerBar).toBe(16);
-    expect(rhythm.swing).toEqual([0, -0.4, 0, 0]);
+    expect(rhythm.dialect).toEqual([0, -0.4, 0, 0]);
     expect(rhythm.tracks[1].variations).toEqual(['x...............']);
+  });
+
+  it('defaults an omitted dialect to zero and rejects the old parameter name', () => {
+    expect(parseRhythm(source.replace('  dialect: [0, -0.4, 0, 0]\n', '')).dialect).toEqual([0, 0, 0, 0]);
+    expect(() => parseRhythm(source.replace('dialect:', 'swing:'))).toThrow();
   });
 
   it.each([

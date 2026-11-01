@@ -2,6 +2,7 @@ soko:
   name: "Soko"
   bpm: 116
   timeSignature: "12/8"
+  dialect: [0, 0, 0]
 
   tracks:
     dundun:     "x....xx.xx.x|x.......xx.x"

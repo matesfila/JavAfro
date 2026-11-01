@@ -5,14 +5,14 @@ import { minimumGap, planBeat, type Controls } from './timing';
 function rhythm(meter = '4/4', steps = 4, pattern = 'xxxxxxxxxxxxxxxx') {
   return parseRhythm(`Test:\n  name: Test\n  bpm: 120\n  timeSignature: '${meter}'\n  stepsPerBeat: ${steps}\n  tracks:\n    dundun: '${pattern}'\n`);
 }
-const straight: Controls = { bpm: 120, humanize: 0, swing: [0, 0, 0, 0] };
+const straight: Controls = { bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] };
 
 describe('sample clock scheduling', () => {
   it('matches the Java 120 BPM example and moves only the second pulse', () => {
-    const result = planBeat(rhythm(), { ...straight, swing: [0, -0.4, 0, 0] }, 0, 0);
+    const result = planBeat(rhythm(), { ...straight, dialect: [0, -0.4, 0, 0] }, 0, 0);
     expect(result.hits.map(h => h.time)).toEqual([0, 0.1, 0.25, 0.375]);
     expect(result.end).toBe(0.5);
-    const faster = planBeat(rhythm(), { ...straight, bpm: 240, swing: [0, -0.4, 0, 0] }, 0, 0);
+    const faster = planBeat(rhythm(), { ...straight, bpm: 240, dialect: [0, -0.4, 0, 0] }, 0, 0);
     expect(faster.hits.map(h => h.time)).toEqual([0, 0.05, 0.125, 0.1875]);
     expect(faster.end).toBe(0.25);
   });
@@ -28,16 +28,16 @@ describe('sample clock scheduling', () => {
   });
 
   it('supports negative first-pulse offsets across boundaries and coincident endpoints', () => {
-    expect(planBeat(rhythm(), { ...straight, swing: [-1, 0, 0, 0] }, 0, 0).hits[0].time).toBe(0);
-    expect(planBeat(rhythm(), { ...straight, swing: [-1, 0, 0, 0] }, 2, 0).hits[0].time).toBe(1.9375);
-    const controls = { ...straight, humanize: 100, swing: [1, -1, 0, 0] };
-    expect(minimumGap(controls.swing)).toBe(0);
+    expect(planBeat(rhythm(), { ...straight, dialect: [-1, 0, 0, 0] }, 0, 0).hits[0].time).toBe(0);
+    expect(planBeat(rhythm(), { ...straight, dialect: [-1, 0, 0, 0] }, 2, 0).hits[0].time).toBe(1.9375);
+    const controls = { ...straight, humanize: 100, dialect: [1, -1, 0, 0] };
+    expect(minimumGap(controls.dialect)).toBe(0);
     const result = planBeat(rhythm(), controls, 1, 0, () => 0);
     expect(result.hits.map(h => h.time)).toEqual([1.0625, 1.0625, 1.25, 1.375]);
   });
 
-  it('caps humanization around swing positions independently for every hit', () => {
-    const controls = { ...straight, humanize: 100, swing: [0, -0.4, 0, 0] };
+  it('caps humanization around dialect positions independently for every hit', () => {
+    const controls = { ...straight, humanize: 100, dialect: [0, -0.4, 0, 0] };
     const early = planBeat(rhythm(), controls, 1, 0, () => 0);
     const late = planBeat(rhythm(), controls, 1, 0, () => 1);
     expect(early.hits[1].time).toBeCloseTo(1.075);
@@ -46,7 +46,7 @@ describe('sample clock scheduling', () => {
 
   it('keeps 12/8 as four dotted-quarter beats and treats pipes as notation', () => {
     const compound = rhythm('12/8', 3, 'xxxxxxxxxxxx');
-    const result = planBeat(compound, { ...straight, swing: [0, 0, 0] }, 0, 0);
+    const result = planBeat(compound, { ...straight, dialect: [0, 0, 0] }, 0, 0);
     expect(result.hits.map(h => h.time)).toEqual([0, 1 / 6, 1 / 3]);
     expect(result.end).toBe(0.5);
     expect(compound.length / compound.stepsPerBeat).toBe(4);
@@ -57,7 +57,7 @@ describe('sample clock scheduling', () => {
 
   it('applies new controls from the next planned beat without resetting the pattern', () => {
     const first = planBeat(rhythm(), straight, 0, 0);
-    const next = planBeat(rhythm(), { ...straight, bpm: 240, swing: [0, -0.4, 0, 0] }, first.end, first.nextStep);
+    const next = planBeat(rhythm(), { ...straight, bpm: 240, dialect: [0, -0.4, 0, 0] }, first.end, first.nextStep);
     expect(next.hits.map(h => h.time)).toEqual([0.5, 0.55, 0.625, 0.6875]);
     expect(next.nextStep).toBe(8); expect(next.end).toBe(0.75);
   });

@@ -32,7 +32,7 @@ afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals()
 
 describe('audio lifecycle', () => {
   it('schedules on the audio clock, then stops every queued source and timer', async () => {
-    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, swing: [0, 0, 0, 0] }), vi.fn());
+    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
     expect(await engine.start(rhythm)).toBe(true);
     expect(context.sources).toHaveLength(4);
     expect(context.sources[1].start.mock.calls[0][0] - context.sources[0].start.mock.calls[0][0]).toBeCloseTo(.125);
@@ -47,7 +47,7 @@ describe('audio lifecycle', () => {
     let release!: () => void;
     const gate = new Promise<void>(resolve => { release = resolve; });
     vi.stubGlobal('fetch', vi.fn(async () => { await gate; return { ok: true, arrayBuffer: async () => new ArrayBuffer(8) }; }));
-    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, swing: [0, 0, 0, 0] }), vi.fn());
+    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
     const starting = engine.start(rhythm);
     engine.stop(); release();
     expect(await starting).toBe(false);
@@ -57,7 +57,7 @@ describe('audio lifecycle', () => {
 
   it('stops and reports system interruption rather than catching up overdue beats', async () => {
     const onError = vi.fn();
-    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, swing: [0, 0, 0, 0] }), onError);
+    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), onError);
     await engine.start(rhythm);
     context.state = 'suspended'; context.onstatechange?.();
     expect(onError).toHaveBeenCalledOnce();
