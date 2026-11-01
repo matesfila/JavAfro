@@ -33,6 +33,26 @@ public class DialectPlaybackTest {
         return result;
     }
     @Test
+    public void configuredHumanizeLimitControlsJitterAndZeroDisablesOnlyTiming() throws Exception {
+        var rhythm = new Rhythm("Limit", List.of(new BeepTrack("xxxxxxxxxxxxxxxx", impulse())),
+                120, new TimeSignature(4, 4), 4);
+        for (int limitMs : List.of(0, 10)) {
+            var pcm = new ByteArrayOutputStream();
+            new BeepSequencer(format -> sink(pcm), limitMs).playPattern(rhythm, 1, 100);
+            var hits = onsets(pcm.toByteArray());
+            assertEquals(16, hits.size());
+            assertEquals(88200, pcm.size() / 2);
+            for (int i = 0; i < hits.size(); i++) {
+                int straight = (int) (i * 5512.5);
+                assertTrue(Math.abs(hits.get(i) - straight) <= limitMs * 44.1 + 1);
+                if (limitMs == 0) assertEquals(straight, hits.get(i).intValue());
+            }
+        }
+        assertThrows(IllegalArgumentException.class, () -> new BeepSequencer(-1));
+        assertThrows(IllegalArgumentException.class, () -> new BeepSequencer(1001));
+    }
+
+    @Test
     public void offsetsMoveOnlySelectedPulsesAndKeepTempo() throws Exception {
         var pcm = new ByteArrayOutputStream();
         var rhythm = new Rhythm("Dialect", List.of(new BeepTrack("xxxxxxxxxxxxxxxx", impulse())),

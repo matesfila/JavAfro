@@ -2,6 +2,36 @@
 
 Prehrávač afrických rytmov so Swing GUI, YAML editorom a zvukovými samplami.
 
+## Konfigurácia aplikácie
+
+Predvolené nastavenia sú v [javafro.yaml](javafro.yaml):
+
+| Nastavenie | Význam |
+| --- | --- |
+| `playback.humanize` | Počiatočná humanizácia 0–100; posuvník ju môže zmeniť počas hrania. |
+| `playback.humanizeMaxOffsetMs` | Maximálny časový posun ±ms pri humanizácii 100 % (0–1000, predvolene 30). Hodnota 0 vypne časové odchýlky. |
+| `playback.tempo.initial` | Počiatočné BPM prázdneho editora; načítaný rytmus použije vlastné BPM. |
+| `playback.tempo.minimum`, `maximum` | Predvolený rozsah posuvníka; rozšíri sa pre rytmus s BPM mimo rozsahu. |
+| `library.directory` | Priečinok rytmov pre Java výber súborov a zostavenie webovej knižnice. |
+| `library.initialRhythm` | Relatívna cesta prvého rytmu webovej verzie, napr. `imported/Djole.yaml`. |
+| `editor.fontSize` | Veľkosť písma YAML editora v Java aj webovej verzii. |
+| `window.width`, `height` | Počiatočná veľkosť Java okna. |
+
+Java načíta konfiguráciu pri štarte: najprv `javafro.yaml` v pracovnom priečinku,
+potom vedľa JAR, prípadne vedľa Windows spúšťača. Ak externý súbor nenájde,
+použije pribalenú konfiguráciu. `library.directory` sa vyhodnocuje voči priečinku
+externého konfiguračného súboru; pri pribalenej konfigurácii voči pracovnému priečinku.
+Konfigurácia môže obsahovať iba zmenené položky; ostatné dostanú predvolené hodnoty.
+Neznáme nastavenia, duplicitné kľúče, nesprávne typy a hodnoty mimo rozsahu vyvolajú chybu.
+
+Po úprave konfigurácie Java aplikáciu reštartuj. Web preberá rovnaký súbor pri
+spustení vývoja alebo zostavení; offline verziu treba znovu zostaviť a aktualizovať.
+Konfigurácia sa automaticky neprepisuje pri posúvaní ovládacích prvkov.
+Časová odchýlka sa škáluje percentom humanizácie a naďalej sa obmedzuje na štvrtinu
+najkratšej medzery medzi pulzmi podľa dialectu. Vypnutie časových odchýlok nemení
+humanizáciu hlasitosti a ladenia djembe.
+Tempo, metrum, delenie doby a dialect konkrétneho rytmu naďalej patria do jeho YAML.
+
 ## Webová verzia
 
 V adresári [web](web/README.md) je React/TypeScript verzia s YAML editorom,
@@ -290,7 +320,8 @@ new BeepSequencer().playPattern("x...x...x.x.x...", 8, 116, 40);
 
 Hodnota `0` zachová presné časovanie a je predvolená pri pôvodnom trojparametrovom volaní.
 Každý úder dostane nezávislý náhodný posun dopredu alebo dozadu. Pri `100` je rozsah
-±30 ms, najviac však štvrtina šestnástiny; nižšie hodnoty ho úmerne zmenšujú.
+predvolene ±30 ms (nastaviteľné cez `playback.humanizeMaxOffsetMs` v aplikácii),
+najviac však štvrtina najkratšej medzery medzi pulzmi; nižšie percentá ho úmerne zmenšujú.
 Tempo sa nemení ani medzi opakovaniami. Posun pred začiatok nahrávky sa oreže na nulu.
 Hlasitosť sa nemení. Hodnoty mimo rozsahu vyvolajú `IllegalArgumentException`.
 

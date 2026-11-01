@@ -3,6 +3,16 @@
 Samostatný frontend: React + TypeScript + Vite, CodeMirror 6 pre YAML a Web Audio API
 pre zvuk. Na prehrávanie nepotrebuje Java server. Java aplikácia zostáva nezmenená.
 
+## Konfigurácia
+
+Web preberá spoločný [javafro.yaml](../javafro.yaml) pri `npm run dev` alebo
+`npm run build`. Používa predvolenú humanizáciu, počiatočné tempo a rozsah jeho
+posuvníka, veľkosť písma editora, priečinok knižnice a prvý vybraný rytmus.
+Nastavenia `window` platia iba pre Java aplikáciu. BPM a dialect načítaného rytmu
+majú prednosť pred počiatočným tempom; humanizácia zostáva globálnym nastavením.
+Pre už nainštalovanú offline aplikáciu treba po zmene konfigurácie vytvoriť nový
+build a nechať ho aktualizovať. Podrobný popis položiek je v hlavnom README.
+
 ## Spustenie
 
 Použi Node.js 20.19+ alebo 22.12+ a npm. Z koreňa JavAfro:

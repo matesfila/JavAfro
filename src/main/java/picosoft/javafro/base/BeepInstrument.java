@@ -13,7 +13,9 @@ package picosoft.javafro.base;
  */
 public class BeepInstrument implements Instrument {
     public static final int DEFAULT_FREQUENCY = 880;
-    private static final int MAX_BEEP_SAMPLES = AudioConstants.SAMPLE_RATE / 20;
+    private static final int MAX_BEEP_DURATION_MS = 50;
+    private static final int MAX_BEEP_SAMPLES = AudioConstants.SAMPLE_RATE * MAX_BEEP_DURATION_MS / AudioConstants.MILLISECONDS_PER_SECOND;
+    private static final int PULSE_DURATION_DIVISOR = 2;
     private final double frequencyHz;
 
     public BeepInstrument() {
@@ -38,7 +40,7 @@ public class BeepInstrument implements Instrument {
 
     @Override
     public long lengthSamples(long pulseSamples) {
-        return Math.min(MAX_BEEP_SAMPLES, pulseSamples / 2);
+        return Math.min(MAX_BEEP_SAMPLES, pulseSamples / PULSE_DURATION_DIVISOR);
     }
 
     @Override

@@ -54,6 +54,7 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw 'Windows packaging failed.'
     }
+    Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'javafro.yaml') -Destination $appDirectory
     Write-Host "Application created: $appDirectory\JavAfro.exe"
     Write-Host 'Distribute the entire JavAfro folder, including app and runtime.'
 } finally {

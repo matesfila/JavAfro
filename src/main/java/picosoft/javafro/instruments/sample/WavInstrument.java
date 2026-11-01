@@ -54,8 +54,8 @@ public final class WavInstrument implements Instrument {
                 || sourceFormat.getEncoding() == AudioFormat.Encoding.PCM_FLOAT;
         if (!isPcm) {
             // Kódované formáty (napr. u-law) najprv dekódujeme na PCM so zachovaným vzorkovaním.
-            AudioFormat decoded = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, sourceFormat.getSampleRate(), 16,
-                    sourceFormat.getChannels(), sourceFormat.getChannels() * 2, sourceFormat.getSampleRate(), false);
+            AudioFormat decoded = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, sourceFormat.getSampleRate(), AudioConstants.SAMPLE_SIZE_BITS,
+                    sourceFormat.getChannels(), sourceFormat.getChannels() * AudioConstants.BYTES_PER_SAMPLE, sourceFormat.getSampleRate(), false);
             input = AudioSystem.getAudioInputStream(decoded, input);
         }
         if (!AudioSystem.isConversionSupported(target, input.getFormat())) {
@@ -65,10 +65,11 @@ public final class WavInstrument implements Instrument {
     }
 
     private static double[] decode(byte[] bytes) {
-        double[] result = new double[bytes.length / 2];
+        double[] result = new double[bytes.length / AudioConstants.BYTES_PER_SAMPLE];
         for (int i = 0; i < result.length; i++) {
-            short value = (short) ((bytes[i * 2] & 0xFF) | (bytes[i * 2 + 1] << 8));
-            result[i] = value / 32768.0;
+            short value = (short) ((bytes[i * AudioConstants.BYTES_PER_SAMPLE] & 0xFF)
+                    | (bytes[i * AudioConstants.BYTES_PER_SAMPLE + 1] << Byte.SIZE));
+            result[i] = value / AudioConstants.PCM_NORMALIZATION_SCALE;
         }
         return result;
     }

@@ -8,6 +8,15 @@ function rhythm(meter = '4/4', steps = 4, pattern = 'xxxxxxxxxxxxxxxx') {
 const straight: Controls = { bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] };
 
 describe('sample clock scheduling', () => {
+  it('uses the configured jitter limit, scales it by humanize and keeps the gap cap', () => {
+    const controls = { ...straight, humanize: 100 };
+    expect(planBeat(rhythm(), controls, 1, 0, () => 1, 10).hits[1].time).toBeCloseTo(1.135);
+    expect(planBeat(rhythm(), { ...controls, humanize: 50 }, 1, 0, () => 1, 10).hits[1].time).toBeCloseTo(1.130);
+    expect(planBeat(rhythm(), controls, 1, 0, () => 1, 0).hits.map(h => h.time)).toEqual([1, 1.125, 1.25, 1.375]);
+    expect(planBeat(rhythm(), controls, 1, 0, () => 1, 1000).hits[1].time).toBeCloseTo(1.15625);
+    expect(() => planBeat(rhythm(), controls, 1, 0, () => 1, -1)).toThrow();
+  });
+
   it('plays a half-bar-only track twice within a complete bar', () => {
     const short = rhythm('4/4', 4, 'x.......');
     const full = rhythm('4/4', 4, 'x.......x.......');

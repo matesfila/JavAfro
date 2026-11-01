@@ -1,5 +1,6 @@
 import manifest from '../../src/main/resources/samples/djembe.json';
 import type { Instrument } from './rhythm';
+import { HUMANIZE_PERCENT_MAX } from './audio-constants';
 
 const drums = { dundun: 'dundun.wav', sangban: 'sangban.wav', kensereni: 'kenkeni.wav' };
 const notes: Record<string, { bank: string; gain: number; probability: number }> = manifest.notes;
@@ -22,7 +23,7 @@ export function selectSound(instrument: Instrument, symbol: string, humanize: nu
   if (note.probability < 1 && random() >= note.probability) return null;
   const variants = banks[note.bank];
   const sample = variants[Math.min(variants.length - 1, Math.floor(random() * variants.length))];
-  const amount = humanize / 100;
+  const amount = humanize / HUMANIZE_PERCENT_MAX;
   return { sample,
     gain: (note.gain + (amount ? (random() * 2 - 1) * manifest.dynamic * amount : 0)) * manifest.outputGain,
     rate: 1 + (amount ? (random() * 2 - 1) * manifest.pitch * amount : 0) };

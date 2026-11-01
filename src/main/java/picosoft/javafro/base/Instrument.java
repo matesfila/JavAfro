@@ -47,15 +47,15 @@ public interface Instrument {
             line.open(format);
             line.start();
 
-            long totalSamples = (long) AudioConstants.SAMPLE_RATE * durationMs / 1000;
-            byte[] buffer = new byte[AudioConstants.SAMPLES_PER_BUFFER * 2];
+            long totalSamples = (long) AudioConstants.SAMPLE_RATE * durationMs / AudioConstants.MILLISECONDS_PER_SECOND;
+            byte[] buffer = new byte[AudioConstants.SAMPLES_PER_BUFFER * AudioConstants.BYTES_PER_SAMPLE];
             long sampleIndex = 0;
             while (sampleIndex < totalSamples) {
                 int samplesToWrite = (int) Math.min(AudioConstants.SAMPLES_PER_BUFFER, totalSamples - sampleIndex);
                 for (int i = 0; i < samplesToWrite; i++, sampleIndex++) {
                     AudioConstants.putSample(buffer, i, sample(sampleIndex));
                 }
-                line.write(buffer, 0, samplesToWrite * 2);
+                line.write(buffer, 0, samplesToWrite * AudioConstants.BYTES_PER_SAMPLE);
             }
             line.drain();
         }

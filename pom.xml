@@ -35,6 +35,13 @@
 
     <build>
         <finalName>JavAfro</finalName>
+        <resources>
+            <resource><directory>src/main/resources</directory></resource>
+            <resource>
+                <directory>${project.basedir}</directory>
+                <includes><include>javafro.yaml</include></includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

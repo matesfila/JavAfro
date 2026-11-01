@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { EditorView, basicSetup } from 'codemirror';
 import { yaml } from '@codemirror/lang-yaml';
+import { config } from './config';
 
 const theme = EditorView.theme({
-  '&': { height: '100%', backgroundColor: '#fffcf8', color: '#443429', fontSize: '14px' },
+  '&': { height: '100%', backgroundColor: '#fffcf8', color: '#443429', fontSize: `${config.editorFontSize}px` },
   '.cm-scroller': { overflow: 'auto', fontFamily: '"Cascadia Code", "SFMono-Regular", Consolas, monospace', lineHeight: '1.8' },
   '.cm-content': { padding: '20px 0', caretColor: '#745137' },
   '.cm-line': { padding: '0 20px' },

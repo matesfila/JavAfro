@@ -2,6 +2,7 @@ package picosoft.javafro;
 
 import picosoft.javafro.ui.RhythmPlayerPanel;
 import picosoft.javafro.ui.SandTheme;
+import picosoft.javafro.config.AppConfig;
 import javax.swing.*;
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -50,8 +51,9 @@ public class AfroJavaPlayer {
         SwingUtilities.invokeLater(() -> {
             try {
                 SandTheme.install();
+                AppConfig config = AppConfig.load();
                 String yaml = readYaml(args);
-                RhythmPlayerPanel player = new RhythmPlayerPanel(yaml);
+                RhythmPlayerPanel player = new RhythmPlayerPanel(yaml, config);
                 JFrame frame = new JFrame("JavAfro");
                 frame.setIconImages(loadIcons());
                 frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -59,7 +61,7 @@ public class AfroJavaPlayer {
                 frame.setMinimumSize(new Dimension(760, 560));
                 frame.pack();
                 Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-                frame.setSize(Math.min(1200, screen.width - 80), Math.min(900, screen.height - 100));
+                frame.setSize(Math.min(config.windowWidth(), screen.width - 80), Math.min(config.windowHeight(), screen.height - 100));
                 frame.setLocationRelativeTo(null);
                 frame.addWindowListener(new WindowAdapter() {
                     public void windowClosing(WindowEvent event) { player.stopPlayback(); }

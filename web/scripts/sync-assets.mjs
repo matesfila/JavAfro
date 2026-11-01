@@ -4,6 +4,9 @@ import path from 'node:path';
 import { parse } from 'yaml';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
+const config = parse(await readFile(path.join(root, 'javafro.yaml'), 'utf8')) ?? {};
+const rhythmsDirectory = config.library?.directory ?? 'rhythms';
+if (typeof rhythmsDirectory !== 'string' || !rhythmsDirectory.trim()) throw new Error('library.directory must be non-empty text.');
 const out = path.join(root, 'web/public/generated');
 await mkdir(out, { recursive: true });
 for (const folder of ['samples', 'icons']) {
@@ -29,7 +32,7 @@ async function collect(folder, relative = '') {
     }
   }
 }
-await collect(path.join(root, 'rhythms'));
+await collect(path.resolve(root, rhythmsDirectory));
 entries.sort((a, b) => Number(a.imported) - Number(b.imported) || a.name.localeCompare(b.name));
 await writeFile(path.join(out, 'rhythms.json'), JSON.stringify(entries, null, 2));
 console.log(`JavAfro: synchronized ${entries.length} rhythms, drum sample libraries and application icons.`);

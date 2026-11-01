@@ -3,7 +3,8 @@ import { YamlEditor } from './Editor';
 import { OfflinePanel } from './OfflinePanel';
 import { AudioEngine } from './audio';
 import { parseRhythm, type CatalogEntry, type Rhythm } from './rhythm';
-import { DEFAULT_HUMANIZE, type Controls } from './timing';
+import { type Controls } from './timing';
+import { config } from './config';
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}generated/${path}`;
 const instrumentNames = { dundun: 'Dundun', sangban: 'Sangban', kensereni: 'Kenkeni', djembe: 'Djembe' };
@@ -26,7 +27,7 @@ export function App() {
   const [isLoading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [beat, setBeat] = useState(-1);
-  const [controls, setControls] = useState<Controls>({ bpm: 116, humanize: DEFAULT_HUMANIZE, dialect: [0, 0, 0, 0] });
+  const [controls, setControls] = useState<Controls>({ bpm: config.initialTempo, humanize: config.humanize, dialect: [0, 0, 0, 0] });
   const controlsRef = useRef(controls); controlsRef.current = controls;
   const syncedSource = useRef('');
   const playingSource = useRef('');
@@ -62,14 +63,14 @@ export function App() {
     let cancelled = false;
     engine.current = new AudioEngine(() => controlsRef.current, message => {
       setMessage(message); setPlaying(false); setStarting(false); setPlayingRhythm(null); setBeat(-1);
-    }, setBeat);
+    }, setBeat, config.humanizeMaxOffsetMs);
     fetch(asset('rhythms.json')).then(response => {
       if (!response.ok) throw new Error('Knižnicu sa nepodarilo načítať. Môžeš otvoriť vlastný YAML.');
       return response.json() as Promise<CatalogEntry[]>;
     }).then(async entries => {
       if (cancelled) return;
       setCatalog(entries);
-      const initial = entries.find(entry => entry.id === 'djole.yaml') ?? entries[0];
+      const initial = entries.find(entry => entry.id === config.initialRhythm) ?? entries[0];
       if (initial) await loadLibrary(initial);
       else setMessage('Otvor YAML súbor a začni hrať.');
     }).catch(error => { if (!cancelled) setMessage(error.message); });
@@ -199,10 +200,10 @@ export function App() {
             <button className="button stop" onClick={stop} disabled={!busy}><span className="stop-square" />Stop</button></div>
           <div className={`playback-status ${isPlaying ? 'playing' : ''}`} role="status"><span className="status-dot" /><span>{message}</span></div>
           <div className="divider" />
-          <div className="control-group"><div className="control-heading"><label htmlFor="tempo">Tempo</label><div className="bpm-value"><input id="bpm-number" aria-label="Tempo v BPM" type="number" min="1" max={Math.max(1000, displayedRhythm?.bpm ?? 300)} value={controls.bpm} onChange={event => {
-            const bpm = event.target.valueAsNumber; if (Number.isInteger(bpm) && bpm >= 1 && bpm <= Math.max(1000, displayedRhythm?.bpm ?? 300)) updateControls({ ...controls, bpm });
+          <div className="control-group"><div className="control-heading"><label htmlFor="tempo">Tempo</label><div className="bpm-value"><input id="bpm-number" aria-label="Tempo v BPM" type="number" min="1" max={Math.max(1000, config.maximumTempo, displayedRhythm?.bpm ?? 0)} value={controls.bpm} onChange={event => {
+            const bpm = event.target.valueAsNumber; if (Number.isInteger(bpm) && bpm >= 1 && bpm <= Math.max(1000, config.maximumTempo, displayedRhythm?.bpm ?? 0)) updateControls({ ...controls, bpm });
           }} /><span>BPM</span></div></div>
-            <input id="tempo" type="range" min={Math.min(20, controls.bpm)} max={Math.max(300, controls.bpm)} value={controls.bpm} onChange={event => updateControls({ ...controls, bpm: Number(event.target.value) })} />
+            <input id="tempo" type="range" min={Math.min(config.minimumTempo, controls.bpm)} max={Math.max(config.maximumTempo, controls.bpm)} value={controls.bpm} onChange={event => updateControls({ ...controls, bpm: Number(event.target.value) })} />
             <div className="range-ends"><span>Pomalšie</span><span>Rýchlejšie</span></div>
           </div>
           <div className="control-group"><div className="control-heading"><label htmlFor="humanize">Humanize</label><output htmlFor="humanize">{controls.humanize}<small>%</small></output></div>

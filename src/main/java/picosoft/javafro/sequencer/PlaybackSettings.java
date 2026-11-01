@@ -1,11 +1,10 @@
 package picosoft.javafro.sequencer;
 
 import picosoft.javafro.base.Dialect;
+import picosoft.javafro.base.AudioConstants;
 
 /** Thread-safe live controls, shared by the UI and the audio thread. */
 public final class PlaybackSettings {
-    public static final int DEFAULT_HUMANIZE = 21;
-
     public record Values(int bpm, int humanize, Dialect dialect) {
         public Values(int bpm, int humanize) { this(bpm, humanize, null); }
     }
@@ -45,6 +44,6 @@ public final class PlaybackSettings {
 
     private static void validate(int bpm, int humanize) {
         if (bpm <= 0) throw new IllegalArgumentException("BPM must be greater than zero.");
-        if (humanize < 0 || humanize > 100) throw new IllegalArgumentException("Humanize must be between 0 and 100.");
+        if (humanize < 0 || humanize > AudioConstants.HUMANIZE_PERCENT_MAX) throw new IllegalArgumentException("Humanize must be between 0 and 100.");
     }
 }

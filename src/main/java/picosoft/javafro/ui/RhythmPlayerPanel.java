@@ -4,6 +4,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import picosoft.javafro.base.Rhythm;
+import picosoft.javafro.config.AppConfig;
 import picosoft.javafro.io.RhythmLoader;
 import picosoft.javafro.sequencer.BeepSequencer;
 import picosoft.javafro.sequencer.PlaybackSettings;
@@ -25,8 +26,9 @@ public final class RhythmPlayerPanel extends JPanel {
     private final JButton play = new JButton("Play");
     private final JButton stop = new JButton("Stop");
     private final JButton open = new JButton("Otvoriť YAML…");
-    private final JSlider tempo = new JSlider(20, 300, 116);
-    private final JSlider humanize = new JSlider(0, 100, PlaybackSettings.DEFAULT_HUMANIZE);
+    private final AppConfig config;
+    private final JSlider tempo;
+    private final JSlider humanize;
     private final JLabel status = new JLabel("Pripravené");
     private PlaybackSettings settings;
     private final DialectControls dialectControls = new DialectControls(dialect -> {
@@ -37,7 +39,14 @@ public final class RhythmPlayerPanel extends JPanel {
     private SwingWorker<Void, Void> worker;
 
     public RhythmPlayerPanel(String yaml) {
+        this(yaml, AppConfig.defaults());
+    }
+
+    public RhythmPlayerPanel(String yaml, AppConfig config) {
         super(new BorderLayout(0, 14));
+        this.config = config;
+        tempo = new JSlider(config.minimumTempo(), config.maximumTempo(), config.initialTempo());
+        humanize = new JSlider(0, 100, config.humanize());
         setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
         JLabel title = new JLabel("JavAfro · Rhythm player");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 22f));
@@ -46,7 +55,7 @@ public final class RhythmPlayerPanel extends JPanel {
         header.add(open, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
         editor.setName("yamlEditor");
-        editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, config.editorFontSize()));
         editor.setTabSize(2);
         editor.setTabsEmulated(true);
         editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_YAML);
@@ -147,8 +156,8 @@ public final class RhythmPlayerPanel extends JPanel {
         Rhythm rhythm = parseRhythm(yaml);
         editor.setText(yaml);
         editor.setCaretPosition(0);
-        tempo.setMaximum(Math.max(300, rhythm.bpm()));
-        tempo.setMinimum(Math.min(20, rhythm.bpm()));
+        tempo.setMaximum(Math.max(config.maximumTempo(), rhythm.bpm()));
+        tempo.setMinimum(Math.min(config.minimumTempo(), rhythm.bpm()));
         tempo.setValue(rhythm.bpm());
         dialectControls.setDialect(rhythm.dialect());
         dialectYaml = yaml;
@@ -156,7 +165,7 @@ public final class RhythmPlayerPanel extends JPanel {
     }
 
     private void openYaml() {
-        JFileChooser chooser = new JFileChooser("rhythms");
+        JFileChooser chooser = new JFileChooser(config.rhythmsDirectory().toFile());
         chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("YAML rytmy", "yaml", "yml"));
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
@@ -187,7 +196,7 @@ public final class RhythmPlayerPanel extends JPanel {
             dialectYaml = editor.getText();
         }
         settings = new PlaybackSettings(tempo.getValue(), humanize.getValue(), dialectControls.value());
-        BeepSequencer session = new BeepSequencer();
+        BeepSequencer session = new BeepSequencer(config.humanizeMaxOffsetMs());
         PlaybackSettings controls = settings;
         sequencer = session;
         play.setEnabled(false);

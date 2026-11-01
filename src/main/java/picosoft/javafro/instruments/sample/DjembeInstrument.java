@@ -4,6 +4,7 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import picosoft.javafro.base.Instrument;
+import picosoft.javafro.base.AudioConstants;
 
 import java.io.IOException;
 import java.util.*;
@@ -49,12 +50,12 @@ public final class DjembeInstrument implements Instrument {
     @Override public boolean supportsNote(char note) { return Resources.BANK.notes().containsKey(note); }
 
     @Override public Instrument voice(char symbol, int humanize) {
-        if (humanize < 0 || humanize > 100) throw new IllegalArgumentException("Humanize must be 0–100.");
+        if (humanize < 0 || humanize > AudioConstants.HUMANIZE_PERCENT_MAX) throw new IllegalArgumentException("Humanize must be 0–100.");
         Note note = Resources.BANK.notes().get(symbol);
         if (note == null) throw new IllegalArgumentException("Unknown djembe note: " + symbol);
         if (note.probability() < 1 && random.nextDouble() >= note.probability()) return null;
         var sample = note.samples().get(random.nextInt(note.samples().size()));
-        double amount = humanize / 100.0;
+        double amount = humanize / (double) AudioConstants.HUMANIZE_PERCENT_MAX;
         double gain = note.gain() + (amount == 0 ? 0 : (random.nextDouble() * 2 - 1) * Resources.BANK.dynamic() * amount);
         double rate = 1 + (amount == 0 ? 0 : (random.nextDouble() * 2 - 1) * Resources.BANK.pitch() * amount);
         return new Instrument() {

@@ -1,6 +1,7 @@
 import { type Rhythm } from './rhythm';
-import { planBeat, validateControls, type Controls } from './timing';
+import { planBeat, validateControls, validateHumanizeMaxOffsetMs, type Controls } from './timing';
 import { samplesForInstrument } from './sounds';
+import * as AudioConstants from './audio-constants';
 
 /** Schedules actual starts on AudioContext.currentTime, not on a UI timer. */
 export class AudioEngine {
@@ -14,7 +15,10 @@ export class AudioEngine {
   private active = false;
 
   constructor(private controls: () => Controls, private onError: (message: string) => void,
-              private onBeat: (beat: number) => void = () => {}) {}
+              private onBeat: (beat: number) => void = () => {},
+              private humanizeMaxOffsetMs = AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS) {
+    validateHumanizeMaxOffsetMs(humanizeMaxOffsetMs);
+  }
 
   async start(rhythm: Rhythm): Promise<boolean> {
     this.stop();
@@ -38,10 +42,12 @@ export class AudioEngine {
     if (context.state !== 'running') throw new Error('Zvuk sa nepodarilo spustiť. Skús znova stlačiť Play.');
     this.active = true;
     this.gain = context.createGain();
-    this.gain.gain.value = 0.25 / rhythm.tracks.length;
+    this.gain.gain.value = AudioConstants.OUTPUT_GAIN / rhythm.tracks.length;
     this.gain.connect(context.destination);
     const initial = this.controls();
-    let nextBeat = context.currentTime + 0.08 + 30 / (initial.bpm * rhythm.stepsPerBeat) + 0.030;
+    let nextBeat = context.currentTime + AudioConstants.PLAYBACK_START_DELAY_SECONDS
+      + AudioConstants.SECONDS_PER_MINUTE * AudioConstants.DIALECT_STEP_FRACTION / (initial.bpm * rhythm.stepsPerBeat)
+      + this.humanizeMaxOffsetMs / AudioConstants.MILLISECONDS_PER_SECOND;
     let step = 0;
     let beat = 0;
     const tick = () => {
@@ -49,17 +55,18 @@ export class AudioEngine {
         if (!this.active || context.state !== 'running') return;
         const now = context.currentTime;
         let iterations = 0;
-        while (iterations++ < 64) {
+        while (iterations++ < AudioConstants.MAX_BEATS_PER_TICK) {
           const controls = this.controls();
           validateControls(controls, rhythm.stepsPerBeat);
           // Include the earliest possible negative pulse position and humanization.
-          const anticipation = 30 / (controls.bpm * rhythm.stepsPerBeat) + 0.030;
-          if (nextBeat - anticipation > now + 0.120) break;
-          if (nextBeat + 60 / controls.bpm < now) {
+          const anticipation = AudioConstants.SECONDS_PER_MINUTE * AudioConstants.DIALECT_STEP_FRACTION
+            / (controls.bpm * rhythm.stepsPerBeat) + this.humanizeMaxOffsetMs / AudioConstants.MILLISECONDS_PER_SECOND;
+          if (nextBeat - anticipation > now + AudioConstants.SCHEDULE_AHEAD_SECONDS) break;
+          if (nextBeat + AudioConstants.SECONDS_PER_MINUTE / controls.bpm < now) {
             // A stalled/backgrounded UI must not emit a burst of overdue notes.
-            nextBeat = now + anticipation + 0.020;
+            nextBeat = now + anticipation + AudioConstants.STALLED_PLAYBACK_RECOVERY_SECONDS;
           }
-          const plan = planBeat(rhythm, controls, nextBeat, step);
+          const plan = planBeat(rhythm, controls, nextBeat, step, Math.random, this.humanizeMaxOffsetMs);
           const scheduledBeat = beat++;
           for (const hit of plan.hits) {
             const source = context.createBufferSource();
@@ -70,10 +77,10 @@ export class AudioEngine {
             source.connect(volume); volume.connect(this.gain!);
             this.sources.add(source);
             source.onended = () => { this.sources.delete(source); source.disconnect(); volume.disconnect(); };
-            source.start(Math.max(now + 0.002, hit.time));
+            source.start(Math.max(now + AudioConstants.MIN_SOURCE_START_DELAY_SECONDS, hit.time));
           }
           // This is visual feedback only; audio never depends on this callback.
-          const delay = Math.max(0, (nextBeat - now) * 1000);
+          const delay = Math.max(0, (nextBeat - now) * AudioConstants.MILLISECONDS_PER_SECOND);
           setTimeout(() => {
             if (this.active && generation === this.generation) this.onBeat(scheduledBeat);
           }, delay);
@@ -83,7 +90,7 @@ export class AudioEngine {
     };
     tick();
     if (!this.active) return false;
-    this.interval = setInterval(tick, 25);
+    this.interval = setInterval(tick, AudioConstants.SCHEDULER_INTERVAL_MS);
     return true;
   }
 
@@ -112,12 +119,12 @@ export class AudioEngine {
     if (this.gain) {
       const gain = this.gain;
       gain.gain.cancelScheduledValues(now);
-      gain.gain.setTargetAtTime(0, now, 0.002);
-      setTimeout(() => gain.disconnect(), 30);
+      gain.gain.setTargetAtTime(0, now, AudioConstants.STOP_GAIN_TIME_CONSTANT_SECONDS);
+      setTimeout(() => gain.disconnect(), AudioConstants.STOP_GAIN_DISCONNECT_DELAY_MS);
       this.gain = null;
     }
     for (const source of this.sources) {
-      try { source.stop(now + 0.010); } catch { /* already ended */ }
+      try { source.stop(now + AudioConstants.STOP_SOURCE_DELAY_SECONDS); } catch { /* already ended */ }
     }
     this.sources.clear();
   }

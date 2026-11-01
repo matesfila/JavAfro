@@ -22,7 +22,7 @@ public record Dialect(List<Double> offsets) {
     public double minimumGap() {
         double minimum = 1;
         for (int i = 0; i < offsets.size(); i++) {
-            minimum = Math.min(minimum, 1 + (offsets.get((i + 1) % offsets.size()) - offsets.get(i)) / 2);
+            minimum = Math.min(minimum, 1 + (offsets.get((i + 1) % offsets.size()) - offsets.get(i)) * AudioConstants.DIALECT_STEP_FRACTION);
         }
         return minimum;
     }
