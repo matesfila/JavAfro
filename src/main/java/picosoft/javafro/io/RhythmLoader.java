@@ -9,6 +9,7 @@ import picosoft.javafro.base.Rhythm;
 import picosoft.javafro.base.Track;
 import picosoft.javafro.base.TimeSignature;
 import picosoft.javafro.base.Dialect;
+import picosoft.javafro.config.AppConfig;
 import picosoft.javafro.instruments.sample.DundunInstrument;
 import picosoft.javafro.instruments.sample.SangbanInstrument;
 import picosoft.javafro.instruments.sample.KensereniInstrument;
@@ -35,8 +36,24 @@ public final class RhythmLoader {
         }
     }
 
+    public static Map<String, Rhythm> load(Path path, int defaultBpm) throws IOException {
+        try (InputStream input = Files.newInputStream(path)) {
+            return load(input, defaultBpm);
+        }
+    }
+
     /** The caller owns the stream and must close it. */
     public static Map<String, Rhythm> load(InputStream input) {
+        try {
+            return load(input, AppConfig.load().initialTempo());
+        } catch (IOException exception) {
+            throw new IllegalArgumentException("Cannot load global tempo from javafro.yaml.", exception);
+        }
+    }
+
+    /** Missing BPM uses the supplied application tempo; explicit invalid values still fail. */
+    public static Map<String, Rhythm> load(InputStream input, int defaultBpm) {
+        if (defaultBpm <= 0) throw new IllegalArgumentException("Default BPM must be greater than zero.");
         if (input == null) {
             throw new IllegalArgumentException("Rhythm YAML input must not be null.");
         }
@@ -56,7 +73,7 @@ public final class RhythmLoader {
         for (var entry : definitions.entrySet()) {
             String id = text(entry.getKey(), "Rhythm identifier");
             try {
-                rhythms.put(id, rhythm(entry.getValue()));
+                rhythms.put(id, rhythm(id, entry.getValue(), defaultBpm));
             } catch (IllegalArgumentException exception) {
                 throw new IllegalArgumentException("Rhythm '" + id + "': " + exception.getMessage(), exception);
             }
@@ -64,15 +81,15 @@ public final class RhythmLoader {
         return Collections.unmodifiableMap(rhythms);
     }
 
-    private static Rhythm rhythm(Object value) {
+    private static Rhythm rhythm(String id, Object value, int defaultBpm) {
         Map<?, ?> definition = mapping(value, "Definition");
         for (Object key : definition.keySet()) {
-            if (!Set.of("name", "bpm", "tracks", "timeSignature", "stepsPerBeat", "dialect", "legacy").contains(key)) {
+            if (!Set.of("bpm", "tracks", "timeSignature", "stepsPerBeat", "dialect", "legacy").contains(key)) {
                 throw new IllegalArgumentException("Unknown rhythm field: " + key);
             }
         }
-        String name = text(definition.get("name"), "Name");
-        if (!(definition.get("bpm") instanceof Integer bpm)) {
+        Object tempo = definition.containsKey("bpm") ? definition.get("bpm") : defaultBpm;
+        if (!(tempo instanceof Integer bpm)) {
             throw new IllegalArgumentException("BPM must be an integer.");
         }
         Map<?, ?> patterns = mapping(definition.get("tracks"), "Tracks");
@@ -135,7 +152,7 @@ public final class RhythmLoader {
                 throw new IllegalArgumentException("Track '" + instrument + "': " + exception.getMessage(), exception);
             }
         }
-        return new Rhythm(name, tracks, bpm, timeSignature, stepsPerBeat, dialect);
+        return new Rhythm(id, tracks, bpm, timeSignature, stepsPerBeat, dialect);
     }
 
     private static Instrument instrument(String id) {

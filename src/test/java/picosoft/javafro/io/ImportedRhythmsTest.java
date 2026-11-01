@@ -92,7 +92,7 @@ public class ImportedRhythmsTest {
                     }
                     var sequencer = new BeepSequencer();
                     sequencer.stop();
-                    sequencer.playPattern(rhythm, 1, 0); // Real playback validation, no audio device.
+                    sequencer.playRhythm(rhythm, 1, 0); // Real playback validation, no audio device.
                 }
             }
         }

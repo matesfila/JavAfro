@@ -4,7 +4,7 @@ playback:
   humanize: 21 # 0–100; po štarte sa dá meniť posuvníkom
   humanizeMaxOffsetMs: 30 # maximálny posun ±ms pri humanize 100; 0 vypne časové odchýlky
   tempo:
-    initial: 116 # len pred načítaním rytmu; potom platí BPM z jeho YAML
+    initial: 116 # globálne BPM pre rytmus bez bpm; explicitné bpm v rytme má prednosť
     minimum: 20
     maximum: 300 # rozsah posuvníka sa rozšíri, ak má rytmus BPM mimo neho
 

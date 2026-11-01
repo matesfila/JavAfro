@@ -7,6 +7,8 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const config = parse(await readFile(path.join(root, 'javafro.yaml'), 'utf8')) ?? {};
 const rhythmsDirectory = config.library?.directory ?? 'rhythms';
 if (typeof rhythmsDirectory !== 'string' || !rhythmsDirectory.trim()) throw new Error('library.directory must be non-empty text.');
+const defaultBpm = config.playback?.tempo?.initial ?? 116;
+if (!Number.isInteger(defaultBpm) || defaultBpm <= 0) throw new Error('playback.tempo.initial must be a positive integer.');
 const out = path.join(root, 'web/public/generated');
 await mkdir(out, { recursive: true });
 for (const folder of ['samples', 'icons']) {
@@ -27,7 +29,7 @@ async function collect(folder, relative = '') {
       const destination = path.join(out, 'rhythms', name);
       await mkdir(path.dirname(destination), { recursive: true });
       await writeFile(destination, source);
-      entries.push({ id: name, key: ids[0], name: rhythm.name, bpm: rhythm.bpm,
+      entries.push({ id: name, key: ids[0], name: ids[0], bpm: rhythm.bpm === undefined ? defaultBpm : rhythm.bpm,
         timeSignature: rhythm.timeSignature ?? '4/4', imported: relative.startsWith('imported') });
     }
   }

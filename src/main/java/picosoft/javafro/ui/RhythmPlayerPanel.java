@@ -140,6 +140,15 @@ public final class RhythmPlayerPanel extends JPanel {
 
     public static Rhythm parseRhythm(String yaml) {
         var rhythms = RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+        return singleRhythm(rhythms);
+    }
+
+    public static Rhythm parseRhythm(String yaml, int defaultBpm) {
+        var rhythms = RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)), defaultBpm);
+        return singleRhythm(rhythms);
+    }
+
+    private static Rhythm singleRhythm(java.util.Map<String, Rhythm> rhythms) {
         if (rhythms.size() != 1) throw new IllegalArgumentException("Editor musí obsahovať práve jeden rytmus.");
         return rhythms.values().iterator().next();
     }
@@ -153,7 +162,7 @@ public final class RhythmPlayerPanel extends JPanel {
             status.setText("Otvor YAML alebo ho presuň do okna");
             return;
         }
-        Rhythm rhythm = parseRhythm(yaml);
+        Rhythm rhythm = parseRhythm(yaml, config.initialTempo());
         editor.setText(yaml);
         editor.setCaretPosition(0);
         tempo.setMaximum(Math.max(config.maximumTempo(), rhythm.bpm()));
@@ -189,7 +198,7 @@ public final class RhythmPlayerPanel extends JPanel {
     private void startPlayback() {
         if (worker != null) return;
         final Rhythm rhythm;
-        try { rhythm = parseRhythm(editor.getText()); }
+        try { rhythm = parseRhythm(editor.getText(), config.initialTempo()); }
         catch (IllegalArgumentException exception) { showError(exception); return; }
         if (!editor.getText().equals(dialectYaml)) {
             dialectControls.setDialect(rhythm.dialect());

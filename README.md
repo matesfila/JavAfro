@@ -10,7 +10,7 @@ Predvolené nastavenia sú v [javafro.yaml](javafro.yaml):
 | --- | --- |
 | `playback.humanize` | Počiatočná humanizácia 0–100; posuvník ju môže zmeniť počas hrania. |
 | `playback.humanizeMaxOffsetMs` | Maximálny časový posun ±ms pri humanizácii 100 % (0–1000, predvolene 30). Hodnota 0 vypne časové odchýlky. |
-| `playback.tempo.initial` | Počiatočné BPM prázdneho editora; načítaný rytmus použije vlastné BPM. |
+| `playback.tempo.initial` | Globálne predvolené BPM; použije sa aj pre rytmus bez `bpm`. |
 | `playback.tempo.minimum`, `maximum` | Predvolený rozsah posuvníka; rozšíri sa pre rytmus s BPM mimo rozsahu. |
 | `library.directory` | Priečinok rytmov pre Java výber súborov a zostavenie webovej knižnice. |
 | `library.initialRhythm` | Relatívna cesta prvého rytmu webovej verzie, napr. `imported/Djole.yaml`. |
@@ -136,7 +136,6 @@ samplov Tomáša Mareka. Funguje v Java aj webovom prehrávači; v knižnici je
 
 ```yaml
 djembe-demo:
-  name: "Djembe"
   bpm: 100
   timeSignature: "4/4"
   stepsPerBeat: 4
@@ -198,7 +197,6 @@ Rytmy možno definovať v YAML (ukážka `src/main/resources/rhythms/djole.yaml`
 
 ```yaml
 Djole:
-  name: "Djole"
   bpm: 116
   timeSignature: "4/4"
   stepsPerBeat: 4
@@ -212,7 +210,10 @@ Djole:
 `picosoft.javafro.io` vráti mapu rytmov podľa identifikátora.
 Každý dodávaný súbor obsahuje jeden rytmus, ktorého hlavný kľúč sa presne zhoduje
 s názvom súboru bez prípony `.yaml` (vrátane veľkosti písmen).
-Povinné polia sú `name`, `bpm` a `tracks`;
+Názov rytmu je jeho hlavný YAML kľúč; samostatné pole `name` sa nepoužíva.
+Z polí definície je povinné iba `tracks`. Vynechané `bpm` prevezme globálne tempo
+z `playback.tempo.initial` v `javafro.yaml`. Vynechaný `dialect` použije samé nuly
+(jednu pre každý krok na dobu). Explicitne zadané neplatné hodnoty sa odmietnu;
 podporované nástroje sú `dundun`, `sangban` a `kensereni`.
 `timeSignature` je voliteľné, predvolene `"4/4"`. Podporované sú kladné metrá
 s menovateľom 4 alebo 8. Bez `stepsPerBeat` každý znak `x` alebo `.` predstavuje osminu;

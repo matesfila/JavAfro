@@ -19,7 +19,6 @@ import static org.junit.Assert.*;
 public class RhythmLoaderTest {
     private static final String YAML = """
             Djole:
-              name: "Djole"
               bpm: 116
               tracks:
                 dundun: "x...xx.."
@@ -35,6 +34,8 @@ public class RhythmLoaderTest {
     public void loadsRhythmsAndInstruments() {
         Rhythm rhythm = load(YAML);
         assertEquals("Djole", rhythm.name());
+        var renamed = RhythmLoader.load(new ByteArrayInputStream(YAML.replace("Djole:", "Kon_Masi:").getBytes(StandardCharsets.UTF_8)));
+        assertEquals("Kon_Masi", renamed.get("Kon_Masi").name());
         assertEquals(116, rhythm.bpm());
         assertEquals(3, rhythm.tracks().size());
         assertEquals("..x...x.", rhythm.tracks().get(1).pattern());
@@ -49,17 +50,36 @@ public class RhythmLoaderTest {
     public void rejectsInvalidDefinitions() {
         for (String invalid : new String[]{
                 YAML.replace("116", "0"), YAML.replace("116", "116.5"),
-                YAML.replace("name: \"Djole\"", "name: \"\""),
+                YAML.replace("Djole:", "'':"),
                 YAML.replace("dundun:", "unknown:"), YAML.replace("x...xx..", "x...s..."),
                 YAML.replace("  bpm: 116", "  bpm: 116\n  bpm: 120"),
                 YAML.replace("  bpm: 116", "  bpm: 116\n  humanize: 70"),
-                YAML.replace("  bpm: 116\n", ""), YAML.replace("  tracks:", "  tracks: []\n  ignored:")
+                YAML.replace("  bpm: 116", "  bpm: 116\n  name: Deprecated"),
+                YAML.replace("116", "null"), YAML.replace("  tracks:", "  tracks: []\n  ignored:")
         }) {
             assertThrows(IllegalArgumentException.class, () -> load(invalid));
         }
         var error = assertThrows(IllegalArgumentException.class, () -> load(YAML.replace("dundun:", "unknown:")));
         assertTrue(error.getMessage().contains("Djole"));
         assertTrue(error.getMessage().contains("unknown"));
+    }
+
+    @Test
+    public void missingTempoUsesGlobalDefaultAndMissingDialectUsesZeros() throws Exception {
+        String minimal = "Test:\n  stepsPerBeat: 4\n  tracks:\n    djembe: 'd.tt..s.'\n";
+        Rhythm rhythm = RhythmLoader.load(new ByteArrayInputStream(minimal.getBytes(StandardCharsets.UTF_8)), 93).get("Test");
+        assertEquals(93, rhythm.bpm());
+        assertEquals(java.util.List.of(0.0, 0.0, 0.0, 0.0), rhythm.dialect().offsets());
+        assertEquals(93, picosoft.javafro.ui.RhythmPlayerPanel.parseRhythm(minimal, 93).bpm());
+        assertEquals(picosoft.javafro.config.AppConfig.load().initialTempo(),
+                RhythmLoader.load(new ByteArrayInputStream(minimal.getBytes(StandardCharsets.UTF_8))).get("Test").bpm());
+        String explicit = minimal.replace("Test:", "Test:\n  bpm: 140\n  dialect: [0, -0.2, 0, 0]");
+        rhythm = RhythmLoader.load(new ByteArrayInputStream(explicit.getBytes(StandardCharsets.UTF_8)), 93).get("Test");
+        assertEquals(140, rhythm.bpm());
+        assertEquals(java.util.List.of(0.0, -0.2, 0.0, 0.0), rhythm.dialect().offsets());
+        String compound = minimal.replace("  stepsPerBeat: 4", "  timeSignature: '12/8'").replace("d.tt..s.", "d..t..s.....");
+        rhythm = RhythmLoader.load(new ByteArrayInputStream(compound.getBytes(StandardCharsets.UTF_8)), 93).get("Test");
+        assertEquals(java.util.List.of(0.0, 0.0, 0.0), rhythm.dialect().offsets());
     }
 
     @Test
@@ -77,12 +97,12 @@ public class RhythmLoaderTest {
         var rhythm = load(YAML);
         var sequencer = new BeepSequencer();
         sequencer.stop(); // Validate without opening an audio device.
-        sequencer.playPattern(rhythm);
-        sequencer.playPattern(rhythm, 32);
-        sequencer.playPattern(rhythm, 32, 70);
-        assertThrows(IllegalArgumentException.class, () -> sequencer.playPattern(rhythm, 0, 70));
-        assertThrows(IllegalArgumentException.class, () -> sequencer.playPattern(rhythm, 32, 101));
-        assertThrows(IllegalArgumentException.class, () -> sequencer.playPattern((Rhythm) null));
+        sequencer.playRhythm(rhythm);
+        sequencer.playRhythm(rhythm, 32);
+        sequencer.playRhythm(rhythm, 32, 70);
+        assertThrows(IllegalArgumentException.class, () -> sequencer.playRhythm(rhythm, 0, 70));
+        assertThrows(IllegalArgumentException.class, () -> sequencer.playRhythm(rhythm, 32, 101));
+        assertThrows(IllegalArgumentException.class, () -> sequencer.playRhythm((Rhythm) null));
     }
 
     @Test

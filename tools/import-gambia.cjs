@@ -55,7 +55,7 @@ const legacy = {
   ],
   definition: original
 };
-const lines = ['"Gambia":', '  name: "Gambia"', `  bpm: ${original.BPM}`, '  timeSignature: "4/4"',
+const lines = ['"Gambia":', `  bpm: ${original.BPM}`, '  timeSignature: "4/4"',
   `  stepsPerBeat: ${stepsPerBeat}`, `  dialect: ${JSON.stringify(Array(stepsPerBeat).fill(0))}`,
   '  # Solo subdivisions are quantized to four steps per beat; original phrases remain in legacy.', '  tracks:'];
 for (const [id, track] of Object.entries(tracks)) {

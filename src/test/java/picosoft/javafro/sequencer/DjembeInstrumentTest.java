@@ -4,7 +4,7 @@ import org.junit.Test;
 import picosoft.javafro.base.*;
 import picosoft.javafro.instruments.sample.DjembeInstrument;
 import picosoft.javafro.io.RhythmLoader;
-import picosoft.javafro.sequencer.*;
+
 import javax.sound.sampled.SourceDataLine;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Proxy;
@@ -92,7 +92,7 @@ public class DjembeInstrumentTest {
         var pcm = new ByteArrayOutputStream();
         var line = (SourceDataLine) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[]{SourceDataLine.class},
                 (proxy, method, args) -> { if (method.getName().equals("write")) { pcm.write((byte[]) args[0], (int) args[1], (int) args[2]); return args[2]; } return null; });
-        new BeepSequencer(format -> line).playPattern(new Rhythm("Notes", List.of(new BeepTrack("d.t.s...", instrument)), 120), 1, 0);
+        new BeepSequencer(format -> line).playRhythm(new Rhythm("Notes", List.of(new BeepTrack("d.t.s...", instrument)), 120), 1, 0);
         assertEquals(List.of('d', 't', 's'), played);
         List<Integer> onsets = new ArrayList<>();
         byte[] audio = pcm.toByteArray();

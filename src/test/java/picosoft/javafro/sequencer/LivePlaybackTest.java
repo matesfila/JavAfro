@@ -57,7 +57,7 @@ public class LivePlaybackTest {
                 // Timing-only impulse supports x; preserve the positions of all instrument notes.
                 .map(track -> new BeepTrack(track.pattern().replaceAll("[a-zA-Z]", "x"), impulse())).toList();
         var rhythm = new Rhythm(definition.name(), tracks, bpm, definition.timeSignature(), definition.stepsPerBeat(), definition.dialect());
-        new BeepSequencer(format -> sink.line).playPattern(rhythm, 1, 0);
+        new BeepSequencer(format -> sink.line).playRhythm(rhythm, 1, 0);
         return sink.bytes.size() / 2;
     }
 
@@ -72,8 +72,8 @@ public class LivePlaybackTest {
                     120, new TimeSignature(4, 4), 4);
             var fullRhythm = new Rhythm("Full", List.of(new BeepTrack(fullPattern, impulse())),
                     120, new TimeSignature(4, 4), 4);
-            new BeepSequencer(format -> shortSink.line).playPattern(shortRhythm, 1, 0);
-            new BeepSequencer(format -> fullSink.line).playPattern(fullRhythm, 1, 0);
+            new BeepSequencer(format -> shortSink.line).playRhythm(shortRhythm, 1, 0);
+            new BeepSequencer(format -> fullSink.line).playRhythm(fullRhythm, 1, 0);
             assertArrayEquals(fullSink.bytes.toByteArray(), shortSink.bytes.toByteArray());
             assertEquals(88200 * shortPattern.split("\\|").length, shortSink.bytes.size() / 2);
         }
@@ -109,7 +109,7 @@ public class LivePlaybackTest {
     public void finitePlaybackKeepsExactTempoAndIgnoresBarSeparators() throws Exception {
         var sink = new AudioSink();
         var sequencer = new BeepSequencer(format -> sink.line);
-        sequencer.playPattern(List.of(new BeepTrack("x...|x...", impulse())), 2, 120, 0);
+        sequencer.playTracks(List.of(new BeepTrack("x...|x...", impulse())), 2, 120, 0);
         byte[] pcm = sink.bytes.toByteArray();
         assertEquals(88200, pcm.length / 2);
         var onsets = new ArrayList<Integer>();

@@ -38,7 +38,7 @@ public class DialectPlaybackTest {
                 120, new TimeSignature(4, 4), 4);
         for (int limitMs : List.of(0, 10)) {
             var pcm = new ByteArrayOutputStream();
-            new BeepSequencer(format -> sink(pcm), limitMs).playPattern(rhythm, 1, 100);
+            new BeepSequencer(format -> sink(pcm), limitMs).playRhythm(rhythm, 1, 100);
             var hits = onsets(pcm.toByteArray());
             assertEquals(16, hits.size());
             assertEquals(88200, pcm.size() / 2);
@@ -57,7 +57,7 @@ public class DialectPlaybackTest {
         var pcm = new ByteArrayOutputStream();
         var rhythm = new Rhythm("Dialect", List.of(new BeepTrack("xxxxxxxxxxxxxxxx", impulse())),
                 120, new TimeSignature(4, 4), 4, Dialect.of(4, List.of(0, -0.4, 0, 0)));
-        new BeepSequencer(format -> sink(pcm)).playPattern(rhythm, 2, 0);
+        new BeepSequencer(format -> sink(pcm)).playRhythm(rhythm, 2, 0);
         assertEquals(176400, pcm.size() / 2);
         var hits = onsets(pcm.toByteArray());
         assertEquals(32, hits.size());
@@ -71,7 +71,7 @@ public class DialectPlaybackTest {
         var pcm = new ByteArrayOutputStream();
         var rhythm = new Rhythm("Endpoints", List.of(new BeepTrack("xxxx", impulse())), 120,
                 new TimeSignature(1, 4), 4, Dialect.of(4, List.of(1, -1, 0, 0)));
-        new BeepSequencer(format -> sink(pcm)).playPattern(rhythm, 1, 100);
+        new BeepSequencer(format -> sink(pcm)).playRhythm(rhythm, 1, 100);
         assertEquals(List.of(2756, 11025, 16537), onsets(pcm.toByteArray()));
         assertEquals(22050, pcm.size() / 2);
     }
@@ -81,7 +81,7 @@ public class DialectPlaybackTest {
         var pcm = new ByteArrayOutputStream();
         var rhythm = new Rhythm("Early", List.of(new BeepTrack("x...............", impulse())),
                 120, new TimeSignature(4, 4), 4, Dialect.of(4, List.of(-1, 0, 0, 0)));
-        new BeepSequencer(format -> sink(pcm)).playPattern(rhythm, 3, 0);
+        new BeepSequencer(format -> sink(pcm)).playRhythm(rhythm, 3, 0);
         assertEquals(List.of(0, 85444, 173644), onsets(pcm.toByteArray()));
         assertEquals(264600, pcm.size() / 2);
     }
@@ -109,7 +109,7 @@ public class DialectPlaybackTest {
         assertEquals(Dialect.of(4, List.of(0, -0.4, 0, 0)), controls.snapshot().dialect());
     }
     private Rhythm load(String dialect) {
-        String yaml = "Test:\n  name: Test\n  bpm: 120\n  stepsPerBeat: 4\n  dialect: " + dialect
+        String yaml = "Test:\n  bpm: 120\n  stepsPerBeat: 4\n  dialect: " + dialect
                 + "\n  tracks:\n    dundun: x...............\n";
         return RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8))).get("Test");
     }

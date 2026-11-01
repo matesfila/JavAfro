@@ -1,5 +1,6 @@
 import { parseDocument } from 'yaml';
 import { supportsNote } from './sounds';
+import { config } from './config';
 
 export const instruments = ['dundun', 'sangban', 'kensereni', 'djembe'] as const;
 export type Instrument = typeof instruments[number];
@@ -45,7 +46,7 @@ function pattern(value: unknown, stepsPerBar: number, instrument: Instrument): s
 }
 
 /** Same meter, subdivision and validation rules as the Java RhythmLoader. */
-export function parseRhythm(source: string): Rhythm {
+export function parseRhythm(source: string, defaultBpm = config.initialTempo): Rhythm {
   if (source.length > 3 * 1024 * 1024) throw new Error('YAML je príliš veľký (limit 3 MB).');
   const document = parseDocument(source, { version: '1.1', uniqueKeys: true });
   if (document.errors.length) throw new Error(document.errors[0].message);
@@ -54,9 +55,8 @@ export function parseRhythm(source: string): Rhythm {
   if (ids.length !== 1) throw new Error('Editor musí obsahovať práve jeden rytmus.');
   const id = text(ids[0], 'Identifikátor');
   const data = record(definitions[id], id);
-  keys(data, ['name', 'bpm', 'timeSignature', 'stepsPerBeat', 'dialect', 'tracks', 'legacy'], id);
-  const name = text(data.name, 'Názov');
-  const bpm = integer(data.bpm, 'BPM');
+  keys(data, ['bpm', 'timeSignature', 'stepsPerBeat', 'dialect', 'tracks', 'legacy'], id);
+  const bpm = integer(data.bpm === undefined ? defaultBpm : data.bpm, 'BPM');
   const timeSignature = data.timeSignature === undefined ? '4/4' : text(data.timeSignature, 'Metrum');
   if (!/^[1-9][0-9]*\/[48]$/.test(timeSignature)) throw new Error('Metrum: očakáva sa napríklad 4/4 alebo 12/8.');
   const [numerator, denominator] = timeSignature.split('/').map(Number);
@@ -90,6 +90,6 @@ export function parseRhythm(source: string): Rhythm {
       return { instrument: instrument as Instrument, base: pattern(base, stepsPerBar, instrument as Instrument), variations };
     } catch (error) { throw new Error(`${instrument}: ${(error as Error).message}`); }
   });
-  return { id, name, bpm, timeSignature, stepsPerBeat, stepsPerBar, dialect: [...dialect], tracks,
+  return { id, name: id, bpm, timeSignature, stepsPerBeat, stepsPerBar, dialect: [...dialect], tracks,
     length: Math.max(...tracks.map(t => t.base.replaceAll('|', '').length)) };
 }

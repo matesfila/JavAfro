@@ -14,7 +14,7 @@ public class AfroJavaPlayerTest {
     @Test
     public void readsUtf8FromDiskWithSpacesAndAccentsInPath() throws Exception {
         var file = temporary.newFile("Môj rytmus.yaml").toPath();
-        String yaml = "rytmus:\n  name: Prvý rytmus\n";
+        String yaml = "rytmus:\n";
         Files.writeString(file, yaml, StandardCharsets.UTF_8);
         assertEquals(yaml, AfroJavaPlayer.readYaml(new String[]{file.toString()}));
         Files.writeString(file, "upravený obsah", StandardCharsets.UTF_8);

@@ -29,7 +29,7 @@ describe('AfroPlayer djembe', () => {
     }
   });
   it('plans d/t/s at the same pulse positions and validates notes for each instrument', () => {
-    const yaml = 'test:\n  name: Djembe\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    djembe: "dts.DTS.i.ca...."';
+    const yaml = 'test:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    djembe: "dts.DTS.i.ca...."';
     const rhythm = parseRhythm(yaml);
     const plan = planBeat(rhythm, { bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }, 0, 0, () => 0);
     expect(plan.hits.map(hit => hit.time)).toEqual([0, .125, .25]);

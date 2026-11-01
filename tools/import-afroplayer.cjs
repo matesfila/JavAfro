@@ -156,9 +156,8 @@ function convert(definition, sourceFile, id) {
       return result;
     }).join('|');
   };
-  const name = symbol === 'NNagnalen' ? "N'Nagnalen" : symbol === 'TESTRHYTHM' ? 'Test rhythm'
-    : symbol.toLowerCase().split('_').map(s => s[0].toUpperCase() + s.slice(1)).join(' ');
-  const lines = [`${quote(id)}:`, `  name: ${quote(name)}`, `  bpm: ${data.BPM}`,
+  const name = id;
+  const lines = [`${quote(id)}:`, `  bpm: ${data.BPM}`,
     `  timeSignature: ${quote(meter)}`, `  stepsPerBeat: ${stepsPerBeat}`, '  tracks:'];
   for (const [oldId, id] of Object.entries(instruments)) {
     const track = data.patterns[oldId];

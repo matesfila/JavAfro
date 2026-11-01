@@ -3,9 +3,9 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { parseRhythm } from './rhythm';
+import { config } from './config';
 
 const source = `Test:
-  name: Test
   bpm: 120
   timeSignature: "4/4"
   stepsPerBeat: 4
@@ -18,6 +18,19 @@ const source = `Test:
 `;
 
 describe('YAML compatibility with Java', () => {
+  it('uses configured tempo and zero dialect only when fields are omitted', () => {
+    const minimal = source.replace('  bpm: 120\n', '').replace('  dialect: [0, -0.4, 0, 0]\n', '');
+    expect(parseRhythm(minimal).bpm).toBe(config.initialTempo);
+    expect(parseRhythm(minimal, 93).bpm).toBe(93);
+    expect(parseRhythm(minimal, 93).dialect).toEqual([0, 0, 0, 0]);
+    expect(parseRhythm(source, 93).bpm).toBe(120);
+    expect(parseRhythm(source, 93).dialect).toEqual([0, -0.4, 0, 0]);
+    expect(() => parseRhythm(source.replace('bpm: 120', 'bpm: null'), 93)).toThrow();
+    expect(() => parseRhythm(source.replace('[0, -0.4, 0, 0]', 'null'), 93)).toThrow();
+    const compound = 'Test:\n  timeSignature: "12/8"\n  tracks:\n    djembe: "d..t..s....."\n';
+    expect(parseRhythm(compound, 93).dialect).toEqual([0, 0, 0]);
+  });
+
   it('loads every real rhythm from the shared Java project library', () => {
     const root = fileURLToPath(new URL('../../rhythms/', import.meta.url));
     const names: string[] = [];
@@ -43,6 +56,8 @@ describe('YAML compatibility with Java', () => {
 
   it('retains base patterns, variations and independent dialect offsets', () => {
     const rhythm = parseRhythm(source);
+    expect(rhythm.name).toBe('Test');
+    expect(parseRhythm(source.replace('Test:', 'Kon_Masi:')).name).toBe('Kon_Masi');
     expect(rhythm.length).toBe(16);
     expect(rhythm.stepsPerBar).toBe(16);
     expect(rhythm.dialect).toEqual([0, -0.4, 0, 0]);
@@ -65,6 +80,7 @@ describe('YAML compatibility with Java', () => {
   });
 
   it.each([
+    source.replace('bpm: 120', 'bpm: 120\n  name: Deprecated'),
     source.replace('bpm: 120', 'bpm: 0'),
     source.replace('bpm: 120', 'bpm: 120.5'),
     source.replace('bpm: 120', 'bpm: 120\n  bpm: 100'),

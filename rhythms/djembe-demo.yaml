@@ -1,5 +1,4 @@
 djembe-demo:
-  name: "Djembe – ukážka"
   bpm: 100
   timeSignature: "4/4"
   stepsPerBeat: 4

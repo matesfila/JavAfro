@@ -10,6 +10,8 @@ Web preberá spoločný [javafro.yaml](../javafro.yaml) pri `npm run dev` alebo
 posuvníka, veľkosť písma editora, priečinok knižnice a prvý vybraný rytmus.
 Nastavenia `window` platia iba pre Java aplikáciu. BPM a dialect načítaného rytmu
 majú prednosť pred počiatočným tempom; humanizácia zostáva globálnym nastavením.
+Ak rytmus vynechá `bpm`, použije sa `playback.tempo.initial` z konfigurácie.
+Vynechaný `dialect` sa doplní nulami podľa `stepsPerBeat`.
 Pre už nainštalovanú offline aplikáciu treba po zmene konfigurácie vytvoriť nový
 build a nechať ho aktualizovať. Podrobný popis položiek je v hlavnom README.
 
@@ -65,7 +67,7 @@ Djembe používa 29 samplov Tomáša Mareka z AfroPlayer, spoločných s Java ve
 `d/t/s` = bas/tón/slap, `D/T/S` = akcenty; `i/I`, `c/C`, `a/A` = tlmený tón,
 tlmený slap a alternatívny slap. Funguje aj pôvodný zápis `D/o/x/i` a pravdepodobnostné
 údery `E/p/y` (60 %) a `F/q/z` (12 %). Humanize ovplyvňuje čas aj jemné zmeny
-dynamiky a ladenia. V knižnici vyber **Djembe – ukážka**. Prehrávač načítava iba
+dynamiky a ladenia. V knižnici vyber **djembe-demo**. Prehrávač načítava iba
 sample nástrojov aktuálneho rytmu a dekódované zvuky používa opakovane.
 
 Dialect má jednu hodnotu od −1 do +1 pre každý pulz: 0 je presná poloha,

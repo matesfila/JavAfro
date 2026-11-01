@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AudioEngine } from './audio';
 import { parseRhythm } from './rhythm';
 
-const rhythm = parseRhythm('test:\n  name: Test\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    dundun: "xxxxxxxxxxxxxxxx"');
+const rhythm = parseRhythm('test:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    dundun: "xxxxxxxxxxxxxxxx"');
 let context: FakeContext;
 class FakeContext {
   currentTime = 0;
@@ -36,7 +36,7 @@ describe('audio lifecycle', () => {
     await engine.start(rhythm);
     expect(context.decodeAudioData).toHaveBeenCalledTimes(1);
     engine.stop();
-    const djembe = parseRhythm('dj:\n  name: Djembe\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    djembe: "dts............."');
+    const djembe = parseRhythm('dj:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    djembe: "dts............."');
     expect(await engine.start(djembe)).toBe(true);
     expect(context.decodeAudioData).toHaveBeenCalledTimes(30);
     engine.stop();

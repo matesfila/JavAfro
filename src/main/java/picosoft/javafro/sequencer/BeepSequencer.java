@@ -132,7 +132,7 @@ public final class BeepSequencer implements Sequencer {
     }
 
     @Override
-    public void playPattern(Rhythm rhythm, int repetitions, int humanize) throws LineUnavailableException {
+    public void playRhythm(Rhythm rhythm, int repetitions, int humanize) throws LineUnavailableException {
         if (rhythm == null) {
             throw new IllegalArgumentException("Rhythm must not be null.");
         }
@@ -163,12 +163,12 @@ public final class BeepSequencer implements Sequencer {
 
     @Override
     public void playPattern(String pattern, int repetitions, int bpm, int humanize) throws LineUnavailableException {
-        playPattern(List.of(new BeepTrack(pattern, new BeepInstrument())), repetitions, bpm, humanize);
+        playTracks(List.of(new BeepTrack(pattern, new BeepInstrument())), repetitions, bpm, humanize);
     }
 
     @Override
-    public void playPattern(List<? extends Track> tracks, int repetitions, int bpm) throws LineUnavailableException {
-        playPattern(tracks, repetitions, bpm, 0);
+    public void playTracks(List<? extends Track> tracks, int repetitions, int bpm) throws LineUnavailableException {
+        playTracks(tracks, repetitions, bpm, 0);
     }
 
     /**
@@ -177,12 +177,12 @@ public final class BeepSequencer implements Sequencer {
      * Tempo stays fixed; starts before the beginning are clamped to zero.
      */
     @Override
-    public void playPattern(List<? extends Track> tracks, int repetitions, int bpm, int humanize) throws LineUnavailableException {
-        playPattern(tracks, repetitions, bpm, humanize, DEFAULT_STEPS_PER_BEAT);
+    public void playTracks(List<? extends Track> tracks, int repetitions, int bpm, int humanize) throws LineUnavailableException {
+        playTracks(tracks, repetitions, bpm, humanize, DEFAULT_STEPS_PER_BEAT);
     }
 
-    private void playPattern(List<? extends Track> tracks, int repetitions, int bpm, int humanize,
-                             int stepsPerBeat) throws LineUnavailableException {
+    private void playTracks(List<? extends Track> tracks, int repetitions, int bpm, int humanize,
+                            int stepsPerBeat) throws LineUnavailableException {
         if (repetitions <= 0) {
             throw new IllegalArgumentException("Repetitions must be greater than zero.");
         }
