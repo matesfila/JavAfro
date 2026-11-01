@@ -74,9 +74,12 @@ export class AudioEngine {
             source.playbackRate.value = hit.rate;
             const volume = context.createGain();
             volume.gain.value = hit.gain;
-            source.connect(volume); volume.connect(this.gain!);
+            source.connect(volume);
+            const panner = hit.pan && typeof context.createStereoPanner === 'function' ? context.createStereoPanner() : null;
+            if (panner) { panner.pan.value = hit.pan!; volume.connect(panner); panner.connect(this.gain!); }
+            else volume.connect(this.gain!);
             this.sources.add(source);
-            source.onended = () => { this.sources.delete(source); source.disconnect(); volume.disconnect(); };
+            source.onended = () => { this.sources.delete(source); source.disconnect(); volume.disconnect(); panner?.disconnect(); };
             source.start(Math.max(now + AudioConstants.MIN_SOURCE_START_DELAY_SECONDS, hit.time));
           }
           // This is visual feedback only; audio never depends on this callback.

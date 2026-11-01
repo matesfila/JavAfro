@@ -1,39 +1,58 @@
-import source from '../../src/main/resources/samples/djembe.yaml?raw';
+import afroSource from '../../src/main/resources/samples/afroplayer-samples.yaml?raw';
 import { parse } from 'yaml';
 import type { Instrument } from './rhythm';
 import { HUMANIZE_PERCENT_MAX } from './audio-constants';
+import { config } from './config';
 
-const drums = { dundun: 'dundun.wav', sangban: 'sangban.wav', kensereni: 'kenkeni.wav' };
-interface DjembeManifest {
-  dynamic: number;
-  pitch: number;
-  outputGain: number;
-  notes: Record<string, { bank: string; gain: number; probability: number }>;
-  banks: Record<string, string[]>;
+interface AfroManifest {
+  banks: Record<string, { samples: string[]; gain: number; rate: number; pan: number }>;
+  instruments: Record<string, { bell?: string;
+    notes: Record<string, { bank: string; probability: number; gain: number }> }>;
 }
-const manifest: DjembeManifest = parse(source, { version: '1.1', uniqueKeys: true });
-const notes = manifest.notes;
-const banks = manifest.banks;
-export interface Sound { sample: string; gain: number; rate: number }
+const afro: AfroManifest = parse(afroSource, { version: '1.1', uniqueKeys: true });
+const freesound: Partial<Record<Instrument, string>> = {
+  dundun_freesound: 'dundun.wav', sangban_freesound: 'sangban.wav', kensereni_freesound: 'kenkeni.wav',
+};
+const canonical = (instrument: Instrument) => instrument === 'kenken' ? 'kensereni'
+  : instrument === 'kenken_bell' ? 'kensereni_bell' : instrument;
+export interface Sound { sample: string; gain: number; rate: number; pan?: number }
 
 export function supportsNote(instrument: Instrument, note: string): boolean {
-  return instrument === 'djembe' ? Object.hasOwn(notes, note) : note === 'x';
+  const definition = afro.instruments[canonical(instrument)];
+  return definition ? Object.hasOwn(definition.notes, note) : !!freesound[instrument] && note === 'x';
 }
 export function samplesForInstrument(instrument: Instrument): string[] {
-  return instrument === 'djembe' ? Object.values(banks).flat() : [drums[instrument]];
+  const definition = afro.instruments[canonical(instrument)];
+  if (!definition) return freesound[instrument] ? [freesound[instrument]!] : [];
+  const bankIds = new Set(Object.values(definition.notes).map(note => note.bank));
+  if (definition.bell) bankIds.add(definition.bell);
+  return [...bankIds].flatMap(id => afro.banks[id].samples);
 }
 
-/** A voice's sample, dynamics and pitch stay fixed for its entire decay. */
+/** Primary voice compatibility helper. Scheduling uses selectSounds to include automatic bells. */
 export function selectSound(instrument: Instrument, symbol: string, humanize: number,
                             random: () => number = Math.random): Sound | null {
-  if (!supportsNote(instrument, symbol)) throw new Error(`Neznámy úder ${symbol} pre ${instrument}.`);
-  if (instrument !== 'djembe') return { sample: drums[instrument], gain: 1, rate: 1 };
-  const note = notes[symbol];
-  if (note.probability < 1 && random() >= note.probability) return null;
-  const variants = banks[note.bank];
-  const sample = variants[Math.min(variants.length - 1, Math.floor(random() * variants.length))];
+  return selectSounds(instrument, symbol, humanize, random)[0] ?? null;
+}
+
+/** One successful drum hit creates its drum and bell together; skipped hits create neither. */
+export function selectSounds(instrument: Instrument, symbol: string, humanize: number,
+                             random: () => number = Math.random): Sound[] {
+  if (!supportsNote(instrument, symbol)) throw new Error('Neznámy úder ' + symbol + ' pre ' + instrument + '.');
+  if (!Number.isFinite(humanize) || humanize < 0 || humanize > HUMANIZE_PERCENT_MAX) throw new Error('Humanize musí byť 0–100.');
   const amount = humanize / HUMANIZE_PERCENT_MAX;
-  return { sample,
-    gain: (note.gain + (amount ? (random() * 2 - 1) * manifest.dynamic * amount : 0)) * manifest.outputGain,
-    rate: 1 + (amount ? (random() * 2 - 1) * manifest.pitch * amount : 0) };
+  const variation = (limit: number) => amount ? (random() * 2 - 1) * limit * amount : 0;
+  const choose = (files: string[]) => files[Math.min(files.length - 1, Math.floor(random() * files.length))];
+  const definition = afro.instruments[canonical(instrument)];
+  if (!definition) return [{ sample: freesound[instrument]!, gain: 1, rate: 1 }];
+  const note = definition.notes[symbol];
+  if (note.probability < 1 && random() >= note.probability) return [];
+  const voice = (id: string, noteGain = 1): Sound => {
+    const bank = afro.banks[id];
+    return { sample: choose(bank.samples), gain: bank.gain * noteGain + variation(config.humanizeDynamic),
+      rate: bank.rate + variation(config.humanizePitch), pan: bank.pan };
+  };
+  const result = [voice(note.bank, note.gain)];
+  if (definition.bell && symbol !== 'b') result.push(voice(definition.bell));
+  return result;
 }

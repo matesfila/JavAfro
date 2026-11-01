@@ -23,6 +23,11 @@ public class AppConfigTest {
         AppConfig config = parse("playback:\n  humanize: 37\nlibrary:\n  directory: moje-rytmy\n");
         assertEquals(37, config.humanize());
         assertEquals(30, config.humanizeMaxOffsetMs());
+        assertEquals(.07, config.humanizeDynamic(), 0);
+        assertEquals(.005, config.humanizePitch(), 0);
+        var offsets = parse("playback: {humanizeDynamic: 0.2, humanizePitch: 0}");
+        assertEquals(.2, offsets.humanizeDynamic(), 0);
+        assertEquals(0, offsets.humanizePitch(), 0);
         assertEquals(0, parse("playback: {humanizeMaxOffsetMs: 0}").humanizeMaxOffsetMs());
         assertEquals(12, parse("playback: {humanizeMaxOffsetMs: 12}").humanizeMaxOffsetMs());
         assertEquals(116, config.initialTempo());
@@ -47,7 +52,10 @@ public class AppConfigTest {
                 "library: {directory: ''}", "playback: {tempo: {minimum: 200, maximum: 100}}",
                 "playback: {tempo: {initial: 301}}", "playback: {humanizeMaxOffsetMs: -1}",
                 "playback: {humanizeMaxOffsetMs: 1001}", "playback: {humanizeMaxOffsetMs: '30'}",
-                "playback: {humanizeMaxOffsetMs: 1.5}", "[]", "playback: ["}) {
+                "playback: {humanizeMaxOffsetMs: 1.5}", "playback: {humanizeDynamic: -0.1}",
+                "playback: {humanizeDynamic: .nan}", "playback: {humanizeDynamic: 1.1}",
+                "playback: {humanizePitch: '0.005'}", "playback: {humanizePitch: .inf}",
+                "playback: {humanizePitch: 0.51}", "[]", "playback: ["}) {
             assertThrows(yaml, IllegalArgumentException.class, () -> parse(yaml));
         }
     }

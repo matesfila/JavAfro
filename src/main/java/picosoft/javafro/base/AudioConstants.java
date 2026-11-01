@@ -34,8 +34,9 @@ public final class AudioConstants {
 
     /** Zapíše amplitúdu z intervalu [-1, 1] ako 16-bitovú vzorku na pozíciu {@code index} v bufferi. */
     public static void putSample(byte[] buffer, int index, double amplitude) {
-        double clamped = Math.max(-1.0, Math.min(1.0, amplitude));
-        short sample = (short) (clamped * Short.MAX_VALUE * OUTPUT_GAIN);
+        // Apply master headroom before clipping: original bank gains and drum+bell sums can exceed one.
+        double clamped = Math.max(-1.0, Math.min(1.0, amplitude * OUTPUT_GAIN));
+        short sample = (short) (clamped * Short.MAX_VALUE);
         buffer[index * BYTES_PER_SAMPLE] = (byte) sample;
         buffer[index * BYTES_PER_SAMPLE + 1] = (byte) (sample >> Byte.SIZE);
     }

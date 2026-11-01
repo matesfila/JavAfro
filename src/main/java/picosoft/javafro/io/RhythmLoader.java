@@ -10,9 +10,7 @@ import picosoft.javafro.base.Track;
 import picosoft.javafro.base.TimeSignature;
 import picosoft.javafro.base.Dialect;
 import picosoft.javafro.config.AppConfig;
-import picosoft.javafro.instruments.sample.DundunInstrument;
-import picosoft.javafro.instruments.sample.SangbanInstrument;
-import picosoft.javafro.instruments.sample.KensereniInstrument;
+import picosoft.javafro.instruments.sample.matesamples.*;
 import picosoft.javafro.sequencer.BeepTrack;
 
 import java.io.IOException;
@@ -173,13 +171,17 @@ public final class RhythmLoader {
 
     private static Instrument instrument(String id) {
         return switch (id) {
-//            case "dundun" -> new picosoft.javafro.instruments.synth.DundunInstrument();
-//            case "sangban" -> new picosoft.javafro.instruments.synth.SangbanInstrument();
-//            case "kensereni" -> new picosoft.javafro.instruments.synth.KensereniInstrument();
             case "dundun" -> new DundunInstrument();
             case "sangban" -> new SangbanInstrument();
-            case "kensereni" -> new KensereniInstrument();
-            case "djembe" -> new picosoft.javafro.instruments.sample.DjembeInstrument();
+            case "kensereni", "kenken" -> new KensereniInstrument();
+            case "dundun_bell" -> new DundunBellInstrument();
+            case "sangban_bell" -> new SangbanBellInstrument();
+            case "kensereni_bell", "kenken_bell" -> new KensereniBellInstrument();
+            case "djembe2" -> new Djembe2Instrument();
+            case "dundun_freesound" -> new picosoft.javafro.instruments.sample.jimmijames.DundunInstrument();
+            case "sangban_freesound" -> new picosoft.javafro.instruments.sample.jimmijames.SangbanInstrument();
+            case "kensereni_freesound" -> new picosoft.javafro.instruments.sample.jimmijames.KensereniInstrument();
+            case "djembe" -> new DjembeInstrument();
             default -> throw new IllegalArgumentException("Unknown instrument: " + id);
         };
     }

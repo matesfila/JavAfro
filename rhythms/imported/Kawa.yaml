@@ -5,13 +5,13 @@
   dialect: [0, 0, 0]
   tracks:
     dundun:
-      base: "....xx.x.x.x|.xx.xx......"
+      base: ".bb.xx.x.x.x|.xx.xx.bb.bb"
       variations:
-        - "..x.xx.x.x..|.xx.xx......"
+        - ".bx.xx.x.x.b|.xx.xx.bb.bb"
     sangban:
-      base: "x...x...xx..|x.x.x...xx.."
+      base: "i.b.x.b.xx.b|x.x.x.b.xx.b"
       variations:
-        - "x...x...xx..|x.x.x...xx.."
+        - "i.b.x.b.xx.b|x.x.x.b.xx.b"
     kensereni:
-      base: "x....xx....x"
+      base: "x.bb.xx.bb.x"
   legacy: {"source":"Kawa.rb","symbol":"KAWA","notes":[],"definition":{"BPM":129,"TIME_SIGNATURE":[12,8],"SWING":[0,0,0],"patterns":{"dundun":{"base":[".bb.XX.X.X.X|.XX.XX.bb.bb"],"variations":[".bX.XX.X.X.b|.XX.XX.bb.bb"],"echauff":[".XX.XX.X.X.X|.XX.XX.X.X.X"],"echauff-in":[".XX.XX.X.X.X|.XX.XX.X.X.X"],"echauff-out":[".XX.XX.X.X.X|.XX.XX.bb.bb"]},"sangban":{"base":["I.b.X.b.XX.b|X.X.X.b.XX.b"],"variations":["I.b.X.b.XX.b|X.X.X.b.XX.b"],"echauff":["I.b.X.b.XX.b|.XX.X.b.XX.b"],"echauff-in":["I.b.X.b.XX.b|.XX.X.b.XX.b"],"echauff-out":["I.b.bX.X.X.b|.XX.X.b.XX.b"]},"kenken":{"base":["X.bb.XX.bb.X"],"variations":[]},"djembe":{"base":["x.ox..x.ox.."],"variations":[],"echauff":["oooxxxxxxxxx"],"echauff-in":["oooxxxxxxxxx"],"echauff-out":["o...........|ooooo.oo.o.."]}},"dependencies":{"sangban":{"I.b.X.b.XX.b|X.X.X.b.XX.b":{"dundun":".bX.XX.X.X.b|.XX.XX.bb.bb"}}}}}

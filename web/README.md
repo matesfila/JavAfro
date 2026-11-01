@@ -69,9 +69,17 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 ## Časovanie a formát
 
 Formát zodpovedá Java triede Rhythm: `timeSignature`, `stepsPerBeat`, `dialect`,
-tracky `dundun`, `sangban`, `kensereni`, `djembe`, string alebo objekt `base`/`variations`.
+tracky `dundun`, `sangban`, `kensereni` (alias `kenken`), `djembe`, `djembe2`
+a samostatné `dundun_bell`, `sangban_bell`, `kensereni_bell`; string alebo objekt `base`/`variations`.
 Znak `x` hrá úder, `.` ticho, `|` oddeľuje celé takty bez pridaného času.
 Variácie a pôvodné `legacy` dáta zostávajú zachované, automaticky sa nehrajú.
+
+Basové bubny používajú pôvodné multisample AfroPlayer: `X/x` je otvorený úder,
+`i/I` uzavretý, `b` iba zvonec. Každý úspešný úder bubna pridá aj jeho zvonec.
+`A/B/C` majú pravdepodobnosti 12/40/80 % vrátane zvonca. `djembe2` zachováva
+pôvodné `D/o/x/i`, pravdepodobnostné `E/p/y/F/q/z` a prijíma aj `d/t/s`.
+Mapovanie, gain, rate a pan sú v spoločnom `samples/afroplayer-samples.yaml`.
+Staršie CC0 nahrávky sú dostupné ako `dundun_freesound`, `sangban_freesound`, `kensereni_freesound`.
 
 Úsek medzi `|` môže mať aj presne polovicu krokov taktu; prehrá sa dvakrát
 za sebou, aby vyplnil celý takt. Platí to pre základné patterny aj variácie.
@@ -96,9 +104,10 @@ Web Audio plánuje údery podľa zvukových hodín; časovač iba dopĺňa plán
 `public/generated/`. Zdroje upravuj v pôvodných adresároch, nie v generovanej kópii.
 Knižnica aj zvuky sa teda aktualizujú pri ďalšom spustení/buildovaní.
 
-Nahrávky troch dununov JIMMYJAMES112 / Freesound a ikona djembe / SVG Repo sú CC0.
+Staršie nahrávky troch dununov JIMMYJAMES112 / Freesound a ikona djembe / SVG Repo sú CC0.
+Nové sample AfroPlayer majú samostatný pôvod a podmienky, opísané v `generated/samples/AFROPLAYER.md`.
 Djembe má samostatný pôvod a podmienky zo starého AfroPlayer; detaily sú v
-`generated/samples/djembe/README.md`, jeho mapovanie v spoločnom `samples/djembe.yaml`.
+`generated/samples/djembe/README.md`, jeho mapovanie v spoločnom `samples/afroplayer-samples.yaml`.
 Podrobné zdroje a úpravy sú v skopírovaných `generated/samples/README.md`
 a `generated/icons/README.txt`. Fonty Manrope a DM Sans sú pribalené lokálne
 cez Fontsource pod SIL Open Font License (licencie v príslušných npm balíkoch).

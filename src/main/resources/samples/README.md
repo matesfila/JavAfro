@@ -1,5 +1,8 @@
 # Recorded drum samples
 
+This document covers only the three legacy CC0 WAVs. The new original AfroPlayer
+multisamples have separate provenance and conditions in [AFROPLAYER.md](AFROPLAYER.md).
+
 All three recordings are by **JIMMYJAMES112**, published on Freesound on
 2012-11-21 under **Creative Commons Zero (CC0 1.0)**. Each individual sound page
 states that copying, modification and redistribution are permitted, including

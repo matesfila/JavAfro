@@ -114,7 +114,7 @@ class Reader {
 const gcd = (a, b) => b ? gcd(b, a % b) : a;
 const lcm = (a, b) => a / gcd(a, b) * b;
 const quote = value => JSON.stringify(value);
-const instruments = { dundun: 'dundun', sangban: 'sangban', kenken: 'kensereni' };
+const instruments = { dundun: 'dundun', sangban: 'sangban', kenken: 'kensereni', djembe: 'djembe', djembe2: 'djembe2' };
 
 function convert(definition, sourceFile, id) {
   const { data, symbol } = definition;
@@ -131,7 +131,7 @@ function convert(definition, sourceFile, id) {
     for (const patterns of Object.values(data.patterns[id] || {})) {
       for (const pattern of patterns) {
         for (const bar of pattern.split('|').filter(Boolean)) {
-          stepsPerBar = lcm(stepsPerBar, bar.length);
+          if (/[^.]/.test(bar)) stepsPerBar = lcm(stepsPerBar, bar.length);
         }
       }
     }
@@ -139,19 +139,21 @@ function convert(definition, sourceFile, id) {
   assert(stepsPerBar <= 10000, `Excessive grid for ${symbol}`);
   const stepsPerBeat = stepsPerBar / beatsPerBar;
   assert(Number.isInteger(stepsPerBeat));
-  const normalize = (pattern, context) => {
+  const normalize = (pattern, context, instrument) => {
     if (!pattern) return '.'.repeat(stepsPerBar);
     const bars = pattern.split('|');
     if (bars.at(-1) === '') { bars.pop(); notes.push(`${context}: removed trailing bar separator.`); }
     return bars.map(bar => {
       if (!bar) throw new Error(`Empty internal bar: ${symbol} ${context}`);
+      if (/^\.+$/.test(bar)) return '.'.repeat(stepsPerBar);
       let result = '';
       const spacing = stepsPerBar / bar.length;
       assert(Number.isInteger(spacing));
       if (bar.length !== stepsPerBar) notes.push(`${context}: expanded ${bar.length} steps to common grid ${stepsPerBar} without moving hits.`);
       for (const char of bar) {
-        if (!'.bXxIiABC'.includes(char)) throw new Error(`Unknown drum note ${char}: ${symbol} ${context}`);
-        result += ('XxIiABC'.includes(char) ? 'x' : '.') + '.'.repeat(spacing - 1);
+        const supported = instrument.startsWith('djembe') ? '.DExyFzopqidtTsSI' : '.bXxIiABC';
+        if (!supported.includes(char)) notes.push(`${context}: unsupported source symbol ${JSON.stringify(char)} archived; rendered as silence.`);
+        result += (supported.includes(char) ? char : '.') + '.'.repeat(spacing - 1);
       }
       return result;
     }).join('|');
@@ -167,11 +169,11 @@ function convert(definition, sourceFile, id) {
       bases = track.echauff?.length ? track.echauff : [''];
       notes.push(`${id}: no base in source; using ${track.echauff?.length ? 'echauff' : 'one silent bar'} for playback.`);
     }
-    const base = bases.map((p, i) => normalize(p, `${id}.base[${i}]`)).join('|');
+    const base = bases.map((p, i) => normalize(p, `${id}.base[${i}]`, id)).join('|');
     lines.push(`    ${id}:`, `      base: ${quote(base)}`);
     if (track.variations?.length) {
       lines.push('      variations:');
-      track.variations.forEach((p, i) => lines.push(`        - ${quote(normalize(p, `${id}.variations[${i}]`))}`));
+      track.variations.forEach((p, i) => lines.push(`        - ${quote(normalize(p, `${id}.variations[${i}]`, id))}`));
     }
   }
   const legacy = {
@@ -185,7 +187,7 @@ function convert(definition, sourceFile, id) {
 function main() {
   const source = process.argv[2];
   if (!source) throw new Error('Usage: node tools/import-afroplayer.cjs <AfroPlayer/src/rhythms>');
-  const out = path.resolve('src/main/resources/rhythms/imported');
+  const out = path.resolve('rhythms/imported');
   const snapshots = path.resolve('docs/afroplayer-import/sources');
   fs.mkdirSync(out, { recursive: true }); fs.mkdirSync(snapshots, { recursive: true });
   const family = new Reader(fs.readFileSync(path.join(source, 'Kon.rb'), 'utf8')).read().env['@DUNUNBE_FAMILY'];
@@ -216,7 +218,7 @@ function main() {
   }
   const report = ['# AfroPlayer import', '',
     `Converted ${results.length} rhythm definitions from 20 Ruby files. Original source snapshots are in sources/.`, '',
-    'Playback uses dundun, sangban and kensereni (formerly kenken). X/x/I/i/A/B/C become x; b becomes silence. Closed/open timbre and hit probabilities are not reproduced. All original notes, other instruments, base sequences, variations, echauff sections, swing and dependencies remain in each YAML legacy.definition. Ruby source snapshots also preserve comments and song arrangement code. legacy is archival and does not control playback.', '',
+    'Playback supports original dundun, sangban, kensereni (formerly kenken), djembe and djembe2 notes. Open/closed strokes, bells and probabilities are retained. Other instruments and arrangement data remain in legacy.definition. Unsupported source symbols are reported and rendered as silence. legacy is archival and does not control playback.', '',
     'Original countNoteDelay uses 1/4 beat for numerators 8 and 16, and 1/3 for 6 and 12. Each original pipe-delimited section has numerator * delay beats regardless of character count. Imported meter and stepsPerBeat preserve those section durations and BPM. A common grid inserts silence between hits instead of rounding or padding source bars. All base sequence entries are concatenated in their original order, including repetitions. Variations stay in their original order, including duplicates. Base playback does not automatically trigger variations, echauff, swing or dependencies.', '',
     '| YAML | ID | Meter | Steps/beat |', '| --- | --- | --- | --- |',
     ...results.map(r => `| ${r.file} | ${r.id} | ${r.meter} | ${r.stepsPerBeat} |`), '', '# Per-rhythm conversion notes', ''];
@@ -225,4 +227,4 @@ function main() {
   console.log(`Converted ${results.length} rhythms in ${new Set(results.map(r => r.file)).size} YAML files; all legacy definitions verified.`);
 }
 if (require.main === module) main();
-module.exports = { Reader };
+module.exports = { Reader, convert };

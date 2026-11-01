@@ -10,11 +10,11 @@ public abstract class WavSampleInstrument implements Instrument {
     private static final ConcurrentHashMap<String, WavInstrument> CACHE = new ConcurrentHashMap<>();
     private final WavInstrument audio;
 
-    protected WavSampleInstrument(String resource) {
+    public WavSampleInstrument(String resource) {
         audio = loadSample(resource);
     }
 
-    static WavInstrument loadSample(String resource) {
+    public static WavInstrument loadSample(String resource) {
         return CACHE.computeIfAbsent(resource, path -> {
             var url = WavSampleInstrument.class.getResource(path);
             if (url == null) throw new IllegalArgumentException("Missing wav sample: " + path);

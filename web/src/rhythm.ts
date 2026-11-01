@@ -2,7 +2,9 @@ import { isMap, parseDocument } from 'yaml';
 import { supportsNote } from './sounds';
 import { config } from './config';
 
-export const instruments = ['dundun', 'sangban', 'kensereni', 'djembe'] as const;
+export const instruments = ['dundun', 'sangban', 'kensereni', 'kenken', 'djembe', 'djembe2',
+  'dundun_bell', 'sangban_bell', 'kensereni_bell', 'kenken_bell',
+  'dundun_freesound', 'sangban_freesound', 'kensereni_freesound'] as const;
 export type Instrument = typeof instruments[number];
 export interface Track { instrument: Instrument; base: string; variations: string[] }
 export interface Rhythm {

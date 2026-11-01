@@ -40,9 +40,17 @@ for (const [oldId, id] of Object.entries({ dundun: 'dundun', sangban: 'sangban',
   const base = original.patterns[oldId].base;
   assert(base.every(pattern => /^[.b|]+$/.test(pattern)), 'Unexpected audible drum notes');
   assert(base.flatMap(bars).length === 2);
-  // b is a separate bell sound, which these instruments do not support.
-  // Silent source sections need no extra grid subdivision (e.g. 8 vs 9 dots).
-  tracks[id] = { base: '.'.repeat(sectionSteps * 2) };
+  // Silent sections need no extra subdivision; retain each standalone bell exactly.
+  tracks[id] = { base: base.flatMap(bars).map(bar => {
+    const result = Array(sectionSteps).fill('.');
+    [...bar].forEach((note, index) => {
+      if (note !== 'b') return;
+      const step = index * sectionSteps / bar.length;
+      assert(Number.isInteger(step), 'Bell is off the four-step grid');
+      result[step] = 'b';
+    });
+    return result.join('');
+  }).join('') };
 }
 const legacy = {
   source: path.basename(source), symbol: 'GAMBIA',
@@ -50,7 +58,7 @@ const legacy = {
     'Reimported directly from Ruby including djembe base and all four variations; original D/o/x symbols retained.',
     'Pairs of original two-beat sections form 4/4 bars; BPM, section durations, note order and note counts are unchanged.',
     'Four steps per beat: off-grid solo hits are rounded to the nearest step; the base groove timing is unchanged.',
-    'Silent drum parts do not affect grid resolution; unsupported bell b remains archived.',
+    'Standalone bells b are retained; silent drum sections do not affect grid resolution.',
     'Echauff remains archived and is not played automatically.'
   ],
   definition: original

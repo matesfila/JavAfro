@@ -7,9 +7,9 @@
     djembe:
       base: "s.ts..s.ts.."
     dundun:
-      base: ".xx....xx.xx"
+      base: ".xx.bb.xx.xx"
     sangban:
-      base: "..x.....x..."
+      base: ".bx.bb.bx.bb"
     kensereni:
-      base: "..x.xx..x.xx"
+      base: ".bx.xx.bx.xx"
   legacy: {"source":"Kon.rb","symbol":"KON_MASI","notes":["dundun: no base in source; using echauff for playback.","sangban: no base in source; using echauff for playback."],"definition":{"BPM":115,"TIME_SIGNATURE":[12,8],"SWING":[-0.03,0.03,0],"patterns":{"dundun":{"echauff-in":[".bb.bb.XX.XX"],"echauff":[".XX.bb.XX.XX"],"echauff-out":[".XX.bb.XX.XX|.X.X.X.XX.XX"]},"sangban":{"echauff":[".bX.bb.bX.bb"],"echauff-in":["I.bb.bb.X.bb"],"echauff-out":[".bX.bb.bX.bX|.X.X.X.bXX.b"]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[],"echauff":[]},"djembe":{"base":["x.ox..x.ox.."],"echauff":["x.ox..x.ox.."]}},"dependencies":{}}}

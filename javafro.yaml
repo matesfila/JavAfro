@@ -3,6 +3,11 @@
 playback:
   humanize: 21 # 0–100; po štarte sa dá meniť posuvníkom
   humanizeMaxOffsetMs: 30 # maximálny posun ±ms pri humanize 100; 0 vypne časové odchýlky
+  # Pôvodné globálne HUMANIZE_DYNAMIC a HUMANIZE_PITCH z AfroPlayera.
+  humanizeDynamic: 0.07 # ku gain banky sa pridá ±(hodnota × humanize / 100), nie percento z gain
+  humanizePitch: 0.005 # k rate banky sa pridá ±(hodnota × humanize / 100); mení ladenie aj dĺžku
+  # Odchýlky sa vyberú nezávisle raz na hlas a počas doznievania sa nemenia.
+  # Pri humanize 0 sú vypnuté; výber samplu a probability ostávajú aktívne.
   tempo:
     initial: 116 # globálne BPM pre rytmus bez bpm; explicitné bpm v rytme má prednosť
     minimum: 20

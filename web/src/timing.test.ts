@@ -3,7 +3,7 @@ import { parseRhythm } from './rhythm';
 import { minimumGap, planBeat, type Controls } from './timing';
 
 function rhythm(meter = '4/4', steps = 4, pattern = 'xxxxxxxxxxxxxxxx') {
-  return parseRhythm(`Test:\n  bpm: 120\n  timeSignature: '${meter}'\n  stepsPerBeat: ${steps}\n  tracks:\n    dundun: '${pattern}'\n`);
+  return parseRhythm(`Test:\n  bpm: 120\n  timeSignature: '${meter}'\n  stepsPerBeat: ${steps}\n  tracks:\n    dundun_freesound: '${pattern}'\n`);
 }
 const straight: Controls = { bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] };
 

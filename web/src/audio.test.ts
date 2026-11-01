@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AudioEngine } from './audio';
 import { parseRhythm } from './rhythm';
 
-const rhythm = parseRhythm('test:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    dundun: "xxxxxxxxxxxxxxxx"');
+const rhythm = parseRhythm('test:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    dundun_freesound: "xxxxxxxxxxxxxxxx"');
 let context: FakeContext;
 class FakeContext {
   currentTime = 0;
@@ -10,10 +10,15 @@ class FakeContext {
   destination = {};
   onstatechange: (() => void) | null = null;
   sources: { start: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn> }[] = [];
+  panners: { pan: { value: number } }[] = [];
   constructor() { context = this; }
   resume = vi.fn(async () => {});
   close = vi.fn(async () => {});
   decodeAudioData = vi.fn(async () => ({}));
+  createStereoPanner() {
+    const panner = { pan: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() };
+    this.panners.push(panner); return panner;
+  }
   createGain() {
     return { gain: { value: 0, cancelScheduledValues: vi.fn(), setTargetAtTime: vi.fn() }, connect: vi.fn(), disconnect: vi.fn() };
   }
@@ -31,6 +36,20 @@ beforeEach(() => {
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('audio lifecycle', () => {
+  it('loads only an AfroPlayer drum and its bell banks and applies their original stereo pan', async () => {
+    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
+    const drum = parseRhythm('drum:\n  stepsPerBeat: 4\n  tracks: {dundun: "XXXXXXXXXXXXXXXX"}');
+    expect(await engine.start(drum)).toBe(true);
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(15);
+    expect(context.sources).toHaveLength(8);
+    expect(context.sources[0].start.mock.calls[0][0]).toBe(context.sources[1].start.mock.calls[0][0]);
+    expect(context.panners).toHaveLength(8);
+    expect(context.panners.every(panner => panner.pan.value === -.3)).toBe(true);
+    engine.stop();
+    expect(context.sources.every(source => source.stop.mock.calls.length === 1)).toBe(true);
+    engine.dispose();
+  });
+
   it('replaces active playback and ignores an older sample load after a newer Play', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
     expect(await engine.start(rhythm)).toBe(true);

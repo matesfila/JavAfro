@@ -21,6 +21,12 @@ export function parseConfig(source: string) {
     if (typeof value !== 'number' || !Number.isInteger(value) || value < min || value > max) throw new Error(`${key}: očakáva sa celé číslo ${min}–${max}.`);
     return value;
   };
+  const decimal = (map: Record<string, unknown>, key: string, fallback: number, min: number, max: number) => {
+    if (!(key in map)) return fallback;
+    const value = map[key];
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) throw new Error(`${key}: očakáva sa číslo ${min}–${max}.`);
+    return value;
+  };
   const text = (map: Record<string, unknown>, key: string, fallback: string) => {
     if (!(key in map)) return fallback;
     const value = map[key];
@@ -30,7 +36,7 @@ export function parseConfig(source: string) {
   const raw = document.toJS({ maxAliasCount: 50 });
   const root = raw === null ? {} : mapping(raw, 'konfigurácia');
   keys(root, 'konfigurácia', ['playback', 'library', 'editor', 'window']);
-  const playback = section(root, 'playback', ['humanize', 'humanizeMaxOffsetMs', 'tempo']);
+  const playback = section(root, 'playback', ['humanize', 'humanizeMaxOffsetMs', 'humanizeDynamic', 'humanizePitch', 'tempo']);
   const tempo = section(playback, 'tempo', ['initial', 'minimum', 'maximum']);
   const library = section(root, 'library', ['directory', 'initialRhythm']);
   const editor = section(root, 'editor', ['fontSize']);
@@ -44,6 +50,8 @@ export function parseConfig(source: string) {
   return {
     humanize: number(playback, 'humanize', 21, 0, HUMANIZE_PERCENT_MAX), initialTempo, minimumTempo, maximumTempo,
     humanizeMaxOffsetMs: number(playback, 'humanizeMaxOffsetMs', DEFAULT_HUMANIZE_MAX_OFFSET_MS, 0, MAX_HUMANIZE_OFFSET_MS),
+    humanizeDynamic: decimal(playback, 'humanizeDynamic', 0.07, 0, 1),
+    humanizePitch: decimal(playback, 'humanizePitch', 0.005, 0, 0.5),
     rhythmsDirectory: text(library, 'directory', 'rhythms'), initialRhythm: text(library, 'initialRhythm', 'basicRhythms.yaml'),
     editorFontSize: number(editor, 'fontSize', 16, 8, 72),
     windowWidth: number(window, 'width', 1200, 760, 10000), windowHeight: number(window, 'height', 900, 560, 10000),

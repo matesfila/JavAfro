@@ -1,5 +1,5 @@
 import type { Instrument, Rhythm } from './rhythm';
-import { selectSound, type Sound } from './sounds';
+import { selectSounds, type Sound } from './sounds';
 import * as AudioConstants from './audio-constants';
 
 export interface Controls { bpm: number; humanize: number; dialect: number[] }
@@ -39,8 +39,11 @@ export function planBeat(rhythm: Rhythm, controls: Controls, beatStart: number,
       const pattern = track.base.replaceAll('|', '');
       const note = pattern[position % pattern.length];
       if (note !== '.') {
-        const sound = selectSound(track.instrument, note, controls.humanize, random);
-        if (sound) hits.push({ ...sound, instrument: track.instrument, time: Math.max(0, shifted + (jitter ? (random() * 2 - 1) * jitter : 0)) });
+        const sounds = selectSounds(track.instrument, note, controls.humanize, random);
+        if (sounds.length) {
+          const time = Math.max(0, shifted + (jitter ? (random() * 2 - 1) * jitter : 0));
+          for (const sound of sounds) hits.push({ ...sound, instrument: track.instrument, time });
+        }
       }
     }
   }

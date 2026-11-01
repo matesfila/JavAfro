@@ -13,11 +13,13 @@ import java.util.Map;
 import java.util.Set;
 
 /** Application defaults, separate from each rhythm's musical settings. */
-public record AppConfig(int humanize, int humanizeMaxOffsetMs, int initialTempo, int minimumTempo, int maximumTempo,
+public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDynamic, double humanizePitch,
+                        int initialTempo, int minimumTempo, int maximumTempo,
                         Path rhythmsDirectory, String initialRhythm, int editorFontSize,
                         int windowWidth, int windowHeight) {
     public static AppConfig defaults() {
-        return new AppConfig(21, AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS, 116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900);
+        return new AppConfig(21, AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS, 0.07, 0.005,
+                116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900);
     }
 
     public static AppConfig load() throws IOException {
@@ -62,7 +64,7 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, int initialTempo,
         }
         Map<?, ?> root = document == null ? Map.of() : mapping(document, "konfigurácia");
         keys(root, "konfigurácia", "playback", "library", "editor", "window");
-        Map<?, ?> playback = section(root, "playback", "humanize", "humanizeMaxOffsetMs", "tempo");
+        Map<?, ?> playback = section(root, "playback", "humanize", "humanizeMaxOffsetMs", "humanizeDynamic", "humanizePitch", "tempo");
         Map<?, ?> tempo = section(playback, "tempo", "initial", "minimum", "maximum");
         Map<?, ?> library = section(root, "library", "directory", "initialRhythm");
         Map<?, ?> editor = section(root, "editor", "fontSize");
@@ -75,7 +77,9 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, int initialTempo,
             throw new IllegalArgumentException("Tempo musí spĺňať minimum <= initial <= maximum.");
         }
         return new AppConfig(number(playback, "humanize", defaults.humanize, 0, AudioConstants.HUMANIZE_PERCENT_MAX),
-                number(playback, "humanizeMaxOffsetMs", defaults.humanizeMaxOffsetMs, 0, AudioConstants.MAX_HUMANIZE_OFFSET_MS), initial, minimum, maximum,
+                number(playback, "humanizeMaxOffsetMs", defaults.humanizeMaxOffsetMs, 0, AudioConstants.MAX_HUMANIZE_OFFSET_MS),
+                decimal(playback, "humanizeDynamic", defaults.humanizeDynamic, 0, 1),
+                decimal(playback, "humanizePitch", defaults.humanizePitch, 0, 0.5), initial, minimum, maximum,
                 baseDirectory.resolve(text(library, "directory", "rhythms")).normalize(),
                 text(library, "initialRhythm", defaults.initialRhythm),
                 number(editor, "fontSize", defaults.editorFontSize, 8, 72),
@@ -108,6 +112,15 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, int initialTempo,
             throw new IllegalArgumentException(key + ": očakáva sa celé číslo " + min + "–" + max + ".");
         }
         return result;
+    }
+
+    private static double decimal(Map<?, ?> map, String key, double fallback, double min, double max) {
+        if (!map.containsKey(key)) return fallback;
+        if (!(map.get(key) instanceof Number value) || !Double.isFinite(value.doubleValue())
+                || value.doubleValue() < min || value.doubleValue() > max) {
+            throw new IllegalArgumentException(key + ": očakáva sa číslo " + min + "–" + max + ".");
+        }
+        return value.doubleValue();
     }
 
     private static String text(Map<?, ?> map, String key, String fallback) {

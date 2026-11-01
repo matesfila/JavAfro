@@ -4,13 +4,18 @@ import { fileURLToPath } from 'node:url';
 import { samplesForInstrument, selectSound } from './sounds';
 import { parseRhythm } from './rhythm';
 import { planBeat } from './timing';
+import manifestSource from '../../src/main/resources/samples/afroplayer-samples.yaml?raw';
+import { parse } from 'yaml';
+import { config } from './config';
+const manifest = parse(manifestSource);
 
 describe('AfroPlayer djembe', () => {
   it('includes all 29 original variants and leaves ordinary drum loading small', () => {
     const samples = samplesForInstrument('djembe');
     expect(new Set(samples).size).toBe(29);
     for (const sample of samples) expect(existsSync(fileURLToPath(new URL(`../../src/main/resources/samples/${sample}`, import.meta.url)))).toBe(true);
-    expect(samplesForInstrument('dundun')).toEqual(['dundun.wav']);
+    expect(samplesForInstrument('dundun')).toHaveLength(15);
+    expect(samplesForInstrument('dundun_freesound')).toEqual(['dundun.wav']);
     expect(selectSound('djembe', 't', 0, () => 0)?.sample).not.toBe(selectSound('djembe', 't', 0, () => .99)?.sample);
   });
   it('keeps accents, independent dynamics, pitch and original probability notes', () => {
@@ -22,10 +27,28 @@ describe('AfroPlayer djembe', () => {
       expect(normal.rate).toBe(1);
     }
     const early = selectSound('djembe', 'D', 100, () => 0)!;
-    expect(early.gain).toBeCloseTo(.93 * .45); expect(early.rate).toBeCloseTo(.995);
+    const djembe = manifest.instruments.djembe;
+    const note = djembe.notes.D;
+    expect(early.gain).toBeCloseTo(manifest.banks[note.bank].gain * note.gain - config.humanizeDynamic);
+    expect(early.rate).toBeCloseTo(1 - config.humanizePitch);
     for (const note of 'EpyFqz') {
       expect(selectSound('djembe', note, 0, () => 0)).not.toBeNull();
       expect(selectSound('djembe', note, 0, () => .99)).toBeNull();
+    }
+  });
+  it('uses global configured offsets around each bank gain and rate, scaled by humanize', () => {
+    const saved = { dynamic: config.humanizeDynamic, pitch: config.humanizePitch };
+    try {
+      config.humanizeDynamic = .2;
+      config.humanizePitch = .05;
+      expect(selectSound('djembe', 'T', 100, () => 0)).toMatchObject({ gain: 1.8, rate: .95 });
+      expect(selectSound('djembe', 'T', 50, () => 0)).toMatchObject({ gain: 1.9, rate: .975 });
+      expect(selectSound('djembe', 'T', 0, () => 0)).toMatchObject({ gain: 2, rate: 1 });
+      expect(selectSound('dundun', 'X', 100, () => 0)?.gain).toBeCloseTo(2);
+      expect(selectSound('dundun', 'X', 100, () => 0)?.rate).toBeCloseTo(.69);
+    } finally {
+      config.humanizeDynamic = saved.dynamic;
+      config.humanizePitch = saved.pitch;
     }
   });
   it('plans d/t/s at the same pulse positions and validates notes for each instrument', () => {

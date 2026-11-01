@@ -16,14 +16,14 @@ Zachovávame rozdiely medzi nahrávkami. V JavAfro sa už FFmpeg nevyžaduje.
 Súbory nie sú súčasťou CC0 sady JIMMYJAMES112; zachovávajú pôvodné podmienky
 z používateľovho projektu AfroPlayer. V pôvodnom adresári nie je licenčný súbor.
 
-Spoločný manifest `../djembe.yaml` používa Java aj web. Obsahuje šestice bánk
+Spoločný manifest `../afroplayer-samples.yaml` používa Java aj web. Obsahuje šestice bánk
 (bas 1, tón 6, slap 8, tlmený tón 3, tlmený slap 3, alternatívny slap 8),
 zosilnenia a pravdepodobnosti. Pri každom údere sa náhodne vyberie jeden variant;
 počas doznievania sa už sample ani jeho parametre nemenia.
 
-Spoločný výstupný gain 0,45 poskytuje rezervu aj pre najsilnejšie akcenty a
-kladnú odchýlku dynamiky. Uplatňuje sa rovnako na všetky banky v Jave aj vo webe;
-nemení relatívne hlasitosti medzi údermi ani samotné WAV súbory.
+Hlasitosť a rýchlosť riadia `gain` a `rate` pri jednotlivých bankách, rovnako
+ako pôvodné Ruby `amp` a `rate`. Bas má gain 1, tón/slap/tlmený tón gain 2.
+Slabšie nové noty používajú relatívny gain 0,7; akcenty a pôvodné noty 1.
 
 Nový zápis: `d/t/s` = bas/tón/slap, `D/T/S` = akcenty. Malé písmená majú
 70 % hlasitosti veľkých. `i/I` = tlmený tón, `c/C` = tlmený slap,
@@ -33,7 +33,9 @@ Pôvodný zápis sa dá prehrať priamo: `D` bas, `o` tón, `x` slap, `i` tlmen�
 `E/p/y` hrajú bas/tón/slap s pravdepodobnosťou 60 %, `F/q/z` s 12 %.
 Pravdepodobnosť neznamená tichší úder. Malé/veľké `d/t/s` riadia hlasitosť.
 
-Humanize riadi aj jemné zmeny dynamiky a ladenia djembe: pri 100 je hlasitosť
+Globálne `playback.humanizeDynamic` a `playback.humanizePitch` v `javafro.yaml`
+zodpovedajú pôvodným `HUMANIZE_DYNAMIC` a `HUMANIZE_PITCH`. Humanize riadi aj
+jemné zmeny dynamiky a ladenia djembe: pri 100 je hlasitosť predvolene
 v rozsahu pôvodného gain ±0,07 a rýchlosť samplu 1 ±0,005; pri 0 sú obe
 odchýlky vypnuté. Náhodný výber multisamplov a explicitné pravdepodobnosti
 zostávajú aktívne aj pri humanize 0, rovnako ako v AfroPlayer.

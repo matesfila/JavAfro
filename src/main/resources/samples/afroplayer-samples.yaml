@@ -1,0 +1,274 @@
+# Pôvodné banky AfroPlayer: gain (Ruby amp), rate, pan a mapovanie nôt.
+# Globálne odchýlky HUMANIZE_DYNAMIC/PITCH sú v javafro.yaml v sekcii playback.
+# gain pri note je relatívny násobiteľ banky (napr. 0.7 pre slabší d/t/s).
+# Úspešný úder basového bubna pridá aj jeho zvonec; b hrá iba zvonec.
+# pan používa web; Java momentálne prehráva mono.
+banks:
+  dundun_open:
+    samples:
+      - afroplayer-dunduns/dundun_s2_v1.wav
+      - afroplayer-dunduns/dundun_s2_v2.wav
+      - afroplayer-dunduns/dundun_s2_v3.wav
+      - afroplayer-dunduns/dundun_s2_v4.wav
+      - afroplayer-dunduns/dundun_s2_v5.wav
+    gain: 2.2
+    rate: 0.74
+    pan: -0.3
+  dundun_closed:
+    samples:
+      - afroplayer-dunduns/dundun_closed_v1.wav
+      - afroplayer-dunduns/dundun_closed_v2.wav
+      - afroplayer-dunduns/dundun_closed_v3.wav
+      - afroplayer-dunduns/dundun_closed_v4.wav
+      - afroplayer-dunduns/dundun_closed_v5.wav
+      - afroplayer-dunduns/dundun_closed_v6.wav
+    gain: 3
+    rate: 0.9
+    pan: -0.3
+  sangban_open:
+    samples:
+      - afroplayer-dunduns/sangban_s2_v1.wav
+      - afroplayer-dunduns/sangban_s2_v2.wav
+      - afroplayer-dunduns/sangban_s2_v3.wav
+      - afroplayer-dunduns/sangban_s2_v4.wav
+      - afroplayer-dunduns/sangban_s2_v5.wav
+      - afroplayer-dunduns/sangban_s2_v6.wav
+    gain: 2.5
+    rate: 0.9
+    pan: 0.1
+  sangban_closed:
+    samples:
+      - afroplayer-dunduns/sangban_closed_v1.wav
+      - afroplayer-dunduns/sangban_closed_v2.wav
+      - afroplayer-dunduns/sangban_closed_v3.wav
+      - afroplayer-dunduns/sangban_closed_v4.wav
+      - afroplayer-dunduns/sangban_closed_v5.wav
+      - afroplayer-dunduns/sangban_closed_v6.wav
+    gain: 3
+    rate: 0.9
+    pan: 0.1
+  kensereni_open:
+    samples:
+      - afroplayer-dunduns/kenkeni_s2_v1.wav
+      - afroplayer-dunduns/kenkeni_s2_v2.wav
+      - afroplayer-dunduns/kenkeni_s2_v3.wav
+      - afroplayer-dunduns/kenkeni_s2_v4.wav
+      - afroplayer-dunduns/kenkeni_s2_v5.wav
+      - afroplayer-dunduns/kenkeni_s2_v6.wav
+      - afroplayer-dunduns/kenkeni_s2_v7.wav
+    gain: 2
+    rate: 1.1
+    pan: 0.02
+  kensereni_closed:
+    samples:
+      - afroplayer-dunduns/kenkeni_closed_v1.wav
+      - afroplayer-dunduns/kenkeni_closed_v2.wav
+      - afroplayer-dunduns/kenkeni_closed_v3.wav
+      - afroplayer-dunduns/kenkeni_closed_v4.wav
+      - afroplayer-dunduns/kenkeni_closed_v5.wav
+    gain: 3
+    rate: 0.9
+    pan: 0.02
+  bell_dun:
+    samples:
+      - afroplayer-dunduns/dundun_bell_open_v1.wav
+      - afroplayer-dunduns/dundun_bell_open_v2.wav
+      - afroplayer-dunduns/dundun_bell_open_v3.wav
+      - afroplayer-dunduns/dundun_bell_open_v4.wav
+    gain: 0.8
+    rate: 0.8
+    pan: -0.3
+  bell_san:
+    samples:
+      - afroplayer-dunduns/sangban_bell_open_v1.wav
+      - afroplayer-dunduns/sangban_bell_open_v2.wav
+      - afroplayer-dunduns/sangban_bell_open_v3.wav
+      - afroplayer-dunduns/sangban_bell_open_v4.wav
+      - afroplayer-dunduns/sangban_bell_open_v5.wav
+    gain: 1
+    rate: 1
+    pan: 0.1
+  bell_ken:
+    samples:
+      - afroplayer-dunduns/kenkeni_bell_open_v1.wav
+      - afroplayer-dunduns/kenkeni_bell_open_v2.wav
+      - afroplayer-dunduns/kenkeni_bell_open_v3.wav
+    gain: 1.3
+    rate: 1.2
+    pan: 0.02
+  dj2_bass:
+    samples:
+      - djembe2/DJEMBEBASS2.wav
+    gain: 0.5
+    rate: 1
+    pan: 0
+  dj2_tone:
+    samples:
+      - djembe2/DJEMBE2.wav
+      - djembe2/DJEMBE3.wav
+    gain: 0.5
+    rate: 1
+    pan: 0
+  dj2_slap:
+    samples:
+      - djembe2/DJEMBESLAP2.wav
+      - djembe2/DJEMBESLAP3.wav
+      - djembe2/DJEMBESLAP4.wav
+    gain: 0.5
+    rate: 1.1
+    pan: 0
+  dj2_closed:
+    samples:
+      - djembe2/DJEMBESLAP1.wav
+    gain: 0.5
+    rate: 1
+    pan: 0
+  dj_bass:
+    samples:
+      - djembe/dj_tm_bass.wav
+    gain: 1
+    rate: 1
+    pan: 0
+  dj_tone:
+    samples:
+      - djembe/dj_tm_ton_v1.wav
+      - djembe/dj_tm_ton_v2.wav
+      - djembe/dj_tm_ton_v3.wav
+      - djembe/dj_tm_ton_v4.wav
+      - djembe/dj_tm_ton_v5.wav
+      - djembe/dj_tm_ton_v6.wav
+    gain: 2
+    rate: 1
+    pan: 0
+  dj_slap:
+    samples:
+      - djembe/dj_tm_slap_v1.wav
+      - djembe/dj_tm_slap_v2.wav
+      - djembe/dj_tm_slap_v3.wav
+      - djembe/dj_tm_slap_v4.wav
+      - djembe/dj_tm_slap_v5.wav
+      - djembe/dj_tm_slap_v6.wav
+      - djembe/dj_tm_slap_v7.wav
+      - djembe/dj_tm_slap_v8.wav
+    gain: 2
+    rate: 1
+    pan: 0
+  dj_closed:
+    samples:
+      - djembe/dj_tm_tonclos_v1.wav
+      - djembe/dj_tm_tonclos_v2.wav
+      - djembe/dj_tm_tonclos_v3.wav
+    gain: 2
+    rate: 1
+    pan: 0
+  dj_closed_slap:
+    samples:
+      - djembe/dj_tm_slapclos_v1.wav
+      - djembe/dj_tm_slapclos_v2.wav
+      - djembe/dj_tm_slapclos_v3.wav
+    gain: 2
+    rate: 1
+    pan: 0
+  dj_alternate_slap:
+    samples:
+      - djembe/dj_tm_slap2_v1.wav
+      - djembe/dj_tm_slap2_v2.wav
+      - djembe/dj_tm_slap2_v3.wav
+      - djembe/dj_tm_slap2_v4.wav
+      - djembe/dj_tm_slap2_v5.wav
+      - djembe/dj_tm_slap2_v6.wav
+      - djembe/dj_tm_slap2_v7.wav
+      - djembe/dj_tm_slap2_v8.wav
+    gain: 2
+    rate: 1
+    pan: 0
+
+instruments:
+  djembe:
+    notes:
+      "d": { bank: dj_bass, probability: 1, gain: 0.7 }
+      "D": { bank: dj_bass, probability: 1, gain: 1 }
+      "t": { bank: dj_tone, probability: 1, gain: 0.7 }
+      "T": { bank: dj_tone, probability: 1, gain: 1 }
+      "s": { bank: dj_slap, probability: 1, gain: 0.7 }
+      "S": { bank: dj_slap, probability: 1, gain: 1 }
+      "i": { bank: dj_closed, probability: 1, gain: 1 }
+      "I": { bank: dj_closed, probability: 1, gain: 1 }
+      "c": { bank: dj_closed_slap, probability: 1, gain: 0.7 }
+      "C": { bank: dj_closed_slap, probability: 1, gain: 1 }
+      "a": { bank: dj_alternate_slap, probability: 1, gain: 0.7 }
+      "A": { bank: dj_alternate_slap, probability: 1, gain: 1 }
+      "x": { bank: dj_slap, probability: 1, gain: 1 }
+      "o": { bank: dj_tone, probability: 1, gain: 1 }
+      "E": { bank: dj_bass, probability: 0.6, gain: 1 }
+      "F": { bank: dj_bass, probability: 0.12, gain: 1 }
+      "y": { bank: dj_slap, probability: 0.6, gain: 1 }
+      "z": { bank: dj_slap, probability: 0.12, gain: 1 }
+      "p": { bank: dj_tone, probability: 0.6, gain: 1 }
+      "q": { bank: dj_tone, probability: 0.12, gain: 1 }
+  dundun:
+    bell: bell_dun
+    notes:
+      "x": { bank: dundun_open, probability: 1, gain: 1 }
+      "X": { bank: dundun_open, probability: 1, gain: 1 }
+      "A": { bank: dundun_open, probability: 0.12, gain: 1 }
+      "B": { bank: dundun_open, probability: 0.4, gain: 1 }
+      "C": { bank: dundun_open, probability: 0.8, gain: 1 }
+      "i": { bank: dundun_closed, probability: 1, gain: 1 }
+      "I": { bank: dundun_closed, probability: 1, gain: 1 }
+      "b": { bank: bell_dun, probability: 1, gain: 1 }
+  dundun_bell:
+    notes:
+      "x": { bank: bell_dun, probability: 1, gain: 1 }
+      "X": { bank: bell_dun, probability: 1, gain: 1 }
+      "b": { bank: bell_dun, probability: 1, gain: 1 }
+  sangban:
+    bell: bell_san
+    notes:
+      "x": { bank: sangban_open, probability: 1, gain: 1 }
+      "X": { bank: sangban_open, probability: 1, gain: 1 }
+      "A": { bank: sangban_open, probability: 0.12, gain: 1 }
+      "B": { bank: sangban_open, probability: 0.4, gain: 1 }
+      "C": { bank: sangban_open, probability: 0.8, gain: 1 }
+      "i": { bank: sangban_closed, probability: 1, gain: 1 }
+      "I": { bank: sangban_closed, probability: 1, gain: 1 }
+      "b": { bank: bell_san, probability: 1, gain: 1 }
+  sangban_bell:
+    notes:
+      "x": { bank: bell_san, probability: 1, gain: 1 }
+      "X": { bank: bell_san, probability: 1, gain: 1 }
+      "b": { bank: bell_san, probability: 1, gain: 1 }
+  kensereni:
+    bell: bell_ken
+    notes:
+      "x": { bank: kensereni_open, probability: 1, gain: 1 }
+      "X": { bank: kensereni_open, probability: 1, gain: 1 }
+      "A": { bank: kensereni_open, probability: 0.12, gain: 1 }
+      "B": { bank: kensereni_open, probability: 0.4, gain: 1 }
+      "C": { bank: kensereni_open, probability: 0.8, gain: 1 }
+      "i": { bank: kensereni_closed, probability: 1, gain: 1 }
+      "I": { bank: kensereni_closed, probability: 1, gain: 1 }
+      "b": { bank: bell_ken, probability: 1, gain: 1 }
+  kensereni_bell:
+    notes:
+      "x": { bank: bell_ken, probability: 1, gain: 1 }
+      "X": { bank: bell_ken, probability: 1, gain: 1 }
+      "b": { bank: bell_ken, probability: 1, gain: 1 }
+  djembe2:
+    notes:
+      "D": { bank: dj2_bass, probability: 1, gain: 1 }
+      "E": { bank: dj2_bass, probability: 0.6, gain: 1 }
+      "F": { bank: dj2_bass, probability: 0.12, gain: 1 }
+      "x": { bank: dj2_slap, probability: 1, gain: 1 }
+      "y": { bank: dj2_slap, probability: 0.6, gain: 1 }
+      "z": { bank: dj2_slap, probability: 0.12, gain: 1 }
+      "o": { bank: dj2_tone, probability: 1, gain: 1 }
+      "p": { bank: dj2_tone, probability: 0.6, gain: 1 }
+      "q": { bank: dj2_tone, probability: 0.12, gain: 1 }
+      "i": { bank: dj2_closed, probability: 1, gain: 1 }
+      "I": { bank: dj2_closed, probability: 1, gain: 1 }
+      "d": { bank: dj2_bass, probability: 1, gain: 0.7 }
+      "t": { bank: dj2_tone, probability: 1, gain: 0.7 }
+      "T": { bank: dj2_tone, probability: 1, gain: 1 }
+      "s": { bank: dj2_slap, probability: 1, gain: 0.7 }
+      "S": { bank: dj2_slap, probability: 1, gain: 1 }
