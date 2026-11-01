@@ -3,13 +3,12 @@ import { offlineSnapshot, retryOffline, subscribeOffline } from './pwa';
 
 export function OfflinePanel() {
   const state = useSyncExternalStore(subscribeOffline, offlineSnapshot);
+  if (state.mode === 'development' || state.mode === 'unsupported') return null;
   const percent = state.total ? Math.round(state.done / state.total * 100) : 0;
   let label = state.ready ? 'Pripravené offline' : 'Pripravujem offline verziu…';
   if (state.downloading) label = `Sťahujem na offline použitie${state.total ? ` · ${percent} %` : '…'}`;
   if (state.error) label = state.ready ? 'Offline pripravené · aktualizácia sa nepodarila' : 'Offline uloženie sa nepodarilo';
-  if (state.mode === 'https') label = 'Na offline inštaláciu otvor HTTPS adresu';
-  if (state.mode === 'development') label = 'Pracovný náhľad · offline režim nie je zapnutý';
-  if (state.mode === 'unsupported') label = 'Tento prehliadač nepodporuje offline režim';
+  if (state.mode === 'https') label = 'Offline vyžaduje HTTPS';
   return <section className={`offline-panel ${state.ready ? 'ready' : ''}`} aria-label="Offline aplikácia">
     <div className="offline-row"><span className="offline-state" role="status"><span className="status-dot" />{label}</span>
       {state.error && <button className="text-button" onClick={() => void retryOffline()}>Skúsiť znova</button>}

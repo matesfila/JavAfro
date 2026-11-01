@@ -41,6 +41,12 @@ aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 
 ## Ovládanie
 
+Pri otvorení sa priamo načíta `basicRhythms.yaml` (alebo súbor z
+`library.initialRhythm`). Rozhranie nemá zoznam knižnice. Vždy pracuješ s jedným
+otvoreným YAML súborom; ďalší môžeš otvoriť tlačidlom **Otvoriť** alebo presunutím
+do okna. Na hlavnej ploche sú Play/Stop, tempo, humanizácia a editor.
+Ovládanie dialectu je pod rozbaľovacou položkou **Dialect**, krátky návod pod **Pomoc**.
+
 Jeden YAML súbor môže obsahovať viac rytmov pod samostatnými hlavnými kľúčmi.
 Po načítaní je vybraný prvý. Play prehrá definíciu pod kurzorom a zostáva dostupné
 aj počas hrania. Ďalšie stlačenie zastaví aktuálny rytmus a od začiatku spustí
@@ -49,7 +55,7 @@ Medzery a komentáre medzi definíciami
 patria predchádzajúcemu rytmu. Uloženie zachová celý súbor a zapíše ovládacie
 nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 
-- Knižnica obsahuje všetky rytmy z koreňového `rhythms/` vrátane importovaných dát.
+- Predvolený súbor obsahuje viac rytmov; prehrávaný rytmus určuje kurzor v editore.
 - Vlastný YAML otvoríš tlačidlom alebo presunutím jedného súboru do okna.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.
 - Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť.
