@@ -8,6 +8,8 @@
     "prebuild": "node scripts/sync-assets.mjs",
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
+    "postbuild": "node scripts/build-offline.mjs",
+    "phone": "npm run build && node scripts/phone-server.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run"
   },

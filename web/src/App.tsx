@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { YamlEditor } from './Editor';
+import { OfflinePanel } from './OfflinePanel';
 import { AudioEngine } from './audio';
 import { parseRhythm, type CatalogEntry, type Rhythm } from './rhythm';
 import { DEFAULT_HUMANIZE, type Controls } from './timing';
@@ -170,6 +171,7 @@ export function App() {
           </select></div>
       </section>
 
+      <OfflinePanel />
       <div className="workspace">
         <section className={`editor-card card ${dragging ? 'dragging' : ''}`} aria-label="Editor rytmu">
           <div className="card-header editor-toolbar"><div><span className="section-number">01</span><h2>YAML editor</h2><span className="file-name" title={fileName}>{fileName}</span></div>
@@ -222,7 +224,7 @@ export function App() {
           <p className="dialect-help"><span>Skôr ← <strong>0 = presne</strong> → Neskôr</span><span>Nezávislé posuny · ± polovica kroku · rovnaké BPM</span></p>
         </section>
       </div>
-      <footer className="studio-footer"><div><img src={asset('icons/djembe.svg')} alt="" /><span>{displayedRhythm?.tracks.map(t => instrumentNames[t.instrument]).join(' · ') || 'Dundun · Sangban · Kenkeni'}<small>{displayedRhythm?.tracks.some(t => t.instrument === 'djembe') ? 'Djembe · Tomáš Marek / AfroPlayer' : 'Reálne nahrávky bubnov · JIMMYJAMES112 / Freesound · CC0'}</small></span></div>
+      <footer className="studio-footer"><div><img src={asset('icons/djembe.svg')} alt="" /><span>{displayedRhythm?.tracks.map(t => instrumentNames[t.instrument]).join(' · ') || 'Dundun · Sangban · Kenkeni'}<small>{displayedRhythm?.tracks.some(t => t.instrument === 'djembe') ? 'AfroPlayer' : 'Reálne nahrávky bubnov · JIMMYJAMES112 / Freesound · CC0'}</small></span></div>
         <span>Vyrobené pre rytmus.<small>JavAfro / web</small></span></footer>
     </main>
   </div>;

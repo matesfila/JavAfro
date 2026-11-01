@@ -1,4 +1,4 @@
-# Djembe – Tomáš Marek / AfroPlayer
+# Djembe / AfroPlayer
 
 29 pôvodných nahrávok z `C:/Projects/AfroPlayer/resources/samples/djembe_tomasmarek`.
 Priradenie bas/tón/slap/tlmený tón a ich zosilnenie vychádza zo starého

@@ -9,6 +9,10 @@ rovnakými rytmami a samplami, nepretržitým prehrávaním, tempom, humanizáci
 a dialectom. Spustenie: `cd web`, `npm ci`, `npm run dev`.
 Nepotrebuje Java backend; produkčný build vytvorí statický adresár `web/dist`.
 
+Na stiahnutie offline verzie na iPhone z vlastného PC spusti v `web` príkaz
+`npm run phone`. Podrobný postup lokálneho HTTPS, inštalácie certifikátu a
+pridania na plochu je v [návode pre telefóny](web/README.md#telefóny).
+
 ## Samostatný PomodoroTimer
 
 PomodoroTimer bol presunutý do `C:/Projects/PomodoroTimer`. Je to nezávislý Maven projekt

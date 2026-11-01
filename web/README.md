@@ -75,10 +75,78 @@ cez Fontsource pod SIL Open Font License (licencie v príslušných npm balíkoc
 
 ## Telefóny
 
+### Stiahnutie z vlastného PC na iPhone
+
+Nepotrebuješ verejný hosting. Na PC spusti:
+
+```powershell
+cd C:\Projects\JavAfro\web
+npm run phone
+```
+
+Príkaz zostaví produkčnú PWA a spustí dva lokálne servery: inštalačnú stránku
+na HTTP porte **4180** a prehrávač na HTTPS porte **4181**. iPhone aj PC musia byť
+na rovnakej Wi-Fi. V termináli vyber adresu bežného Wi-Fi/LAN adaptéra,
+napríklad `http://192.168.1.66:4180/`; virtuálne adaptéry sa na telefóne nepoužívajú.
+
+1. Otvor túto **HTTP inštalačnú adresu v Safari**. Stránka obsahuje celý postup.
+2. Stiahni certifikát **JavAfro Local CA**, ktorý vygeneroval tvoj PC.
+3. V Nastaveniach iPhone otvor **Profil stiahnutý** (prípadne Všeobecné → VPN
+   a správa zariadenia) a profil nainštaluj.
+4. Otvor **Všeobecné → Informácie → Nastavenia dôveryhodnosti certifikátov**
+   a zapni plnú dôveru pre **JavAfro Local CA**.
+5. Vráť sa na inštalačnú stránku a otvor jej odkaz na **HTTPS aplikáciu**.
+6. V Safari zvoľ **Zdieľať → Pridať na plochu → Pridať**. Ak sa ponúka prepínač
+   otvorenia ako webovej aplikácie, zapni ho.
+7. Otvor novú ikonku djembe a počkaj na **Pripravené offline**. Až potom vypni PC.
+   Odporúčané overenie: zapni na telefóne režim lietadlo, aplikáciu zatvor a znovu
+   otvor z ikonky, vyber iný rytmus a stlač Play.
+
+Ručné povolenie dôvery je požiadavka iOS pre vlastný lokálny certifikát:
+[postup Apple](https://support.apple.com/en-gb/102390). HTTP adresa počítača
+samotná offline PWA neumožňuje; HTTPS nevyžaduje verejný internetový server.
+Ak Safari ukazuje varovanie certifikátu, neobchádzaj ho; skontroluj inštaláciu,
+plnú dôveru a správnu IP adresu. Odtlačok SHA-256 verejného certifikátu je v termináli
+aj na inštalačnej stránke.
+
+Súkromné kľúče a certifikáty zostávajú v ignorovanom **`web/.local/phone/`**.
+Server neposkytuje súkromné kľúče a nemení dôveryhodné certifikáty Windows.
+Celý tento priečinok nezdieľaj; telefón potrebuje iba verejný `javafro-ca.cer`.
+CA platí rok, serverový certifikát 90 dní; serverový certifikát sa pri ďalšom
+spustení automaticky obnoví alebo prispôsobí novej IP, s rovnakou CA.
+Ak vyprší CA, treba vytvoriť novú sadu a nahradiť profil na iPhone. Profil môžeš
+odstrániť v správe zariadenia, keď už lokálny prenos nepotrebuješ.
+
+Script používa OpenSSL z Git for Windows (na tomto PC `C:/usr/Git/usr/bin/openssl.exe`),
+prípadne z PATH alebo premennej `JAVAFRO_OPENSSL`. Žiadne certifikáty neposiela
+externej službe. Ak Windows zobrazí firewall dialóg, na spojenie z iPhone potrebuješ
+povoliť Node pre vlastnú súkromnú sieť. Script firewall automaticky nemení.
+Pri guest Wi-Fi s izoláciou klientov sa telefón s PC nemusí spojiť.
+
+### Offline dáta a aktualizácie
+
+Každý produkčný build vytvorí manifest a service worker `dist/sw.js`. Ten uloží
+všetky JS/CSS/fonty, ikony, všetky YAML a všetky WAV vrátane 29 djembe samplov.
+Stav **Pripravené offline** sa zobrazí až po overení úplnej cache. Pri zlyhaní
+je dostupné opakovanie; neúplná nová verzia nenahradí funkčnú starú verziu.
+Úpravy vlastného YAML si naďalej ulož tlačidlom **Uložiť** do Súborov.
+
+Na aktualizáciu spusti na PC znovu `npm run phone` a otvor aplikáciu na telefóne
+pri zapnutom PC. Nová verzia sa stiahne na pozadí a zobrazí sa upozornenie.
+Prehrávanie sa nepreruší; nová verzia sa použije po zatvorení všetkých okien
+JavAfro (vrátane Safari tabu) a opätovnom otvorení. Pri zmene IP treba na nové
+stiahnutie otvoriť novú HTTPS adresu zo servera; pôvodná offline inštalácia tým
+nezíska novú adresu automaticky.
+
+Safari/iOS môže dáta aplikácie časom odstrániť, napríklad pri nedostatku miesta
+alebo ručnom vymazaní dát. Vtedy treba aplikáciu znovu otvoriť pri zapnutom PC.
+Vývojový `npm run dev` service worker neinštaluje. Na PC možno PWA otestovať cez
+`npm run build` a `npm run preview` na `localhost`, ktorý prehliadač povoľuje aj bez HTTPS.
+
 Rozhranie má mobilné rozloženie a zvuk sa aktivuje priamo kliknutím na Play,
 čo je potrebné aj v Safari na iOS. Ak systém preruší AudioContext, prehrávanie
 sa zastaví a zobrazí výzvu na opätovné Play. Spoľahlivé hranie na zamknutom
-telefóne alebo na pozadí sa negarantuje. Táto verzia ešte nemá PWA ani offline cache.
+telefóne alebo na pozadí sa negarantuje.
 Testy v prehliadači na počítači nenahrádzajú overenie na fyzickom iPhone.
 
 Automatické testy kontrolujú všetky zdieľané YAML, pravidlá taktu, dialect,
