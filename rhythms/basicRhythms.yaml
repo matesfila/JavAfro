@@ -1,0 +1,22 @@
+
+Djole:
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+
+  tracks:
+    djembe:     "d.tt..s."
+    dundun:     "x.......x.x....."
+    sangban:    "....x.......x..."
+    kensereni:  "..xx..xx..xx..xx"
+
+
+Soko:
+  timeSignature: "12/8"
+  stepsPerBeat: 3
+  dialect: [0, 0.21, 0]
+
+  tracks:
+    djembe:     "s.ts..s.ts.."
+    dundun:     "x....xx.xx.x|x.......xx.x"
+    sangban:    "......xx.xx.|.........xx."
+    kensereni:  "...xx....xx.|...xx....xx."

@@ -38,6 +38,43 @@ public class YamlFileTransferHandlerTest {
     }
 
     @Test
+    public void caretSelectsRhythmAndUpdatesControlsWithoutResettingSameRhythm() throws Exception {
+        String yaml = "First:\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: 'd.tt..s.'}\n"
+                + "Second:\n  bpm: 140\n  timeSignature: '12/8'\n  tracks: {djembe: 'd..t..s.....'}\n";
+        SwingUtilities.invokeAndWait(() -> {
+            var panel = new RhythmPlayerPanel(yaml);
+            var text = editor(panel);
+            var tempo = (JSlider) named(panel, "tempoSlider");
+            var humanize = (JSlider) named(panel, "humanizeSlider");
+            assertEquals(90, tempo.getValue());
+            tempo.setValue(107);
+            humanize.setValue(37);
+            text.setCaretPosition(yaml.indexOf("d.tt"));
+            assertEquals(107, tempo.getValue());
+            text.setCaretPosition(yaml.indexOf("Second:"));
+            assertEquals(140, tempo.getValue());
+            assertEquals(37, humanize.getValue());
+            assertNull(named(panel, "dialectPulse4"));
+            assertNotNull(named(panel, "dialectPulse3"));
+            assertEquals("Pripravené · Second", ((JLabel) named(panel, "playbackStatus")).getText());
+            text.setCaretPosition(0);
+            assertEquals(90, tempo.getValue());
+            assertNotNull(named(panel, "dialectPulse4"));
+        });
+    }
+
+    private Component named(Container parent, String name) {
+        for (Component child : parent.getComponents()) {
+            if (name.equals(child.getName())) return child;
+            if (child instanceof Container nested) {
+                Component found = named(nested, name);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    @Test
     public void emptyEditorAcceptsDroppedYamlWithSpacesAndKeepsTextPaste() throws Exception {
         var yaml = temporary.newFile("Môj rytmus.YML");
         String source = "Test:\n  bpm: 123\n  tracks:\n    dundun: x.......\n";

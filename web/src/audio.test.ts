@@ -31,6 +31,24 @@ beforeEach(() => {
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('audio lifecycle', () => {
+  it('replaces active playback and ignores an older sample load after a newer Play', async () => {
+    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
+    expect(await engine.start(rhythm)).toBe(true);
+    const oldSources = [...context.sources];
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    vi.stubGlobal('fetch', vi.fn(async () => { await gate; return { ok: true, arrayBuffer: async () => new ArrayBuffer(8) }; }));
+    const djembe = parseRhythm('dj:\n  stepsPerBeat: 4\n  tracks: {djembe: "dts............."}');
+    const superseded = engine.start(djembe);
+    expect(oldSources.every(source => source.stop.mock.calls.length === 1)).toBe(true);
+    expect(await engine.start(rhythm)).toBe(true);
+    const currentSourceCount = context.sources.length;
+    release();
+    expect(await superseded).toBe(false);
+    expect(context.sources.length).toBe(currentSourceCount);
+    engine.dispose();
+  });
+
   it('loads djembe after playing an ordinary drum, then reuses the decoded multisamples', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
     await engine.start(rhythm);

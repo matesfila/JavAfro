@@ -1,4 +1,4 @@
-import { parseDocument } from 'yaml';
+import { isMap, parseDocument } from 'yaml';
 import { supportsNote } from './sounds';
 import { config } from './config';
 
@@ -47,14 +47,34 @@ function pattern(value: unknown, stepsPerBar: number, instrument: Instrument): s
 
 /** Same meter, subdivision and validation rules as the Java RhythmLoader. */
 export function parseRhythm(source: string, defaultBpm = config.initialTempo): Rhythm {
+  return parseRhythmEntries(source, defaultBpm)[0].rhythm;
+}
+
+export function parseRhythmAtCaret(source: string, caretOffset: number, defaultBpm = config.initialTempo): Rhythm {
+  const entries = parseRhythmEntries(source, defaultBpm);
+  let selected = entries[0].rhythm;
+  for (const entry of entries) {
+    if (entry.offset > caretOffset) break;
+    selected = entry.rhythm;
+  }
+  return selected;
+}
+
+export function parseRhythmEntries(source: string, defaultBpm = config.initialTempo): { rhythm: Rhythm; offset: number }[] {
   if (source.length > 3 * 1024 * 1024) throw new Error('YAML je príliš veľký (limit 3 MB).');
   const document = parseDocument(source, { version: '1.1', uniqueKeys: true });
   if (document.errors.length) throw new Error(document.errors[0].message);
   const definitions = record(document.toJS({ maxAliasCount: 50 }), 'YAML');
-  const ids = Object.keys(definitions);
-  if (ids.length !== 1) throw new Error('Editor musí obsahovať práve jeden rytmus.');
-  const id = text(ids[0], 'Identifikátor');
-  const data = record(definitions[id], id);
+  if (!isMap(document.contents) || !document.contents.items.length) throw new Error('YAML musí obsahovať aspoň jeden rytmus.');
+  return document.contents.items.map(pair => {
+    const id = text((pair.key as { value?: unknown }).value, 'Identifikátor');
+    const offset = (pair.key as { range?: number[] }).range?.[0] ?? 0;
+    return { rhythm: parseDefinition(id, definitions[id], defaultBpm), offset };
+  });
+}
+
+function parseDefinition(id: string, definition: unknown, defaultBpm: number): Rhythm {
+  const data = record(definition, id);
   keys(data, ['bpm', 'timeSignature', 'stepsPerBeat', 'dialect', 'tracks', 'legacy'], id);
   const bpm = integer(data.bpm === undefined ? defaultBpm : data.bpm, 'BPM');
   const timeSignature = data.timeSignature === undefined ? '4/4' : text(data.timeSignature, 'Metrum');

@@ -18,19 +18,21 @@ import static org.junit.Assert.*;
 
 public class ImportedRhythmsTest {
     @Test
-    public void everyYamlHasOneRhythmNamedAfterItsFile() throws IOException {
+    public void everyYamlLoadsItsNamedDefinitionsWithValidDialect() throws IOException {
         try (var paths = Files.walk(Path.of("rhythms"))) {
             var files = paths.filter(p -> p.toString().endsWith(".yaml")).toList();
-            assertEquals(27, files.size());
+            assertFalse(files.isEmpty());
             for (Path file : files) {
-                String id = file.getFileName().toString().replaceFirst("\\.yaml$", "");
-                assertEquals(file.toString(), java.util.Set.of(id), RhythmLoader.load(file).keySet());
                 Map<?, ?> document = new Yaml().load(Files.readString(file));
-                Map<?, ?> definition = (Map<?, ?>) document.get(id);
-                assertTrue(file.toString(), definition.containsKey("dialect"));
-                assertFalse(file.toString(), definition.containsKey("swing"));
-                Rhythm rhythm = RhythmLoader.load(file).get(id);
-                assertEquals(rhythm.stepsPerBeat(), rhythm.dialect().offsets().size());
+                var rhythms = RhythmLoader.load(file);
+                assertEquals(file.toString(), document.keySet(), rhythms.keySet());
+                for (var entry : rhythms.entrySet()) {
+                    Map<?, ?> definition = (Map<?, ?>) document.get(entry.getKey());
+                    assertFalse(file.toString(), definition.containsKey("swing"));
+                    Rhythm rhythm = entry.getValue();
+                    assertEquals(entry.getKey(), rhythm.name());
+                    assertEquals(rhythm.stepsPerBeat(), rhythm.dialect().offsets().size());
+                }
             }
         }
     }

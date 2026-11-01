@@ -30,6 +30,22 @@ import java.util.Set;
 public final class RhythmLoader {
     private RhythmLoader() { }
 
+    /** Selects the last top-level rhythm key at or before the caret; leading text selects the first. */
+    public static Rhythm atCaret(String source, int caretOffset, int defaultBpm) {
+        var rhythms = load(new java.io.ByteArrayInputStream(source.getBytes(java.nio.charset.StandardCharsets.UTF_8)), defaultBpm);
+        LoaderOptions options = new LoaderOptions();
+        options.setAllowDuplicateKeys(false);
+        var root = (org.yaml.snakeyaml.nodes.MappingNode) new Yaml(new SafeConstructor(options))
+                .compose(new java.io.StringReader(source));
+        int caretIndex = source.codePointCount(0, Math.max(0, Math.min(caretOffset, source.length())));
+        String selected = rhythms.keySet().iterator().next();
+        for (var tuple : root.getValue()) {
+            if (tuple.getKeyNode().getStartMark().getIndex() > caretIndex) break;
+            selected = ((org.yaml.snakeyaml.nodes.ScalarNode) tuple.getKeyNode()).getValue();
+        }
+        return rhythms.get(selected);
+    }
+
     public static Map<String, Rhythm> load(Path path) throws IOException {
         try (InputStream input = Files.newInputStream(path)) {
             return load(input);

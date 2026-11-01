@@ -41,6 +41,14 @@ aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 
 ## Ovládanie
 
+Jeden YAML súbor môže obsahovať viac rytmov pod samostatnými hlavnými kľúčmi.
+Po načítaní je vybraný prvý. Play prehrá definíciu pod kurzorom a zostáva dostupné
+aj počas hrania. Ďalšie stlačenie zastaví aktuálny rytmus a od začiatku spustí
+nový výber vrátane úprav YAML. Stop zruší aj rozpracované načítavanie samplov.
+Medzery a komentáre medzi definíciami
+patria predchádzajúcemu rytmu. Uloženie zachová celý súbor a zapíše ovládacie
+nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
+
 - Knižnica obsahuje všetky rytmy z koreňového `rhythms/` vrátane importovaných dát.
 - Vlastný YAML otvoríš tlačidlom alebo presunutím jedného súboru do okna.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.

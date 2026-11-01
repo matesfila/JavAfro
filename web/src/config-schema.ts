@@ -44,7 +44,7 @@ export function parseConfig(source: string) {
   return {
     humanize: number(playback, 'humanize', 21, 0, HUMANIZE_PERCENT_MAX), initialTempo, minimumTempo, maximumTempo,
     humanizeMaxOffsetMs: number(playback, 'humanizeMaxOffsetMs', DEFAULT_HUMANIZE_MAX_OFFSET_MS, 0, MAX_HUMANIZE_OFFSET_MS),
-    rhythmsDirectory: text(library, 'directory', 'rhythms'), initialRhythm: text(library, 'initialRhythm', 'djole.yaml'),
+    rhythmsDirectory: text(library, 'directory', 'rhythms'), initialRhythm: text(library, 'initialRhythm', 'basicRhythms.yaml'),
     editorFontSize: number(editor, 'fontSize', 16, 8, 72),
     windowWidth: number(window, 'width', 1200, 760, 10000), windowHeight: number(window, 'height', 900, 560, 10000),
   };

@@ -22,6 +22,14 @@ import java.util.concurrent.ExecutionException;
 
 /** YAML editor and live controls. UI operations run on the EDT. */
 public final class RhythmPlayerPanel extends JPanel {
+    interface PlaybackSession {
+        void play(Rhythm rhythm, PlaybackSettings settings) throws Exception;
+        void stop();
+        boolean isStopped();
+    }
+
+    private record PlaybackRequest(Rhythm rhythm, PlaybackSettings settings) {}
+    private final java.util.function.IntFunction<PlaybackSession> sessionFactory;
     private final RSyntaxTextArea editor = new RSyntaxTextArea(30, 100);
     private final JButton play = new JButton("Play");
     private final JButton stop = new JButton("Stop");
@@ -35,16 +43,35 @@ public final class RhythmPlayerPanel extends JPanel {
         if (settings != null) settings.setDialect(dialect);
     });
     private String dialectYaml;
-    private BeepSequencer sequencer;
+    private String selectedRhythmId;
+    private boolean loadingYaml;
+    private PlaybackSession sequencer;
     private SwingWorker<Void, Void> worker;
+    private PlaybackRequest pendingPlayback;
 
     public RhythmPlayerPanel(String yaml) {
         this(yaml, AppConfig.defaults());
     }
 
     public RhythmPlayerPanel(String yaml, AppConfig config) {
+        this(yaml, config, RhythmPlayerPanel::newSession);
+    }
+
+    private static PlaybackSession newSession(int humanizeMaxOffsetMs) {
+        BeepSequencer sequencer = new BeepSequencer(humanizeMaxOffsetMs);
+        return new PlaybackSession() {
+            public void play(Rhythm rhythm, PlaybackSettings settings) throws Exception {
+                sequencer.playContinuously(rhythm, settings);
+            }
+            public void stop() { sequencer.stop(); }
+            public boolean isStopped() { return sequencer.isStopped(); }
+        };
+    }
+
+    RhythmPlayerPanel(String yaml, AppConfig config, java.util.function.IntFunction<PlaybackSession> sessionFactory) {
         super(new BorderLayout(0, 14));
         this.config = config;
+        this.sessionFactory = sessionFactory;
         tempo = new JSlider(config.minimumTempo(), config.maximumTempo(), config.initialTempo());
         humanize = new JSlider(0, 100, config.humanize());
         setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
@@ -113,7 +140,15 @@ public final class RhythmPlayerPanel extends JPanel {
             public void removeUpdate(DocumentEvent event) { update(); }
             public void changedUpdate(DocumentEvent event) { update(); }
             private void update() {
-                if (worker == null) play.setEnabled(!editor.getText().isBlank());
+                play.setEnabled(!editor.getText().isBlank());
+            }
+        });
+        editor.addCaretListener(event -> {
+            if (loadingYaml || worker != null || editor.getText().isBlank()) return;
+            try {
+                syncRhythm(RhythmLoader.atCaret(editor.getText(), editor.getCaretPosition(), config.initialTempo()));
+            } catch (IllegalArgumentException exception) {
+                status.setText("Neplatný YAML · " + exception.getMessage());
             }
         });
         setTransferHandler(fileDropHandler(getTransferHandler()));
@@ -140,17 +175,28 @@ public final class RhythmPlayerPanel extends JPanel {
 
     public static Rhythm parseRhythm(String yaml) {
         var rhythms = RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-        return singleRhythm(rhythms);
+        return firstRhythm(rhythms);
     }
 
     public static Rhythm parseRhythm(String yaml, int defaultBpm) {
         var rhythms = RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)), defaultBpm);
-        return singleRhythm(rhythms);
+        return firstRhythm(rhythms);
     }
 
-    private static Rhythm singleRhythm(java.util.Map<String, Rhythm> rhythms) {
-        if (rhythms.size() != 1) throw new IllegalArgumentException("Editor musí obsahovať práve jeden rytmus.");
+    private static Rhythm firstRhythm(java.util.Map<String, Rhythm> rhythms) {
         return rhythms.values().iterator().next();
+    }
+
+    private void syncRhythm(Rhythm rhythm) {
+        if (!editor.getText().equals(dialectYaml) || !rhythm.name().equals(selectedRhythmId)) {
+            tempo.setMaximum(Math.max(config.maximumTempo(), rhythm.bpm()));
+            tempo.setMinimum(Math.min(config.minimumTempo(), rhythm.bpm()));
+            tempo.setValue(rhythm.bpm());
+            dialectControls.setDialect(rhythm.dialect());
+            dialectYaml = editor.getText();
+            selectedRhythmId = rhythm.name();
+        }
+        status.setText("Pripravené · " + rhythm.name());
     }
 
     private void loadYaml(String yaml) {
@@ -163,14 +209,12 @@ public final class RhythmPlayerPanel extends JPanel {
             return;
         }
         Rhythm rhythm = parseRhythm(yaml, config.initialTempo());
-        editor.setText(yaml);
-        editor.setCaretPosition(0);
-        tempo.setMaximum(Math.max(config.maximumTempo(), rhythm.bpm()));
-        tempo.setMinimum(Math.min(config.minimumTempo(), rhythm.bpm()));
-        tempo.setValue(rhythm.bpm());
-        dialectControls.setDialect(rhythm.dialect());
-        dialectYaml = yaml;
-        status.setText("Pripravené · " + rhythm.name());
+        loadingYaml = true;
+        try {
+            editor.setText(yaml);
+            editor.setCaretPosition(0);
+            syncRhythm(rhythm);
+        } finally { loadingYaml = false; }
     }
 
     private void openYaml() {
@@ -196,25 +240,36 @@ public final class RhythmPlayerPanel extends JPanel {
     }
 
     private void startPlayback() {
-        if (worker != null) return;
         final Rhythm rhythm;
-        try { rhythm = parseRhythm(editor.getText(), config.initialTempo()); }
+        try { rhythm = RhythmLoader.atCaret(editor.getText(), editor.getCaretPosition(), config.initialTempo()); }
         catch (IllegalArgumentException exception) { showError(exception); return; }
-        if (!editor.getText().equals(dialectYaml)) {
-            dialectControls.setDialect(rhythm.dialect());
-            dialectYaml = editor.getText();
-        }
+        settings = null; // The previous worker keeps its own controls until stopped.
+        syncRhythm(rhythm);
         settings = new PlaybackSettings(tempo.getValue(), humanize.getValue(), dialectControls.value());
-        BeepSequencer session = new BeepSequencer(config.humanizeMaxOffsetMs());
-        PlaybackSettings controls = settings;
+        PlaybackRequest request = new PlaybackRequest(rhythm, settings);
+        if (worker != null) {
+            pendingPlayback = request; // Repeated clicks keep only the latest request.
+            status.setText("Prepínam · " + rhythm.name());
+            stop.setEnabled(true);
+            sequencer.stop();
+            return;
+        }
+        beginPlayback(request);
+    }
+
+    private void beginPlayback(PlaybackRequest request) {
+        Rhythm rhythm = request.rhythm();
+        PlaybackSession session = sessionFactory.apply(config.humanizeMaxOffsetMs());
+        PlaybackSettings controls = request.settings();
+        settings = controls;
         sequencer = session;
-        play.setEnabled(false);
+        play.setEnabled(!editor.getText().isBlank());
         stop.setEnabled(true);
         open.setEnabled(false);
         status.setText("Prehráva sa · " + rhythm.name());
         worker = new SwingWorker<>() {
             protected Void doInBackground() throws Exception {
-                session.playContinuously(rhythm, controls);
+                session.play(rhythm, controls);
                 return null;
             }
             protected void done() {
@@ -226,6 +281,12 @@ public final class RhythmPlayerPanel extends JPanel {
                 worker = null;
                 sequencer = null;
                 settings = null;
+                PlaybackRequest next = pendingPlayback;
+                pendingPlayback = null;
+                if (next != null) {
+                    beginPlayback(next);
+                    return;
+                }
                 play.setEnabled(!editor.getText().isBlank());
                 stop.setEnabled(false);
                 open.setEnabled(true);
@@ -238,6 +299,7 @@ public final class RhythmPlayerPanel extends JPanel {
 
     /** Stops audio without waiting for the background worker. Also used on window close. */
     public void stopPlayback() {
+        pendingPlayback = null;
         if (sequencer != null) {
             status.setText("Zastavujem…");
             stop.setEnabled(false);

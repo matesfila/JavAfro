@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { YamlEditor } from './Editor';
 import { OfflinePanel } from './OfflinePanel';
 import { AudioEngine } from './audio';
-import { parseRhythm, type CatalogEntry, type Rhythm } from './rhythm';
+import { parseRhythm, parseRhythmAtCaret, parseRhythmEntries, type CatalogEntry, type Rhythm } from './rhythm';
 import { type Controls } from './timing';
 import { config } from './config';
 
@@ -15,6 +15,8 @@ function DownloadIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="cu
 
 export function App() {
   const [source, setSource] = useState('');
+  const [caretOffset, setCaretOffset] = useState(0);
+  const caretRef = useRef(0);
   const [fileName, setFileName] = useState('rytmus.yaml');
   const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
   const [selected, setSelected] = useState('');
@@ -30,9 +32,11 @@ export function App() {
   const [controls, setControls] = useState<Controls>({ bpm: config.initialTempo, humanize: config.humanize, dialect: [0, 0, 0, 0] });
   const controlsRef = useRef(controls); controlsRef.current = controls;
   const syncedSource = useRef('');
+  const syncedRhythmId = useRef('');
   const playingSource = useRef('');
   const fileInput = useRef<HTMLInputElement>(null);
   const loadRequest = useRef(0);
+  const playRequest = useRef(0);
   const engine = useRef<AudioEngine | null>(null);
   const busy = isPlaying || isStarting;
   const displayedRhythm = playingRhythm ?? rhythm;
@@ -41,8 +45,10 @@ export function App() {
 
   function applySource(text: string, filename: string, selection = '') {
     const parsed = parseRhythm(text);
+    caretRef.current = 0; setCaretOffset(0);
     setSource(text); setFileName(filename); setSelected(selection); setRhythm(parsed); setValidation('');
     syncedSource.current = text;
+    syncedRhythmId.current = parsed.id;
     updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] });
     setMessage(`Pripravené · ${parsed.name}`);
   }
@@ -62,6 +68,7 @@ export function App() {
   useEffect(() => {
     let cancelled = false;
     engine.current = new AudioEngine(() => controlsRef.current, message => {
+      playRequest.current++;
       setMessage(message); setPlaying(false); setStarting(false); setPlayingRhythm(null); setBeat(-1);
     }, setBeat, config.humanizeMaxOffsetMs);
     fetch(asset('rhythms.json')).then(response => {
@@ -74,22 +81,24 @@ export function App() {
       if (initial) await loadLibrary(initial);
       else setMessage('Otvor YAML súbor a začni hrať.');
     }).catch(error => { if (!cancelled) setMessage(error.message); });
-    return () => { cancelled = true; loadRequest.current++; engine.current?.dispose(); };
+    return () => { cancelled = true; loadRequest.current++; playRequest.current++; engine.current?.dispose(); };
   }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!source.trim()) { setRhythm(null); setValidation(''); return; }
-      try { setRhythm(parseRhythm(source)); setValidation(''); }
+      try { setRhythm(parseRhythmAtCaret(source, caretOffset)); setValidation(''); }
       catch (error) { setRhythm(null); setValidation((error as Error).message); }
     }, 150);
     return () => clearTimeout(timeout);
-  }, [source]);
+  }, [source, caretOffset]);
 
   useEffect(() => {
-    if (rhythm && !busy && syncedSource.current !== source) {
+    if (rhythm && !busy && (syncedSource.current !== source || syncedRhythmId.current !== rhythm.id)) {
       updateControls({ bpm: rhythm.bpm, humanize: controlsRef.current.humanize, dialect: [...rhythm.dialect] });
       syncedSource.current = source;
+      syncedRhythmId.current = rhythm.id;
+      setMessage(`Pripravené · ${rhythm.name}`);
     }
   }, [rhythm, source, busy]);
 
@@ -107,35 +116,44 @@ export function App() {
   }
 
   async function play() {
-    if (busy || isLoading || !source.trim()) return;
+    if (isLoading || !source.trim()) return;
+    const request = ++playRequest.current;
     try {
-      const parsed = parseRhythm(source);
-      if (syncedSource.current !== source) {
+      const parsed = parseRhythmAtCaret(source, caretRef.current);
+      if (syncedSource.current !== source || syncedRhythmId.current !== parsed.id) {
         updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] });
         syncedSource.current = source;
+        syncedRhythmId.current = parsed.id;
       }
-      setStarting(true); setPlayingRhythm(parsed); setMessage('Pripravujem zvuky bubnov…');
+      setPlaying(false); setStarting(true); setBeat(-1); setPlayingRhythm(parsed); setMessage('Pripravujem zvuky bubnov…');
       playingSource.current = source;
       const started = await engine.current!.start(parsed);
+      if (request !== playRequest.current) return;
       if (started) { setPlaying(true); setMessage(`Prehráva sa · ${parsed.name}`); }
     } catch (error) {
+      if (request !== playRequest.current) return;
       engine.current?.stop(); setPlayingRhythm(null); setPlaying(false);
       setMessage(`Prehrávanie sa nepodarilo: ${(error as Error).message}`);
-    } finally { setStarting(false); }
+    } finally { if (request === playRequest.current) setStarting(false); }
   }
 
   function stop() {
+    playRequest.current++;
     engine.current?.stop(); setPlaying(false); setStarting(false); setPlayingRhythm(null); setBeat(-1);
     setMessage('Zastavené');
   }
 
   async function save() {
     try {
-      const parsed = parseRhythm(source);
+      const selected = parseRhythmAtCaret(source, caretRef.current);
+      const parsed = busy && playingRhythm
+        ? parseRhythmEntries(source).find(entry => entry.rhythm.id === playingRhythm.id)?.rhythm : selected;
+      if (!parsed) throw new Error('Prehrávaný rytmus už nie je v editore. Pred uložením stlač Stop.');
+      const useControls = busy || (syncedSource.current === source && syncedRhythmId.current === parsed.id);
       const { parseDocument } = await import('yaml');
       const document = parseDocument(source, { version: '1.1' });
-      document.setIn([parsed.id, 'bpm'], controlsRef.current.bpm);
-      document.setIn([parsed.id, 'dialect'], controlsRef.current.dialect);
+      document.setIn([parsed.id, 'bpm'], useControls ? controlsRef.current.bpm : parsed.bpm);
+      document.setIn([parsed.id, 'dialect'], useControls ? controlsRef.current.dialect : parsed.dialect);
       const exported = document.toString();
       const url = URL.createObjectURL(new Blob([exported], { type: 'application/yaml;charset=utf-8' }));
       const link = documentNode(url, fileName); link.click(); link.remove();
@@ -182,7 +200,9 @@ export function App() {
           <input ref={fileInput} type="file" accept=".yaml,.yml,application/yaml,text/yaml" hidden onChange={event => {
             const file = event.target.files?.[0]; if (file) void openFile(file); event.target.value = '';
           }} />
-          <div className="editor-wrap"><YamlEditor value={source} onChange={setSource} />
+          <div className="editor-wrap"><YamlEditor value={source} onChange={setSource} caretOffset={caretOffset} onCaretChange={offset => {
+            caretRef.current = offset; setCaretOffset(offset);
+          }} />
             {!source && <div className="editor-placeholder">Tvoj ďalší rytmus začína tu.<small>Otvor YAML súbor alebo ho presuň do okna.</small></div>}
           </div>
           <div className={`editor-status ${validation ? 'invalid' : ''}`} role="status"><span className="status-dot" />
@@ -196,7 +216,7 @@ export function App() {
           <div className="rhythm-summary"><span className="eyebrow">PRÁVE V ŠTÚDIU</span><h3>{displayedRhythm?.name ?? 'Tvoj rytmus'}</h3>
             <div className="rhythm-tags"><span>{displayedRhythm?.timeSignature ?? '—'} takt</span><span>{displayedRhythm?.stepsPerBeat ?? '—'} pulzy / beat</span></div>
           </div>
-          <div className="transport"><button className="button play" onClick={() => void play()} disabled={busy || !rhythm || isLoading}><PlayIcon />{isStarting ? 'Načítavam…' : 'Play'}</button>
+          <div className="transport"><button className="button play" onClick={() => void play()} disabled={!source.trim() || isLoading}><PlayIcon />{isStarting ? 'Načítavam…' : 'Play'}</button>
             <button className="button stop" onClick={stop} disabled={!busy}><span className="stop-square" />Stop</button></div>
           <div className={`playback-status ${isPlaying ? 'playing' : ''}`} role="status"><span className="status-dot" /><span>{message}</span></div>
           <div className="divider" />

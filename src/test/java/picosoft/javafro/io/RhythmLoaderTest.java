@@ -65,6 +65,22 @@ public class RhythmLoaderTest {
     }
 
     @Test
+    public void selectsFirstOrRhythmAtCaretUsingYamlNodesAndUnicodeOffsets() {
+        String first = "# 🥁 úvod\n\"Prvý rytmus\":\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: 'd.tt..s.'}\n";
+        String second = "\n# medzi rytmami\n'Druhý: rytmus':\n  bpm: 140\n  timeSignature: '12/8'\n  tracks: {djembe: 'd..t..s.....'}\n";
+        String source = first + second;
+        assertEquals("Prvý rytmus", picosoft.javafro.ui.RhythmPlayerPanel.parseRhythm(source, 116).name());
+        assertEquals("Prvý rytmus", RhythmLoader.atCaret(source, 0, 116).name());
+        assertEquals("Prvý rytmus", RhythmLoader.atCaret(source, source.indexOf("# medzi"), 116).name());
+        assertEquals("Druhý: rytmus", RhythmLoader.atCaret(source, source.indexOf("'Druhý"), 116).name());
+        assertEquals(140, RhythmLoader.atCaret(source, source.length(), 116).bpm());
+        assertEquals(3, RhythmLoader.atCaret(source, source.length(), 116).dialect().offsets().size());
+        String flow = "{First: {tracks: {dundun: 'x.......'}}, Second: {tracks: {dundun: '....x...'}}}";
+        assertEquals("Second", RhythmLoader.atCaret(flow, flow.indexOf("Second"), 116).name());
+        assertThrows(IllegalArgumentException.class, () -> RhythmLoader.atCaret(source + first, 0, 116));
+    }
+
+    @Test
     public void missingTempoUsesGlobalDefaultAndMissingDialectUsesZeros() throws Exception {
         String minimal = "Test:\n  stepsPerBeat: 4\n  tracks:\n    djembe: 'd.tt..s.'\n";
         Rhythm rhythm = RhythmLoader.load(new ByteArrayInputStream(minimal.getBytes(StandardCharsets.UTF_8)), 93).get("Test");
@@ -107,7 +123,7 @@ public class RhythmLoaderTest {
 
     @Test
     public void diskDjoleIsValid() throws Exception {
-        Rhythm rhythm = RhythmLoader.load(Path.of("rhythms/djole.yaml")).get("djole");
+        Rhythm rhythm = RhythmLoader.load(Path.of("rhythms/basicRhythms.yaml")).get("Djole");
         var dundun = rhythm.tracks().stream().filter(track -> track.instrument() instanceof DundunInstrument)
                 .findFirst().orElseThrow();
         assertEquals("x.......x.x.....", dundun.pattern());

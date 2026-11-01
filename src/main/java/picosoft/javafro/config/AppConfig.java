@@ -17,7 +17,7 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, int initialTempo,
                         Path rhythmsDirectory, String initialRhythm, int editorFontSize,
                         int windowWidth, int windowHeight) {
     public static AppConfig defaults() {
-        return new AppConfig(21, AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS, 116, 20, 300, Path.of("rhythms"), "djole.yaml", 16, 1200, 900);
+        return new AppConfig(21, AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS, 116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900);
     }
 
     public static AppConfig load() throws IOException {

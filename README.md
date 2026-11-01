@@ -49,7 +49,7 @@ pridania na plochu je v [návode pre telefóny](web/README.md#telefóny).
 
 ```powershell
 mvn package
-& "$env:JAVA_HOME/bin/java.exe" -cp target/JavAfro.jar picosoft.javafro.AfroJavaPlayer "rhythms/djole-samples.yaml"
+& "$env:JAVA_HOME/bin/java.exe" -cp target/JavAfro.jar picosoft.javafro.AfroJavaPlayer "rhythms/basicRhythms.yaml"
 ```
 
 Voliteľný argument je cesta k jednému YAML súboru na disku (UTF-8).
@@ -62,7 +62,14 @@ zostane doterajší obsah zachovaný. Bežné kopírovanie a vkladanie textu fun
 Editor RSyntaxTextArea zvýrazňuje YAML syntax,
 zobrazuje čísla riadkov a pri stlačení Tab odsádza dvoma medzerami.
 Má veľkú plochu s neproporcionálnym
-písmom a posuvníkmi pre dlhšie zápisy. Musí obsahovať práve jeden rytmus.
+písmom a posuvníkmi pre dlhšie zápisy. Jeden súbor môže obsahovať viac rytmov
+ako samostatné hlavné YAML kľúče. Play prehrá rytmus, v ktorého definícii je kurzor.
+Text pred prvým kľúčom vyberá prvý rytmus; medzera alebo komentár medzi definíciami
+patrí predchádzajúcemu rytmu. Presun kurzora počas hrania neprepína zvuk.
+Play zostáva dostupné: ďalšie stlačenie zastaví aktuálny rytmus a od začiatku
+spustí definíciu pod kurzorom vrátane úprav YAML. Pri rýchlych kliknutiach platí
+posledný výber; Stop zruší aj čakajúce spustenie. Súbor z argumentu príkazového riadka
+sa iba načíta, s kurzorom na začiatku. Prehrávanie sa spustí až po stlačení Play.
 
 **Play** načíta aktuálny YAML a prehráva základné patterny nepretržite až po **Stop**.
 Posuvníky **Tempo** a **Humanize** fungujú aj počas prehrávania bez reštartovania
@@ -171,7 +178,7 @@ vrátane dozvuku. Nepotrebuje internet ani externý audio prehrávač.
 V YAML použi `dundun`, `sangban` a `kensereni`; tieto identifikátory teraz
 načítajú nahraté sample. Syntetické varianty sú naďalej dostupné cez Java triedy
 v balíku `picosoft.javafro.instruments.synth`. V GUI otvor
-`rhythms/djole-samples.yaml` na vyskúšanie všetkých troch.
+`rhythms/basicRhythms.yaml` a vyber Djole na vyskúšanie všetkých troch.
 
 Nahrávky sú od JIMMYJAMES112 na Freesound pod licenciou CC0. Sangban je drevený
 bubon; dundunba a kenkeni sú podľa autora repliky zo sudov s hovädzou kožou.
@@ -193,7 +200,7 @@ tempo musí byť kladné. Rhythm si uloží nemennú kópiu zoznamu trackov.
 Počet opakovaní a humanizácia patria k prehrávaniu. `playPattern(rhythm)` prehrá
 rytmus raz bez humanizácie; `playPattern(rhythm, 32)` ho prehrá 32-krát bez humanizácie.
 
-Rytmy možno definovať v YAML (ukážka `src/main/resources/rhythms/djole.yaml`):
+Rytmy možno definovať v YAML (ukážka `rhythms/basicRhythms.yaml`):
 
 ```yaml
 Djole:
@@ -265,8 +272,8 @@ variáciou (index od nuly), ktorý možno vložiť do nového `Rhythm`.
 V `src/main/resources/rhythms/imported` je 23 YAML súborov z 20 pôvodných Ruby
 súborov. Kon Masi, Kon Maja a Soli Masi majú samostatné súbory
 `Kon_Masi.yaml`, `Kon_Maja.yaml` a `Soli_Masi.yaml`.
-Ručné definície Djole a Soko sú v `rhythms/djole.yaml` a `rhythms/soko.yaml`
-s kľúčmi `djole` a `soko`.
+Ručné definície Djole a Soko sú spolu v `rhythms/basicRhythms.yaml`
+s kľúčmi `Djole` a `Soko`.
 Načítanie napríklad:
 
 ```java

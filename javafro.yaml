@@ -10,7 +10,7 @@ playback:
 
 library:
   directory: rhythms # relatívne voči tomuto konfiguračnému súboru
-  initialRhythm: djole.yaml # prvý rytmus vo webovej verzii
+  initialRhythm: basicRhythms.yaml # prvý rytmus vo webovej verzii
 
 editor:
   fontSize: 16

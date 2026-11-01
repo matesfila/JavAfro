@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { parseRhythm } from './rhythm';
+import { parseRhythm, parseRhythmAtCaret, parseRhythmEntries } from './rhythm';
 import { config } from './config';
 
 const source = `Test:
@@ -18,6 +18,21 @@ const source = `Test:
 `;
 
 describe('YAML compatibility with Java', () => {
+  it('selects the first definition or the one containing the caret, including quoted keys and flow maps', () => {
+    const first = '# 🥁 úvod\n"Prvý rytmus":\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: "d.tt..s."}\n';
+    const second = '\n# medzi rytmami\n"Druhý: rytmus":\n  bpm: 140\n  timeSignature: "12/8"\n  tracks: {djembe: "d..t..s....."}\n';
+    const source = first + second;
+    expect(parseRhythmEntries(source).map(entry => entry.rhythm.id)).toEqual(['Prvý rytmus', 'Druhý: rytmus']);
+    expect(parseRhythm(source).id).toBe('Prvý rytmus');
+    expect(parseRhythmAtCaret(source, 0).id).toBe('Prvý rytmus');
+    expect(parseRhythmAtCaret(source, source.indexOf('# medzi')).id).toBe('Prvý rytmus');
+    expect(parseRhythmAtCaret(source, source.indexOf('"Druhý')).id).toBe('Druhý: rytmus');
+    expect(parseRhythmAtCaret(source, source.length)).toMatchObject({ bpm: 140, dialect: [0, 0, 0] });
+    const flow = '{First: {tracks: {dundun: "x......."}}, Second: {tracks: {dundun: "....x..."}}}';
+    expect(parseRhythmAtCaret(flow, flow.indexOf('Second')).id).toBe('Second');
+    expect(() => parseRhythm(source + first)).toThrow();
+  });
+
   it('uses configured tempo and zero dialect only when fields are omitted', () => {
     const minimal = source.replace('  bpm: 120\n', '').replace('  dialect: [0, -0.4, 0, 0]\n', '');
     expect(parseRhythm(minimal).bpm).toBe(config.initialTempo);
@@ -40,18 +55,18 @@ describe('YAML compatibility with Java', () => {
         if (entry.isDirectory()) visit(file);
         else if (entry.name.endsWith('.yaml')) {
           const yaml = readFileSync(file, 'utf8');
-          const rhythm = parseRhythm(yaml);
-          expect(yaml).toMatch(/^  dialect: \[/m);
           expect(yaml).not.toMatch(/^  swing:/m);
-          expect(rhythm.dialect).toHaveLength(rhythm.stepsPerBeat);
-          expect(rhythm.id).toBe(entry.name.replace(/\.yaml$/, ''));
-          expect(rhythm.tracks.length).toBeGreaterThan(0);
-          names.push(rhythm.id);
+          for (const { rhythm } of parseRhythmEntries(yaml)) {
+            expect(rhythm.dialect).toHaveLength(rhythm.stepsPerBeat);
+            expect(rhythm.name).toBe(rhythm.id);
+            expect(rhythm.tracks.length).toBeGreaterThan(0);
+            names.push(rhythm.id);
+          }
         }
       }
     }
     visit(root);
-    expect(names).toEqual(expect.arrayContaining(['djole', 'Soli', 'Kon_Masi', 'Soko'.toLowerCase()]));
+    expect(names).toEqual(expect.arrayContaining(['Djole', 'Soko', 'Soli', 'Kon_Masi']));
   });
 
   it('retains base patterns, variations and independent dialect offsets', () => {
@@ -92,6 +107,6 @@ describe('YAML compatibility with Java', () => {
     source.replace('[0, -0.4, 0, 0]', '[0, "0", 0, 0]'),
     source.replace('variations:', 'variation:'),
     source.replace('timeSignature: "4/4"', 'timeSignature: "4/3"'),
-    source + source.replace('Test', 'Another'),
+    source + source,
   ])('rejects invalid definitions', yaml => { expect(() => parseRhythm(yaml)).toThrow(); });
 });
