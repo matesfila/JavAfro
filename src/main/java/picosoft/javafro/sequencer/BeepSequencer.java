@@ -13,9 +13,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Prehráva rytmické patterny viacerých trackov súčasne v zadanom tempe.
- * Každý znak patternu predstavuje jednu šestnástinu: {@code x} spustí úder
+ * Pri priamom prehrávaní patternu predstavuje každý znak jednu šestnástinu: {@code x} spustí úder
  * priradeného {@link Instrument}u a {@code .} predstavuje ticho. BPM určuje počet
  * štvrťových dôb za minútu, takže jedna pozícia trvá {@code 60 / (4 * BPM)} sekundy.
+ * Pri prehrávaní {@link Rhythm} určuje počet pozícií na beat jeho
+ * {@link Rhythm#stepsPerBeat()} (predvolene osminy). Oddeľovače taktov
+ * {@code |} nezaberajú čas.
  *
  * <p>Dĺžku jedného opakovania určuje najdlhší pattern. Kratšie patterny
  * sa počas neho cyklia a pri ďalšom opakovaní začnú všetky tracky od začiatku.
@@ -102,7 +105,7 @@ public final class BeepSequencer implements Sequencer {
         if (rhythm == null) {
             throw new IllegalArgumentException("Rhythm must not be null.");
         }
-        playPattern(rhythm.tracks(), repetitions, rhythm.bpm(), humanize);
+        playPattern(rhythm.tracks(), repetitions, rhythm.bpm(), humanize, rhythm.stepsPerBeat());
     }
 
     @Override
@@ -122,11 +125,16 @@ public final class BeepSequencer implements Sequencer {
 
     /**
      * Randomizes each hit independently by up to ±30 ms at 100, capped at a
-     * quarter of a sixteenth note. The range scales linearly from zero.
+     * quarter of a pattern step. The range scales linearly from zero.
      * Tempo stays fixed; starts before the beginning are clamped to zero.
      */
     @Override
     public void playPattern(List<? extends Track> tracks, int repetitions, int bpm, int humanize) throws LineUnavailableException {
+        playPattern(tracks, repetitions, bpm, humanize, 4);
+    }
+
+    private void playPattern(List<? extends Track> tracks, int repetitions, int bpm, int humanize,
+                             int stepsPerBeat) throws LineUnavailableException {
         if (humanize < 0 || humanize > 100) {
             throw new IllegalArgumentException("Humanize must be between 0 and 100.");
         }
@@ -135,18 +143,19 @@ public final class BeepSequencer implements Sequencer {
         }
         List<BeepTrack> validatedTracks = tracks.stream()
                 .map(track -> new BeepTrack(track.pattern(), track.instrument()))
+                .map(track -> new BeepTrack(track.pattern().replace("|", ""), track.instrument()))
                 .toList();
         if (repetitions <= 0 || bpm <= 0) {
             throw new IllegalArgumentException("Repetitions and BPM must be greater than zero.");
         }
-        long sixteenthNotesPerMinute = bpm * 4L;
-        if (AudioConstants.SAMPLE_RATE * 60L / sixteenthNotesPerMinute < 4) {
+        long stepsPerMinute = bpm * (long) stepsPerBeat;
+        if (AudioConstants.SAMPLE_RATE * 60L / stepsPerMinute < 4) {
             throw new IllegalArgumentException("BPM is too high to render an audible pulse at the current sample rate.");
         }
         int patternLength = validatedTracks.stream().mapToInt(track -> track.pattern().length()).max().orElseThrow();
 
         long maxOffset = Math.round(Math.min(AudioConstants.SAMPLE_RATE * 0.030,
-                AudioConstants.SAMPLE_RATE * 60.0 / sixteenthNotesPerMinute / 4) * humanize / 100.0);
+                AudioConstants.SAMPLE_RATE * 60.0 / stepsPerMinute / 4) * humanize / 100.0);
         AudioFormat format = AudioConstants.audioFormat();
         if (stopped) {
             return;
@@ -173,8 +182,8 @@ public final class BeepSequencer implements Sequencer {
                     }
                     // Carry fractional samples forward so rounding does not accumulate tempo drift.
                     long numerator = AudioConstants.SAMPLE_RATE * 60L + remainder;
-                    long pulseSamples = numerator / sixteenthNotesPerMinute;
-                    remainder = numerator % sixteenthNotesPerMinute;
+                    long pulseSamples = numerator / stepsPerMinute;
+                    remainder = numerator % stepsPerMinute;
 
                     for (BeepTrack track : validatedTracks) {
                         if (track.pattern().charAt(pulse % track.pattern().length()) == 'x') {

@@ -11,7 +11,8 @@ Rhythm rhythm = new Rhythm("Djole", tracks, 116);
 new BeepSequencer().playPattern(rhythm, 32, 70);
 ```
 
-Poradie parametrov je `name, tracks, bpm`.
+Poradie parametrov je `name, tracks, bpm`, voliteľne aj `TimeSignature` ako štvrtý parameter.
+Predvolené metrum je 4/4.
 Názov nesmie byť prázdny, zoznam musí obsahovať aspoň jeden nenulový track,
 tempo musí byť kladné. Rhythm si uloží nemennú kópiu zoznamu trackov.
 Počet opakovaní a humanizácia patria k prehrávaniu. `playPattern(rhythm)` prehrá
@@ -23,18 +24,88 @@ Rytmy možno definovať v YAML (ukážka `src/main/resources/rhythms/djole.yaml`
 Djole:
   name: "Djole"
   bpm: 116
+  timeSignature: "4/4"
   tracks:
-    dundun:    "x...xx.."
-    sangban:   "..x...x."
-    kensereni: "x.x.x.x."
+    dundun:    "x.......|x.x....."
+    sangban:   "....x...|....x..."
+    kensereni: "..xx..xx|..xx..xx"
 ```
 
 `RhythmLoader.load(Path)` alebo `RhythmLoader.load(InputStream)` v balíku
-`picosoft.javafro.io` vráti mapu rytmov podľa identifikátora (napr. `Djole`).
-Jeden súbor môže obsahovať viac rytmov. Povinné polia sú `name`, `bpm` a `tracks`;
+`picosoft.javafro.io` vráti mapu rytmov podľa identifikátora.
+Každý dodávaný súbor obsahuje jeden rytmus, ktorého hlavný kľúč sa presne zhoduje
+s názvom súboru bez prípony `.yaml` (vrátane veľkosti písmen).
+Povinné polia sú `name`, `bpm` a `tracks`;
 podporované nástroje sú `dundun`, `sangban` a `kensereni`.
+`timeSignature` je voliteľné, predvolene `"4/4"`. Podporované sú kladné metrá
+s menovateľom 4 alebo 8. V `Rhythm` každý znak `x` alebo `.` predstavuje osminu;
+`|` oddeľuje takty, nezaberá čas a nespúšťa zvuk. Každý takt musí byť úplný:
+
+- `4/4`: 8 znakov na takt, napr. `"x.......|x.x....."`.
+- `8/4`: 16 znakov na takt, napr. `"x.......x.x....."`.
+- `12/8`: 12 znakov na takt, napr. `"x..x..x..x.."`.
+
+V zložených osminových metrách (6/8, 9/8, 12/8 atď.) BPM označuje bodkovanú
+štvrťovú dobu: tri osminy na beat. Inde BPM označuje štvrťovú dobu: dve osminy
+na beat. Preto 4/4 aj 12/8 majú pri rovnakom BPM štyri beaty na takt.
+Tracky môžu mať rôzny počet celých taktov; kratšie sa cyklia.
+Pôvodné volania `playPattern(pattern, ...)` a `playPattern(tracks, ...)` zachovávajú
+šestnástinové časovanie; aj v nich je `|` iba oddeľovač bez časového trvania.
 Neznáme polia, nástroje, duplicitné kľúče a neplatné hodnoty vyvolajú chybu.
 Kompletné načítanie zo zdrojov a prehrávanie je v `AfroJavaPlayer`.
+
+### Variácie a import z AfroPlayer
+
+Track môže zostať reťazec alebo obsahovať základ a zoznam variácií:
+
+```yaml
+tracks:
+  dundun:
+    base: "x.......|x.x....."
+    variations:
+      - "xx.xxx.x|xx.xx.x."
+  sangban: "....x...|....x..."
+  kensereni: "..xx..xx|..xx..xx"
+```
+
+Bežné prehrávanie používa iba `base`. Alternatívy sú dostupné cez
+`track.variations()`; `BeepTrack.withVariation(index)` vytvorí track s vybranou
+variáciou (index od nuly), ktorý možno vložiť do nového `Rhythm`.
+
+V `src/main/resources/rhythms/imported` je 23 YAML súborov z 20 pôvodných Ruby
+súborov. Kon Masi, Kon Maja a Soli Masi majú samostatné súbory
+`Kon_Masi.yaml`, `Kon_Maja.yaml` a `Soli_Masi.yaml`.
+Ručné definície Djole a Soko sú v `rhythms/djole.yaml` a `rhythms/soko.yaml`
+s kľúčmi `djole` a `soko`.
+Načítanie napríklad:
+
+```java
+try (var input = AfroJavaPlayer.class.getResourceAsStream("/rhythms/imported/Djole.yaml")) {
+    Rhythm rhythm = RhythmLoader.load(input).get("Djole");
+    new BeepSequencer().playPattern(rhythm, 32, 40);
+}
+```
+
+Importované tracky obsahujú tri bubny; starý `kenken` je nový `kensereni`.
+Otvorené, zatvorené a pravdepodobnostné údery sú zjednotené na `x`, samostatný
+zvonček `b` sa v prehrateľnej časti vynecháva. Pôvodné symboly, ostatné nástroje,
+sekvencie, echauff časti, swing a väzby variácií sú bez zjednodušenia uložené
+v `legacy.definition`. Načítavač `legacy` akceptuje ako archív; neovplyvňuje prehrávanie.
+
+Voliteľné `stepsPerBeat` určuje počet krokov na beat (predvolene 2, pri zloženom
+osminovom metre 3). Hodnota 4 umožní šestnástinové delenie. Import ho spolu
+s metrom nastavuje tak, aby zachoval pôvodné BPM a časové pozície úderov;
+staré označenie metra preto nemusí byť rovnaké ako nové.
+Príklady: staré `8/4` používalo osem šestnástin na úsek, teda nové `2/4`
+so `stepsPerBeat: 4`; staré `12/8` zostáva `12/8` s tromi krokmi na beat.
+
+Podrobnosti, upozornenia a pôvodné zdrojové súbory sú v
+[správe o importe](docs/afroplayer-import/README.md).
+Prevod možno zopakovať príkazom (prepíše generované importy a ich archív):
+
+```powershell
+node tools/import-afroplayer.cjs C:/Projects/AfroPlayer/src/rhythms
+```
 
 ## Humanizácia patternov
 

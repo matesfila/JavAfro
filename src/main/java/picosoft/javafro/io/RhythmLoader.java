@@ -7,6 +7,7 @@ import org.yaml.snakeyaml.error.YAMLException;
 import picosoft.javafro.base.Instrument;
 import picosoft.javafro.base.Rhythm;
 import picosoft.javafro.base.Track;
+import picosoft.javafro.base.TimeSignature;
 import picosoft.javafro.instruments.DundunInstrument;
 import picosoft.javafro.instruments.KensereniInstrument;
 import picosoft.javafro.instruments.SangbanInstrument;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 /** Loads a YAML map of rhythm identifiers to rhythm definitions. */
@@ -64,7 +66,7 @@ public final class RhythmLoader {
     private static Rhythm rhythm(Object value) {
         Map<?, ?> definition = mapping(value, "Definition");
         for (Object key : definition.keySet()) {
-            if (!Set.of("name", "bpm", "tracks").contains(key)) {
+            if (!Set.of("name", "bpm", "tracks", "timeSignature", "stepsPerBeat", "legacy").contains(key)) {
                 throw new IllegalArgumentException("Unknown rhythm field: " + key);
             }
         }
@@ -73,16 +75,52 @@ public final class RhythmLoader {
             throw new IllegalArgumentException("BPM must be an integer.");
         }
         Map<?, ?> patterns = mapping(definition.get("tracks"), "Tracks");
+        TimeSignature timeSignature = definition.containsKey("timeSignature")
+                ? TimeSignature.parse(text(definition.get("timeSignature"), "Time signature"))
+                : new TimeSignature(4, 4);
+        int stepsPerBeat = timeSignature.stepsPerBeat();
+        if (definition.containsKey("stepsPerBeat")) {
+            if (!(definition.get("stepsPerBeat") instanceof Integer steps)) {
+                throw new IllegalArgumentException("Steps per beat must be an integer.");
+            }
+            stepsPerBeat = steps;
+        }
+        timeSignature.stepsPerBar(stepsPerBeat);
+        if (definition.containsKey("legacy")) {
+            mapping(definition.get("legacy"), "Legacy archive");
+        }
         var tracks = new ArrayList<Track>();
         for (var entry : patterns.entrySet()) {
             String instrument = text(entry.getKey(), "Instrument");
             try {
-                tracks.add(new BeepTrack(text(entry.getValue(), "Pattern"), instrument(instrument)));
+                Object patternValue = entry.getValue();
+                List<String> variations = new ArrayList<>();
+                if (patternValue instanceof Map<?, ?> details) {
+                    for (Object key : details.keySet()) {
+                        if (!Set.of("base", "variations").contains(key)) {
+                            throw new IllegalArgumentException("Unknown track field: " + key);
+                        }
+                    }
+                    patternValue = details.get("base");
+                    if (details.containsKey("variations")) {
+                        if (!(details.get("variations") instanceof List<?> alternatives)) {
+                            throw new IllegalArgumentException("Variations must be a list of patterns.");
+                        }
+                        for (Object alternative : alternatives) {
+                            String pattern = text(alternative, "Variation");
+                            timeSignature.validatePattern(pattern, stepsPerBeat);
+                            variations.add(pattern);
+                        }
+                    }
+                }
+                String base = text(patternValue, "Pattern");
+                timeSignature.validatePattern(base, stepsPerBeat);
+                tracks.add(new BeepTrack(base, instrument(instrument), variations));
             } catch (IllegalArgumentException exception) {
                 throw new IllegalArgumentException("Track '" + instrument + "': " + exception.getMessage(), exception);
             }
         }
-        return new Rhythm(name, tracks, bpm);
+        return new Rhythm(name, tracks, bpm, timeSignature, stepsPerBeat);
     }
 
     private static Instrument instrument(String id) {

@@ -1,0 +1,16 @@
+"Bolokonondo":
+  name: "Bolokonondo"
+  bpm: 120
+  timeSignature: "12/8"
+  stepsPerBeat: 3
+  tracks:
+    dundun:
+      base: "............|..xx.x.xx.x.|............|..xx.x.xx.x.|xx.x.x.xx.x.|x.xx.x.xx.xx|.x.x.x.xx.x."
+      variations:
+        - "............|..xx.x.xx.x.|............|..xx.x.xx.xx|.x.x.x.xx.xx|.x.x.x.xx.xx|.x.x.x.xx.x."
+        - "............|..xx.x.xx.x.|............|..xx.x.xx.xx|.x.x.x.x.x.x|.x.x.x.x.x.x|.x.x.x.xx.x."
+    sangban:
+      base: "x..x..x..x..|x..x.x....x.|x..x..x..x..|x..x.x....x.|...x....x...|..xx.x.....x|.....x....x."
+    kensereni:
+      base: "..x.xx..x.xx"
+  legacy: {"source":"Bolokonondo.rb","symbol":"BOLOKONONDO","notes":[],"definition":{"BPM":120,"TIME_SIGNATURE":[12,8],"SWING":[-0.03,0.04,-0.01],"patterns":{"dundun":{"base":["b.bb.bb.bb.b|b.XX.X.XX.X.|b.bb.bb.bb.b|b.XX.X.XX.X.|XX.X.X.XX.X.|X.XX.X.XX.XX|.X.X.X.XX.X."],"variations":["b.bb.bb.bb.b|b.XX.X.XX.X.|b.bb.bb.bb.b|b.XX.X.XX.XX|.X.X.X.XX.XX|.X.X.X.XX.XX|.X.X.X.XX.X.","b.bb.bb.bb.b|b.XX.X.XX.X.|b.bb.bb.bb.b|b.XX.X.XX.XX|.X.X.X.X.X.X|.X.X.X.X.X.X|.X.X.X.XX.X."],"echauff":[".XX.XX.XX.XX|.XX.XX.XX.XX|.XX.XX.XX.XX|.XX.XX.XX.XX|.XX.XX.XX.XX|.XX.XX.XX.XX|.XX.XX.XX.XX"],"echauff-out":["b.bb.bb.bb.b|b.XX.X.XX.X.|b.bb.bb.bb.b|b.XX.X.XX.X.|XX.X.X.XX.X.|X.XX.X.XX.XX|.X.X.X.XX.X."]},"sangban":{"base":["I.bI.bI.bI.b|I.bX.X.bb.X.|I.bI.bI.bI.b|I.bX.X.bb.X.|b.bX.b.bX.b.|b.XX.Xb.bb.X|b.bb.Xb.b.X."],"variations":[]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[]},"djembe":{"base":["x.ox..x.ox.."],"variations":[]}},"dependencies":{}}}

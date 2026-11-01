@@ -1,0 +1,13 @@
+"Gambia":
+  name: "Gambia"
+  bpm: 240
+  timeSignature: "2/4"
+  stepsPerBeat: 36
+  tracks:
+    dundun:
+      base: "........................................................................|........................................................................"
+    sangban:
+      base: "........................................................................|........................................................................"
+    kensereni:
+      base: "........................................................................|........................................................................"
+  legacy: {"source":"Gambia.rb","symbol":"GAMBIA","notes":["Original 8/4 is 2/4 in the new timing model; BPM unchanged.","dundun.base[0]: expanded 1 steps to common grid 72 without moving hits.","sangban.base[0]: expanded 8 steps to common grid 72 without moving hits.","sangban.base[0]: expanded 9 steps to common grid 72 without moving hits.","kensereni.base[0]: expanded 8 steps to common grid 72 without moving hits.","kensereni.base[0]: expanded 9 steps to common grid 72 without moving hits."],"definition":{"BPM":240,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["b|b"]},"sangban":{"base":["........|........."]},"kenken":{"base":["........|........."]},"djembe":{"base":["D.oo|.x..|..oo|.x..|D.oo|.x..|..oo|.x..|"],"variations":["..xx|.o.o|....|....|...x|.x.x|....|....|..xx|.D.D|....|....|..xx|....|.x.x|....|..xx|.D.D|....|....|...x|.x.x|....|....|..xx|.D.D|....|....|xx..|xx..|xx..|x.x.|","....|....|xo.o|.oo.|xo.o|.oo.|xo..|xo..|xo.o|.oo.|xo.o|.oo.|xx..|xx..|xx..|xx..|xo.o|.oo.|xo.o|.oo.|xx..|....|xooooo|x.x.|","x.x..oo|x.x...|x.x..oo|x.x...|oooooo|oooooo|oooooo|x...|","....|...x|ooxo|oxoo|xoox|ooxo|oxoo|x...|....|....|...ooo|x.x...|...ooo|x.x...|x.....|oooooo|"],"echauff":["oxxx|xxxx"]}}}}

@@ -1,0 +1,17 @@
+"Kon":
+  name: "Kon"
+  bpm: 115
+  timeSignature: "12/8"
+  stepsPerBeat: 3
+  tracks:
+    dundun:
+      base: ".......xx.xx"
+      variations:
+        - ".......xx.xx|.x.x.x.xx.xx"
+    sangban:
+      base: "x.......xx.."
+      variations:
+        - "x.......x..x|.x.x.x..xx.."
+    kensereni:
+      base: "..x.xx..x.xx"
+  legacy: {"source":"Kon.rb","symbol":"KON","notes":[],"definition":{"BPM":115,"TIME_SIGNATURE":[12,8],"SWING":[-0.03,0.03,0],"patterns":{"dundun":{"base":[".bb.bb.XX.XX"],"variations":[".bb.bb.XX.XX|.X.X.X.XX.XX"],"echauff":[".XX.XX.XX.XX"],"echauff-out":[".XX.XX.XX.XX|.X.X.X.XX.XX"]},"sangban":{"base":["I.bb.bb.XX.b"],"variations":["I.bb.bb.X.bX|.X.X.X.bXX.b"],"echauff":["b.XX.bb.XX.b"],"echauff-in":["I.bb.bb.XX.b"],"echauff-out":["b.XX.bb.X.bX|.X.X.X.bXX.b"]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[],"echauff":[]},"djembe":{"base":["x.ox..x.ox.."],"variations":[],"echauff":["oooxxxxxxxxx"],"echauff-in":["oooxxxxxxxxx"],"echauff-out":["oooxxxx.....|xxx.x.x...ooo.o.o...x..."]}},"dependencies":{"sangban":{"I.bb.bb.X.bX|.X.X.X.bXX.b":{"dundun":".bb.bb.XX.XX|.X.X.X.XX.XX"}}}}}

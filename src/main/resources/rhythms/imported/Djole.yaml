@@ -1,0 +1,17 @@
+"Djole":
+  name: "Djole"
+  bpm: 125
+  timeSignature: "2/4"
+  stepsPerBeat: 4
+  tracks:
+    dundun:
+      base: "x.......|x.x....."
+      variations:
+        - "xx.xxx.x|xx.xx.x."
+    sangban:
+      base: "x...x...|x...x..."
+      variations:
+        - "..x...x.|..x..x.x"
+    kensereni:
+      base: "..xx..xx|..xx..xx"
+  legacy: {"source":"Djole.rb","symbol":"DJOLE","notes":["Original 8/4 is 2/4 in the new timing model; BPM unchanged."],"definition":{"BPM":125,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["X.b.b.b.|X.X.b.b."],"variations":["XX.XXX.X|XX.XX.X."],"echauff":["X.XX.XX.|X.XX.XX."]},"sangban":{"base":["X.b.X.b.|X.b.X.b."],"variations":["..X...X.|..X..X.X"],"echauff":["X.b.X.X.|X.b.X.X."]},"kenken":{"base":["b.XXb.XX|b.XXb.XX"],"variations":[],"echauff":[]},"djembe":{"base":["Dyoo..xy|D.oopyx."],"variations":[],"echauff":["oooxxxxx|xxxxxxxx"]},"djembe2":{"base":["D.xxD.oo|D.xxD.oo"],"variations":[],"echauff":[]}}}}

@@ -1,0 +1,13 @@
+"Soli_Masi":
+  name: "Soli Masi"
+  bpm: 135
+  timeSignature: "12/8"
+  stepsPerBeat: 3
+  tracks:
+    dundun:
+      base: ".x.x.x.xx.x.|x.xx......xx"
+    sangban:
+      base: ".x.x.x..x.x.|...........x"
+    kensereni:
+      base: "....xx....xx"
+  legacy: {"source":"Soli.rb","symbol":"SOLI_MASI","notes":["dundun: no base in source; using echauff for playback.","sangban: no base in source; using echauff for playback."],"definition":{"BPM":135,"TIME_SIGNATURE":[12,8],"SWING":[0.03,-0.03,0],"patterns":{"dundun":{"base":[],"variations":[],"echauff-in":["X.X.b.b.b.XX"],"echauff":[".X.X.X.XX.X.|X.XX.b.bb.XX"],"echauff-out":[".X.X.X.bX.X."]},"sangban":{"base":[],"variations":[],"echauff-in":["X.b.I.b.I.bX"],"echauff":[".X.X.X.bX.X.|b.b.b.b.b.bX"],"echauff-out":[".X.X.X.bX.X."]},"kenken":{"base":[".bb.XX.bb.XX"],"variations":[]},"djembe":{"base":["x.ox.Dx.ox.."],"variations":[]}},"dependencies":{}}}

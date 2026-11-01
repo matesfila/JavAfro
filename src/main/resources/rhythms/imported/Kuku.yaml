@@ -1,0 +1,40 @@
+"Kuku":
+  name: "Kuku"
+  bpm: 110
+  timeSignature: "2/4"
+  stepsPerBeat: 4
+  tracks:
+    dundun:
+      base: "...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|...x....|....x...|.x.x....|....x..."
+      variations:
+        - "...x....|x..x..x."
+        - "...x....|x..x..x."
+        - "...x....|x..x..x."
+        - "...x....|x..x..x."
+        - "..xx.xx.|xx.xx.x."
+        - "..xx.xx.|xx.xx.x."
+        - "..xx.xx.|xx.xx.x."
+        - "..xx.xx.|xx.xx.x."
+        - "..xx.xx.|xx.xx.x."
+        - "..xx.xx.|xx.xx.x."
+        - "..xx.xx.|xx.xx.x."
+        - "..xx.xx.|xx.xx.x."
+        - "...x....|x.xx.xx."
+        - "...x....|x.xx.xx."
+        - "x.xx.xx.|x.xx.xx."
+        - "x.xx.xx.|x.xx.xx."
+        - "x.xx.xx.|x.xx.xx."
+        - "x.xx.xx.|x.xx.xx."
+        - "x.xx.xx.|x.xx.xx."
+        - "x.xx.xx.|x.xx.xx."
+        - "x.xx.xx.|x.xx.xx."
+        - "x.xx.xx.|x.xx.xx."
+        - "x..x..x.|xx.x.xx.|x.xx.xx.|xx.xxxx."
+        - "x..x..x.|xx.x.xx.|x.xx.xx.|xx.xxxx."
+    sangban:
+      base: "x.....x.|x.....x."
+      variations:
+        - "x..x..x.|.x..x.x."
+    kensereni:
+      base: "xx..xx..|xx..xx.."
+  legacy: {"source":"Kuku.rb","symbol":"KUKU","notes":["Original 8/4 is 2/4 in the new timing model; BPM unchanged."],"definition":{"BPM":110,"TIME_SIGNATURE":[8,4],"SWING":[0.1,-0.1,0.1,-0.1],"patterns":{"dundun":{"base":["b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","bX.X.bb.|b.b.B.b."],"variations":["b.bX.bb.|X.bX.bX.","b.bX.bb.|X.bX.bX.","b.bX.bb.|X.bX.bX.","b.bX.bb.|X.bX.bX.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.bX.bb.|X.XX.XX.","b.bX.bb.|X.XX.XX.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","X.bX.bB.|XX.X.XX.|X.XX.XX.|XX.XXXX.","X.bX.bB.|XX.X.XX.|X.XX.XX.|XX.XXXX."]},"sangban":{"base":["X.b.b.X.|X.b.b.X."],"variations":["X.bX.bX.|bX.bX.X."]},"kenken":{"base":["XX..XX..|XX..XX.."],"variations":[]},"djembe":{"base":["x.oo..x.|x.oo..x."],"variations":["x.oxoox.|ox.xoox.","x.oo..x.|ooxxooxx|x.oxoox.|ox.xoox."]},"djembe2":{"base":["x.D.oo..|x.D.oo.."],"variations":[]}}}}

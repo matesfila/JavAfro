@@ -1,0 +1,15 @@
+"Sogoninkun":
+  name: "Sogoninkun"
+  bpm: 100
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  tracks:
+    dundun:
+      base: "................"
+    sangban:
+      base: "x..x...xx.xx...."
+      variations:
+        - "x..x...xx.x.x.x."
+    kensereni:
+      base: "................"
+  legacy: {"source":"Sogoninkun.rb","symbol":"SOGONINKUN","notes":["Original 16/8 is 4/4 in the new timing model; BPM unchanged.","dundun.base[0]: expanded 1 steps to common grid 16 without moving hits."],"definition":{"BPM":100,"TIME_SIGNATURE":[16,8],"SWING":[-0.02,-0.02,0.02,0.02],"patterns":{"dundun":{"base":["."],"variations":[],"echauff":[]},"sangban":{"base":["I..I...xx.xx...."],"variations":["I..I...xx.x.x.x."],"echauff":["x.xx.x.xx.x.xx.x|.x.x.x.xx.x.x.x."],"echauff-out":["x.xx.x.xx.x.xx.x|x.xx.x.xx.x.x..."]},"kenken":{"base":[""],"variations":[],"echauff":[]},"djembe":{"base":["oo.x..x.oo.x..x.","ooyx..x.ooyxy.x."],"variations":["oo.x..x.ooxxx.x.","ooxx..x.ooxxx.x."],"echauff":["oooxxxxxxxxxxxxx"],"echauff-out":["oooxxxxxx.......|o.oo.o.oo.o.x..."]},"djembe2":{"base":[""],"variations":[],"echauff":[]}}}}

@@ -1,0 +1,25 @@
+"_Test-rhythm":
+  name: "Test rhythm"
+  bpm: 115
+  timeSignature: "2/4"
+  stepsPerBeat: 4
+  tracks:
+    dundun:
+      base: "x.......|x......."
+      variations:
+        - "x..x..x.|.x..x..x"
+        - "xx....xx|....xx.."
+        - "xxx.....|.xxx...."
+    sangban:
+      base: "....x...|....x..."
+      variations:
+        - ".x..x..x|..x..x.."
+        - "..xx....|xx....xx"
+        - "...xxx..|....xxx."
+    kensereni:
+      base: "..x...x.|..x...x."
+      variations:
+        - "..x..x..|x..x..x."
+        - "....xx..|..xx...."
+        - "......xx|x......x"
+  legacy: {"source":"_Test-rhythm.rb","symbol":"TESTRHYTHM","notes":["Original 8/4 is 2/4 in the new timing model; BPM unchanged."],"definition":{"BPM":115,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0],"patterns":{"dundun":{"base":["X.......|X......."],"variations":["X..X..X.|.X..X..X","XX....XX|....XX..","XXX.....|.XXX...."]},"sangban":{"base":["....X...|....X..."],"variations":[".X..X..X|..X..X..","..XX....|XX....XX","...XXX..|....XXX."]},"kenken":{"base":["..X...X.|..X...X."],"variations":["..X..X..|X..X..X.","....XX..|..XX....","......XX|X......X"]},"djembe":{"base":["Dyoo..xy|o.oopyx."],"variations":[]},"djembe2":{"base":["D.xxD.oo|D.xxD.oo"],"variations":[]}},"dependencies":{"dundun":{"X..X..X.|.X..X..X":{"sangban":".X..X..X|..X..X..","kenken":"..X..X..|X..X..X."},"XX....XX|....XX..":{"sangban":"..XX....|XX....XX","kenken":"....XX..|..XX...."},"XXX.....|.XXX....":{"sangban":"...XXX..|....XXX.","kenken":"......XX|X......X"}}}}}

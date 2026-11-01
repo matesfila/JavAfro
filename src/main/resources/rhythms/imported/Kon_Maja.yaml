@@ -1,0 +1,13 @@
+"Kon_Maja":
+  name: "Kon Maja"
+  bpm: 115
+  timeSignature: "12/8"
+  stepsPerBeat: 3
+  tracks:
+    dundun:
+      base: "............|..........xx|.xx.........|..........xx|.xx.......xx|.xx....xx.xx|.xx.......xx|.x.x.x.xx.xx"
+    sangban:
+      base: "x.....x.....|x.....x....x|x.....x.....|x.....x....x|x.....x....x|x.....x.xx.x|x.....x.....|x.x.x.x.xx.."
+    kensereni:
+      base: "..x.xx..x.xx"
+  legacy: {"source":"Kon.rb","symbol":"KON_MAJA","notes":[],"definition":{"BPM":115,"TIME_SIGNATURE":[12,8],"SWING":[-0.03,0.03,0],"patterns":{"dundun":{"base":[".bb.bb.bb.bb|.bb.bb.bb.XX|.XX.bb.bb.bb|.bb.bb.bb.XX|.XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|.X.X.X.XX.XX"]},"sangban":{"base":["I.bb.bI.bb.b|I.bb.bI.bb.X|X.bb.bI.bb.b|I.bb.bI.bb.X|X.bb.bI.bb.X|X.bb.bI.XX.X|X.bb.bI.bb.b|X.X.X.X.XX.b"]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[],"echauff":[]},"djembe":{"base":["x.ox..x.ox.."]}},"dependencies":{}}}

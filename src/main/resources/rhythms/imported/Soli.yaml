@@ -1,0 +1,20 @@
+"Soli":
+  name: "Soli"
+  bpm: 115
+  timeSignature: "12/8"
+  stepsPerBeat: 3
+  tracks:
+    dundun:
+      base: "x.xx....xx.x"
+      variations:
+        - "x.x.xxxx.xxx|.xx.x.x.xx.x"
+        - "x.........xx|.x.x.x..xx.x"
+        - "x.....x.xx.x"
+    sangban:
+      base: "x...x.x..x.."
+      variations:
+        - "xx.xx.xx.xx.|x.x.x.x..x.."
+        - "x...x.x..x.x|x.x.x.x..x.."
+    kensereni:
+      base: "....xx....xx"
+  legacy: {"source":"Soli.rb","symbol":"SOLI","notes":[],"definition":{"BPM":115,"TIME_SIGNATURE":[12,8],"SWING":[0.03,-0.03,0],"patterns":{"dundun":{"base":["X.XX.bb.XX.X"],"variations":["X.X.XXXX.XXX|.XX.X.X.XX.X","X.bb.bb.b.XX|.X.X.X.bXX.X","X.bb.bX.XX.X"],"echauff-in":["X.XX.X.X.X.X"],"echauff":[".XX.XX.X.X.X"],"echauff-out":[".XX.XX.X.X.X"]},"sangban":{"base":["X.b.I.I.bX.b"],"variations":["XX.XX.XX.XX.|X.X.X.X.bX.b","X.b.I.I.bX.X|X.X.X.X.bX.b"],"echauff-in":["X.b.X.b.X.b."],"echauff":["X.b.X.X.b.X."],"echauff-out":["X.b.X.X.b.bX|.X.X.X.bX.X."]},"kenken":{"base":[".bb.XX.bb.XX"],"variations":[]},"djembe":{"base":["x.ox.Dx.ox.."],"variations":["x.oxoox.oxoo|xooxooxoox.."]}},"dependencies":{"dundun":{"X.X.XXXX.XXX|.XX.X.X.XX.X":{"sangban":"XX.XX.XX.XX.|X.X.X.X.bX.b"},"X.bb.bb.b.XX|.X.X.X.bXX.X":{"sangban":"X.b.I.I.bX.X|X.X.X.X.bX.b"}}}}}

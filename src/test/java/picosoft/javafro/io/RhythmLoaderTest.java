@@ -3,6 +3,7 @@ package picosoft.javafro.io;
 import org.junit.Test;
 import picosoft.javafro.base.Rhythm;
 import picosoft.javafro.base.Track;
+import picosoft.javafro.base.TimeSignature;
 import picosoft.javafro.instruments.DundunInstrument;
 import picosoft.javafro.instruments.SangbanInstrument;
 import picosoft.javafro.sequencer.BeepSequencer;
@@ -84,7 +85,66 @@ public class RhythmLoaderTest {
     @Test
     public void bundledDjoleIsValid() throws Exception {
         try (var input = getClass().getResourceAsStream("/rhythms/djole.yaml")) {
-            assertEquals("x...xx..", RhythmLoader.load(input).get("Djole").tracks().getFirst().pattern());
+            Rhythm rhythm = RhythmLoader.load(input).get("djole");
+            assertEquals("x.......|x.x.....", rhythm.tracks().getFirst().pattern());
+            assertEquals(new TimeSignature(4, 4), rhythm.timeSignature());
         }
+    }
+
+    @Test
+    public void supportsTwoFourFourBarsOrOneEightFourBar() {
+        String twoBars = YAML.replace("  bpm: 116", "  bpm: 116\n  timeSignature: '4/4'")
+                .replace("x...xx..", "x...xx..|x...xx..");
+        assertEquals("x...xx..|x...xx..", load(twoBars).tracks().getFirst().pattern());
+        String oneLongBar = twoBars.replace("'4/4'", "'8/4'").replace("|", "")
+                .replace("..x...x.", "..x...x...x...x.").replace("x.x.x.x.", "x.x.x.x.x.x.x.x.");
+        Rhythm rhythm = load(oneLongBar);
+        assertEquals(16, rhythm.timeSignature().stepsPerBar());
+        assertEquals(2, rhythm.timeSignature().stepsPerBeat());
+        assertEquals(16, rhythm.tracks().getFirst().pattern().length());
+    }
+
+    @Test
+    public void supportsCompoundTwelveEightWithThreeStepsPerBeat() {
+        String yaml = YAML.replace("  bpm: 116", "  bpm: 116\n  timeSignature: '12/8'")
+                .replace("x...xx..", "x..x..x..x..")
+                .replace("..x...x.", "..x..x..x..x")
+                .replace("x.x.x.x.", "xxxxxxxxxxxx");
+        Rhythm rhythm = load(yaml);
+        assertEquals(12, rhythm.timeSignature().stepsPerBar());
+        assertEquals(3, rhythm.timeSignature().stepsPerBeat());
+        assertEquals(4, rhythm.timeSignature().stepsPerBar() / rhythm.timeSignature().stepsPerBeat());
+    }
+
+    @Test
+    public void rejectsInvalidMetersAndMisplacedBarLines() {
+        for (String signature : new String[]{"0/4", "4/0", "4/3", "abc", "4", "999999999999/4"}) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> load(YAML.replace("  bpm: 116", "  bpm: 116\n  timeSignature: '" + signature + "'")));
+        }
+        for (String pattern : new String[]{"x...|xx..", "|x...xx..", "x...xx..|", "x...xx..||x...xx..", "x...xx..x...xx.."}) {
+            var error = assertThrows(IllegalArgumentException.class,
+                    () -> load(YAML.replace("x...xx..", pattern)));
+            assertTrue(error.getMessage().contains("Djole"));
+            assertTrue(error.getMessage().contains("dundun"));
+        }
+    }
+
+    @Test
+    public void loadsStructuredTracksAndRejectsInvalidVariations() {
+        String structured = YAML.replace("dundun: \"x...xx..\"", """
+                dundun:
+                      base: "x...xx.."
+                      variations:
+                        - "xx......"
+                """.stripTrailing());
+        var track = load(structured).tracks().getFirst();
+        assertEquals("x...xx..", track.pattern());
+        assertEquals(java.util.List.of("xx......"), track.variations());
+        assertThrows(IllegalArgumentException.class, () -> load(structured.replace("xx......", "xx")));
+        assertThrows(IllegalArgumentException.class, () -> load(structured.replace("variations:", "variationz:")));
+        assertThrows(IllegalArgumentException.class, () -> load(structured.replace("variations:\n        - \"xx......\"", "variations: null")));
+        assertThrows(IllegalArgumentException.class, () -> load(structured.replace("base:", "unknown:")));
+        assertThrows(IllegalArgumentException.class, () -> load(YAML.replace("bpm: 116", "bpm: 116\n  stepsPerBeat: 0")));
     }
 }

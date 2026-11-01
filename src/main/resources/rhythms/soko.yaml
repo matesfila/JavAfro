@@ -1,0 +1,9 @@
+soko:
+  name: "Soko"
+  bpm: 116
+  timeSignature: "12/8"
+
+  tracks:
+    dundun:     "x....xx.xx.x|x.......xx.x"
+    sangban:    "......xx.xx.|.........xx."
+    kensereni:  "...xx....xx.|...xx....xx."

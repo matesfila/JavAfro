@@ -10,16 +10,16 @@ import javax.sound.sampled.LineUnavailableException;
 public class AfroJavaPlayer {
 
     public static void main(String[] args) throws LineUnavailableException, IOException {
-        try (var input = AfroJavaPlayer.class.getResourceAsStream("/rhythms/djole.yaml")) {
-            Rhythm rhythm = RhythmLoader.load(input).get("Djole");
+
+        playRhythm("Kon");
+
+    }
+
+    private static void playRhythm(String rhythmName) throws IOException, LineUnavailableException {
+        try (var input = AfroJavaPlayer.class.getResourceAsStream("/rhythms/imported/%s.yaml".formatted(rhythmName))) {
+            Rhythm rhythm = RhythmLoader.load(input).get(rhythmName);
             new BeepSequencer().playPattern(rhythm, 32, 40);
         }
-
-//        new BeepSequencer().playPattern(List.of(
-//                new BeepTrack("x.x.x.x.", new DundunInstrument()),
-//                new BeepTrack("x.x.x.x.", new SangbanInstrument()),
-//                new BeepTrack("x.x.x.x.", new KensereniInstrument())
-//        ), 32, 116, 80);
     }
 
 }
