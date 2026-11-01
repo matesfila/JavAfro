@@ -156,7 +156,7 @@ Každý úder náhodne vyberá jeden multisample. Humanize navyše mení hlasito
 Výber samplu aj parametre zostávajú nemenné počas celého doznievania úderu.
 
 Zdroje a prevod audio súborov sú zdokumentované v
-`src/main/resources/samples/djembe/README.md`. Spoločný manifest `samples/djembe.json`
+`src/main/resources/samples/djembe/README.md`. Spoločný manifest `samples/djembe.yaml`
 riadi mapovanie a hlasitosti v oboch prehrávačoch. Pri používaní nástroja nie je
 potrebný AfroPlayer, Sonic Pi ani FFmpeg.
 

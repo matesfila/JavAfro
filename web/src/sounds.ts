@@ -1,10 +1,19 @@
-import manifest from '../../src/main/resources/samples/djembe.json';
+import source from '../../src/main/resources/samples/djembe.yaml?raw';
+import { parse } from 'yaml';
 import type { Instrument } from './rhythm';
 import { HUMANIZE_PERCENT_MAX } from './audio-constants';
 
 const drums = { dundun: 'dundun.wav', sangban: 'sangban.wav', kensereni: 'kenkeni.wav' };
-const notes: Record<string, { bank: string; gain: number; probability: number }> = manifest.notes;
-const banks: Record<string, string[]> = manifest.banks;
+interface DjembeManifest {
+  dynamic: number;
+  pitch: number;
+  outputGain: number;
+  notes: Record<string, { bank: string; gain: number; probability: number }>;
+  banks: Record<string, string[]>;
+}
+const manifest: DjembeManifest = parse(source, { version: '1.1', uniqueKeys: true });
+const notes = manifest.notes;
+const banks = manifest.banks;
 export interface Sound { sample: string; gain: number; rate: number }
 
 export function supportsNote(instrument: Instrument, note: string): boolean {

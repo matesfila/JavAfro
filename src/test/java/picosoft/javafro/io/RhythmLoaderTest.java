@@ -108,7 +108,9 @@ public class RhythmLoaderTest {
     @Test
     public void diskDjoleIsValid() throws Exception {
         Rhythm rhythm = RhythmLoader.load(Path.of("rhythms/djole.yaml")).get("djole");
-        assertEquals("x.......x.x.....", rhythm.tracks().getFirst().pattern());
+        var dundun = rhythm.tracks().stream().filter(track -> track.instrument() instanceof DundunInstrument)
+                .findFirst().orElseThrow();
+        assertEquals("x.......x.x.....", dundun.pattern());
         assertEquals(4, rhythm.stepsPerBeat());
         assertEquals(new TimeSignature(4, 4), rhythm.timeSignature());
     }

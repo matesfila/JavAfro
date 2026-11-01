@@ -16,7 +16,7 @@ Zachovávame rozdiely medzi nahrávkami. V JavAfro sa už FFmpeg nevyžaduje.
 Súbory nie sú súčasťou CC0 sady JIMMYJAMES112; zachovávajú pôvodné podmienky
 z používateľovho projektu AfroPlayer. V pôvodnom adresári nie je licenčný súbor.
 
-Spoločný manifest `../djembe.json` používa Java aj web. Obsahuje šestice bánk
+Spoločný manifest `../djembe.yaml` používa Java aj web. Obsahuje šestice bánk
 (bas 1, tón 6, slap 8, tlmený tón 3, tlmený slap 3, alternatívny slap 8),
 zosilnenia a pravdepodobnosti. Pri každom údere sa náhodne vyberie jeden variant;
 počas doznievania sa už sample ani jeho parametre nemenia.

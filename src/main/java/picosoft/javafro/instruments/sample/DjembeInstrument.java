@@ -26,7 +26,7 @@ public final class DjembeInstrument implements Instrument {
     }
 
     private static Bank load() {
-        try (var stream = DjembeInstrument.class.getResourceAsStream("/samples/djembe.json")) {
+        try (var stream = DjembeInstrument.class.getResourceAsStream("/samples/djembe.yaml")) {
             if (stream == null) throw new IllegalArgumentException("Missing djembe sample manifest.");
             Map<?, ?> manifest = new Yaml(new SafeConstructor(new LoaderOptions())).load(stream);
             Map<?, ?> definitions = (Map<?, ?>) manifest.get("banks");

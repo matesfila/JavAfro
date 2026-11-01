@@ -84,7 +84,7 @@ Knižnica aj zvuky sa teda aktualizujú pri ďalšom spustení/buildovaní.
 
 Nahrávky troch dununov JIMMYJAMES112 / Freesound a ikona djembe / SVG Repo sú CC0.
 Djembe má samostatný pôvod a podmienky zo starého AfroPlayer; detaily sú v
-`generated/samples/djembe/README.md`, jeho mapovanie v spoločnom `samples/djembe.json`.
+`generated/samples/djembe/README.md`, jeho mapovanie v spoločnom `samples/djembe.yaml`.
 Podrobné zdroje a úpravy sú v skopírovaných `generated/samples/README.md`
 a `generated/icons/README.txt`. Fonty Manrope a DM Sans sú pribalené lokálne
 cez Fontsource pod SIL Open Font License (licencie v príslušných npm balíkoch).
