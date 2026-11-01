@@ -9,6 +9,7 @@ import picosoft.javafro.io.RhythmLoader;
 import javax.sound.sampled.SourceDataLine;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Proxy;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -61,15 +62,12 @@ public class LivePlaybackTest {
 
     @Test
     public void djoleCycleIsFourBeatsAndMatchesImportedTiming() throws Exception {
-        try (var input = getClass().getResourceAsStream("/rhythms/djole.yaml");
-             var imported = getClass().getResourceAsStream("/rhythms/imported/Djole.yaml")) {
-            var djole = RhythmLoader.load(input).get("djole");
-            var original = RhythmLoader.load(imported).get("Djole");
-            assertEquals(88200, renderedFrames(djole, 120)); // Four beats at 120 BPM = two seconds.
-            assertEquals(renderedFrames(original, 120), renderedFrames(djole, 120));
-            assertEquals(44100, renderedFrames(djole, 240));
-            assertEquals(44100 * 240.0 / 116, renderedFrames(djole, 116), 1.0);
-        }
+        var djole = RhythmLoader.load(Path.of("rhythms/djole.yaml")).get("djole");
+        var original = RhythmLoader.load(Path.of("rhythms/imported/Djole.yaml")).get("Djole");
+        assertEquals(88200, renderedFrames(djole, 120)); // Four beats at 120 BPM = two seconds.
+        assertEquals(renderedFrames(original, 120), renderedFrames(djole, 120));
+        assertEquals(44100, renderedFrames(djole, 240));
+        assertEquals(44100 * 240.0 / 116, renderedFrames(djole, 116), 1.0);
     }
 
     @Test

@@ -1,6 +1,12 @@
-# Focus Timer (JavAfro)
+# JavAfro
 
-Pomodoro časovač so Swing GUI a zvukovým upozornením.
+Prehrávač afrických rytmov so Swing GUI, YAML editorom a zvukovými samplami.
+
+## Samostatný PomodoroTimer
+
+PomodoroTimer bol presunutý do `C:/Projects/PomodoroTimer`. Je to nezávislý Maven projekt
+s vlastným `pom.xml`, run konfiguráciou, zvukovým alarmom a Windows balením.
+V IntelliJ ho otvor ako samostatný projekt. Postup spustenia je v jeho `README.md`.
 
 ## Swing prehrávač rytmov
 
@@ -8,7 +14,7 @@ Pomodoro časovač so Swing GUI a zvukovým upozornením.
 
 ```powershell
 mvn package
-& "$env:JAVA_HOME/bin/java.exe" -cp target/FocusTimer.jar picosoft.javafro.AfroJavaPlayer "rhythms/djole-samples.yaml"
+& "$env:JAVA_HOME/bin/java.exe" -cp target/JavAfro.jar picosoft.javafro.AfroJavaPlayer "rhythms/djole-samples.yaml"
 ```
 
 Voliteľný argument je cesta k jednému YAML súboru na disku (UTF-8).
@@ -28,8 +34,7 @@ Posuvníky **Tempo** a **Humanize** fungujú aj počas prehrávania bez reštart
 rytmu. Zmena sa použije od ďalšieho generovaného kroku, s malým oneskorením daným
 už pripraveným zvukom. Tempo posuvníka má pri prehrávaní prednosť pred BPM v editore;
 pri otvorení súboru sa posuvník inicializuje jeho BPM. Zmeny YAML sa použijú pri
-ďalšom Play. Zatvorenie okna zastaví aj zvuk. Existujúci spúšťač FocusTimer zostáva
-Pomodoro aplikáciou.
+ďalšom Play. Zatvorenie okna zastaví aj zvuk. Spúšťací JAR teraz otvára rytmický prehrávač.
 
 Nepretržité prehrávanie možno použiť aj bez GUI (blokuje volajúce vlákno):
 
@@ -90,16 +95,16 @@ aj po Stop/Play. Swing je zatiaľ spoločný pre všetky tracky.
 
 ### Nahraté zvuky bubnov
 
-K dispozícii sú aj `DundunSampleInstrument`, `SangbanSampleInstrument` a
-`KenkeniSampleInstrument` v balíku `picosoft.javafro.instruments`.
+Nahraté nástroje `DundunInstrument`, `SangbanInstrument` a `KensereniInstrument`
+sú v balíku `picosoft.javafro.instruments.sample`.
 Každý nástroj má bezparametrový konštruktor a používa reálnu nahrávku pribalenú
 v JAR. Dekódovaný sample sa zdieľa medzi inštanciami a pri údere znie celý,
 vrátane dozvuku. Nepotrebuje internet ani externý audio prehrávač.
 
-V YAML použi `dundun-sample`, `sangban-sample` a `kenkeni-sample`
-(prípustný je aj alias `kensereni-sample`). Pôvodné `dundun`, `sangban`
-a `kensereni` zostávajú syntetické tóny. V GUI otvor
-`src/main/resources/rhythms/djole-samples.yaml` na vyskúšanie všetkých troch.
+V YAML použi `dundun`, `sangban` a `kensereni`; tieto identifikátory teraz
+načítajú nahraté sample. Syntetické varianty sú naďalej dostupné cez Java triedy
+v balíku `picosoft.javafro.instruments.synth`. V GUI otvor
+`rhythms/djole-samples.yaml` na vyskúšanie všetkých troch.
 
 Nahrávky sú od JIMMYJAMES112 na Freesound pod licenciou CC0. Sangban je drevený
 bubon; dundunba a kenkeni sú podľa autora repliky zo sudov s hovädzou kožou.
@@ -240,12 +245,12 @@ Na build je potrebný Maven a JDK 25 (`JAVA_HOME` musí ukazovať na JDK 25).
 
 ```powershell
 mvn package
-& "$env:JAVA_HOME/bin/java.exe" -jar target/FocusTimer.jar
+& "$env:JAVA_HOME/bin/java.exe" -jar target/JavAfro.jar
 ```
 
-Výsledný `target/FocusTimer.jar` možno spustiť bez IntelliJ IDEA.
+Výsledný `target/JavAfro.jar` možno spustiť bez IntelliJ IDEA.
 Na cieľovom počítači musí byť Java 25 alebo novšia; príkaz `java` musí používať túto verziu.
-Ak je Java 25 nastavená v `PATH`, stačí `java -jar target/FocusTimer.jar`.
+Ak je Java 25 nastavená v `PATH`, stačí `java -jar target/JavAfro.jar`.
 Dvojklik na JAR funguje, ak je vo Windows nastavená príslušná asociácia súborov s Javou.
 
 ## Windows aplikácia s pribalenou Javou
@@ -257,12 +262,12 @@ Na Windows spusti z koreňa projektu:
 ```
 
 Skript vykoná `mvn package` a pomocou nástroja `jpackage` z `JAVA_HOME`
-vytvorí `target/windows/FocusTimer/FocusTimer.exe`.
+vytvorí `target/windows/JavAfro/JavAfro.exe`.
 Spúšťač otvorí aplikáciu bez konzolového okna.
 
 Na iný Windows počítač s rovnakou architektúrou skopíruj **celý priečinok
-`target/windows/FocusTimer`**, vrátane podpriečinkov `app` a `runtime`.
-Používateľ potom spustí `FocusTimer.exe`; nemusí mať nainštalovanú Javu ani IntelliJ IDEA.
+`target/windows/JavAfro`**, vrátane podpriečinkov `app` a `runtime`.
+Používateľ potom spustí `JavAfro.exe`; nemusí mať nainštalovanú Javu ani IntelliJ IDEA.
 Samotný EXE súbor nestačí. Toto je prenosná aplikácia, nie inštalátor.
 
 Podrobnosti k baleniu: [oficiálna dokumentácia jpackage](https://docs.oracle.com/en/java/javase/25/docs/specs/man/jpackage.html).

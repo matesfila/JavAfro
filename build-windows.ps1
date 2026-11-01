@@ -21,7 +21,7 @@ try {
     $targetDirectory = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'target'))
     $inputDirectory = Join-Path $targetDirectory 'windows-input'
     $outputDirectory = Join-Path $targetDirectory 'windows'
-    $appDirectory = Join-Path $outputDirectory 'FocusTimer'
+    $appDirectory = Join-Path $outputDirectory 'JavAfro'
 
     # Replace only generated packaging folders, verified to be inside target.
     foreach ($generatedDirectory in @($inputDirectory, $appDirectory)) {
@@ -36,26 +36,26 @@ try {
     }
 
     New-Item -ItemType Directory -Path $inputDirectory -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $targetDirectory 'FocusTimer.jar') -Destination $inputDirectory
+    Copy-Item -LiteralPath (Join-Path $targetDirectory 'JavAfro.jar') -Destination $inputDirectory
     [xml]$projectPom = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'pom.xml') -Raw
     $packageArguments = @(
         '--type', 'app-image',
-        '--name', 'FocusTimer',
+        '--name', 'JavAfro',
         '--app-version', $projectPom.project.version,
         '--vendor', 'Picosoft',
-        '--description', 'Pomodoro focus timer',
+        '--description', 'African rhythm player',
         '--input', $inputDirectory,
         '--dest', $outputDirectory,
-        '--main-jar', 'FocusTimer.jar',
-        '--main-class', 'picosoft.pomodorotimer.PomodoroTimer',
+        '--main-jar', 'JavAfro.jar',
+        '--main-class', 'picosoft.javafro.AfroJavaPlayer',
         '--add-modules', 'java.desktop'
     )
     & $jpackage @packageArguments
     if ($LASTEXITCODE -ne 0) {
         throw 'Windows packaging failed.'
     }
-    Write-Host "Application created: $appDirectory\FocusTimer.exe"
-    Write-Host 'Distribute the entire FocusTimer folder, including app and runtime.'
+    Write-Host "Application created: $appDirectory\JavAfro.exe"
+    Write-Host 'Distribute the entire JavAfro folder, including app and runtime.'
 } finally {
     Pop-Location
 }

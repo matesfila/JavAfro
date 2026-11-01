@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 public class ImportedRhythmsTest {
     @Test
     public void everyYamlHasOneRhythmNamedAfterItsFile() throws IOException {
-        try (var paths = Files.walk(Path.of("src/main/resources/rhythms"))) {
+        try (var paths = Files.walk(Path.of("rhythms"))) {
             var files = paths.filter(p -> p.toString().endsWith(".yaml")).toList();
             assertEquals(26, files.size());
             for (Path file : files) {
@@ -32,7 +32,7 @@ public class ImportedRhythmsTest {
     @Test
     public void allImportedRhythmsLoadAndPreserveDrumHitTimes() throws Exception {
         int count = 0;
-        try (var paths = Files.list(Path.of("src/main/resources/rhythms/imported"))) {
+        try (var paths = Files.list(Path.of("rhythms/imported"))) {
             var files = paths.filter(p -> p.toString().endsWith(".yaml")).sorted().toList();
             assertEquals(23, files.size());
             for (Path file : files) {
@@ -107,12 +107,12 @@ public class ImportedRhythmsTest {
 
     @Test
     public void djoleAndKukuRetainVariationsAndBaseSequences() throws IOException {
-        var djole = RhythmLoader.load(Path.of("src/main/resources/rhythms/imported/Djole.yaml")).get("Djole");
+        var djole = RhythmLoader.load(Path.of("rhythms/imported/Djole.yaml")).get("Djole");
         assertEquals("x.......|x.x.....", djole.tracks().getFirst().pattern());
         var track = (BeepTrack) djole.tracks().getFirst();
         assertEquals("xx.xxx.x|xx.xx.x.", track.withVariation(0).pattern());
         assertThrows(UnsupportedOperationException.class, () -> track.variations().clear());
-        var kuku = RhythmLoader.load(Path.of("src/main/resources/rhythms/imported/Kuku.yaml")).get("Kuku");
+        var kuku = RhythmLoader.load(Path.of("rhythms/imported/Kuku.yaml")).get("Kuku");
         assertEquals(26, kuku.tracks().getFirst().pattern().split("\\|").length);
         assertEquals(24, kuku.tracks().getFirst().variations().size());
     }

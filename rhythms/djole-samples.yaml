@@ -6,6 +6,6 @@ djole-samples:
   swing: [0, 0, 0, 0]
 
   tracks:
-    dundun-sample:  "x.......x.x....."
-    sangban-sample: "....x.......x..."
-    kenkeni-sample: "..xx..xx..xx..xx"
+    dundun:    "x.......x.x....."
+    sangban:   "....x.......x..."
+    kensereni: "..xx..xx..xx..xx"

@@ -34,7 +34,7 @@
     </dependencies>
 
     <build>
-        <finalName>FocusTimer</finalName>
+        <finalName>JavAfro</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -57,7 +57,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>picosoft.pomodorotimer.PomodoroTimer</mainClass>
+                            <mainClass>picosoft.javafro.AfroJavaPlayer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

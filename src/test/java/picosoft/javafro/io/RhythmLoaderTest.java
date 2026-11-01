@@ -4,12 +4,14 @@ import org.junit.Test;
 import picosoft.javafro.base.Rhythm;
 import picosoft.javafro.base.Track;
 import picosoft.javafro.base.TimeSignature;
-import picosoft.javafro.instruments.synth.DundunInstrument;
-import picosoft.javafro.instruments.synth.SangbanInstrument;
+import picosoft.javafro.instruments.sample.DundunInstrument;
+import picosoft.javafro.instruments.sample.SangbanInstrument;
+import picosoft.javafro.instruments.sample.KensereniInstrument;
 import picosoft.javafro.sequencer.BeepSequencer;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
@@ -38,6 +40,7 @@ public class RhythmLoaderTest {
         assertEquals("..x...x.", rhythm.tracks().get(1).pattern());
         assertTrue(rhythm.tracks().get(0).instrument() instanceof DundunInstrument);
         assertTrue(rhythm.tracks().get(1).instrument() instanceof SangbanInstrument);
+        assertTrue(rhythm.tracks().get(2).instrument() instanceof KensereniInstrument);
         var multiple = YAML + YAML.replace("Djole", "Second");
         assertEquals(2, RhythmLoader.load(new ByteArrayInputStream(multiple.getBytes(StandardCharsets.UTF_8))).size());
     }
@@ -83,13 +86,11 @@ public class RhythmLoaderTest {
     }
 
     @Test
-    public void bundledDjoleIsValid() throws Exception {
-        try (var input = getClass().getResourceAsStream("/rhythms/djole.yaml")) {
-            Rhythm rhythm = RhythmLoader.load(input).get("djole");
-            assertEquals("x.......x.x.....", rhythm.tracks().getFirst().pattern());
-            assertEquals(4, rhythm.stepsPerBeat());
-            assertEquals(new TimeSignature(4, 4), rhythm.timeSignature());
-        }
+    public void diskDjoleIsValid() throws Exception {
+        Rhythm rhythm = RhythmLoader.load(Path.of("rhythms/djole.yaml")).get("djole");
+        assertEquals("x.......x.x.....", rhythm.tracks().getFirst().pattern());
+        assertEquals(4, rhythm.stepsPerBeat());
+        assertEquals(new TimeSignature(4, 4), rhythm.timeSignature());
     }
 
     @Test
