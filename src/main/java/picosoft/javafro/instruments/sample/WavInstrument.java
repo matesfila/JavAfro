@@ -1,4 +1,4 @@
-package picosoft.javafro.instruments;
+package picosoft.javafro.instruments.sample;
 
 import picosoft.javafro.base.AudioConstants;
 import picosoft.javafro.base.Instrument;
@@ -10,6 +10,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.net.URL;
 
 /**
  * Nástroj, ktorý pri každom údere prehrá načítaný audio sample (napríklad WAV).
@@ -30,12 +31,17 @@ public final class WavInstrument implements Instrument {
     }
 
     public WavInstrument(File file) throws IOException, UnsupportedAudioFileException {
-        try (AudioInputStream source = AudioSystem.getAudioInputStream(file);
+        this(file.toURI().toURL());
+    }
+
+    /** Supports bundled resources, including jar:file URLs. */
+    public WavInstrument(URL resource) throws IOException, UnsupportedAudioFileException {
+        try (AudioInputStream source = AudioSystem.getAudioInputStream(resource);
              AudioInputStream pcm = toOutputFormat(source)) {
             this.samples = decode(pcm.readAllBytes());
         }
         if (samples.length == 0) {
-            throw new IllegalArgumentException("Audio file contains no samples: " + file);
+            throw new IllegalArgumentException("Audio file contains no samples: " + resource);
         }
     }
 

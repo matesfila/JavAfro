@@ -21,7 +21,7 @@ public class ImportedRhythmsTest {
     public void everyYamlHasOneRhythmNamedAfterItsFile() throws IOException {
         try (var paths = Files.walk(Path.of("src/main/resources/rhythms"))) {
             var files = paths.filter(p -> p.toString().endsWith(".yaml")).toList();
-            assertEquals(25, files.size());
+            assertEquals(26, files.size());
             for (Path file : files) {
                 String id = file.getFileName().toString().replaceFirst("\\.yaml$", "");
                 assertEquals(file.toString(), java.util.Set.of(id), RhythmLoader.load(file).keySet());

@@ -41,7 +41,7 @@ public class AfroJavaPlayer {
                 if (args.length > 0) {
                     yaml = Files.readString(Path.of(args[0]), StandardCharsets.UTF_8);
                 } else {
-                    try (var input = AfroJavaPlayer.class.getResourceAsStream("/rhythms/djole.yaml")) {
+                    try (var input = AfroJavaPlayer.class.getResourceAsStream("/rhythms/djole-samples.yaml")) {
                         if (input == null) throw new IllegalStateException("Chýba predvolený rytmus djole.yaml.");
                         yaml = new String(input.readAllBytes(), StandardCharsets.UTF_8);
                     }

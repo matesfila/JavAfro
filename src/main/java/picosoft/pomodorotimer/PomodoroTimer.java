@@ -1,8 +1,8 @@
 package picosoft.pomodorotimer;
 
-import picosoft.javafro.instruments.DundunInstrument;
-import picosoft.javafro.instruments.KensereniInstrument;
-import picosoft.javafro.instruments.SangbanInstrument;
+import picosoft.javafro.instruments.synth.DundunInstrument;
+import picosoft.javafro.instruments.synth.KensereniInstrument;
+import picosoft.javafro.instruments.synth.SangbanInstrument;
 import picosoft.javafro.sequencer.BeepSequencer;
 import picosoft.javafro.sequencer.BeepTrack;
 import picosoft.windows.WindowsDesktop;

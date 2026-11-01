@@ -73,6 +73,25 @@ aj po Stop/Play. Swing je zatiaľ spoločný pre všetky tracky.
 
 ## Rhythm
 
+### Nahraté zvuky bubnov
+
+K dispozícii sú aj `DundunSampleInstrument`, `SangbanSampleInstrument` a
+`KenkeniSampleInstrument` v balíku `picosoft.javafro.instruments`.
+Každý nástroj má bezparametrový konštruktor a používa reálnu nahrávku pribalenú
+v JAR. Dekódovaný sample sa zdieľa medzi inštanciami a pri údere znie celý,
+vrátane dozvuku. Nepotrebuje internet ani externý audio prehrávač.
+
+V YAML použi `dundun-sample`, `sangban-sample` a `kenkeni-sample`
+(prípustný je aj alias `kensereni-sample`). Pôvodné `dundun`, `sangban`
+a `kensereni` zostávajú syntetické tóny. V GUI otvor
+`src/main/resources/rhythms/djole-samples.yaml` na vyskúšanie všetkých troch.
+
+Nahrávky sú od JIMMYJAMES112 na Freesound pod licenciou CC0. Sangban je drevený
+bubon; dundunba a kenkeni sú podľa autora repliky zo sudov s hovädzou kožou.
+Pribalené PCM WAV sú odvodené z verejných HQ MP3 náhľadov (originálne WAV
+vyžadujú prihlásenie). Prevod do WAV nezvyšuje kvalitu pôvodného MP3.
+Zdroje a spracovanie sú zaznamenané v `src/main/resources/samples/README.md`.
+
 `Rhythm` z balíka `picosoft.javafro.base` spája názov, tracky a tempo rytmu:
 
 ```java

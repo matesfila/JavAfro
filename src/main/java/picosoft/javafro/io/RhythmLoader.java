@@ -9,9 +9,9 @@ import picosoft.javafro.base.Rhythm;
 import picosoft.javafro.base.Track;
 import picosoft.javafro.base.TimeSignature;
 import picosoft.javafro.base.Swing;
-import picosoft.javafro.instruments.DundunInstrument;
-import picosoft.javafro.instruments.KensereniInstrument;
-import picosoft.javafro.instruments.SangbanInstrument;
+import picosoft.javafro.instruments.sample.DundunInstrument;
+import picosoft.javafro.instruments.sample.SangbanInstrument;
+import picosoft.javafro.instruments.sample.KensereniInstrument;
 import picosoft.javafro.sequencer.BeepTrack;
 
 import java.io.IOException;
@@ -140,6 +140,9 @@ public final class RhythmLoader {
 
     private static Instrument instrument(String id) {
         return switch (id) {
+//            case "dundun" -> new picosoft.javafro.instruments.synth.DundunInstrument();
+//            case "sangban" -> new picosoft.javafro.instruments.synth.SangbanInstrument();
+//            case "kensereni" -> new picosoft.javafro.instruments.synth.KensereniInstrument();
             case "dundun" -> new DundunInstrument();
             case "sangban" -> new SangbanInstrument();
             case "kensereni" -> new KensereniInstrument();

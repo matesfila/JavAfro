@@ -4,8 +4,8 @@ import org.junit.Test;
 import picosoft.javafro.base.Rhythm;
 import picosoft.javafro.base.Track;
 import picosoft.javafro.base.TimeSignature;
-import picosoft.javafro.instruments.DundunInstrument;
-import picosoft.javafro.instruments.SangbanInstrument;
+import picosoft.javafro.instruments.synth.DundunInstrument;
+import picosoft.javafro.instruments.synth.SangbanInstrument;
 import picosoft.javafro.sequencer.BeepSequencer;
 
 import java.io.ByteArrayInputStream;
