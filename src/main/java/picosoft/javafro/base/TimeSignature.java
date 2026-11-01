@@ -43,16 +43,27 @@ public record TimeSignature(int numerator, int denominator) {
     }
 
     public void validatePattern(String pattern, int stepsPerBeat) {
+        expandPattern(pattern, stepsPerBeat);
+    }
+
+    /** Each pipe-delimited bar may be written in half and is then played twice. */
+    public String expandPattern(String pattern, int stepsPerBeat) {
         int expected = stepsPerBar(stepsPerBeat);
         if (pattern == null || !pattern.matches("[a-zA-Z.]+(\\|[a-zA-Z.]+)*")) {
             throw new IllegalArgumentException("Pattern must contain non-empty bars of note letters and '.', separated by '|'.");
         }
-        for (String bar : pattern.split("\\|", -1)) {
-            if (bar.length() != expected) {
+        var bars = pattern.split("\\|", -1);
+        for (int i = 0; i < bars.length; i++) {
+            String bar = bars[i];
+            if ((long) bar.length() * 2 == expected) {
+                bars[i] = bar.repeat(2);
+            } else if (bar.length() != expected) {
                 throw new IllegalArgumentException("Each bar in " + this + " must contain " + expected
-                        + " steps; found " + bar.length() + ". Separate bars with '|'.");
+                        + " steps or exactly half as many (repeated twice); found " + bar.length()
+                        + ". Separate bars with '|'.");
             }
         }
+        return String.join("|", bars);
     }
 
     @Override

@@ -119,12 +119,30 @@ public class RhythmLoaderTest {
     }
 
     @Test
+    public void acceptsHalfBarsInBaseAndVariationsButRejectsOtherFractions() {
+        var meter = new TimeSignature(4, 4);
+        assertEquals("d.tt..s.d.tt..s.", meter.expandPattern("d.tt..s.", 4));
+        assertEquals("x..x..x..x..", new TimeSignature(12, 8).expandPattern("x..x..", 3));
+        assertThrows(IllegalArgumentException.class, () -> meter.validatePattern("x...", 4));
+        assertThrows(IllegalArgumentException.class, () -> new TimeSignature(3, 4).validatePattern("x", 1));
+        String yaml = YAML.replace("dundun: \"x...xx..\"", """
+                dundun:
+                      base: "x..."
+                      variations:
+                        - "xx.."
+                """.stripTrailing());
+        var track = load(yaml).tracks().getFirst();
+        assertEquals("x...", track.pattern());
+        assertEquals(java.util.List.of("xx.."), track.variations());
+    }
+
+    @Test
     public void rejectsInvalidMetersAndMisplacedBarLines() {
         for (String signature : new String[]{"0/4", "4/0", "4/3", "abc", "4", "999999999999/4"}) {
             assertThrows(IllegalArgumentException.class,
                     () -> load(YAML.replace("  bpm: 116", "  bpm: 116\n  timeSignature: '" + signature + "'")));
         }
-        for (String pattern : new String[]{"x...|xx..", "|x...xx..", "x...xx..|", "x...xx..||x...xx..", "x...xx..x...xx.."}) {
+        for (String pattern : new String[]{"x..|xx...", "|x...xx..", "x...xx..|", "x...xx..||x...xx..", "x...xx..x...xx.."}) {
             var error = assertThrows(IllegalArgumentException.class,
                     () -> load(YAML.replace("x...xx..", pattern)));
             assertTrue(error.getMessage().contains("Djole"));

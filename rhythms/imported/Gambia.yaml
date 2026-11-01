@@ -1,14 +1,22 @@
 "Gambia":
   name: "Gambia"
   bpm: 240
-  timeSignature: "2/4"
-  stepsPerBeat: 36
-  dialect: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  dialect: [0,0,0,0]
+  # Solo subdivisions are quantized to four steps per beat; original phrases remain in legacy.
   tracks:
+    djembe:
+      base: "D...o.o...x.....|....o.o...x.....|D...o.o...x.....|....o.o...x....."
+      variations:
+        - "....x.x...o...o.|................|......x...x...x.|................|....x.x...D...D.|................|....x.x.........|..x...x.........|....x.x...D...D.|................|......x...x...x.|................|....x.x...D...D.|................|x.x.....x.x.....|x.x.....x...x..."
+        - "................|x.o...o...o.o...|x.o...o...o.o...|x.o.....x.o.....|x.o...o...o.o...|x.o...o...o.o...|x.x.....x.x.....|x.x.....x.x.....|x.o...o...o.o...|x.o...o...o.o...|x.x.............|xo.ooo.ox...x..."
+        - "x.x...oox..x....|x.x...oox..x....|oo.ooo.ooo.ooo.o|oo.ooo.ox......."
+        - "..............x.|o.o.x.o.o.x.o.o.|x.o.o.x.o.o.x.o.|o.x.o.o.x.......|................|....oo.ox..x....|....oo.ox..x....|x.......oo.ooo.o"
     dundun:
-      base: "........................................................................|........................................................................"
+      base: "................"
     sangban:
-      base: "........................................................................|........................................................................"
+      base: "................"
     kensereni:
-      base: "........................................................................|........................................................................"
-  legacy: {"source":"Gambia.rb","symbol":"GAMBIA","notes":["Original 8/4 is 2/4 in the new timing model; BPM unchanged.","dundun.base[0]: expanded 1 steps to common grid 72 without moving hits.","sangban.base[0]: expanded 8 steps to common grid 72 without moving hits.","sangban.base[0]: expanded 9 steps to common grid 72 without moving hits.","kensereni.base[0]: expanded 8 steps to common grid 72 without moving hits.","kensereni.base[0]: expanded 9 steps to common grid 72 without moving hits."],"definition":{"BPM":240,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["b|b"]},"sangban":{"base":["........|........."]},"kenken":{"base":["........|........."]},"djembe":{"base":["D.oo|.x..|..oo|.x..|D.oo|.x..|..oo|.x..|"],"variations":["..xx|.o.o|....|....|...x|.x.x|....|....|..xx|.D.D|....|....|..xx|....|.x.x|....|..xx|.D.D|....|....|...x|.x.x|....|....|..xx|.D.D|....|....|xx..|xx..|xx..|x.x.|","....|....|xo.o|.oo.|xo.o|.oo.|xo..|xo..|xo.o|.oo.|xo.o|.oo.|xx..|xx..|xx..|xx..|xo.o|.oo.|xo.o|.oo.|xx..|....|xooooo|x.x.|","x.x..oo|x.x...|x.x..oo|x.x...|oooooo|oooooo|oooooo|x...|","....|...x|ooxo|oxoo|xoox|ooxo|oxoo|x...|....|....|...ooo|x.x...|...ooo|x.x...|x.....|oooooo|"],"echauff":["oxxx|xxxx"]}}}}
+      base: "................"
+  legacy: {"source":"Gambia.rb","symbol":"GAMBIA","notes":["Reimported directly from Ruby including djembe base and all four variations; original D/o/x symbols retained.","Pairs of original two-beat sections form 4/4 bars; BPM, section durations, note order and note counts are unchanged.","Four steps per beat: off-grid solo hits are rounded to the nearest step; the base groove timing is unchanged.","Silent drum parts do not affect grid resolution; unsupported bell b remains archived.","Echauff remains archived and is not played automatically."],"definition":{"BPM":240,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["b|b"]},"sangban":{"base":["........|........."]},"kenken":{"base":["........|........."]},"djembe":{"base":["D.oo|.x..|..oo|.x..|D.oo|.x..|..oo|.x..|"],"variations":["..xx|.o.o|....|....|...x|.x.x|....|....|..xx|.D.D|....|....|..xx|....|.x.x|....|..xx|.D.D|....|....|...x|.x.x|....|....|..xx|.D.D|....|....|xx..|xx..|xx..|x.x.|","....|....|xo.o|.oo.|xo.o|.oo.|xo..|xo..|xo.o|.oo.|xo.o|.oo.|xx..|xx..|xx..|xx..|xo.o|.oo.|xo.o|.oo.|xx..|....|xooooo|x.x.|","x.x..oo|x.x...|x.x..oo|x.x...|oooooo|oooooo|oooooo|x...|","....|...x|ooxo|oxoo|xoox|ooxo|oxoo|x...|....|....|...ooo|x.x...|...ooo|x.x...|x.....|oooooo|"],"echauff":["oxxx|xxxx"]}}}}

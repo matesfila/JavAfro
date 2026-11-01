@@ -225,4 +225,5 @@ function main() {
   fs.writeFileSync('docs/afroplayer-import/README.md', report.join('\n'));
   console.log(`Converted ${results.length} rhythms in ${new Set(results.map(r => r.file)).size} YAML files; all legacy definitions verified.`);
 }
-main();
+if (require.main === module) main();
+module.exports = { Reader };

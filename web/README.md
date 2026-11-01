@@ -47,6 +47,10 @@ tracky `dundun`, `sangban`, `kensereni`, `djembe`, string alebo objekt `base`/`v
 Znak `x` hrá úder, `.` ticho, `|` oddeľuje celé takty bez pridaného času.
 Variácie a pôvodné `legacy` dáta zostávajú zachované, automaticky sa nehrajú.
 
+Úsek medzi `|` môže mať aj presne polovicu krokov taktu; prehrá sa dvakrát
+za sebou, aby vyplnil celý takt. Platí to pre základné patterny aj variácie.
+Pri `4/4` a `stepsPerBeat: 4` teda `"d.tt..s."` znie ako `"d.tt..s.d.tt..s."`.
+
 Djembe používa 29 samplov Tomáša Mareka z AfroPlayer, spoločných s Java verziou.
 `d/t/s` = bas/tón/slap, `D/T/S` = akcenty; `i/I`, `c/C`, `a/A` = tlmený tón,
 tlmený slap a alternatívny slap. Funguje aj pôvodný zápis `D/o/x/i` a pravdepodobnostné

@@ -54,10 +54,29 @@ public class LivePlaybackTest {
     private int renderedFrames(Rhythm definition, int bpm) throws Exception {
         var sink = new AudioSink();
         var tracks = definition.tracks().stream()
-                .map(track -> new BeepTrack(track.pattern(), impulse())).toList();
+                // Timing-only impulse supports x; preserve the positions of all instrument notes.
+                .map(track -> new BeepTrack(track.pattern().replaceAll("[a-zA-Z]", "x"), impulse())).toList();
         var rhythm = new Rhythm(definition.name(), tracks, bpm, definition.timeSignature(), definition.stepsPerBeat(), definition.dialect());
         new BeepSequencer(format -> sink.line).playPattern(rhythm, 1, 0);
         return sink.bytes.size() / 2;
+    }
+
+    @Test
+    public void halfBarsRepeatLocallyAndKeepFullBarDuration() throws Exception {
+        for (String shortPattern : List.of("x.......", "x.......|....x...")) {
+            String fullPattern = java.util.Arrays.stream(shortPattern.split("\\|"))
+                    .map(bar -> bar.repeat(2)).collect(java.util.stream.Collectors.joining("|"));
+            var shortSink = new AudioSink();
+            var fullSink = new AudioSink();
+            var shortRhythm = new Rhythm("Short", List.of(new BeepTrack(shortPattern, impulse())),
+                    120, new TimeSignature(4, 4), 4);
+            var fullRhythm = new Rhythm("Full", List.of(new BeepTrack(fullPattern, impulse())),
+                    120, new TimeSignature(4, 4), 4);
+            new BeepSequencer(format -> shortSink.line).playPattern(shortRhythm, 1, 0);
+            new BeepSequencer(format -> fullSink.line).playPattern(fullRhythm, 1, 0);
+            assertArrayEquals(fullSink.bytes.toByteArray(), shortSink.bytes.toByteArray());
+            assertEquals(88200 * shortPattern.split("\\|").length, shortSink.bytes.size() / 2);
+        }
     }
 
     @Test

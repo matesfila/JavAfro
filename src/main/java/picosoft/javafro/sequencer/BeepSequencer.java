@@ -122,7 +122,7 @@ public final class BeepSequencer implements Sequencer {
             throw new IllegalArgumentException("Rhythm must not be null.");
         }
         if (repetitions <= 0) throw new IllegalArgumentException("Repetitions must be greater than zero.");
-        play(rhythm.tracks(), repetitions, new PlaybackSettings(rhythm.bpm(), humanize), rhythm.stepsPerBeat(), rhythm.dialect());
+        play(expandedTracks(rhythm), repetitions, new PlaybackSettings(rhythm.bpm(), humanize), rhythm.stepsPerBeat(), rhythm.dialect());
     }
 
     /** Blocks until stop() is called; live controls are sampled before each new step. */
@@ -130,7 +130,15 @@ public final class BeepSequencer implements Sequencer {
         if (rhythm == null || settings == null) {
             throw new IllegalArgumentException("Rhythm and playback settings must not be null.");
         }
-        play(rhythm.tracks(), 0, settings, rhythm.stepsPerBeat(), rhythm.dialect());
+        play(expandedTracks(rhythm), 0, settings, rhythm.stepsPerBeat(), rhythm.dialect());
+    }
+
+    private List<BeepTrack> expandedTracks(Rhythm rhythm) {
+        return rhythm.tracks().stream()
+                .map(track -> new BeepTrack(
+                        rhythm.timeSignature().expandPattern(track.pattern(), rhythm.stepsPerBeat()),
+                        track.instrument()))
+                .toList();
     }
 
     @Override

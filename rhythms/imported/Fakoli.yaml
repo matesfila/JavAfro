@@ -1,22 +1,22 @@
 "Fakoli":
   name: "Fakoli"
   bpm: 97
-  timeSignature: "2/4"
+  timeSignature: "4/4"
   stepsPerBeat: 4
   dialect: [0, 0, 0, 0]
   tracks:
     djembe:
-      base: "d.tt..s.|d.tt..s."
+      base: "d.tt..s.d.tt..s."
     dundun:
-      base: "x...x...|x...x..."
+      base: "x...x...x...x..."
       variations:
-        - "x.x.x.x.|x.x.x...|x...x...|x...x...|x.x.x.x.|x.x.x...|x...x...|x...x...|x.x.x.x.|x.x.x...|...xx...|x...x...|xx......|x.xxx..."
+        - "x.x.x.x.x.x.x...|x...x...x...x...|x.x.x.x.x.x.x...|x...x...x...x...|x.x.x.x.x.x.x...|...xx...x...x...|xx......x.xxx..."
     sangban:
-      base: "x..x....|x.x.x..."
+      base: "x..x....x.x.x..."
       variations:
-        - "x.x.x.x.|x.x.x...|x..x....|x.x.x...|x.x.x.x.|x.x.x...|x..x....|x.x.x...|x.x.x.x.|x.x.x...|...xx...|x...x...|xx......|x.xxx..."
+        - "x.x.x.x.x.x.x...|x..x....x.x.x...|x.x.x.x.x.x.x...|x..x....x.x.x...|x.x.x.x.x.x.x...|...xx...x...x...|xx......x.xxx..."
     kensereni:
-      base: "..xx..x.|..xx..x."
+      base: "..xx..x...xx..x."
       variations:
-        - "x.x.x.x.|x.x.x...|..xx..x.|..xx..x.|x.x.x.x.|x.x.x...|..xx..x.|..xx..x.|x.x.x.x.|x.x.x...|...xx...|x...x...|xx......|x.xxx..."
-  legacy: {"source":"Fakoli.rb","symbol":"FAKOLI","notes":["Original 8/4 is 2/4 in the new timing model; BPM unchanged."],"definition":{"BPM":97,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["x.b.x.b.|x.b.x.b."],"variations":["x.x.x.x.|x.x.x...|x.b.x.b.|x.b.x.b.|x.x.x.x.|x.x.x...|x.b.x.b.|x.b.x.b.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"sangban":{"base":["x.bx.bb.|x.x.i.b."],"variations":["x.x.x.x.|x.x.x...|x.bx.bb.|x.x.i.b.|x.x.x.x.|x.x.x...|x.bx.bb.|x.x.i.b.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"kenken":{"base":["b.xx.bi.|b.xx.bi."],"variations":["x.x.x.x.|x.x.x...|b.xx.bi.|b.xx.bi.|x.x.x.x.|x.x.x...|b.xx.bi.|b.xx.bi.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"djembe":{"base":["ooxx.xx.|ooxxD.x."],"variations":["x.x.x.x.|x.x.x...|ooxx.xx.|ooxxD.x.|x.x.x.x.|x.x.x...|ooxx.xx.|ooxxD.x.|x.x.x.x.|x.x.x...|x..oo.x.|o.x.o.x.|oo.xx...|x.xxx..."]},"djembe2":{"base":["D.xxD.oo|D.xxD.oo"],"variations":["x.x.x.x.|x.x.x...|D.xxD.oo|D.xxD.oo|x.x.x.x.|x.x.x...|D.xxD.oo|D.xxD.oo|x.x.x.x.|x.x.x...|x..oo.x.|o.x.o.x.|oo.xx...|x.xxx..."]}}}}
+        - "x.x.x.x.x.x.x...|..xx..x...xx..x.|x.x.x.x.x.x.x...|..xx..x...xx..x.|x.x.x.x.x.x.x...|...xx...x...x...|xx......x.xxx..."
+  legacy: {"source":"Fakoli.rb","symbol":"FAKOLI","notes":["Original 8/4 sections were imported as 2/4, then paired into 4/4 bars; BPM and hit timing unchanged."],"definition":{"BPM":97,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["x.b.x.b.|x.b.x.b."],"variations":["x.x.x.x.|x.x.x...|x.b.x.b.|x.b.x.b.|x.x.x.x.|x.x.x...|x.b.x.b.|x.b.x.b.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"sangban":{"base":["x.bx.bb.|x.x.i.b."],"variations":["x.x.x.x.|x.x.x...|x.bx.bb.|x.x.i.b.|x.x.x.x.|x.x.x...|x.bx.bb.|x.x.i.b.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"kenken":{"base":["b.xx.bi.|b.xx.bi."],"variations":["x.x.x.x.|x.x.x...|b.xx.bi.|b.xx.bi.|x.x.x.x.|x.x.x...|b.xx.bi.|b.xx.bi.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"djembe":{"base":["ooxx.xx.|ooxxD.x."],"variations":["x.x.x.x.|x.x.x...|ooxx.xx.|ooxxD.x.|x.x.x.x.|x.x.x...|ooxx.xx.|ooxxD.x.|x.x.x.x.|x.x.x...|x..oo.x.|o.x.o.x.|oo.xx...|x.xxx..."]},"djembe2":{"base":["D.xxD.oo|D.xxD.oo"],"variations":["x.x.x.x.|x.x.x...|D.xxD.oo|D.xxD.oo|x.x.x.x.|x.x.x...|D.xxD.oo|D.xxD.oo|x.x.x.x.|x.x.x...|x..oo.x.|o.x.o.x.|oo.xx...|x.xxx..."]}}}}

@@ -8,6 +8,16 @@ function rhythm(meter = '4/4', steps = 4, pattern = 'xxxxxxxxxxxxxxxx') {
 const straight: Controls = { bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] };
 
 describe('sample clock scheduling', () => {
+  it('plays a half-bar-only track twice within a complete bar', () => {
+    const short = rhythm('4/4', 4, 'x.......');
+    const full = rhythm('4/4', 4, 'x.......x.......');
+    expect(short.length).toBe(16);
+    for (let step = 0; step < 16; step += 4) {
+      expect(planBeat(short, straight, step / 8, step))
+        .toEqual(planBeat(full, straight, step / 8, step));
+    }
+  });
+
   it('matches the Java 120 BPM example and moves only the second pulse', () => {
     const result = planBeat(rhythm(), { ...straight, dialect: [0, -0.4, 0, 0] }, 0, 0);
     expect(result.hits.map(h => h.time)).toEqual([0, 0.1, 0.25, 0.375]);

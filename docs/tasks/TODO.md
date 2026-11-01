@@ -6,7 +6,7 @@
 - [] Ovládacie prvky oddeliť do podpanelov
 - [] Generátor stringov - preskúmať, či existuje nejaká knižnica na generovanie stringov
   - cieľom by bolo mať možnosť v jednom riadku zapísať rôzne varianty patternu
-- [] Prehodnotiť zápis timeSignature a oddelovača taktov |
+- [x] Prehodnotiť zápis timeSignature a oddelovača taktov |
 - [] Zaviesť rodinu rytmov (meniť sa im bude zrejme dialekt)
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
 - [] Globálny konfiguračný súbor (tam by malo byť defaultné humanize, možno defaultné dialekty pre dané rodiny rytmov...)

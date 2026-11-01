@@ -54,12 +54,22 @@ describe('YAML compatibility with Java', () => {
     expect(() => parseRhythm(source.replace('dialect:', 'swing:'))).toThrow();
   });
 
+  it('expands each half bar independently, including variations', () => {
+    const rhythm = parseRhythm(source
+      .replace('x.......x.x.....', 'x.......|....x...')
+      .replace('x...............', 'xx......'));
+    expect(rhythm.tracks[0].base).toBe('x.......x.......|....x.......x...');
+    expect(rhythm.tracks[1].variations).toEqual(['xx......xx......']);
+    expect(rhythm.length).toBe(32);
+    expect(() => parseRhythm(source.replace('x.......x.x.....', 'x...'))).toThrow();
+  });
+
   it.each([
     source.replace('bpm: 120', 'bpm: 0'),
     source.replace('bpm: 120', 'bpm: 120.5'),
     source.replace('bpm: 120', 'bpm: 120\n  bpm: 100'),
     source.replace('dundun:', 'unknown:'),
-    source.replace('x.......x.x.....', 'x.......|x.x.....'),
+    source.replace('x.......x.x.....', 'x......|x.x......'),
     source.replace('[0, -0.4, 0, 0]', '[0, 0, 0]'),
     source.replace('[0, -0.4, 0, 0]', '[0, -1.1, 0, 0]'),
     source.replace('[0, -0.4, 0, 0]', '[0, .nan, 0, 0]'),

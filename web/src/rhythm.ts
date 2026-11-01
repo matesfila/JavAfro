@@ -35,10 +35,13 @@ function pattern(value: unknown, stepsPerBar: number, instrument: Instrument): s
   for (const note of source) if (note !== '.' && note !== '|' && !supportsNote(instrument, note)) {
     throw new Error(`Neznámy úder „${note}“ pre ${instrument}.`);
   }
-  for (const bar of source.split('|')) if (bar.length !== stepsPerBar) {
-    throw new Error(`Takt má ${bar.length} krokov, očakáva sa ${stepsPerBar}. Skontroluj metrum a stepsPerBeat.`);
-  }
-  return source;
+  return source.split('|').map(bar => {
+    if (bar.length * 2 === stepsPerBar) return bar.repeat(2);
+    if (bar.length !== stepsPerBar) {
+      throw new Error(`Takt má ${bar.length} krokov, očakáva sa ${stepsPerBar} alebo presná polovica (zahrá sa dvakrát). Skontroluj metrum a stepsPerBeat.`);
+    }
+    return bar;
+  }).join('|');
 }
 
 /** Same meter, subdivision and validation rules as the Java RhythmLoader. */

@@ -13,12 +13,6 @@ Na stiahnutie offline verzie na iPhone z vlastného PC spusti v `web` príkaz
 `npm run phone`. Podrobný postup lokálneho HTTPS, inštalácie certifikátu a
 pridania na plochu je v [návode pre telefóny](web/README.md#telefóny).
 
-## Samostatný PomodoroTimer
-
-PomodoroTimer bol presunutý do `C:/Projects/PomodoroTimer`. Je to nezávislý Maven projekt
-s vlastným `pom.xml`, run konfiguráciou, zvukovým alarmom a Windows balením.
-V IntelliJ ho otvor ako samostatný projekt. Postup spustenia je v jeho `README.md`.
-
 ## Swing prehrávač rytmov
 
 `picosoft.javafro.AfroJavaPlayer` otvorí editor YAML a ovládanie prehrávania:
@@ -205,6 +199,11 @@ jeden 4/4 takt bez pipe alebo dva 2/4 takty s pipe uprostred; pri rovnakých
 BPM a `stepsPerBeat: 4` znejú rovnako dlho. Predvolený Djole má pri 116 BPM
 cyklus dlhý približne 2,069 sekundy (štyri beaty).
 
+Každý úsek medzi `|` môže obsahovať aj presne polovicu krokov taktu. Vtedy sa
+pri prehrávaní zahrá dvakrát za sebou a vyplní celý takt. Napríklad pri `4/4`
+a `stepsPerBeat: 4` je `"d.tt..s."` skrátený zápis `"d.tt..s.d.tt..s."`.
+Pravidlo platí aj pre variácie; iné zlomky dĺžky taktu nie sú povolené.
+
 V zložených osminových metrách (6/8, 9/8, 12/8 atď.) BPM označuje bodkovanú
 štvrťovú dobu: tri osminy na beat. Inde BPM označuje štvrťovú dobu: dve osminy
 na beat. Preto 4/4 aj 12/8 majú pri rovnakom BPM štyri beaty na takt.
@@ -266,6 +265,18 @@ Prevod možno zopakovať príkazom (prepíše generované importy a ich archív)
 ```powershell
 node tools/import-afroplayer.cjs C:/Projects/AfroPlayer/src/rhythms
 ```
+
+Gambiu s pôvodným djembe groove a štyrmi variáciami možno obnoviť samostatne
+bez prepísania ostatných ručne upravených rytmov:
+
+```powershell
+node tools/import-gambia.cjs C:/Projects/AfroPlayer/src/rhythms/Gambia.rb
+```
+
+Používa 4/4 a 4 kroky na dobu. Groove zachováva pôvodné časovanie; údery v sólach
+so 6 a 7 znakmi sa zaokrúhľujú na najbližší krok. Počet aj poradie úderov zostávajú
+zachované. Dvojice pôvodných dvojdobých úsekov tvoria jeden takt.
+Pôvodné symboly djembe `D/o/x` sa prehrávajú priamo; zvonček `b` zostáva v archíve.
 
 ## Humanizácia patternov
 
