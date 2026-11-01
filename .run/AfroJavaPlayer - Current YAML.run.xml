@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="AfroJavaPlayer - Current YAML" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="picosoft.javafro.AfroJavaPlayer" />
+    <module name="JavAfro" />
+    <option name="PROGRAM_PARAMETERS" value="&quot;$FilePath$&quot;" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

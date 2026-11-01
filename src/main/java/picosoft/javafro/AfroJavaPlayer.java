@@ -33,19 +33,24 @@ public class AfroJavaPlayer {
         }
     }
 
+    static String readYaml(String[] args) throws IOException {
+        if (args.length == 0) return "";
+        if (args.length != 1 || args[0].isBlank()) {
+            throw new IllegalArgumentException("Použitie: AfroJavaPlayer [cesta-k-rytmu.yaml]\n"
+                    + "Zadaj najviac jeden YAML súbor. Cestu s medzerami uzavri do úvodzoviek.");
+        }
+        Path rhythmFile = Path.of(args[0]).toAbsolutePath().normalize();
+        if (!Files.isRegularFile(rhythmFile)) {
+            throw new IOException("Súbor rytmu neexistuje alebo nie je bežný súbor: " + rhythmFile);
+        }
+        return Files.readString(rhythmFile, StandardCharsets.UTF_8);
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
                 SandTheme.install();
-                String yaml;
-                if (args.length > 0) {
-                    yaml = Files.readString(Path.of(args[0]), StandardCharsets.UTF_8);
-                } else {
-                    try (var input = AfroJavaPlayer.class.getResourceAsStream("/rhythms/djole-samples.yaml")) {
-                        if (input == null) throw new IllegalStateException("Chýba predvolený rytmus djole.yaml.");
-                        yaml = new String(input.readAllBytes(), StandardCharsets.UTF_8);
-                    }
-                }
+                String yaml = readYaml(args);
                 RhythmPlayerPanel player = new RhythmPlayerPanel(yaml);
                 JFrame frame = new JFrame("JavAfro");
                 frame.setIconImages(loadIcons());

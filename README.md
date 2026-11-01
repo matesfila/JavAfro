@@ -8,11 +8,17 @@ Pomodoro časovač so Swing GUI a zvukovým upozornením.
 
 ```powershell
 mvn package
-& "$env:JAVA_HOME/bin/java.exe" -cp target/FocusTimer.jar picosoft.javafro.AfroJavaPlayer
+& "$env:JAVA_HOME/bin/java.exe" -cp target/FocusTimer.jar picosoft.javafro.AfroJavaPlayer "rhythms/djole-samples.yaml"
 ```
 
-Voliteľný argument je cesta k YAML súboru. V okne je aj tlačidlo **Otvoriť YAML…**.
-Predvolene sa načíta `rhythms/djole.yaml`. Editor RSyntaxTextArea zvýrazňuje YAML syntax,
+Voliteľný argument je cesta k jednému YAML súboru na disku (UTF-8).
+Bez argumentu sa otvorí prázdny editor; predvolený rytmus z resources sa nenačítava.
+Relatívna cesta sa vyhodnocuje voči pracovnému priečinku. V okne je aj tlačidlo **Otvoriť YAML…**.
+Jeden súbor `.yaml` alebo `.yml` možno tiež presunúť z Prieskumníka priamo do okna
+alebo editora. Načíta sa jeho obsah, tempo a swing. Počas prehrávania treba najprv
+stlačiť Stop. Viac súborov, priečinky a iné prípony sa odmietnu; pri neplatnom YAML
+zostane doterajší obsah zachovaný. Bežné kopírovanie a vkladanie textu funguje naďalej.
+Editor RSyntaxTextArea zvýrazňuje YAML syntax,
 zobrazuje čísla riadkov a pri stlačení Tab odsádza dvoma medzerami.
 Má veľkú plochu s neproporcionálnym
 písmom a posuvníkmi pre dlhšie zápisy. Musí obsahovať práve jeden rytmus.
@@ -37,6 +43,15 @@ sequencer.playContinuously(rhythm, controls);
 ```
 
 Pôvodné metódy s počtom opakovaní zostávajú dostupné.
+
+### Spustenie aktuálneho YAML v IntelliJ IDEA
+
+Zdieľaná run konfigurácia **AfroJavaPlayer - Current YAML** je v
+`.run/AfroJavaPlayer_Current_YAML.run.xml`. Otvor a ulož YAML súbor, nechaj ho
+aktívny v editore a spusti túto konfiguráciu. Makro `"$FilePath$"` odovzdá
+absolútnu cestu k aktuálne zvolenému súboru vrátane prípadných medzier.
+Konfigurácia používa modul `JavAfro`, hlavný vstup `picosoft.javafro.AfroJavaPlayer`
+a pracovný priečinok koreňa projektu. Pred spustením sa vykoná Build.
 
 ### Swing
 

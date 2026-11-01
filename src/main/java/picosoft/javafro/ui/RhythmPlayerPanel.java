@@ -12,6 +12,11 @@ import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.UncheckedIOException;
+import java.io.IOException;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.util.concurrent.ExecutionException;
 
 /** YAML editor and live controls. UI operations run on the EDT. */
@@ -94,6 +99,18 @@ public final class RhythmPlayerPanel extends JPanel {
         play.addActionListener(event -> startPlayback());
         stop.addActionListener(event -> stopPlayback());
         open.addActionListener(event -> openYaml());
+        editor.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent event) { update(); }
+            public void removeUpdate(DocumentEvent event) { update(); }
+            public void changedUpdate(DocumentEvent event) { update(); }
+            private void update() {
+                if (worker == null) play.setEnabled(!editor.getText().isBlank());
+            }
+        });
+        setTransferHandler(fileDropHandler(getTransferHandler()));
+        editor.setTransferHandler(fileDropHandler(editor.getTransferHandler()));
+        scroll.setTransferHandler(fileDropHandler(scroll.getTransferHandler()));
+        scroll.getViewport().setTransferHandler(fileDropHandler(scroll.getViewport().getTransferHandler()));
         loadYaml(yaml);
     }
 
@@ -119,6 +136,14 @@ public final class RhythmPlayerPanel extends JPanel {
     }
 
     private void loadYaml(String yaml) {
+        if (yaml.isBlank()) {
+            editor.setText("");
+            swingControls.setSwing(picosoft.javafro.base.Swing.straight(4));
+            swingYaml = "";
+            play.setEnabled(false);
+            status.setText("Otvor YAML alebo ho presuň do okna");
+            return;
+        }
         Rhythm rhythm = parseRhythm(yaml);
         editor.setText(yaml);
         editor.setCaretPosition(0);
@@ -131,13 +156,25 @@ public final class RhythmPlayerPanel extends JPanel {
     }
 
     private void openYaml() {
-        JFileChooser chooser = new JFileChooser("src/main/resources/rhythms");
+        JFileChooser chooser = new JFileChooser("rhythms");
         chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("YAML rytmy", "yaml", "yml"));
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
-                loadYaml(Files.readString(chooser.getSelectedFile().toPath(), StandardCharsets.UTF_8));
+                openFile(chooser.getSelectedFile().toPath());
             } catch (Exception exception) { showError(exception); }
         }
+    }
+
+    private TransferHandler fileDropHandler(TransferHandler fallback) {
+        return new YamlFileTransferHandler(fallback, () -> worker == null, path -> {
+            try { openFile(path); }
+            catch (IOException exception) { throw new UncheckedIOException(exception); }
+        }, this::showError);
+    }
+
+    private void openFile(Path path) throws IOException {
+        if (worker != null) throw new IllegalStateException("Pred otvorením iného rytmu zastav prehrávanie.");
+        loadYaml(Files.readString(path, StandardCharsets.UTF_8));
     }
 
     private void startPlayback() {
@@ -171,7 +208,7 @@ public final class RhythmPlayerPanel extends JPanel {
                 worker = null;
                 sequencer = null;
                 settings = null;
-                play.setEnabled(true);
+                play.setEnabled(!editor.getText().isBlank());
                 stop.setEnabled(false);
                 open.setEnabled(true);
                 status.setText("Zastavené");
