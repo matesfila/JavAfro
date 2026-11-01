@@ -32,4 +32,4 @@ async function collect(folder, relative = '') {
 await collect(path.join(root, 'rhythms'));
 entries.sort((a, b) => Number(a.imported) - Number(b.imported) || a.name.localeCompare(b.name));
 await writeFile(path.join(out, 'rhythms.json'), JSON.stringify(entries, null, 2));
-console.log(`JavAfro: synchronized ${entries.length} rhythms, three samples and application icons.`);
+console.log(`JavAfro: synchronized ${entries.length} rhythms, drum sample libraries and application icons.`);

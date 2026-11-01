@@ -146,6 +146,7 @@ public final class RhythmLoader {
             case "dundun" -> new DundunInstrument();
             case "sangban" -> new SangbanInstrument();
             case "kensereni" -> new KensereniInstrument();
+            case "djembe" -> new picosoft.javafro.instruments.sample.DjembeInstrument();
             default -> throw new IllegalArgumentException("Unknown instrument: " + id);
         };
     }

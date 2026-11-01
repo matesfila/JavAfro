@@ -1,13 +1,12 @@
-import { instruments, type Instrument, type Rhythm } from './rhythm';
+import { type Rhythm } from './rhythm';
 import { planBeat, validateControls, type Controls } from './timing';
-
-const sampleFiles: Record<Instrument, string> = { dundun: 'dundun.wav', sangban: 'sangban.wav', kensereni: 'kenkeni.wav' };
+import { samplesForInstrument } from './sounds';
 
 /** Schedules actual starts on AudioContext.currentTime, not on a UI timer. */
 export class AudioEngine {
   private context: AudioContext | null = null;
-  private buffers = new Map<Instrument, AudioBuffer>();
-  private loadPromise: Promise<void> | null = null;
+  private buffers = new Map<string, AudioBuffer>();
+  private pending = new Map<string, Promise<void>>();
   private interval: ReturnType<typeof setInterval> | null = null;
   private sources = new Set<AudioBufferSourceNode>();
   private gain: GainNode | null = null;
@@ -23,7 +22,7 @@ export class AudioEngine {
     validateControls(this.controls(), rhythm.stepsPerBeat);
     if (!this.context || this.context.state === 'closed') {
       this.context = new AudioContext({ latencyHint: 'interactive' });
-      this.buffers.clear(); this.loadPromise = null;
+      this.buffers.clear(); this.pending.clear();
       this.context.onstatechange = () => {
         if (this.active && this.context?.state !== 'running') {
           this.stop();
@@ -34,8 +33,7 @@ export class AudioEngine {
     const context = this.context;
     // Called directly from the Play gesture, before any file/network await (iOS).
     const resumed = context.resume();
-    this.loadPromise ??= this.load(context).catch(error => { this.loadPromise = null; throw error; });
-    await Promise.all([resumed, this.loadPromise]);
+    await Promise.all([resumed, this.load(context, rhythm)]);
     if (generation !== this.generation) return false;
     if (context.state !== 'running') throw new Error('Zvuk sa nepodarilo spustiť. Skús znova stlačiť Play.');
     this.active = true;
@@ -65,10 +63,13 @@ export class AudioEngine {
           const scheduledBeat = beat++;
           for (const hit of plan.hits) {
             const source = context.createBufferSource();
-            source.buffer = this.buffers.get(hit.instrument)!;
-            source.connect(this.gain!);
+            source.buffer = this.buffers.get(hit.sample)!;
+            source.playbackRate.value = hit.rate;
+            const volume = context.createGain();
+            volume.gain.value = hit.gain;
+            source.connect(volume); volume.connect(this.gain!);
             this.sources.add(source);
-            source.onended = () => { this.sources.delete(source); source.disconnect(); };
+            source.onended = () => { this.sources.delete(source); source.disconnect(); volume.disconnect(); };
             source.start(Math.max(now + 0.002, hit.time));
           }
           // This is visual feedback only; audio never depends on this callback.
@@ -86,12 +87,20 @@ export class AudioEngine {
     return true;
   }
 
-  private async load(context: AudioContext) {
-    await Promise.all(instruments.map(async instrument => {
-      const response = await fetch(`${import.meta.env.BASE_URL}generated/samples/${sampleFiles[instrument]}`);
-      if (!response.ok) throw new Error(`Nedá sa načítať sample ${instrument} (${response.status}).`);
-      const audio = await context.decodeAudioData(await response.arrayBuffer());
-      this.buffers.set(instrument, audio);
+  private async load(context: AudioContext, rhythm: Rhythm) {
+    const samples = new Set(rhythm.tracks.flatMap(track => samplesForInstrument(track.instrument)));
+    await Promise.all([...samples].map(sample => {
+      if (this.buffers.has(sample)) return Promise.resolve();
+      let loading = this.pending.get(sample);
+      if (!loading) {
+        loading = (async () => {
+          const response = await fetch(`${import.meta.env.BASE_URL}generated/samples/${sample}`);
+          if (!response.ok) throw new Error(`Nedá sa načítať sample ${sample} (${response.status}).`);
+          this.buffers.set(sample, await context.decodeAudioData(await response.arrayBuffer()));
+        })().finally(() => { this.pending.delete(sample); });
+        this.pending.set(sample, loading);
+      }
+      return loading;
     }));
   }
 

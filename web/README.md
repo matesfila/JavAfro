@@ -43,9 +43,16 @@ aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 ## Časovanie a formát
 
 Formát zodpovedá Java triede Rhythm: `timeSignature`, `stepsPerBeat`, `dialect`,
-tri tracky `dundun`, `sangban`, `kensereni`, string alebo objekt `base`/`variations`.
+tracky `dundun`, `sangban`, `kensereni`, `djembe`, string alebo objekt `base`/`variations`.
 Znak `x` hrá úder, `.` ticho, `|` oddeľuje celé takty bez pridaného času.
 Variácie a pôvodné `legacy` dáta zostávajú zachované, automaticky sa nehrajú.
+
+Djembe používa 29 samplov Tomáša Mareka z AfroPlayer, spoločných s Java verziou.
+`d/t/s` = bas/tón/slap, `D/T/S` = akcenty; `i/I`, `c/C`, `a/A` = tlmený tón,
+tlmený slap a alternatívny slap. Funguje aj pôvodný zápis `D/o/x/i` a pravdepodobnostné
+údery `E/p/y` (60 %) a `F/q/z` (12 %). Humanize ovplyvňuje čas aj jemné zmeny
+dynamiky a ladenia. V knižnici vyber **Djembe – ukážka**. Prehrávač načítava iba
+sample nástrojov aktuálneho rytmu a dekódované zvuky používa opakovane.
 
 Dialect má jednu hodnotu od −1 do +1 pre každý pulz: 0 je presná poloha,
 ±1 posúva o polovicu rovného kroku. Posuny aj humanizácia rešpektujú tempo.
@@ -59,7 +66,9 @@ Web Audio plánuje údery podľa zvukových hodín; časovač iba dopĺňa plán
 `public/generated/`. Zdroje upravuj v pôvodných adresároch, nie v generovanej kópii.
 Knižnica aj zvuky sa teda aktualizujú pri ďalšom spustení/buildovaní.
 
-Nahrávky JIMMYJAMES112 / Freesound a ikona djembe / SVG Repo sú CC0.
+Nahrávky troch dununov JIMMYJAMES112 / Freesound a ikona djembe / SVG Repo sú CC0.
+Djembe má samostatný pôvod a podmienky zo starého AfroPlayer; detaily sú v
+`generated/samples/djembe/README.md`, jeho mapovanie v spoločnom `samples/djembe.json`.
 Podrobné zdroje a úpravy sú v skopírovaných `generated/samples/README.md`
 a `generated/icons/README.txt`. Fonty Manrope a DM Sans sú pribalené lokálne
 cez Fontsource pod SIL Open Font License (licencie v príslušných npm balíkoch).

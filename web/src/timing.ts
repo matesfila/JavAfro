@@ -1,9 +1,10 @@
 import type { Instrument, Rhythm } from './rhythm';
+import { selectSound, type Sound } from './sounds';
 
 export const DEFAULT_HUMANIZE = 21;
 
 export interface Controls { bpm: number; humanize: number; dialect: number[] }
-export interface Hit { instrument: Instrument; time: number }
+export interface Hit extends Sound { instrument: Instrument; time: number }
 
 export function validateControls(controls: Controls, steps: number) {
   if (!Number.isFinite(controls.bpm) || controls.bpm <= 0 || 44100 * 60 / (controls.bpm * steps) < 4) {
@@ -29,8 +30,10 @@ export function planBeat(rhythm: Rhythm, controls: Controls, beatStart: number,
     const shifted = Math.max(0, nominal + step * controls.dialect[pulse] / 2);
     for (const track of rhythm.tracks) {
       const pattern = track.base.replaceAll('|', '');
-      if (pattern[position % pattern.length] === 'x') {
-        hits.push({ instrument: track.instrument, time: Math.max(0, shifted + (jitter ? (random() * 2 - 1) * jitter : 0)) });
+      const note = pattern[position % pattern.length];
+      if (note !== '.') {
+        const sound = selectSound(track.instrument, note, controls.humanize, random);
+        if (sound) hits.push({ ...sound, instrument: track.instrument, time: Math.max(0, shifted + (jitter ? (random() * 2 - 1) * jitter : 0)) });
       }
     }
   }

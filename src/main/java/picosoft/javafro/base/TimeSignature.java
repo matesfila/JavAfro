@@ -44,8 +44,8 @@ public record TimeSignature(int numerator, int denominator) {
 
     public void validatePattern(String pattern, int stepsPerBeat) {
         int expected = stepsPerBar(stepsPerBeat);
-        if (pattern == null || !pattern.matches("[x.]+(\\|[x.]+)*")) {
-            throw new IllegalArgumentException("Pattern must contain non-empty bars of 'x' and '.', separated by '|'.");
+        if (pattern == null || !pattern.matches("[a-zA-Z.]+(\\|[a-zA-Z.]+)*")) {
+            throw new IllegalArgumentException("Pattern must contain non-empty bars of note letters and '.', separated by '|'.");
         }
         for (String bar : pattern.split("\\|", -1)) {
             if (bar.length() != expected) {

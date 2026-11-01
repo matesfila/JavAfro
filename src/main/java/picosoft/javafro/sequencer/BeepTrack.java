@@ -11,17 +11,27 @@ public record BeepTrack(String pattern, Instrument instrument, List<String> vari
     }
 
     public BeepTrack {
-        if (pattern == null || !pattern.matches("[x.]+(\\|[x.]+)*")) {
-            throw new IllegalArgumentException("Pattern must contain non-empty bars of 'x' and '.', separated by '|'.");
+        if (pattern == null || !pattern.matches("[a-zA-Z.]+(\\|[a-zA-Z.]+)*")) {
+            throw new IllegalArgumentException("Pattern must contain non-empty bars of notes and '.', separated by '|'.");
         }
         if (instrument == null) {
             throw new IllegalArgumentException("Track instrument must not be null.");
         }
         if (variations == null || variations.stream().anyMatch(value -> value == null
-                || !value.matches("[x.]+(\\|[x.]+)*"))) {
+                || !value.matches("[a-zA-Z.]+(\\|[a-zA-Z.]+)*"))) {
             throw new IllegalArgumentException("Variations must be non-null valid patterns.");
         }
         variations = List.copyOf(variations);
+        validateNotes(pattern, instrument);
+        for (String variation : variations) validateNotes(variation, instrument);
+    }
+
+    private static void validateNotes(String pattern, Instrument instrument) {
+        for (char note : pattern.toCharArray()) {
+            if (note != '.' && note != '|' && !instrument.supportsNote(note)) {
+                throw new IllegalArgumentException("Unsupported note '" + note + "' for " + instrument.getClass().getSimpleName());
+            }
+        }
     }
 
     /** Explicit selection; the sequencer never chooses variations automatically. */

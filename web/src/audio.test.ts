@@ -18,7 +18,7 @@ class FakeContext {
     return { gain: { value: 0, cancelScheduledValues: vi.fn(), setTargetAtTime: vi.fn() }, connect: vi.fn(), disconnect: vi.fn() };
   }
   createBufferSource() {
-    const source = { buffer: null, onended: null, connect: vi.fn(), disconnect: vi.fn(), start: vi.fn(), stop: vi.fn() };
+    const source = { buffer: null, playbackRate: { value: 1 }, onended: null, connect: vi.fn(), disconnect: vi.fn(), start: vi.fn(), stop: vi.fn() };
     this.sources.push(source); return source;
   }
 }
@@ -31,6 +31,20 @@ beforeEach(() => {
 afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('audio lifecycle', () => {
+  it('loads djembe after playing an ordinary drum, then reuses the decoded multisamples', async () => {
+    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
+    await engine.start(rhythm);
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(1);
+    engine.stop();
+    const djembe = parseRhythm('dj:\n  name: Djembe\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    djembe: "dts............."');
+    expect(await engine.start(djembe)).toBe(true);
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(30);
+    engine.stop();
+    expect(await engine.start(djembe)).toBe(true);
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(30);
+    engine.dispose();
+  });
+
   it('schedules on the audio clock, then stops every queued source and timer', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
     expect(await engine.start(rhythm)).toBe(true);

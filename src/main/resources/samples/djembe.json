@@ -1,0 +1,150 @@
+{
+  "dynamic": 0.07,
+  "pitch": 0.005,
+  "banks": {
+    "bass": [
+      "djembe/dj_tm_bass.wav"
+    ],
+    "tone": [
+      "djembe/dj_tm_ton_v1.wav",
+      "djembe/dj_tm_ton_v2.wav",
+      "djembe/dj_tm_ton_v3.wav",
+      "djembe/dj_tm_ton_v4.wav",
+      "djembe/dj_tm_ton_v5.wav",
+      "djembe/dj_tm_ton_v6.wav"
+    ],
+    "slap": [
+      "djembe/dj_tm_slap_v1.wav",
+      "djembe/dj_tm_slap_v2.wav",
+      "djembe/dj_tm_slap_v3.wav",
+      "djembe/dj_tm_slap_v4.wav",
+      "djembe/dj_tm_slap_v5.wav",
+      "djembe/dj_tm_slap_v6.wav",
+      "djembe/dj_tm_slap_v7.wav",
+      "djembe/dj_tm_slap_v8.wav"
+    ],
+    "closed": [
+      "djembe/dj_tm_tonclos_v1.wav",
+      "djembe/dj_tm_tonclos_v2.wav",
+      "djembe/dj_tm_tonclos_v3.wav"
+    ],
+    "closedSlap": [
+      "djembe/dj_tm_slapclos_v1.wav",
+      "djembe/dj_tm_slapclos_v2.wav",
+      "djembe/dj_tm_slapclos_v3.wav"
+    ],
+    "alternateSlap": [
+      "djembe/dj_tm_slap2_v1.wav",
+      "djembe/dj_tm_slap2_v2.wav",
+      "djembe/dj_tm_slap2_v3.wav",
+      "djembe/dj_tm_slap2_v4.wav",
+      "djembe/dj_tm_slap2_v5.wav",
+      "djembe/dj_tm_slap2_v6.wav",
+      "djembe/dj_tm_slap2_v7.wav",
+      "djembe/dj_tm_slap2_v8.wav"
+    ]
+  },
+  "notes": {
+    "d": {
+      "bank": "bass",
+      "gain": 0.7,
+      "probability": 1
+    },
+    "D": {
+      "bank": "bass",
+      "gain": 1,
+      "probability": 1
+    },
+    "t": {
+      "bank": "tone",
+      "gain": 1.4,
+      "probability": 1
+    },
+    "T": {
+      "bank": "tone",
+      "gain": 2,
+      "probability": 1
+    },
+    "s": {
+      "bank": "slap",
+      "gain": 1.4,
+      "probability": 1
+    },
+    "S": {
+      "bank": "slap",
+      "gain": 2,
+      "probability": 1
+    },
+    "i": {
+      "bank": "closed",
+      "gain": 2,
+      "probability": 1
+    },
+    "I": {
+      "bank": "closed",
+      "gain": 2,
+      "probability": 1
+    },
+    "c": {
+      "bank": "closedSlap",
+      "gain": 1.4,
+      "probability": 1
+    },
+    "C": {
+      "bank": "closedSlap",
+      "gain": 2,
+      "probability": 1
+    },
+    "a": {
+      "bank": "alternateSlap",
+      "gain": 1.4,
+      "probability": 1
+    },
+    "A": {
+      "bank": "alternateSlap",
+      "gain": 2,
+      "probability": 1
+    },
+    "x": {
+      "bank": "slap",
+      "gain": 2,
+      "probability": 1
+    },
+    "o": {
+      "bank": "tone",
+      "gain": 2,
+      "probability": 1
+    },
+    "E": {
+      "bank": "bass",
+      "gain": 1,
+      "probability": 0.6
+    },
+    "F": {
+      "bank": "bass",
+      "gain": 1,
+      "probability": 0.12
+    },
+    "y": {
+      "bank": "slap",
+      "gain": 2,
+      "probability": 0.6
+    },
+    "z": {
+      "bank": "slap",
+      "gain": 2,
+      "probability": 0.12
+    },
+    "p": {
+      "bank": "tone",
+      "gain": 2,
+      "probability": 0.6
+    },
+    "q": {
+      "bank": "tone",
+      "gain": 2,
+      "probability": 0.12
+    }
+  },
+  "outputGain": 0.45
+}

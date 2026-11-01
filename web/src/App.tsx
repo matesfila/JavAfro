@@ -5,7 +5,7 @@ import { parseRhythm, type CatalogEntry, type Rhythm } from './rhythm';
 import { DEFAULT_HUMANIZE, type Controls } from './timing';
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}generated/${path}`;
-const instrumentNames = { dundun: 'Dundun', sangban: 'Sangban', kensereni: 'Kenkeni' };
+const instrumentNames = { dundun: 'Dundun', sangban: 'Sangban', kensereni: 'Kenkeni', djembe: 'Djembe' };
 
 function PlayIcon() { return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6 3.5v13l11-6.5z" /></svg>; }
 function FolderIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M2 6V4h6l2 2h8v10H2V6Z" /><path d="M2 8h16" /></svg>; }
@@ -160,7 +160,7 @@ export function App() {
 
     <main>
       <section className="intro"><div><p className="eyebrow">PRIESTOR PRE TVOJ GROOVE</p><h1>Nájdi svoj rytmus<span>.</span></h1>
-        <p className="intro-copy">Tri bubny. Nekonečne veľa možností. Otvor rytmus a daj mu vlastný pulz.</p></div>
+        <p className="intro-copy">Bubny, ktoré majú čo povedať. Otvor rytmus a daj mu vlastný pulz.</p></div>
         <div className="library-field"><label htmlFor="library">Knižnica rytmov <span>{catalog.length ? String(catalog.length).padStart(2, '0') : '—'}</span></label>
           <select id="library" value={selected} disabled={busy || isLoading} onChange={event => {
             const entry = catalog.find(entry => entry.id === event.target.value); if (entry) void loadLibrary(entry);
@@ -222,7 +222,7 @@ export function App() {
           <p className="dialect-help"><span>Skôr ← <strong>0 = presne</strong> → Neskôr</span><span>Nezávislé posuny · ± polovica kroku · rovnaké BPM</span></p>
         </section>
       </div>
-      <footer className="studio-footer"><div><img src={asset('icons/djembe.svg')} alt="" /><span>{displayedRhythm?.tracks.map(t => instrumentNames[t.instrument]).join(' · ') || 'Dundun · Sangban · Kenkeni'}<small>Reálne nahrávky bubnov · JIMMYJAMES112 / Freesound · CC0</small></span></div>
+      <footer className="studio-footer"><div><img src={asset('icons/djembe.svg')} alt="" /><span>{displayedRhythm?.tracks.map(t => instrumentNames[t.instrument]).join(' · ') || 'Dundun · Sangban · Kenkeni'}<small>{displayedRhythm?.tracks.some(t => t.instrument === 'djembe') ? 'Djembe · Tomáš Marek / AfroPlayer' : 'Reálne nahrávky bubnov · JIMMYJAMES112 / Freesound · CC0'}</small></span></div>
         <span>Vyrobené pre rytmus.<small>JavAfro / web</small></span></footer>
     </main>
   </div>;

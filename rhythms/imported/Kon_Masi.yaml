@@ -5,6 +5,8 @@
   stepsPerBeat: 3
   dialect: [0, -0.33, 0]
   tracks:
+    djembe:
+      base: "s.ts..s.ts.."
     dundun:
       base: ".xx....xx.xx"
     sangban:

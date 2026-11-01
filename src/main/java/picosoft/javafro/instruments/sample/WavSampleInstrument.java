@@ -11,7 +11,11 @@ public abstract class WavSampleInstrument implements Instrument {
     private final WavInstrument audio;
 
     protected WavSampleInstrument(String resource) {
-        audio = CACHE.computeIfAbsent(resource, path -> {
+        audio = loadSample(resource);
+    }
+
+    static WavInstrument loadSample(String resource) {
+        return CACHE.computeIfAbsent(resource, path -> {
             var url = WavSampleInstrument.class.getResource(path);
             if (url == null) throw new IllegalArgumentException("Missing wav sample: " + path);
             try {

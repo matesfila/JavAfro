@@ -100,6 +100,39 @@ aj po Stop/Play. Dialect je zatiaľ spoločný pre všetky tracky.
 
 ## Rhythm
 
+### Djembe z AfroPlayer
+
+Nástroj `picosoft.javafro.instruments.sample.DjembeInstrument` používa 29 pôvodných
+samplov Tomáša Mareka. Funguje v Java aj webovom prehrávači; v knižnici je
+`rhythms/djembe-demo.yaml` s ukážkou všetkých úderov aj pôvodného zápisu.
+
+```yaml
+djembe-demo:
+  name: "Djembe"
+  bpm: 100
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  dialect: [0, 0, 0, 0]
+  tracks:
+    djembe: "d..t.s..D.tt.S.."
+```
+
+`d` = bas, `t` = tón, `s` = slap; `D/T/S` sú akcenty (malé písmená majú 70 %
+ich hlasitosti). `i/I` hrá tlmený tón, `c/C` tlmený slap a `a/A` alternatívny slap.
+Pôvodné `i` ostáva na pôvodnej hlasitosti. `.` znamená ticho a `|` oddeľuje takty.
+Ostatné bubny naďalej povoľujú iba `x` a `.`.
+
+Zachovaný je aj pôvodný zápis AfroPlayer: `D/o/x/i`. Znaky `E/p/y` hrajú bas/tón/slap
+s pravdepodobnosťou 60 %, `F/q/z` s 12 %; neznamenajú nižšiu hlasitosť.
+Každý úder náhodne vyberá jeden multisample. Humanize navyše mení hlasitosť
+(pri 100 ±0,07) a ladenie/rýchlosť (±0,5 %); pri 0 sú tieto odchýlky vypnuté.
+Výber samplu aj parametre zostávajú nemenné počas celého doznievania úderu.
+
+Zdroje a prevod audio súborov sú zdokumentované v
+`src/main/resources/samples/djembe/README.md`. Spoločný manifest `samples/djembe.json`
+riadi mapovanie a hlasitosti v oboch prehrávačoch. Pri používaní nástroja nie je
+potrebný AfroPlayer, Sonic Pi ani FFmpeg.
+
 ### Nahraté zvuky bubnov
 
 Nahraté nástroje `DundunInstrument`, `SangbanInstrument` a `KensereniInstrument`

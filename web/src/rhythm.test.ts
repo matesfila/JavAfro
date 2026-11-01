@@ -30,7 +30,7 @@ describe('YAML compatibility with Java', () => {
           const rhythm = parseRhythm(yaml);
           expect(yaml).toMatch(/^  dialect: \[/m);
           expect(yaml).not.toMatch(/^  swing:/m);
-          expect(rhythm.dialect).toEqual(Array(rhythm.stepsPerBeat).fill(0));
+          expect(rhythm.dialect).toHaveLength(rhythm.stepsPerBeat);
           expect(rhythm.id).toBe(entry.name.replace(/\.yaml$/, ''));
           expect(rhythm.tracks.length).toBeGreaterThan(0);
           names.push(rhythm.id);

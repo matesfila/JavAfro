@@ -1,6 +1,7 @@
 import { parseDocument } from 'yaml';
+import { supportsNote } from './sounds';
 
-export const instruments = ['dundun', 'sangban', 'kensereni'] as const;
+export const instruments = ['dundun', 'sangban', 'kensereni', 'djembe'] as const;
 export type Instrument = typeof instruments[number];
 export interface Track { instrument: Instrument; base: string; variations: string[] }
 export interface Rhythm {
@@ -28,9 +29,12 @@ function integer(value: unknown, field: string, maximum = 2147483647): number {
 function keys(value: Record<string, unknown>, allowed: string[], field: string) {
   for (const key of Object.keys(value)) if (!allowed.includes(key)) throw new Error(`${field}: neznáme pole „${key}“.`);
 }
-function pattern(value: unknown, stepsPerBar: number): string {
+function pattern(value: unknown, stepsPerBar: number, instrument: Instrument): string {
   const source = text(value, 'Pattern');
-  if (!/^[x.]+(\|[x.]+)*$/.test(source)) throw new Error('Pattern: povolené sú x, . a oddeľovač taktov |.');
+  if (!/^[a-zA-Z.]+(\|[a-zA-Z.]+)*$/.test(source)) throw new Error('Pattern: očakávajú sa znaky úderov, . a oddeľovač taktov |.');
+  for (const note of source) if (note !== '.' && note !== '|' && !supportsNote(instrument, note)) {
+    throw new Error(`Neznámy úder „${note}“ pre ${instrument}.`);
+  }
   for (const bar of source.split('|')) if (bar.length !== stepsPerBar) {
     throw new Error(`Takt má ${bar.length} krokov, očakáva sa ${stepsPerBar}. Skontroluj metrum a stepsPerBeat.`);
   }
@@ -77,10 +81,10 @@ export function parseRhythm(source: string): Rhythm {
         base = track.base;
         if ('variations' in track) {
           if (!Array.isArray(track.variations)) throw new Error('Variations musí byť zoznam patternov.');
-          variations = track.variations.map(value => pattern(value, stepsPerBar));
+          variations = track.variations.map(value => pattern(value, stepsPerBar, instrument as Instrument));
         }
       }
-      return { instrument: instrument as Instrument, base: pattern(base, stepsPerBar), variations };
+      return { instrument: instrument as Instrument, base: pattern(base, stepsPerBar, instrument as Instrument), variations };
     } catch (error) { throw new Error(`${instrument}: ${(error as Error).message}`); }
   });
   return { id, name, bpm, timeSignature, stepsPerBeat, stepsPerBar, dialect: [...dialect], tracks,

@@ -10,6 +10,15 @@ import javax.sound.sampled.SourceDataLine;
  * Čas vo vzorkách sa vždy počíta od začiatku konkrétneho úderu pri 44 100 Hz.
  */
 public interface Instrument {
+    /** Notes this instrument understands; a dot is handled as silence by the sequencer. */
+    default boolean supportsNote(char note) { return note == 'x'; }
+
+    /** Select one immutable voice per hit, so multisamples never change during a sounding note. */
+    default Instrument voice(char note, int humanize) {
+        if (!supportsNote(note)) throw new IllegalArgumentException("Unsupported note: " + note);
+        return this;
+    }
+
     /** Vráti normalizovanú vzorku v intervale [-1, 1] {@code sampleIndex} vzoriek po začiatku úderu. */
     double sample(long sampleIndex);
 

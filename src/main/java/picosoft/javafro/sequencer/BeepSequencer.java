@@ -233,11 +233,14 @@ public final class BeepSequencer implements Sequencer {
                             * controls.humanize() / 100.0);
 
                     for (BeepTrack track : validatedTracks) {
-                        if (track.pattern().charAt(pulse % track.pattern().length()) == 'x') {
-                            long length = track.instrument().lengthSamples(pulseSamples);
+                        char note = track.pattern().charAt(pulse % track.pattern().length());
+                        if (note != '.') {
+                            Instrument voice = track.instrument().voice(note, controls.humanize());
+                            if (voice == null) continue; // Probability notes may intentionally skip a hit.
+                            long length = voice.lengthSamples(pulseSamples);
                             if (length > 0) {
                                 long start = humanizedStart(Math.max(0, position + dialectOffset), maxOffset);
-                                voices.add(new Voice(track.instrument(), Math.max(renderedPosition, start), length));
+                                voices.add(new Voice(voice, Math.max(renderedPosition, start), length));
                             }
                         }
                     }

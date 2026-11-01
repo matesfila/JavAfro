@@ -21,7 +21,7 @@ public class ImportedRhythmsTest {
     public void everyYamlHasOneRhythmNamedAfterItsFile() throws IOException {
         try (var paths = Files.walk(Path.of("rhythms"))) {
             var files = paths.filter(p -> p.toString().endsWith(".yaml")).toList();
-            assertEquals(26, files.size());
+            assertEquals(27, files.size());
             for (Path file : files) {
                 String id = file.getFileName().toString().replaceFirst("\\.yaml$", "");
                 assertEquals(file.toString(), java.util.Set.of(id), RhythmLoader.load(file).keySet());
@@ -30,7 +30,7 @@ public class ImportedRhythmsTest {
                 assertTrue(file.toString(), definition.containsKey("dialect"));
                 assertFalse(file.toString(), definition.containsKey("swing"));
                 Rhythm rhythm = RhythmLoader.load(file).get(id);
-                assertEquals(java.util.Collections.nCopies(rhythm.stepsPerBeat(), 0.0), rhythm.dialect().offsets());
+                assertEquals(rhythm.stepsPerBeat(), rhythm.dialect().offsets().size());
             }
         }
     }

@@ -1,0 +1,19 @@
+djembe-demo:
+  name: "Djembe – ukážka"
+  bpm: 100
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  dialect: [0, 0, 0, 0]
+
+  tracks:
+    dundun:    "x.......x......."
+    sangban:   "....x.......x..."
+    kensereni: "..x...x...x...x."
+    djembe:
+      # d = bas, t = tón, s = slap; veľké písmená sú akcenty.
+      base: "d..t.s..D.tt.S.."
+      variations:
+        # i = tlmený tón, c = tlmený slap, a = alternatívny slap.
+        - "D.tsI.c.a.T.s..."
+        # Pôvodné značky AfroPlayer: D/o/x/i, E/p/y (60 %), F/q/z (12 %).
+        - "D.oxE.pyF.qz.i.."
