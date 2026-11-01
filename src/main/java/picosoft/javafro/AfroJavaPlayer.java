@@ -54,7 +54,7 @@ public class AfroJavaPlayer {
                 RhythmPlayerPanel player = new RhythmPlayerPanel(yaml);
                 JFrame frame = new JFrame("JavAfro");
                 frame.setIconImages(loadIcons());
-                frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 frame.setContentPane(player);
                 frame.setMinimumSize(new Dimension(760, 560));
                 frame.pack();
@@ -67,6 +67,7 @@ public class AfroJavaPlayer {
                 frame.setVisible(true);
             } catch (Exception exception) {
                 JOptionPane.showMessageDialog(null, exception.getMessage(), "JavAfro", JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
             }
         });
     }
