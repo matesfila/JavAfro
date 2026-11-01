@@ -2,6 +2,13 @@
 
 Prehrávač afrických rytmov so Swing GUI, YAML editorom a zvukovými samplami.
 
+## Webová verzia
+
+V adresári [web](web/README.md) je React/TypeScript verzia s YAML editorom,
+rovnakými rytmami a samplami, nepretržitým prehrávaním, tempom, humanizáciou
+a swingom. Spustenie: `cd web`, `npm ci`, `npm run dev`.
+Nepotrebuje Java backend; produkčný build vytvorí statický adresár `web/dist`.
+
 ## Samostatný PomodoroTimer
 
 PomodoroTimer bol presunutý do `C:/Projects/PomodoroTimer`. Je to nezávislý Maven projekt

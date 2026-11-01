@@ -1,0 +1,88 @@
+import { parseDocument } from 'yaml';
+
+export const instruments = ['dundun', 'sangban', 'kensereni'] as const;
+export type Instrument = typeof instruments[number];
+export interface Track { instrument: Instrument; base: string; variations: string[] }
+export interface Rhythm {
+  id: string; name: string; bpm: number; timeSignature: string;
+  stepsPerBeat: number; stepsPerBar: number; swing: number[]; tracks: Track[]; length: number;
+}
+export interface CatalogEntry {
+  id: string; key: string; name: string; bpm: number; timeSignature: string; imported: boolean;
+}
+
+const record = (value: unknown, field: string): Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error(`${field}: očakáva sa mapa.`);
+  return value as Record<string, unknown>;
+};
+function text(value: unknown, field: string): string {
+  if (typeof value !== 'string' || !value.trim()) throw new Error(`${field}: očakáva sa neprázdny text.`);
+  return value;
+}
+function integer(value: unknown, field: string, maximum = 2147483647): number {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 1 || value > maximum) {
+    throw new Error(`${field}: očakáva sa kladné celé číslo (najviac ${maximum}).`);
+  }
+  return value;
+}
+function keys(value: Record<string, unknown>, allowed: string[], field: string) {
+  for (const key of Object.keys(value)) if (!allowed.includes(key)) throw new Error(`${field}: neznáme pole „${key}“.`);
+}
+function pattern(value: unknown, stepsPerBar: number): string {
+  const source = text(value, 'Pattern');
+  if (!/^[x.]+(\|[x.]+)*$/.test(source)) throw new Error('Pattern: povolené sú x, . a oddeľovač taktov |.');
+  for (const bar of source.split('|')) if (bar.length !== stepsPerBar) {
+    throw new Error(`Takt má ${bar.length} krokov, očakáva sa ${stepsPerBar}. Skontroluj metrum a stepsPerBeat.`);
+  }
+  return source;
+}
+
+/** Same meter, subdivision and validation rules as the Java RhythmLoader. */
+export function parseRhythm(source: string): Rhythm {
+  if (source.length > 3 * 1024 * 1024) throw new Error('YAML je príliš veľký (limit 3 MB).');
+  const document = parseDocument(source, { version: '1.1', uniqueKeys: true });
+  if (document.errors.length) throw new Error(document.errors[0].message);
+  const definitions = record(document.toJS({ maxAliasCount: 50 }), 'YAML');
+  const ids = Object.keys(definitions);
+  if (ids.length !== 1) throw new Error('Editor musí obsahovať práve jeden rytmus.');
+  const id = text(ids[0], 'Identifikátor');
+  const data = record(definitions[id], id);
+  keys(data, ['name', 'bpm', 'timeSignature', 'stepsPerBeat', 'swing', 'tracks', 'legacy'], id);
+  const name = text(data.name, 'Názov');
+  const bpm = integer(data.bpm, 'BPM');
+  const timeSignature = data.timeSignature === undefined ? '4/4' : text(data.timeSignature, 'Metrum');
+  if (!/^[1-9][0-9]*\/[48]$/.test(timeSignature)) throw new Error('Metrum: očakáva sa napríklad 4/4 alebo 12/8.');
+  const [numerator, denominator] = timeSignature.split('/').map(Number);
+  integer(numerator, 'Čitateľ metra', 1073741823);
+  const compound = denominator === 8 && numerator >= 6 && numerator % 3 === 0;
+  const defaultSteps = compound ? 3 : 2;
+  const stepsPerBeat = data.stepsPerBeat === undefined ? defaultSteps : integer(data.stepsPerBeat, 'stepsPerBeat', 10000);
+  const stepsPerBar = (denominator === 4 ? numerator * 2 : numerator) * stepsPerBeat / defaultSteps;
+  if (!Number.isInteger(stepsPerBar) || stepsPerBar > 2147483647) throw new Error('Metrum a delenie nevytvárajú celý počet krokov na takt.');
+  const swing: number[] = data.swing === undefined ? Array(stepsPerBeat).fill(0) : data.swing as number[];
+  if (!Array.isArray(swing) || swing.length !== stepsPerBeat || swing.some(n => typeof n !== 'number' || !Number.isFinite(n) || Math.abs(n) > 1)) {
+    throw new Error(`Swing musí obsahovať ${stepsPerBeat} hodnôt medzi −1 a +1.`);
+  }
+  if ('legacy' in data) record(data.legacy, 'Legacy archív');
+  const rawTracks = record(data.tracks, 'Tracks');
+  if (!Object.keys(rawTracks).length) throw new Error('Rytmus musí mať aspoň jeden track.');
+  const tracks = Object.entries(rawTracks).map(([instrument, definition]): Track => {
+    if (!instruments.includes(instrument as Instrument)) throw new Error(`Neznámy nástroj „${instrument}“.`);
+    try {
+      let base = definition;
+      let variations: string[] = [];
+      if (typeof definition !== 'string') {
+        const track = record(definition, 'Track');
+        keys(track, ['base', 'variations'], 'Track');
+        base = track.base;
+        if ('variations' in track) {
+          if (!Array.isArray(track.variations)) throw new Error('Variations musí byť zoznam patternov.');
+          variations = track.variations.map(value => pattern(value, stepsPerBar));
+        }
+      }
+      return { instrument: instrument as Instrument, base: pattern(base, stepsPerBar), variations };
+    } catch (error) { throw new Error(`${instrument}: ${(error as Error).message}`); }
+  });
+  return { id, name, bpm, timeSignature, stepsPerBeat, stepsPerBar, swing: [...swing], tracks,
+    length: Math.max(...tracks.map(t => t.base.replaceAll('|', '').length)) };
+}

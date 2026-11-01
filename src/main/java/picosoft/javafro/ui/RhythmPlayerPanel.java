@@ -26,7 +26,7 @@ public final class RhythmPlayerPanel extends JPanel {
     private final JButton stop = new JButton("Stop");
     private final JButton open = new JButton("Otvoriť YAML…");
     private final JSlider tempo = new JSlider(20, 300, 116);
-    private final JSlider humanize = new JSlider(0, 100, 40);
+    private final JSlider humanize = new JSlider(0, 100, PlaybackSettings.DEFAULT_HUMANIZE);
     private final JLabel status = new JLabel("Pripravené");
     private PlaybackSettings settings;
     private final SwingControls swingControls = new SwingControls(swing -> {

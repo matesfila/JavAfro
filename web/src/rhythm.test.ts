@@ -1,0 +1,62 @@
+import { describe, expect, it } from 'vitest';
+import { readdirSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import { parseRhythm } from './rhythm';
+
+const source = `Test:
+  name: Test
+  bpm: 120
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  swing: [0, -0.4, 0, 0]
+  tracks:
+    dundun: "x.......x.x....."
+    sangban:
+      base: "....x.......x..."
+      variations: ["x..............."]
+`;
+
+describe('YAML compatibility with Java', () => {
+  it('loads every real rhythm from the shared Java project library', () => {
+    const root = fileURLToPath(new URL('../../rhythms/', import.meta.url));
+    const names: string[] = [];
+    function visit(folder: string) {
+      for (const entry of readdirSync(folder, { withFileTypes: true })) {
+        const file = path.join(folder, entry.name);
+        if (entry.isDirectory()) visit(file);
+        else if (entry.name.endsWith('.yaml')) {
+          const rhythm = parseRhythm(readFileSync(file, 'utf8'));
+          expect(rhythm.id).toBe(entry.name.replace(/\.yaml$/, ''));
+          expect(rhythm.tracks.length).toBeGreaterThan(0);
+          names.push(rhythm.id);
+        }
+      }
+    }
+    visit(root);
+    expect(names).toEqual(expect.arrayContaining(['djole', 'Soli', 'Kon_Masi', 'Soko'.toLowerCase()]));
+  });
+
+  it('retains base patterns, variations and independent swing offsets', () => {
+    const rhythm = parseRhythm(source);
+    expect(rhythm.length).toBe(16);
+    expect(rhythm.stepsPerBar).toBe(16);
+    expect(rhythm.swing).toEqual([0, -0.4, 0, 0]);
+    expect(rhythm.tracks[1].variations).toEqual(['x...............']);
+  });
+
+  it.each([
+    source.replace('bpm: 120', 'bpm: 0'),
+    source.replace('bpm: 120', 'bpm: 120.5'),
+    source.replace('bpm: 120', 'bpm: 120\n  bpm: 100'),
+    source.replace('dundun:', 'unknown:'),
+    source.replace('x.......x.x.....', 'x.......|x.x.....'),
+    source.replace('[0, -0.4, 0, 0]', '[0, 0, 0]'),
+    source.replace('[0, -0.4, 0, 0]', '[0, -1.1, 0, 0]'),
+    source.replace('[0, -0.4, 0, 0]', '[0, .nan, 0, 0]'),
+    source.replace('[0, -0.4, 0, 0]', '[0, "0", 0, 0]'),
+    source.replace('variations:', 'variation:'),
+    source.replace('timeSignature: "4/4"', 'timeSignature: "4/3"'),
+    source + source.replace('Test', 'Another'),
+  ])('rejects invalid definitions', yaml => { expect(() => parseRhythm(yaml)).toThrow(); });
+});

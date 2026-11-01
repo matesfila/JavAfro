@@ -4,6 +4,8 @@ import picosoft.javafro.base.Swing;
 
 /** Thread-safe live controls, shared by the UI and the audio thread. */
 public final class PlaybackSettings {
+    public static final int DEFAULT_HUMANIZE = 21;
+
     public record Values(int bpm, int humanize, Swing swing) {
         public Values(int bpm, int humanize) { this(bpm, humanize, null); }
     }
