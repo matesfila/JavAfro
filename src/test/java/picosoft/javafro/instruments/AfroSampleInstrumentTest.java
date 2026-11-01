@@ -32,6 +32,14 @@ public class AfroSampleInstrumentTest {
         return (sample.sample(left) * (1 - fraction) + sample.sample(left + 1) * fraction) * gain;
     }
 
+    private double configuredGain(String bank) throws Exception {
+        try (var input = getClass().getResourceAsStream("/samples/afroplayer-samples.yaml")) {
+            Map<?, ?> manifest = new Yaml().load(input);
+            Map<?, ?> definition = (Map<?, ?>) ((Map<?, ?>) manifest.get("banks")).get(bank);
+            return ((Number) definition.get("gain")).doubleValue();
+        }
+    }
+
     @Test public void sampleInstrumentsRequireAnExplicitNoteBeforeRenderingOrPlaying() {
         for (Instrument instrument : List.of(new DjembeInstrument(fixed()), new Djembe2Instrument(fixed()),
                 new DundunInstrument(fixed()), new SangbanInstrument(fixed()), new KensereniInstrument(fixed()),
@@ -91,10 +99,10 @@ public class AfroSampleInstrumentTest {
         WavInstrument closedSample = wav("afroplayer-dunduns/dundun_closed_v1.wav");
         WavInstrument bellSample = wav("afroplayer-dunduns/dundun_bell_open_v1.wav");
         for (long i : new long[]{0, 127, 500, 1001, 8000}) {
-            double expectedBell = value(bellSample, i, .8, .8);
+            double expectedBell = value(bellSample, i, .8, configuredGain("bell_dun"));
             assertEquals(expectedBell, bell.sample(i), 1e-12);
-            assertEquals(value(openSample, i, .74, 2.2) + expectedBell, open.sample(i), 1e-12);
-            assertEquals(value(closedSample, i, .9, 3) + expectedBell, closed.sample(i), 1e-12);
+            assertEquals(value(openSample, i, .74, configuredGain("dundun_open")) + expectedBell, open.sample(i), 1e-12);
+            assertEquals(value(closedSample, i, .9, configuredGain("dundun_closed")) + expectedBell, closed.sample(i), 1e-12);
         }
         assertEquals(Math.max((long) Math.ceil(openSample.lengthSamples(1) / .74),
                 (long) Math.ceil(bellSample.lengthSamples(1) / .8)), open.lengthSamples(1));

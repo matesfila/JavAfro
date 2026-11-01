@@ -44,6 +44,7 @@ public class YamlFileTransferHandlerTest {
         SwingUtilities.invokeAndWait(() -> {
             var panel = new RhythmPlayerPanel(yaml);
             var text = editor(panel);
+            ((org.fife.ui.rsyntaxtextarea.RSyntaxTextArea) text).getFoldManager().getFold(0).setCollapsed(false);
             var tempo = (JSlider) named(panel, "tempoSlider");
             var humanize = (JSlider) named(panel, "humanizeSlider");
             assertEquals(90, tempo.getValue());

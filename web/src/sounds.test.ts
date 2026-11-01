@@ -44,7 +44,7 @@ describe('AfroPlayer djembe', () => {
       expect(selectSound('djembe', 'T', 100, () => 0)).toMatchObject({ gain: 1.8, rate: .95 });
       expect(selectSound('djembe', 'T', 50, () => 0)).toMatchObject({ gain: 1.9, rate: .975 });
       expect(selectSound('djembe', 'T', 0, () => 0)).toMatchObject({ gain: 2, rate: 1 });
-      expect(selectSound('dundun', 'X', 100, () => 0)?.gain).toBeCloseTo(2);
+      expect(selectSound('dundun', 'X', 100, () => 0)?.gain).toBeCloseTo(manifest.banks.dundun_open.gain - .2);
       expect(selectSound('dundun', 'X', 100, () => 0)?.rate).toBeCloseTo(.69);
     } finally {
       config.humanizeDynamic = saved.dynamic;

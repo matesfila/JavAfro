@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { EditorView, basicSetup } from 'codemirror';
 import { yaml } from '@codemirror/lang-yaml';
 import { config } from './config';
+import { rhythmFoldEffects } from './rhythm-folding';
 
 const theme = EditorView.theme({
   '&': { height: '100%', backgroundColor: '#fffcf8', color: '#443429', fontSize: `${config.editorFontSize}px` },
@@ -32,6 +33,7 @@ export function YamlEditor({ value, onChange, onCaretChange, caretOffset }: {
         })],
     });
     view.current = editor;
+    editor.dispatch({ effects: rhythmFoldEffects(editor.state) });
     return () => { editor.destroy(); view.current = null; };
     // The editor instance is retained while documents change.
   }, []);
@@ -40,6 +42,7 @@ export function YamlEditor({ value, onChange, onCaretChange, caretOffset }: {
     if (editor && editor.state.doc.toString() !== value) {
       editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: value },
         selection: { anchor: Math.min(caretOffset, value.length) } });
+      editor.dispatch({ effects: rhythmFoldEffects(editor.state) });
     }
   }, [value, caretOffset]);
   return <div className="editor-host" ref={host} />;

@@ -4,6 +4,9 @@ import { fileURLToPath } from 'node:url';
 import { parseRhythm } from './rhythm';
 import { samplesForInstrument, selectSounds, supportsNote } from './sounds';
 import { planBeat } from './timing';
+import manifestSource from '../../src/main/resources/samples/afroplayer-samples.yaml?raw';
+import { parse } from 'yaml';
+const manifest = parse(manifestSource);
 
 describe('original AfroPlayer instruments', () => {
   it('bundles all 54 used original samples and only requests the selected instrument banks', () => {
@@ -17,10 +20,10 @@ describe('original AfroPlayer instruments', () => {
   });
   it('plays open/closed drums with a simultaneous bell, but b and standalone bells only once', () => {
     expect(selectSounds('dundun', 'X', 0, () => 0)).toEqual([
-      { sample: 'afroplayer-dunduns/dundun_s2_v1.wav', gain: 2.2, rate: .74, pan: -.3 },
+      { sample: 'afroplayer-dunduns/dundun_s2_v1.wav', gain: manifest.banks.dundun_open.gain, rate: .74, pan: -.3 },
       { sample: 'afroplayer-dunduns/dundun_bell_open_v1.wav', gain: .8, rate: .8, pan: -.3 },
     ]);
-    expect(selectSounds('sangban', 'i', 0, () => 0)[0]).toMatchObject({ sample: 'afroplayer-dunduns/sangban_closed_v1.wav', gain: 3, rate: .9 });
+    expect(selectSounds('sangban', 'i', 0, () => 0)[0]).toMatchObject({ sample: 'afroplayer-dunduns/sangban_closed_v1.wav', gain: manifest.banks.sangban_closed.gain, rate: .9 });
     expect(selectSounds('dundun', 'b', 0, () => 0)).toHaveLength(1);
     expect(selectSounds('dundun_bell', 'x', 0, () => 0)).toEqual(selectSounds('dundun', 'b', 0, () => 0));
     expect(selectSounds('kenken', 'I', 0, () => 0)).toEqual(selectSounds('kensereni', 'I', 0, () => 0));

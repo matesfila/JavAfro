@@ -80,11 +80,9 @@ public class LivePlaybackTest {
     }
 
     @Test
-    public void djoleCycleIsFourBeatsAndMatchesImportedTiming() throws Exception {
-        var djole = RhythmLoader.load(Path.of("rhythms/basicRhythms.yaml")).get("Djole");
-        var original = RhythmLoader.load(Path.of("rhythms/imported/Djole.yaml")).get("Djole");
+    public void djoleCycleIsFourBeatsAtDifferentTempos() throws Exception {
+        var djole = RhythmLoader.load(Path.of("rhythms/imported/Djole.yaml")).get("Djole");
         assertEquals(88200, renderedFrames(djole, 120)); // Four beats at 120 BPM = two seconds.
-        assertEquals(renderedFrames(original, 120), renderedFrames(djole, 120));
         assertEquals(44100, renderedFrames(djole, 240));
         assertEquals(44100 * 240.0 / 116, renderedFrames(djole, 116), 1.0);
     }

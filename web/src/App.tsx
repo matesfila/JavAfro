@@ -190,6 +190,7 @@ export function App() {
           <div className="rhythm-heading"><h1>{displayedRhythm?.name ?? 'Rytmus'}</h1>
             {busy && <span className="activity" role="status"><span className="status-dot" />{isStarting ? 'Načítavam' : 'Hrá'}</span>}
           </div>
+          <div className="playback-controls">
           <div className="transport">
             <button className="button play" onClick={() => void play()} disabled={!source.trim() || isLoading}><PlayIcon />Play</button>
             <button className="button stop" onClick={stop} disabled={!busy}><span className="stop-square" />Stop</button>
@@ -212,6 +213,7 @@ export function App() {
                 }} /></div>)}
             </div>
           </details>
+          </div>
         </aside>
       </div>
       <footer className="app-footer">

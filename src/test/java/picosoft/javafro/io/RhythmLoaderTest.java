@@ -123,10 +123,10 @@ public class RhythmLoaderTest {
 
     @Test
     public void diskDjoleIsValid() throws Exception {
-        Rhythm rhythm = RhythmLoader.load(Path.of("rhythms/basicRhythms.yaml")).get("Djole");
+        Rhythm rhythm = RhythmLoader.load(Path.of("rhythms/imported/Djole.yaml")).get("Djole");
         var dundun = rhythm.tracks().stream().filter(track -> track.instrument() instanceof DundunInstrument)
                 .findFirst().orElseThrow();
-        assertEquals("x.......x.x.....", dundun.pattern());
+        assertEquals("x.b.b.b.x.x.b.b.", dundun.pattern());
         assertEquals(4, rhythm.stepsPerBeat());
         assertEquals(new TimeSignature(4, 4), rhythm.timeSignature());
     }

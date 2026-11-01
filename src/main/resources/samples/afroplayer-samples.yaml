@@ -11,7 +11,7 @@ banks:
       - afroplayer-dunduns/dundun_s2_v3.wav
       - afroplayer-dunduns/dundun_s2_v4.wav
       - afroplayer-dunduns/dundun_s2_v5.wav
-    gain: 2.2
+    gain: 1.5
     rate: 0.74
     pan: -0.3
   dundun_closed:
@@ -22,7 +22,7 @@ banks:
       - afroplayer-dunduns/dundun_closed_v4.wav
       - afroplayer-dunduns/dundun_closed_v5.wav
       - afroplayer-dunduns/dundun_closed_v6.wav
-    gain: 3
+    gain: 2
     rate: 0.9
     pan: -0.3
   sangban_open:
@@ -33,7 +33,7 @@ banks:
       - afroplayer-dunduns/sangban_s2_v4.wav
       - afroplayer-dunduns/sangban_s2_v5.wav
       - afroplayer-dunduns/sangban_s2_v6.wav
-    gain: 2.5
+    gain: 2
     rate: 0.9
     pan: 0.1
   sangban_closed:
@@ -44,7 +44,7 @@ banks:
       - afroplayer-dunduns/sangban_closed_v4.wav
       - afroplayer-dunduns/sangban_closed_v5.wav
       - afroplayer-dunduns/sangban_closed_v6.wav
-    gain: 3
+    gain: 2.5
     rate: 0.9
     pan: 0.1
   kensereni_open:

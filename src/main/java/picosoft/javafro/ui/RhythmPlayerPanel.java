@@ -85,7 +85,10 @@ public final class RhythmPlayerPanel extends JPanel {
         editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, config.editorFontSize()));
         editor.setTabSize(2);
         editor.setTabsEmulated(true);
+        org.fife.ui.rsyntaxtextarea.folding.FoldParserManager.get()
+                .addFoldParserMapping(SyntaxConstants.SYNTAX_STYLE_YAML, new RhythmFoldParser());
         editor.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_YAML);
+        editor.setCodeFoldingEnabled(true);
         editor.setBackground(Color.WHITE);
         editor.setForeground(SandTheme.INK);
         editor.setCaretColor(SandTheme.INK);
@@ -96,6 +99,7 @@ public final class RhythmPlayerPanel extends JPanel {
         editor.setLineWrap(false);
         editor.getAccessibleContext().setAccessibleName("YAML definícia rytmu");
         RTextScrollPane scroll = new RTextScrollPane(editor);
+        scroll.setFoldIndicatorEnabled(true);
         scroll.setLineNumbersEnabled(true);
         scroll.getGutter().setBackground(SandTheme.GUTTER);
         scroll.getGutter().setBorderColor(SandTheme.BORDER);
@@ -213,6 +217,9 @@ public final class RhythmPlayerPanel extends JPanel {
         try {
             editor.setText(yaml);
             editor.setCaretPosition(0);
+            var folds = editor.getFoldManager();
+            folds.reparse();
+            for (int i = 0; i < folds.getFoldCount(); i++) folds.getFold(i).setCollapsed(true);
             syncRhythm(rhythm);
         } finally { loadingYaml = false; }
     }

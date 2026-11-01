@@ -37,7 +37,7 @@ public class WavSampleInstrumentTest {
 
     @Test
     public void sampleRhythmLoadsAndUsesRecordedInstruments() throws Exception {
-        var rhythm = RhythmLoader.load(Path.of("rhythms/basicRhythms.yaml")).get("Djole");
+        var rhythm = RhythmLoader.load(Path.of("rhythms/imported/Djole.yaml")).get("Djole");
         assertTrue(rhythm.tracks().stream().anyMatch(track -> track.instrument() instanceof DundunInstrument));
         assertTrue(rhythm.tracks().stream().anyMatch(track -> track.instrument() instanceof SangbanInstrument));
         assertTrue(rhythm.tracks().stream().anyMatch(track -> track.instrument() instanceof KensereniInstrument));

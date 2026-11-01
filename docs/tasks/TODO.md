@@ -2,11 +2,8 @@
 
 ## Najbližšie
 
-- [] Zjednodušiť mobilné rozhranie
-- [] Ovládacie prvky oddeliť do podpanelov
 - [] Generátor stringov - preskúmať, či existuje nejaká knižnica na generovanie stringov
   - cieľom by bolo mať možnosť v jednom riadku zapísať rôzne varianty patternu
-- [x] Prehodnotiť zápis timeSignature a oddelovača taktov |
 - [] Zaviesť rodinu rytmov (meniť sa im bude zrejme dialekt)
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
 - [] Globálny konfiguračný súbor (tam by malo byť defaultné humanize, možno defaultné dialekty pre dané rodiny rytmov...)
@@ -16,6 +13,9 @@
 
 ## Hotové
 
+- [x] Zjednodušiť mobilné rozhranie
+- [x] Ovládacie prvky oddeliť do podpanelov
+- [x] Prehodnotiť zápis timeSignature a oddelovača taktov |
 - [x] Vytvoriť Java aplikáciu so Swing rozhraním na prehrávanie rytmov.
 - [x] Zaviesť YAML formát rytmov s tempom, metrom, nástrojmi a kontrolou platnosti.
 - [x] Podporiť rôzne metrá a delenie doby vrátane 12/8 a šestnástinových patternov.
