@@ -1,0 +1,11 @@
+djole-samples:
+  name: "Djole (samples)"
+  bpm: 116
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  swing: [0, 0, 0, 0]
+
+  tracks:
+    dundun-sample:  "x.......x.x....."
+    sangban-sample: "....x.......x..."
+    kenkeni-sample: "..xx..xx..xx..xx"
