@@ -11,7 +11,7 @@ banks:
       - afroplayer-dunduns/dundun_s2_v3.wav
       - afroplayer-dunduns/dundun_s2_v4.wav
       - afroplayer-dunduns/dundun_s2_v5.wav
-    gain: 1.5
+    gain: 1
     rate: 0.74
     pan: -0.3
   dundun_closed:
@@ -22,7 +22,7 @@ banks:
       - afroplayer-dunduns/dundun_closed_v4.wav
       - afroplayer-dunduns/dundun_closed_v5.wav
       - afroplayer-dunduns/dundun_closed_v6.wav
-    gain: 2
+    gain: 1
     rate: 0.9
     pan: -0.3
   sangban_open:
@@ -33,7 +33,7 @@ banks:
       - afroplayer-dunduns/sangban_s2_v4.wav
       - afroplayer-dunduns/sangban_s2_v5.wav
       - afroplayer-dunduns/sangban_s2_v6.wav
-    gain: 2
+    gain: 1.7
     rate: 0.9
     pan: 0.1
   sangban_closed:
@@ -44,7 +44,7 @@ banks:
       - afroplayer-dunduns/sangban_closed_v4.wav
       - afroplayer-dunduns/sangban_closed_v5.wav
       - afroplayer-dunduns/sangban_closed_v6.wav
-    gain: 2.5
+    gain: 1
     rate: 0.9
     pan: 0.1
   kensereni_open:
@@ -56,7 +56,7 @@ banks:
       - afroplayer-dunduns/kenkeni_s2_v5.wav
       - afroplayer-dunduns/kenkeni_s2_v6.wav
       - afroplayer-dunduns/kenkeni_s2_v7.wav
-    gain: 2
+    gain: 1
     rate: 1.1
     pan: 0.02
   kensereni_closed:
@@ -66,7 +66,7 @@ banks:
       - afroplayer-dunduns/kenkeni_closed_v3.wav
       - afroplayer-dunduns/kenkeni_closed_v4.wav
       - afroplayer-dunduns/kenkeni_closed_v5.wav
-    gain: 3
+    gain: 1
     rate: 0.9
     pan: 0.02
   bell_dun:
@@ -75,7 +75,7 @@ banks:
       - afroplayer-dunduns/dundun_bell_open_v2.wav
       - afroplayer-dunduns/dundun_bell_open_v3.wav
       - afroplayer-dunduns/dundun_bell_open_v4.wav
-    gain: 0.8
+    gain: 1
     rate: 0.8
     pan: -0.3
   bell_san:
@@ -93,20 +93,20 @@ banks:
       - afroplayer-dunduns/kenkeni_bell_open_v1.wav
       - afroplayer-dunduns/kenkeni_bell_open_v2.wav
       - afroplayer-dunduns/kenkeni_bell_open_v3.wav
-    gain: 1.3
+    gain: 1
     rate: 1.2
     pan: 0.02
   dj2_bass:
     samples:
       - djembe2/DJEMBEBASS2.wav
-    gain: 0.5
+    gain: 1
     rate: 1
     pan: 0
   dj2_tone:
     samples:
       - djembe2/DJEMBE2.wav
       - djembe2/DJEMBE3.wav
-    gain: 0.5
+    gain: 1
     rate: 1
     pan: 0
   dj2_slap:
@@ -114,13 +114,13 @@ banks:
       - djembe2/DJEMBESLAP2.wav
       - djembe2/DJEMBESLAP3.wav
       - djembe2/DJEMBESLAP4.wav
-    gain: 0.5
+    gain: 1
     rate: 1.1
     pan: 0
   dj2_closed:
     samples:
       - djembe2/DJEMBESLAP1.wav
-    gain: 0.5
+    gain: 1
     rate: 1
     pan: 0
   dj_bass:
@@ -137,7 +137,7 @@ banks:
       - djembe/dj_tm_ton_v4.wav
       - djembe/dj_tm_ton_v5.wav
       - djembe/dj_tm_ton_v6.wav
-    gain: 2
+    gain: 1
     rate: 1
     pan: 0
   dj_slap:
@@ -150,7 +150,7 @@ banks:
       - djembe/dj_tm_slap_v6.wav
       - djembe/dj_tm_slap_v7.wav
       - djembe/dj_tm_slap_v8.wav
-    gain: 2
+    gain: 1
     rate: 1
     pan: 0
   dj_closed:
@@ -158,7 +158,7 @@ banks:
       - djembe/dj_tm_tonclos_v1.wav
       - djembe/dj_tm_tonclos_v2.wav
       - djembe/dj_tm_tonclos_v3.wav
-    gain: 2
+    gain: 1
     rate: 1
     pan: 0
   dj_closed_slap:
@@ -166,7 +166,7 @@ banks:
       - djembe/dj_tm_slapclos_v1.wav
       - djembe/dj_tm_slapclos_v2.wav
       - djembe/dj_tm_slapclos_v3.wav
-    gain: 2
+    gain: 1
     rate: 1
     pan: 0
   dj_alternate_slap:
@@ -179,7 +179,7 @@ banks:
       - djembe/dj_tm_slap2_v6.wav
       - djembe/dj_tm_slap2_v7.wav
       - djembe/dj_tm_slap2_v8.wav
-    gain: 2
+    gain: 1
     rate: 1
     pan: 0
 
