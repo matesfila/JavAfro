@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { parseRhythm } from './rhythm';
 import { minimumGap, planBeat, type Controls } from './timing';
 
@@ -8,6 +8,35 @@ function rhythm(meter = '4/4', steps = 4, pattern = 'xxxxxxxxxxxxxxxx') {
 const straight: Controls = { bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] };
 
 describe('sample clock scheduling', () => {
+  it('chooses humanization independently per note at 50 percent without changing the grid', () => {
+    const random = vi.fn().mockReturnValueOnce(.1).mockReturnValueOnce(1)
+      .mockReturnValueOnce(.5).mockReturnValueOnce(.49).mockReturnValueOnce(0).mockReturnValueOnce(.9);
+    const result = planBeat(rhythm(), { ...straight, humanize: 100 }, 1, 0, random, 10, 50);
+    expect(result.hits.map(hit => hit.time)).toEqual([1.01, 1.125, 1.24, 1.375]);
+    expect(random).toHaveBeenCalledTimes(6);
+    expect(result.end).toBe(1.5);
+    expect(result.nextStep).toBe(4);
+  });
+
+  it('gates timing, dynamics and pitch together for a drum and its automatic bell', () => {
+    const drum = parseRhythm('test:\n  stepsPerBeat: 4\n  tracks: {dundun: "X..............."}');
+    const controls = { ...straight, humanize: 100, dialect: [-.4, 0, 0, 0] };
+    const baseline = planBeat(drum, { ...controls, humanize: 0 }, 1, 0, () => .75, 10);
+    expect(baseline.hits).toHaveLength(2);
+    expect(planBeat(drum, controls, 1, 0, () => .75, 10, 0)).toEqual(baseline);
+    expect(planBeat(drum, controls, 1, 0, () => .75, 10, 50)).toEqual(baseline);
+    const active = planBeat(drum, controls, 1, 0, () => .75, 10, 100);
+    expect(planBeat(drum, controls, 1, 0, vi.fn().mockReturnValueOnce(.25).mockReturnValue(.75), 10, 50)).toEqual(active);
+    expect(planBeat(drum, controls, 1, 0, () => .75, 10)).toEqual(active);
+    expect(active.hits[0].time).not.toBe(baseline.hits[0].time);
+    expect(active.hits[0].time).toBe(active.hits[1].time);
+    expect(active.hits[0].gain).not.toBe(baseline.hits[0].gain);
+    expect(active.hits[1].rate).not.toBe(baseline.hits[1].rate);
+    for (const probability of [-1, 101, .5, NaN]) {
+      expect(() => planBeat(drum, controls, 1, 0, () => .75, 10, probability)).toThrow();
+    }
+  });
+
   it('uses the configured jitter limit, scales it by humanize and keeps the gap cap', () => {
     const controls = { ...straight, humanize: 100 };
     expect(planBeat(rhythm(), controls, 1, 0, () => 1, 10).hits[1].time).toBeCloseTo(1.135);

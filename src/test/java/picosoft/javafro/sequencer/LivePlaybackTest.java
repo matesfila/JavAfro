@@ -51,6 +51,49 @@ public class LivePlaybackTest {
         };
     }
 
+    @Test
+    public void humanizeProbabilityUsesExactBoundariesAndPreservesEndpointBehavior() {
+        java.util.function.DoubleSupplier unexpected = () -> { throw new AssertionError("Unnecessary random draw"); };
+        assertEquals(60, BeepSequencer.noteHumanize(60, 100, unexpected));
+        assertEquals(0, BeepSequencer.noteHumanize(60, 0, unexpected));
+        assertEquals(0, BeepSequencer.noteHumanize(0, 50, unexpected));
+        assertEquals(60, BeepSequencer.noteHumanize(60, 50, () -> .499));
+        assertEquals(0, BeepSequencer.noteHumanize(60, 50, () -> .5));
+        var settings = new PlaybackSettings(120, 60);
+        assertEquals(100, settings.humanizeApplianceProbability());
+        assertThrows(IllegalArgumentException.class, () -> settings.setHumanizeApplianceProbability(-1));
+        assertThrows(IllegalArgumentException.class, () -> settings.setHumanizeApplianceProbability(101));
+    }
+
+    @Test
+    public void zeroProbabilityDisablesVoiceHumanizationAndTimingJitter() throws Exception {
+        var sink = new AudioSink();
+        var sequencer = new BeepSequencer(format -> sink.line);
+        var settings = new PlaybackSettings(120, 100);
+        settings.setHumanizeApplianceProbability(0);
+        var amounts = new ArrayList<Integer>();
+        Instrument instrument = new Instrument() {
+            public double sample(long index) { return 1; }
+            public Instrument voice(char note, int humanize) { amounts.add(humanize); return this; }
+            public long lengthSamples(long pulse) {
+                if (amounts.size() == 21) sequencer.stop();
+                return 1;
+            }
+        };
+        sequencer.playContinuously(new Rhythm("No jitter", List.of(new BeepTrack("xxxxxxxx", instrument)), 120), settings);
+        assertEquals(21, amounts.size());
+        assertTrue(amounts.stream().allMatch(amount -> amount == 0));
+        byte[] pcm = sink.bytes.toByteArray();
+        int hits = 0;
+        for (int frame = 0; frame < pcm.length / 2; frame++) {
+            if (pcm[frame * 2] != 0 || pcm[frame * 2 + 1] != 0) {
+                assertEquals(0, frame % 11025);
+                hits++;
+            }
+        }
+        assertTrue(hits >= 16);
+    }
+
     private int renderedFrames(Rhythm definition, int bpm) throws Exception {
         var sink = new AudioSink();
         var tracks = definition.tracks().stream()

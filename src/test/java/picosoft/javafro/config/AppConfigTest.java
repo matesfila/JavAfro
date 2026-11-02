@@ -22,6 +22,14 @@ public class AppConfigTest {
     public void partialConfigurationKeepsDefaultsAndResolvesLibraryRelativeToConfig() {
         AppConfig config = parse("playback:\n  humanize: 37\nlibrary:\n  directory: moje-rytmy\n");
         assertEquals(37, config.humanize());
+        assertEquals(40, config.defaultTrackVolume());
+        assertEquals(100, config.humanizeApplianceProbability());
+        for (int probability : new int[]{0, 50, 100}) {
+            assertEquals(probability, parse("playback: {humanizeApplianceProbability: " + probability + "}").humanizeApplianceProbability());
+        }
+        for (int volume : new int[]{0, 35, 65, 100}) {
+            assertEquals(volume, parse("playback: {defaultTrackVolume: " + volume + "}").defaultTrackVolume());
+        }
         assertEquals(30, config.humanizeMaxOffsetMs());
         assertEquals(.07, config.humanizeDynamic(), 0);
         assertEquals(.005, config.humanizePitch(), 0);
@@ -46,7 +54,11 @@ public class AppConfigTest {
 
     @Test
     public void rejectsTyposDuplicateKeysWrongTypesAndInvalidRanges() {
-        for (String yaml : new String[]{"unknown: 1", "playback: null", "playback: {humanize: 101}",
+        for (String yaml : new String[]{"playback: {humanizeApplianceProbability: -1}", "playback: {humanizeApplianceProbability: 101}",
+                "playback: {humanizeApplianceProbability: 50.5}", "playback: {humanizeApplianceProbability: '50'}",
+                "playback: {defaultTrackVolume: -1}", "playback: {defaultTrackVolume: 101}",
+                "playback: {defaultTrackVolume: 80.5}", "playback: {defaultTrackVolume: '80'}",
+                "unknown: 1", "playback: null", "playback: {humanize: 101}",
                 "playback: {humanize: -1}", "playback: {humanize: '21'}", "playback: {humanize: 21.5}",
                 "playback: {humanize: 1, humanize: 2}", "editor: {fontSize: 0}", "window: {width: 100}",
                 "library: {directory: ''}", "playback: {tempo: {minimum: 200, maximum: 100}}",
@@ -62,10 +74,11 @@ public class AppConfigTest {
 
     @Test
     public void playerUsesConfiguredControlsAndKeepsRhythmTempo() throws Exception {
-        AppConfig config = parse("playback:\n  humanize: 37\n  tempo: {initial: 90, minimum: 40, maximum: 100}\neditor: {fontSize: 19}");
+        AppConfig config = parse("playback:\n  humanize: 37\n  humanizeApplianceProbability: 63\n  tempo: {initial: 90, minimum: 40, maximum: 100}\neditor: {fontSize: 19}");
         SwingUtilities.invokeAndWait(() -> {
             var panel = new RhythmPlayerPanel("", config);
             assertEquals(37, ((JSlider) find(panel, "humanizeSlider")).getValue());
+            assertEquals(63, ((JSlider) find(panel, "humanizeProbabilitySlider")).getValue());
             JSlider tempo = (JSlider) find(panel, "tempoSlider");
             assertEquals(40, tempo.getMinimum());
             assertEquals(100, tempo.getMaximum());

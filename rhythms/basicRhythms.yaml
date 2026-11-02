@@ -1,3 +1,13 @@
+"Test rhythm":
+  bpm: 100
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  tracks:
+    djembe:      "d.d.t.t.s.s.t.t."
+    djembe2:     "d.d.t.t.s.s.t.t."
+    dundun:      "x.x.b.b.x.x.i.i."
+    sangban:     "x.x.b.b.x.x.i.i."
+    kensereni:   "x.x.b.b.x.x.i.i."
 
 "Bandodjei":
   bpm: 120
@@ -32,8 +42,8 @@
     sangban:    "b.bb.x.bb.b.|x.bi.i.ib.x."
     kensereni:  ".bx.xx.bx.xx"
 
-"Djole (AfroPlayer)":
-  bpm: 125
+"Djole":
+  bpm: 118
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
@@ -166,6 +176,17 @@
     dundun:     "b.bx.bb.b.b...b.|b.bx.bb.b.b.x.b.|b.bx.bb.b.b...b.|bx.x.bb.b.b...b."
     sangban:    "x.b.b.x.x.b.b.x."
     kensereni:  "xx..xx..xx..xx.."
+
+"Lamban":
+  bpm: 90
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  dialect: [0, 0, 0, 0.42]
+  tracks:
+    djembe:     "ttss..s."
+    dundun:     "b.b.b.b.b.b.b.bx|x.x.xx.xx.xx.bxx"
+    sangban:    "x...x.x.x...x.x.|x...x.x.x...x.x."
+    kensereni:  "b.b.x.xx.b.xb.b."
 
 "Maane":
   bpm: 115

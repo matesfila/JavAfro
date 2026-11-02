@@ -36,7 +36,7 @@ export function parseConfig(source: string) {
   const raw = document.toJS({ maxAliasCount: 50 });
   const root = raw === null ? {} : mapping(raw, 'konfigurácia');
   keys(root, 'konfigurácia', ['playback', 'library', 'editor', 'window']);
-  const playback = section(root, 'playback', ['humanize', 'humanizeMaxOffsetMs', 'humanizeDynamic', 'humanizePitch', 'tempo']);
+  const playback = section(root, 'playback', ['humanize', 'humanizeMaxOffsetMs', 'humanizeDynamic', 'humanizePitch', 'tempo', 'defaultTrackVolume', 'humanizeApplianceProbability']);
   const tempo = section(playback, 'tempo', ['initial', 'minimum', 'maximum']);
   const library = section(root, 'library', ['directory', 'initialRhythm']);
   const editor = section(root, 'editor', ['fontSize']);
@@ -48,6 +48,8 @@ export function parseConfig(source: string) {
     throw new Error('Tempo musí spĺňať minimum <= initial <= maximum.');
   }
   return {
+    humanizeApplianceProbability: number(playback, 'humanizeApplianceProbability', 100, 0, 100),
+    defaultTrackVolume: number(playback, 'defaultTrackVolume', 40, 0, 100),
     humanize: number(playback, 'humanize', 21, 0, HUMANIZE_PERCENT_MAX), initialTempo, minimumTempo, maximumTempo,
     humanizeMaxOffsetMs: number(playback, 'humanizeMaxOffsetMs', DEFAULT_HUMANIZE_MAX_OFFSET_MS, 0, MAX_HUMANIZE_OFFSET_MS),
     humanizeDynamic: decimal(playback, 'humanizeDynamic', 0.07, 0, 1),

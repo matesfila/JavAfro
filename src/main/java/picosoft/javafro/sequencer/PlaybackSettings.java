@@ -10,6 +10,36 @@ public final class PlaybackSettings {
     }
 
     private volatile Values values;
+    private volatile int humanizeApplianceProbability = 100;
+
+    public int humanizeApplianceProbability() { return humanizeApplianceProbability; }
+
+    public void setHumanizeApplianceProbability(int probability) {
+        if (probability < 0 || probability > 100) throw new IllegalArgumentException("Humanize appliance probability must be between 0 and 100.");
+        humanizeApplianceProbability = probability;
+    }
+    private volatile int masterVolume = (int) (AudioConstants.OUTPUT_GAIN * 100);
+
+    public int masterVolume() { return masterVolume; }
+
+    public void setMasterVolume(int volume) {
+        if (volume < 0 || volume > 100) throw new IllegalArgumentException("Master volume must be between 0 and 100.");
+        masterVolume = volume;
+    }
+    public record TrackMix(int volume, boolean muted) {
+        public TrackMix {
+            if (volume < 0 || volume > 200) throw new IllegalArgumentException("Track volume must be between 0 and 200.");
+        }
+        public double gain() { return muted ? 0 : volume / 100.0; }
+    }
+    private final java.util.concurrent.ConcurrentHashMap<Integer, TrackMix> mixer = new java.util.concurrent.ConcurrentHashMap<>();
+
+    public TrackMix trackMix(int track) { return mixer.getOrDefault(track, new TrackMix(100, false)); }
+
+    public void setTrackMix(int track, int volume, boolean muted) {
+        if (track < 0) throw new IllegalArgumentException("Track index must not be negative.");
+        mixer.put(track, new TrackMix(volume, muted));
+    }
 
     public PlaybackSettings(int bpm, int humanize) {
         this(bpm, humanize, null);

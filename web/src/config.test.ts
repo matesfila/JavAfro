@@ -8,6 +8,14 @@ describe('application configuration', () => {
     expect(shared.humanize).toBeGreaterThanOrEqual(0);
     expect(shared.humanize).toBeLessThanOrEqual(100);
     expect(shared.rhythmsDirectory.length).toBeGreaterThan(0);
+    expect(parseConfig('').defaultTrackVolume).toBe(40);
+    expect(parseConfig('').humanizeApplianceProbability).toBe(100);
+    for (const probability of [0, 50, 100]) {
+      expect(parseConfig(`playback: {humanizeApplianceProbability: ${probability}}`).humanizeApplianceProbability).toBe(probability);
+    }
+    for (const volume of [0, 35, 65, 100]) {
+      expect(parseConfig(`playback: {defaultTrackVolume: ${volume}}`).defaultTrackVolume).toBe(volume);
+    }
     expect(parseConfig('playback: {humanize: 37}')).toEqual({ ...parseConfig(''), humanize: 37 });
     expect(parseConfig('').humanizeMaxOffsetMs).toBe(30);
     expect(parseConfig('')).toMatchObject({ humanizeDynamic: .07, humanizePitch: .005 });
@@ -19,7 +27,11 @@ describe('application configuration', () => {
       .toMatchObject({ initialTempo: 90, minimumTempo: 40, maximumTempo: 100, editorFontSize: 19 });
   });
 
-  it.each(['unknown: 1', 'playback: null', 'playback: {humanize: 101}', 'playback: {humanize: -1}',
+  it.each(['playback: {humanizeApplianceProbability: -1}', 'playback: {humanizeApplianceProbability: 101}',
+    'playback: {humanizeApplianceProbability: 50.5}', "playback: {humanizeApplianceProbability: '50'}",
+    'playback: {defaultTrackVolume: -1}', 'playback: {defaultTrackVolume: 101}',
+    'playback: {defaultTrackVolume: 80.5}', "playback: {defaultTrackVolume: '80'}",
+    'unknown: 1', 'playback: null', 'playback: {humanize: 101}', 'playback: {humanize: -1}',
     "playback: {humanize: '21'}", 'playback: {humanize: 21.5}', 'playback: {humanize: 1, humanize: 2}',
     'editor: {fontSize: 0}', 'window: {width: 100}', "library: {directory: ''}",
     'playback: {tempo: {minimum: 200, maximum: 100}}', 'playback: {tempo: {initial: 301}}',

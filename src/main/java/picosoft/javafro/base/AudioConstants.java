@@ -23,7 +23,7 @@ public final class AudioConstants {
     public static final double DIALECT_STEP_FRACTION = 0.5;
     public static final double HUMANIZE_GAP_FRACTION = 0.25;
     public static final int MIN_SAMPLES_PER_PULSE = 4;
-    private static final double OUTPUT_GAIN = 0.25;
+    public static final double OUTPUT_GAIN = 0.25;
 
     private AudioConstants() {
     }
@@ -34,8 +34,13 @@ public final class AudioConstants {
 
     /** Zapíše amplitúdu z intervalu [-1, 1] ako 16-bitovú vzorku na pozíciu {@code index} v bufferi. */
     public static void putSample(byte[] buffer, int index, double amplitude) {
+        putSample(buffer, index, amplitude, OUTPUT_GAIN);
+    }
+
+    /** Applies the selected master gain before clipping and PCM conversion. */
+    public static void putSample(byte[] buffer, int index, double amplitude, double outputGain) {
         // Apply master headroom before clipping: original bank gains and drum+bell sums can exceed one.
-        double clamped = Math.max(-1.0, Math.min(1.0, amplitude * OUTPUT_GAIN));
+        double clamped = Math.max(-1.0, Math.min(1.0, amplitude * outputGain));
         short sample = (short) (clamped * Short.MAX_VALUE);
         buffer[index * BYTES_PER_SAMPLE] = (byte) sample;
         buffer[index * BYTES_PER_SAMPLE + 1] = (byte) (sample >> Byte.SIZE);

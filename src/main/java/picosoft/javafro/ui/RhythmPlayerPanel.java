@@ -37,11 +37,14 @@ public final class RhythmPlayerPanel extends JPanel {
     private final AppConfig config;
     private final JSlider tempo;
     private final JSlider humanize;
+    private final JSlider humanizeProbability;
     private final JLabel status = new JLabel("Pripravené");
     private PlaybackSettings settings;
+    private final MixerPanel mixer;
+    private JDialog mixerWindow;
     private final DialectControls dialectControls = new DialectControls(dialect -> {
         if (settings != null) settings.setDialect(dialect);
-    });
+    }, false);
     private String dialectYaml;
     private String selectedRhythmId;
     private boolean loadingYaml;
@@ -71,9 +74,11 @@ public final class RhythmPlayerPanel extends JPanel {
     RhythmPlayerPanel(String yaml, AppConfig config, java.util.function.IntFunction<PlaybackSession> sessionFactory) {
         super(new BorderLayout(0, 14));
         this.config = config;
+        mixer = new MixerPanel(config.defaultTrackVolume());
         this.sessionFactory = sessionFactory;
         tempo = new JSlider(config.minimumTempo(), config.maximumTempo(), config.initialTempo());
         humanize = new JSlider(0, 100, config.humanize());
+        humanizeProbability = new JSlider(0, 100, config.humanizeApplianceProbability());
         setBorder(BorderFactory.createEmptyBorder(18, 20, 18, 20));
         JLabel title = new JLabel("JavAfro · Rhythm player");
         title.setFont(title.getFont().deriveFont(Font.BOLD, 22f));
@@ -100,7 +105,9 @@ public final class RhythmPlayerPanel extends JPanel {
         editor.getAccessibleContext().setAccessibleName("YAML definícia rytmu");
         RTextScrollPane scroll = new RTextScrollPane(editor);
         scroll.setFoldIndicatorEnabled(true);
-        scroll.setLineNumbersEnabled(true);
+        scroll.setLineNumbersEnabled(false);
+        int foldIconSize = Math.max(10, Math.min(20, editor.getLineHeight() - 2));
+        scroll.getGutter().setFoldIcons(new EditorFoldIcon(true, foldIconSize), new EditorFoldIcon(false, foldIconSize));
         scroll.getGutter().setBackground(SandTheme.GUTTER);
         scroll.getGutter().setBorderColor(SandTheme.BORDER);
         scroll.getGutter().setLineNumberColor(SandTheme.MUTED);
@@ -109,16 +116,22 @@ public final class RhythmPlayerPanel extends JPanel {
 
         tempo.setName("tempoSlider");
         humanize.setName("humanizeSlider");
+        humanizeProbability.setName("humanizeProbabilitySlider");
         tempo.setMajorTickSpacing(40);
         humanize.setMajorTickSpacing(25);
         tempo.setPaintTicks(true);
         humanize.setPaintTicks(true);
-        JPanel sliders = new JPanel(new GridLayout(2, 1, 0, 8));
-        sliders.add(sliderRow("Tempo", tempo, " BPM"));
-        sliders.add(sliderRow("Humanize", humanize, " %"));
+        humanizeProbability.setMajorTickSpacing(25);
+        humanizeProbability.setPaintTicks(true);
+        JPanel humanizeControls = new JPanel(new GridLayout(2, 1, 0, 8));
+        humanizeControls.add(sliderRow("Intenzita", humanize, " %"));
+        humanizeControls.add(sliderRow("Pravdepodobnosť", humanizeProbability, " %"));
+        JPanel disclosures = new JPanel(new BorderLayout(0, 8));
+        disclosures.add(new DisclosurePanel("Humanize", "humanizeDisclosure", humanizeControls), BorderLayout.NORTH);
+        disclosures.add(new DisclosurePanel("Dialect", "dialectDisclosure", dialectControls), BorderLayout.SOUTH);
         JPanel liveControls = new JPanel(new BorderLayout(0, 8));
-        liveControls.add(sliders, BorderLayout.NORTH);
-        liveControls.add(dialectControls, BorderLayout.CENTER);
+        liveControls.add(sliderRow("Tempo", tempo, " BPM"), BorderLayout.NORTH);
+        liveControls.add(disclosures, BorderLayout.CENTER);
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         play.setName("playButton");
         stop.setName("stopButton");
@@ -127,6 +140,10 @@ public final class RhythmPlayerPanel extends JPanel {
         stop.setEnabled(false);
         buttons.add(play);
         buttons.add(stop);
+        JButton showMixer = new JButton("Mixer…");
+        showMixer.setName("mixerButton");
+        showMixer.addActionListener(event -> showMixer());
+        buttons.add(showMixer);
         status.setName("playbackStatus");
         buttons.add(status);
         JPanel footer = new JPanel(new BorderLayout(0, 12));
@@ -136,6 +153,9 @@ public final class RhythmPlayerPanel extends JPanel {
         add(footer, BorderLayout.SOUTH);
         tempo.addChangeListener(event -> { if (settings != null) settings.setBpm(tempo.getValue()); });
         humanize.addChangeListener(event -> { if (settings != null) settings.setHumanize(humanize.getValue()); });
+        humanizeProbability.addChangeListener(event -> {
+            if (settings != null) settings.setHumanizeApplianceProbability(humanizeProbability.getValue());
+        });
         play.addActionListener(event -> startPlayback());
         stop.addActionListener(event -> stopPlayback());
         open.addActionListener(event -> openYaml());
@@ -162,8 +182,36 @@ public final class RhythmPlayerPanel extends JPanel {
         loadYaml(yaml);
     }
 
+    private void showMixer() {
+        if (mixerWindow == null) {
+            mixerWindow = new JDialog(SwingUtilities.getWindowAncestor(this), "JavAfro · Mixer", Dialog.ModalityType.MODELESS);
+            mixerWindow.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+            JPanel content = new JPanel(new BorderLayout());
+            content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+            content.add(mixer, BorderLayout.NORTH);
+            JScrollPane scroll = new JScrollPane(content);
+            scroll.setBorder(BorderFactory.createEmptyBorder());
+            mixerWindow.setContentPane(scroll);
+            mixerWindow.setMinimumSize(new Dimension(460, 200));
+            mixerWindow.setSize(640, 340);
+            mixerWindow.setLocationRelativeTo(this);
+        }
+        mixerWindow.setVisible(true);
+        mixerWindow.toFront();
+    }
+
+    @Override
+    public void removeNotify() {
+        if (mixerWindow != null) {
+            mixerWindow.dispose();
+            mixerWindow = null;
+        }
+        super.removeNotify();
+    }
+
     private JPanel sliderRow(String text, JSlider slider, String unit) {
         JLabel label = new JLabel(text);
+        if (slider == tempo) label.setFont(label.getFont().deriveFont(Font.BOLD));
         label.setLabelFor(slider);
         label.setPreferredSize(new Dimension(Math.max(110, label.getPreferredSize().width), 24));
         slider.getAccessibleContext().setAccessibleName(text);
@@ -192,6 +240,7 @@ public final class RhythmPlayerPanel extends JPanel {
     }
 
     private void syncRhythm(Rhythm rhythm) {
+        mixer.setRhythm(rhythm);
         if (!editor.getText().equals(dialectYaml) || !rhythm.name().equals(selectedRhythmId)) {
             tempo.setMaximum(Math.max(config.maximumTempo(), rhythm.bpm()));
             tempo.setMinimum(Math.min(config.minimumTempo(), rhythm.bpm()));
@@ -205,6 +254,7 @@ public final class RhythmPlayerPanel extends JPanel {
 
     private void loadYaml(String yaml) {
         if (yaml.isBlank()) {
+            mixer.reset();
             editor.setText("");
             dialectControls.setDialect(picosoft.javafro.base.Dialect.straight(4));
             dialectYaml = "";
@@ -213,6 +263,7 @@ public final class RhythmPlayerPanel extends JPanel {
             return;
         }
         Rhythm rhythm = parseRhythm(yaml, config.initialTempo());
+        mixer.reset();
         loadingYaml = true;
         try {
             editor.setText(yaml);
@@ -253,6 +304,8 @@ public final class RhythmPlayerPanel extends JPanel {
         settings = null; // The previous worker keeps its own controls until stopped.
         syncRhythm(rhythm);
         settings = new PlaybackSettings(tempo.getValue(), humanize.getValue(), dialectControls.value());
+        settings.setHumanizeApplianceProbability(humanizeProbability.getValue());
+        mixer.bind(settings);
         PlaybackRequest request = new PlaybackRequest(rhythm, settings);
         if (worker != null) {
             pendingPlayback = request; // Repeated clicks keep only the latest request.

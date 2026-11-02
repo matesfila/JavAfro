@@ -10,6 +10,8 @@ const theme = EditorView.theme({
   '.cm-content': { padding: '20px 0', caretColor: '#745137' },
   '.cm-line': { padding: '0 20px' },
   '.cm-gutters': { background: '#f7f0e5', color: '#a39179', border: 'none', paddingRight: '8px' },
+  '.cm-foldGutter .cm-gutterElement': { padding: '0 4px', cursor: 'pointer' },
+  '.cm-foldGutter span': { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', fontSize: '24px', lineHeight: '1', color: '#705840' },
   '.cm-activeLine, .cm-activeLineGutter': { backgroundColor: '#faf5ed' },
   '&.cm-focused': { outline: 'none' },
   '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': { background: '#e8d6bb !important' },

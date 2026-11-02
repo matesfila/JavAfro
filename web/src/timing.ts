@@ -3,10 +3,14 @@ import { selectSounds, type Sound } from './sounds';
 import * as AudioConstants from './audio-constants';
 
 export interface Controls { bpm: number; humanize: number; dialect: number[] }
-export interface Hit extends Sound { instrument: Instrument; time: number }
+export interface Hit extends Sound { instrument: Instrument; time: number; trackIndex: number }
 
 export function validateHumanizeMaxOffsetMs(value: number) {
   if (!Number.isInteger(value) || value < 0 || value > AudioConstants.MAX_HUMANIZE_OFFSET_MS) throw new Error('Maximálna odchýlka humanizácie musí byť 0–1000 ms.');
+}
+
+export function validateHumanizeApplianceProbability(value: number) {
+  if (!Number.isInteger(value) || value < 0 || value > 100) throw new Error('Pravdepodobnosť humanizácie musí byť 0–100 %.');
 }
 
 export function validateControls(controls: Controls, steps: number) {
@@ -24,9 +28,11 @@ export function minimumGap(dialect: number[]): number {
 /** Times are seconds on the audio clock, independent from timers or UI frames. */
 export function planBeat(rhythm: Rhythm, controls: Controls, beatStart: number,
                          stepIndex: number, random: () => number = Math.random,
-                         humanizeMaxOffsetMs = AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS): { hits: Hit[]; end: number; nextStep: number } {
+                         humanizeMaxOffsetMs = AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS,
+                         humanizeApplianceProbability = 100): { hits: Hit[]; end: number; nextStep: number } {
   validateControls(controls, rhythm.stepsPerBeat);
   validateHumanizeMaxOffsetMs(humanizeMaxOffsetMs);
+  validateHumanizeApplianceProbability(humanizeApplianceProbability);
   const step = AudioConstants.SECONDS_PER_MINUTE / (controls.bpm * rhythm.stepsPerBeat);
   const jitter = Math.min(humanizeMaxOffsetMs / AudioConstants.MILLISECONDS_PER_SECOND,
     step * minimumGap(controls.dialect) * AudioConstants.HUMANIZE_GAP_FRACTION) * controls.humanize / AudioConstants.HUMANIZE_PERCENT_MAX;
@@ -35,14 +41,16 @@ export function planBeat(rhythm: Rhythm, controls: Controls, beatStart: number,
     const position = (stepIndex + pulse) % rhythm.length;
     const nominal = beatStart + pulse * step;
     const shifted = Math.max(0, nominal + step * controls.dialect[pulse] * AudioConstants.DIALECT_STEP_FRACTION);
-    for (const track of rhythm.tracks) {
+    for (const [trackIndex, track] of rhythm.tracks.entries()) {
       const pattern = track.base.replaceAll('|', '');
       const note = pattern[position % pattern.length];
       if (note !== '.') {
-        const sounds = selectSounds(track.instrument, note, controls.humanize, random);
+        const noteHumanize = controls.humanize === 0 || humanizeApplianceProbability === 0 ? 0
+          : humanizeApplianceProbability === 100 || random() < humanizeApplianceProbability / 100 ? controls.humanize : 0;
+        const sounds = selectSounds(track.instrument, note, noteHumanize, random);
         if (sounds.length) {
-          const time = Math.max(0, shifted + (jitter ? (random() * 2 - 1) * jitter : 0));
-          for (const sound of sounds) hits.push({ ...sound, instrument: track.instrument, time });
+          const time = Math.max(0, shifted + (noteHumanize && jitter ? (random() * 2 - 1) * jitter : 0));
+          for (const sound of sounds) hits.push({ ...sound, instrument: track.instrument, time, trackIndex });
         }
       }
     }

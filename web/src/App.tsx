@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { YamlEditor } from './Editor';
 import { OfflinePanel } from './OfflinePanel';
-import { AudioEngine } from './audio';
+import { AudioEngine, defaultTrackMix, type TrackMix } from './audio';
 import { parseRhythm, parseRhythmAtCaret, parseRhythmEntries, type Rhythm } from './rhythm';
 import { type Controls } from './timing';
 import { config } from './config';
+import { OUTPUT_GAIN } from './audio-constants';
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}generated/${path}`;
+const mixerKey = (rhythm: Rhythm) => JSON.stringify([rhythm.id, rhythm.tracks.map(track => track.instrument)]);
 
 function PlayIcon() { return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6 3.5v13l11-6.5z" /></svg>; }
 function FolderIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M2 6V4h6l2 2h8v10H2V6Z" /><path d="M2 8h16" /></svg>; }
@@ -36,11 +38,23 @@ export function App() {
   const engine = useRef<AudioEngine | null>(null);
   const busy = isPlaying || isStarting;
   const displayedRhythm = playingRhythm ?? rhythm;
+  const [mixes, setMixes] = useState<Record<string, TrackMix[]>>({});
+  const [masterVolume, setMasterVolume] = useState(OUTPUT_GAIN * 100);
+  const [humanizeProbability, setHumanizeProbability] = useState(config.humanizeApplianceProbability);
+  const mix = displayedRhythm ? mixes[mixerKey(displayedRhythm)] ?? displayedRhythm.tracks.map(() => defaultTrackMix) : [];
+
+  function updateMix(index: number, value: TrackMix) {
+    if (!displayedRhythm) return;
+    const next = displayedRhythm.tracks.map((_, i) => i === index ? value : mix[i]);
+    setMixes(previous => ({ ...previous, [mixerKey(displayedRhythm)]: next }));
+    engine.current?.setTrackMix(next);
+  }
 
   function updateControls(next: Controls) { controlsRef.current = next; setControls(next); }
 
   function applySource(text: string, filename: string) {
     const parsed = parseRhythm(text);
+    setMixes({});
     caretRef.current = 0; setCaretOffset(0);
     setSource(text); setFileName(filename); setRhythm(parsed); setValidation('');
     syncedSource.current = text;
@@ -65,7 +79,7 @@ export function App() {
     engine.current = new AudioEngine(() => controlsRef.current, message => {
       playRequest.current++;
       setMessage(message); setPlaying(false); setStarting(false); setPlayingRhythm(null);
-    }, undefined, config.humanizeMaxOffsetMs);
+    }, undefined, config.humanizeMaxOffsetMs, config.humanizeApplianceProbability);
     void loadDefaultFile();
     return () => { loadRequest.current++; playRequest.current++; engine.current?.dispose(); };
   }, []);
@@ -113,6 +127,7 @@ export function App() {
       }
       setPlaying(false); setStarting(true); setPlayingRhythm(parsed); setMessage('');
       playingSource.current = source;
+      engine.current!.setTrackMix(mixes[mixerKey(parsed)] ?? []);
       const started = await engine.current!.start(parsed);
       if (request !== playRequest.current) return;
       if (started) setPlaying(true);
@@ -201,9 +216,36 @@ export function App() {
           }} /><span>BPM</span></div></div>
             <input id="tempo" type="range" min={Math.min(config.minimumTempo, controls.bpm)} max={Math.max(config.maximumTempo, controls.bpm)} value={controls.bpm} onChange={event => updateControls({ ...controls, bpm: Number(event.target.value) })} />
           </div>
-          <div className="control-group"><div className="control-heading"><label htmlFor="humanize">Humanize</label><output htmlFor="humanize">{controls.humanize}<small>%</small></output></div>
+          <details className="humanize-options"><summary>Humanize</summary>
+          <div className="humanize-controls">
+          <div className="control-group"><div className="control-heading"><label htmlFor="humanize">Intenzita</label><output htmlFor="humanize">{controls.humanize}<small>%</small></output></div>
             <input id="humanize" type="range" min="0" max="100" value={controls.humanize} onChange={event => updateControls({ ...controls, humanize: Number(event.target.value) })} />
           </div>
+          <div className="control-group"><div className="control-heading"><label htmlFor="humanize-probability">Pravdepodobnosť</label><output htmlFor="humanize-probability">{humanizeProbability}<small>%</small></output></div>
+            <input id="humanize-probability" type="range" min="0" max="100" value={humanizeProbability} onChange={event => {
+              const probability = Number(event.target.value); setHumanizeProbability(probability); engine.current?.setHumanizeApplianceProbability(probability);
+            }} />
+          </div>
+          <p className="humanize-hint">Šanca, že sa na každú notu použije nastavená intenzita.</p>
+          </div>
+          </details>
+          {displayedRhythm && <details className="mixer" aria-label="Mixer">
+            <summary>Mixer</summary>
+            <div className="mixer-tracks">
+            <div className="mixer-track master-track">
+              <div className="mixer-heading"><label htmlFor="master-volume">Master</label></div>
+              <div className="mixer-volume"><input id="master-volume" aria-label="Master hlasitosť" type="range" min="0" max="100" value={masterVolume} onChange={event => {
+                const volume = Number(event.target.value); setMasterVolume(volume); engine.current?.setMasterVolume(volume);
+              }} /><output htmlFor="master-volume">{masterVolume} %</output></div>
+            </div>
+            {displayedRhythm.tracks.map((track, index) => <div className={'mixer-track' + (mix[index].muted ? ' muted' : '')} key={index + '-' + track.instrument}>
+              <div className="mixer-heading"><label htmlFor={'volume-' + index}>{index + 1} · {track.instrument.replaceAll('_', ' ')}</label>
+                <button className="button mute-button" aria-label={'Mute track ' + (index + 1) + ' ' + track.instrument} aria-pressed={mix[index].muted} onClick={() => updateMix(index, { ...mix[index], muted: !mix[index].muted })}>Mute</button>
+              </div>
+              <div className="mixer-volume"><input id={'volume-' + index} aria-label={'Hlasitosť tracku ' + (index + 1) + ' ' + track.instrument} type="range" min="0" max="100" step="0.5" value={mix[index].volume / 2} onChange={event => updateMix(index, { ...mix[index], volume: Number(event.target.value) * 2 })} /><output htmlFor={'volume-' + index}>{mix[index].volume / 2} %</output></div>
+            </div>)}
+            </div>
+          </details>}
           <details className="dialect-options"><summary>Dialect</summary>
             <div className="dialect-toolbar"><button className="text-button" onClick={() => updateControls({ ...controls, dialect: controls.dialect.map(() => 0) })}>Vynulovať</button></div>
             <div className="dialect-grid">
@@ -219,7 +261,8 @@ export function App() {
       <footer className="app-footer">
         <details className="help"><summary>Pomoc</summary><div className="help-content">
           <p>Klikni do rytmu v editore a stlač Play. Ďalšie Play spustí aktuálny výber od začiatku.</p>
-          <p>Tempo, Humanize a Dialect môžeš meniť počas hrania. Úpravy si stiahni tlačidlom Uložiť.</p>
+          <p>Tempo, Humanize, Dialect aj Mixer môžeš meniť počas hrania. Mute stlmí track a zachová jeho hlasitosť. Mixer platí počas otvorenia súboru a neukladá sa do YAML.</p>
+          <p>Tempo a Dialect si stiahni tlačidlom Uložiť.</p>
           <p className="credits">Zvuky dununov: JIMMYJAMES112 / Freesound, CC0. Djembe: AfroPlayer / Tomáš Marek.</p>
         </div></details>
         <OfflinePanel />

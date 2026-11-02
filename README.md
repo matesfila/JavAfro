@@ -8,7 +8,9 @@ Predvolené nastavenia sú v [javafro.yaml](javafro.yaml):
 
 | Nastavenie | Význam |
 | --- | --- |
+| `playback.defaultTrackVolume` | Predvolená hlasitosť každého tracku v mixeri, celé číslo 0–100 %, predvolene 40. Hodnota zodpovedá percentám v UI. |
 | `playback.humanize` | Počiatočná humanizácia 0–100; posuvník ju môže zmeniť počas hrania. |
+| `playback.humanizeApplianceProbability` | Pravdepodobnosť použitia humanizácie na každú notu, celé číslo 0–100, predvolene 100. Pri 50 sa pre každú notu nezávisle rozhodne s pravdepodobnosťou 50 %. |
 | `playback.humanizeMaxOffsetMs` | Maximálny časový posun ±ms pri humanizácii 100 % (0–1000, predvolene 30). Hodnota 0 vypne časové odchýlky. |
 | `playback.humanizeDynamic` | Globálna odchýlka gain samplov pri humanize 100, predvolene ±0,07 ako pôvodné `HUMANIZE_DYNAMIC`. |
 | `playback.humanizePitch` | Globálna odchýlka rate samplov pri humanize 100, predvolene ±0,005 ako pôvodné `HUMANIZE_PITCH`. |
@@ -32,9 +34,36 @@ Konfigurácia sa automaticky neprepisuje pri posúvaní ovládacích prvkov.
 Časová odchýlka sa škáluje percentom humanizácie a naďalej sa obmedzuje na štvrtinu
 najkratšej medzery medzi pulzmi podľa dialectu. Vypnutie časových odchýlok nemení
 humanizáciu hlasitosti a ladenia djembe.
+`humanizeApplianceProbability` vyberá raz pre každú notu, či sa na ňu použije
+nastavená intenzita Humanize (čas, hlasitosť aj ladenie spolu), alebo Humanize 0.
+Pri 100 sa zachová pôvodné správanie, pri 0 sa humanizácia nepoužije.
+Automatický zvonček zdieľa rozhodnutie bubna. Dialect, náhodný výber samplov
+a pravdepodobnosť zahratia noty zostávajú aktívne aj pri vynechaní humanizácie.
+Pravdepodobnosť možno meniť aj počas hrania. V desktopovej aj webovej verzii sú
+posuvníky **Intenzita** a **Pravdepodobnosť** spolu v rozbaľovacom paneli **Humanize**.
+Samostatne možno rozbaliť aj **Dialect**. Oba panely sú predvolene zbalené;
+zbalenie zachová nastavenia aj prehrávanie. Konfigurácia určuje počiatočnú hodnotu;
+zmeny posuvníka sa zachovajú pri Stop/Play aj zmene rytmu a neukladajú sa do YAML.
 Tempo, metrum, delenie doby a dialect konkrétneho rytmu naďalej patria do jeho YAML.
 
 ## Webová verzia
+
+Java aj webový prehrávač majú **Mixer** so zobrazením hlasitosti 0–100 % a prepínačom
+**Mute** pre každý track. V desktopovej verzii tlačidlo **Mixer…** otvorí samostatné
+okno; na webe rozbalíš panel **Mixer**. Zatvorenie okna alebo zbalenie panela
+zachová nastavený mix a prehrávanie pokračuje. Zmeny fungujú aj počas hrania; vypnutie mute obnoví
+nastavenú hlasitosť. Stlmenie tracku nemení hlasitosť ostatných trackov.
+Stop/Play zachová mix aktuálneho rytmu. Nastavenia mixera sa neukladajú do YAML;
+otvorenie súboru ich obnoví na `playback.defaultTrackVolume` (predvolene 40 %) bez mute.
+Zobrazená hlasitosť je lineárna: 50 % = 1× amplitúda, 100 % = 2× (približne +6 dB).
+Konfigurácia `playback.defaultTrackVolume` používa rovnakú stupnicu 0–100 ako UI;
+hodnota 35 sa zobrazí ako 35 %. Pri prechode zo starej stupnice 0–200 vydeľ
+konfiguračnú hodnotu dvoma, aby sa zachovala zvuková úroveň.
+Posuvník **Master** ovláda celý výstup v rozsahu 0–100 %, predvolene 25 %
+(pôvodný násobok 0,25). Master 100 % je štvornásobná amplitúda oproti 25 %,
+približne +12 dB. Mix sa naďalej delí počtom trackov; pri hlasných samploch
+a prekrývaní úderov môže vzniknúť clipping. Master funguje aj počas hrania,
+zachová sa pri Stop/Play aj zmene rytmu alebo súboru a neukladá sa do YAML.
 
 V adresári [web](web/README.md) je React/TypeScript verzia s YAML editorom,
 rovnakými rytmami a samplami, nepretržitým prehrávaním, tempom, humanizáciou
@@ -62,7 +91,7 @@ alebo editora. Načíta sa jeho obsah, tempo a dialect. Počas prehrávania treb
 stlačiť Stop. Viac súborov, priečinky a iné prípony sa odmietnu; pri neplatnom YAML
 zostane doterajší obsah zachovaný. Bežné kopírovanie a vkladanie textu funguje naďalej.
 Editor RSyntaxTextArea zvýrazňuje YAML syntax,
-zobrazuje čísla riadkov a pri stlačení Tab odsádza dvoma medzerami.
+skrýva čísla riadkov a pri stlačení Tab odsádza dvoma medzerami.
 Má veľkú plochu s neproporcionálnym
 písmom a posuvníkmi pre dlhšie zápisy. Jeden súbor môže obsahovať viac rytmov
 ako samostatné hlavné YAML kľúče. Play prehrá rytmus, v ktorého definícii je kurzor.

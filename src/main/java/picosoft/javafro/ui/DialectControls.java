@@ -18,11 +18,18 @@ public final class DialectControls extends JPanel {
     private boolean updating;
 
     public DialectControls(Consumer<Dialect> onChange) {
+        this(onChange, true);
+    }
+
+    public DialectControls(Consumer<Dialect> onChange, boolean showTitle) {
         super(new BorderLayout(12, 0));
         this.onChange = onChange;
-        JLabel title = new JLabel("Dialect");
-        title.setPreferredSize(new Dimension(110, 24));
-        add(title, BorderLayout.WEST);
+        if (showTitle) {
+            JLabel title = new JLabel("Dialect");
+            title.setFont(title.getFont().deriveFont(Font.BOLD));
+            title.setPreferredSize(new Dimension(110, 24));
+            add(title, BorderLayout.WEST);
+        }
         JScrollPane scroll = new JScrollPane(row, ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scroll.setBorder(null);

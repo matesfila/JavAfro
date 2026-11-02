@@ -125,7 +125,7 @@ public final class BeepSequencer implements Sequencer {
         return stopped;
     }
 
-    private record Voice(Instrument instrument, long start, long length) {
+    private record Voice(Instrument instrument, long start, long length, int track) {
         long end() {
             return start + length;
         }
@@ -256,15 +256,18 @@ public final class BeepSequencer implements Sequencer {
                             straightSamples * shortestGap * AudioConstants.HUMANIZE_GAP_FRACTION)
                             * controls.humanize() / (double) AudioConstants.HUMANIZE_PERCENT_MAX);
 
-                    for (BeepTrack track : validatedTracks) {
+                    for (int trackIndex = 0; trackIndex < validatedTracks.size(); trackIndex++) {
+                        BeepTrack track = validatedTracks.get(trackIndex);
                         char note = track.pattern().charAt(pulse % track.pattern().length());
                         if (note != '.') {
-                            Instrument voice = track.instrument().voice(note, controls.humanize());
+                            int noteHumanize = noteHumanize(controls.humanize(), settings.humanizeApplianceProbability(),
+                                    () -> ThreadLocalRandom.current().nextDouble());
+                            Instrument voice = track.instrument().voice(note, noteHumanize);
                             if (voice == null) continue; // Probability notes may intentionally skip a hit.
                             long length = voice.lengthSamples(pulseSamples);
                             if (length > 0) {
-                                long start = humanizedStart(Math.max(0, position + dialectOffset), maxOffset);
-                                voices.add(new Voice(voice, Math.max(renderedPosition, start), length));
+                                long start = humanizedStart(Math.max(0, position + dialectOffset), noteHumanize == 0 ? 0 : maxOffset);
+                                voices.add(new Voice(voice, Math.max(renderedPosition, start), length, trackIndex));
                             }
                         }
                     }
@@ -272,13 +275,13 @@ public final class BeepSequencer implements Sequencer {
                     // Leave room for early hits in the next pulse, including across repeats.
                     long renderUntil = Math.max(0, position - lookbehind);
                     renderedPosition = render(line, buffer, voices, renderedPosition,
-                            renderUntil - renderedPosition, validatedTracks.size());
+                            renderUntil - renderedPosition, validatedTracks.size(), settings);
                 }
                 if (repetitions != 0) repeat++;
             }
 
             long tailEnd = Math.max(position, voices.stream().mapToLong(Voice::end).max().orElse(position));
-            render(line, buffer, voices, renderedPosition, tailEnd - renderedPosition, validatedTracks.size());
+            render(line, buffer, voices, renderedPosition, tailEnd - renderedPosition, validatedTracks.size(), settings);
             if (!stopped) {
                 line.drain();
             }
@@ -290,7 +293,7 @@ public final class BeepSequencer implements Sequencer {
     }
 
     /** Vyrenderuje {@code count} vzoriek od pozície {@code from}, zapíše ich do linky a vráti novú pozíciu. */
-    private long render(SourceDataLine line, byte[] buffer, List<Voice> voices, long from, long count, int trackCount) {
+    private long render(SourceDataLine line, byte[] buffer, List<Voice> voices, long from, long count, int trackCount, PlaybackSettings settings) {
         long position = from;
         long end = from + count;
         while (position < end) {
@@ -298,15 +301,18 @@ public final class BeepSequencer implements Sequencer {
                 return position;
             }
             int block = (int) Math.min(AudioConstants.SAMPLES_PER_BUFFER, end - position);
+            double[] gains = new double[trackCount];
+            double masterGain = settings.masterVolume() / 100.0;
+            for (int track = 0; track < trackCount; track++) gains[track] = settings.trackMix(track).gain();
             for (int i = 0; i < block; i++, position++) {
                 double mixed = 0;
                 for (Voice voice : voices) {
                     long index = position - voice.start();
                     if (index >= 0 && index < voice.length()) {
-                        mixed += voice.instrument().sample(index) * voice.instrument().envelope(index, voice.length());
+                        mixed += voice.instrument().sample(index) * voice.instrument().envelope(index, voice.length()) * gains[voice.track()];
                     }
                 }
-                AudioConstants.putSample(buffer, i, mixed / trackCount);
+                AudioConstants.putSample(buffer, i, mixed / trackCount, masterGain);
             }
             try {
                 line.write(buffer, 0, block * AudioConstants.BYTES_PER_SAMPLE);
@@ -318,6 +324,12 @@ public final class BeepSequencer implements Sequencer {
             voices.removeIf(voice -> voice.end() <= blockEnd);
         }
         return position;
+    }
+
+    /** One decision per note covers timing, dynamics and pitch together. */
+    static int noteHumanize(int amount, int probability, java.util.function.DoubleSupplier random) {
+        if (amount == 0 || probability == 0) return 0;
+        return probability == 100 || random.getAsDouble() < probability / 100.0 ? amount : 0;
     }
 
     static long humanizedStart(long position, long maxOffset) {

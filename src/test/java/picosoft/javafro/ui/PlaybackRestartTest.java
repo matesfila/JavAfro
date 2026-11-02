@@ -40,6 +40,23 @@ public class PlaybackRestartTest {
     }
 
     @Test
+    public void probabilitySliderAppliesBeforePlayAndUpdatesTheRunningSession() throws Exception {
+        var sessions = new CopyOnWriteArrayList<Session>();
+        RhythmPlayerPanel panel = panel(sessions);
+        try {
+            SwingUtilities.invokeAndWait(() -> ((JSlider) named(panel, "humanizeProbabilitySlider")).setValue(65));
+            click(panel, "playButton");
+            Session session = sessions.getFirst();
+            assertTrue(session.started.await(2, TimeUnit.SECONDS));
+            assertEquals(65, session.controls.humanizeApplianceProbability());
+            SwingUtilities.invokeAndWait(() -> ((JSlider) named(panel, "humanizeProbabilitySlider")).setValue(25));
+            assertEquals(25, session.controls.humanizeApplianceProbability());
+            assertEquals(1, sessions.size());
+            assertFalse(session.stopped);
+        } finally { close(panel, sessions); }
+    }
+
+    @Test
     public void repeatedPlayWaitsForOldSessionAndStartsOnlyLatestSelection() throws Exception {
         var sessions = new CopyOnWriteArrayList<Session>();
         RhythmPlayerPanel panel = panel(sessions);

@@ -16,10 +16,10 @@ import java.util.Set;
 public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDynamic, double humanizePitch,
                         int initialTempo, int minimumTempo, int maximumTempo,
                         Path rhythmsDirectory, String initialRhythm, int editorFontSize,
-                        int windowWidth, int windowHeight) {
+                        int windowWidth, int windowHeight, int defaultTrackVolume, int humanizeApplianceProbability) {
     public static AppConfig defaults() {
         return new AppConfig(21, AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS, 0.07, 0.005,
-                116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900);
+                116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900, 40, 100);
     }
 
     public static AppConfig load() throws IOException {
@@ -64,7 +64,7 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDy
         }
         Map<?, ?> root = document == null ? Map.of() : mapping(document, "konfigurácia");
         keys(root, "konfigurácia", "playback", "library", "editor", "window");
-        Map<?, ?> playback = section(root, "playback", "humanize", "humanizeMaxOffsetMs", "humanizeDynamic", "humanizePitch", "tempo");
+        Map<?, ?> playback = section(root, "playback", "humanize", "humanizeMaxOffsetMs", "humanizeDynamic", "humanizePitch", "tempo", "defaultTrackVolume", "humanizeApplianceProbability");
         Map<?, ?> tempo = section(playback, "tempo", "initial", "minimum", "maximum");
         Map<?, ?> library = section(root, "library", "directory", "initialRhythm");
         Map<?, ?> editor = section(root, "editor", "fontSize");
@@ -84,7 +84,9 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDy
                 text(library, "initialRhythm", defaults.initialRhythm),
                 number(editor, "fontSize", defaults.editorFontSize, 8, 72),
                 number(window, "width", defaults.windowWidth, 760, 10000),
-                number(window, "height", defaults.windowHeight, 560, 10000));
+                number(window, "height", defaults.windowHeight, 560, 10000),
+                number(playback, "defaultTrackVolume", defaults.defaultTrackVolume, 0, 100),
+                number(playback, "humanizeApplianceProbability", defaults.humanizeApplianceProbability, 0, 100));
     }
 
     private static Map<?, ?> mapping(Object value, String name) {
