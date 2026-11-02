@@ -10,8 +10,8 @@ playback:
   # Pri humanize 0 sú vypnuté; výber samplu a probability ostávajú aktívne.
   tempo:
     initial: 116 # globálne BPM pre rytmus bez bpm; explicitné bpm v rytme má prednosť
-    minimum: 20
-    maximum: 300 # rozsah posuvníka sa rozšíri, ak má rytmus BPM mimo neho
+    minimum: 30
+    maximum: 200 # rozsah posuvníka sa rozšíri, ak má rytmus BPM mimo neho
 
 library:
   directory: rhythms # relatívne voči tomuto konfiguračnému súboru
