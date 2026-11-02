@@ -57,6 +57,48 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Runs after Shade: retain the development JAR and create a distribution JAR. -->
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>2.7.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>proguard</goal></goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <proguardVersion>7.8.2</proguardVersion>
+                    <injar>${project.build.finalName}.jar</injar>
+                    <outjar>${project.build.finalName}-obfuscated.jar</outjar>
+                    <includeDependency>false</includeDependency>
+                    <proguardInclude>${project.basedir}/proguard.pro</proguardInclude>
+                    <mappingFileName>proguard-mapping.txt</mappingFileName>
+                    <options>
+                        <option>-libraryjars '${java.home}/jmods/java.base.jmod'(!**.jar;!module-info.class)</option>
+                        <option>-libraryjars '${java.home}/jmods/java.desktop.jmod'(!**.jar;!module-info.class)</option>
+                        <option>-libraryjars '${java.home}/jmods/java.datatransfer.jmod'(!**.jar;!module-info.class)</option>
+                        <option>-libraryjars '${java.home}/jmods/java.logging.jmod'(!**.jar;!module-info.class)</option>
+                        <option>-libraryjars '${java.home}/jmods/java.xml.jmod'(!**.jar;!module-info.class)</option>
+                        <option>-libraryjars '${java.home}/jmods/java.sql.jmod'(!**.jar;!module-info.class)</option>
+                        <option>-libraryjars '${java.home}/jmods/java.transaction.xa.jmod'(!**.jar;!module-info.class)</option>
+                    </options>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.guardsquare</groupId>
+                        <artifactId>proguard-base</artifactId>
+                        <version>7.8.2</version>
+                    </dependency>
+                    <!-- Override the plugin's older core as well (Java 25 bytecode). -->
+                    <dependency>
+                        <groupId>com.guardsquare</groupId>
+                        <artifactId>proguard-core</artifactId>
+                        <version>9.2.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

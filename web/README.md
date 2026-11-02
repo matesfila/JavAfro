@@ -39,6 +39,23 @@ Produkčným výstupom je `dist/`: statické HTML, JS, CSS, fonty, YAML a zvuky.
 Na neskoršie nasadenie stačí statický hosting s HTTPS. `base: './'` umožňuje
 aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 
+### Zostavenie s obfuskáciou
+
+```powershell
+npm run build:obfuscated
+```
+
+Výstup je v rovnakom `dist/`. Lokálny `javascript-obfuscator` obfuskuje aplikačné
+JS moduly po minifikácii; knižnice React, CodeMirror a YAML zostávajú minifikované.
+Následne sa vypočítajú finálne názvy súborov a vygeneruje offline cache.
+Source mapy sa nevytvárajú. Nastavenia sú v `build/obfuscate.ts`; náročné
+transformácie toku programu a ochrany proti debuggeru sú vypnuté kvôli mobilom.
+Obfuskácia sťažuje čítanie JavaScriptu; YAML rytmy a WAV sample zostávajú dostupné.
+
+Pre lokálny prenos tejto verzie na telefón použi `npm run phone:obfuscated`.
+Bežné `npm run build`, `npm run phone` a vývoj cez `npm run dev` používajú
+štandardné zostavenie. Java JAR a Windows balenie tento webový režim nemení.
+
 ## Ovládanie
 
 Pri otvorení sa priamo načíta `basicRhythms.yaml` (alebo súbor z

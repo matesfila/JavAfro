@@ -17,6 +17,21 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw 'Maven build failed.'
     }
+    & (Join-Path $env:JAVA_HOME 'bin/java.exe') '-Djava.awt.headless=true' 'tools/ObfuscationSmokeCheck.java'
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Obfuscated JAR verification failed.'
+    }
+
+    # Include modules required by bundled libraries as well as application code.
+    $jdeps = Join-Path $env:JAVA_HOME 'bin/jdeps.exe'
+    $runtimeModules = & $jdeps --multi-release 25 --print-module-deps 'target/JavAfro-obfuscated.jar'
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Runtime module analysis failed.'
+    }
+    $runtimeModules = ($runtimeModules -join '').Trim()
+    if ($runtimeModules -notmatch '^java\.[a-z.]+(,java\.[a-z.]+)*$') {
+        throw "Unexpected runtime module list: $runtimeModules"
+    }
 
     $targetDirectory = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'target'))
     $inputDirectory = Join-Path $targetDirectory 'windows-input'
@@ -36,7 +51,7 @@ try {
     }
 
     New-Item -ItemType Directory -Path $inputDirectory -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $targetDirectory 'JavAfro.jar') -Destination $inputDirectory
+    Copy-Item -LiteralPath (Join-Path $targetDirectory 'JavAfro-obfuscated.jar') -Destination (Join-Path $inputDirectory 'JavAfro.jar')
     [xml]$projectPom = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'pom.xml') -Raw
     $packageArguments = @(
         '--type', 'app-image',
@@ -48,11 +63,22 @@ try {
         '--dest', $outputDirectory,
         '--main-jar', 'JavAfro.jar',
         '--main-class', 'picosoft.javafro.AfroJavaPlayer',
-        '--add-modules', 'java.desktop'
+        '--add-modules', $runtimeModules,
+        # Retain java.exe so the generated runtime can be verified and diagnosed.
+        '--jlink-options', '--strip-debug --no-man-pages --no-header-files'
     )
     & $jpackage @packageArguments
     if ($LASTEXITCODE -ne 0) {
         throw 'Windows packaging failed.'
+    }
+    $smokeClasses = Join-Path $targetDirectory 'obfuscation-smoke'
+    & (Join-Path $env:JAVA_HOME 'bin/javac.exe') -d $smokeClasses 'tools/ObfuscationSmokeCheck.java'
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Could not compile packaged runtime verification.'
+    }
+    & (Join-Path $appDirectory 'runtime/bin/java.exe') '-Djava.awt.headless=true' -cp $smokeClasses ObfuscationSmokeCheck (Join-Path $appDirectory 'app/JavAfro.jar')
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Packaged Java runtime verification failed.'
     }
     Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'javafro.yaml') -Destination $appDirectory
     Write-Host "Application created: $appDirectory\JavAfro.exe"

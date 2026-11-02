@@ -2,6 +2,8 @@
 
 ## Najbližšie
 
+- [] Aktívny riadok tmavší - teraz je dôležitý, rytmus pod ním sa prehráva
+- [] Desktop verzia: vstupný súbor nebude zakompilovaný, ale normálny externý súbor
 - [] Generátor stringov - preskúmať, či existuje nejaká knižnica na generovanie stringov
   - cieľom by bolo mať možnosť v jednom riadku zapísať rôzne varianty patternu
 - [] Zaviesť rodinu rytmov (meniť sa im bude zrejme dialekt)

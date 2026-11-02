@@ -383,6 +383,34 @@ Na cieľovom počítači musí byť Java 25 alebo novšia; príkaz `java` musí 
 Ak je Java 25 nastavená v `PATH`, stačí `java -jar target/JavAfro.jar`.
 Dvojklik na JAR funguje, ak je vo Windows nastavená príslušná asociácia súborov s Javou.
 
+### Obfuskovaná distribúcia
+
+`mvn package` navyše vytvorí **`target/JavAfro-obfuscated.jar`** na distribúciu.
+Spustenie vyžaduje Java 25 alebo novšiu:
+
+```powershell
+& "$env:JAVA_HOME/bin/java.exe" -jar target/JavAfro-obfuscated.jar
+```
+
+ProGuard premenuje aplikačné triedy, metódy a polia a odstráni zdrojové debug
+informácie. Vstupná trieda zostáva zachovaná; knižnice RSyntaxTextArea a SnakeYAML
+si ponechávajú názvy kvôli reflexii a načítaniu resources. YAML, ikony a zvukové
+sample zostávajú čitateľné a nezmenené. Obfuskácia nešifruje reťazce ani dáta.
+Odstraňovanie tried a optimalizácie bytecode sú vypnuté.
+
+Pravidlá sú v [proguard.pro](proguard.pro). Použitá verzia ProGuard podporuje
+[Java 25](https://www.guardsquare.com/manual/releasenotes).
+`target/JavAfro.jar` zostáva vývojovou verziou bez obfuskácie.
+Súbor `target/proguard-mapping.txt` uchovaj súkromne ku konkrétnemu vydaniu pre
+diagnostiku chýb; nepribaľuj ho k distribúcii. Ďalší build ho prepíše.
+
+Overenie skutočného obfuskovaného JAR (premenené triedy, nezmenené resources,
+konfigurácia, načítanie rytmov a samplov, Swing YAML editor a skladanie blokov):
+
+```powershell
+& "$env:JAVA_HOME/bin/java.exe" -Djava.awt.headless=true tools/ObfuscationSmokeCheck.java
+```
+
 ## Windows aplikácia s pribalenou Javou
 
 Na Windows spusti z koreňa projektu:
@@ -391,8 +419,12 @@ Na Windows spusti z koreňa projektu:
 .\build-windows.ps1
 ```
 
-Skript vykoná `mvn package` a pomocou nástroja `jpackage` z `JAVA_HOME`
+Skript vykoná `mvn package`, použije obfuskovaný JAR a pomocou nástroja `jpackage` z `JAVA_HOME`
 vytvorí `target/windows/JavAfro/JavAfro.exe`.
+Potrebné Java moduly určí z výsledného JAR pomocou `jdeps`, vrátane závislostí
+knižníc (napríklad `java.logging` pre SnakeYAML). Pred dokončením overí aj
+zabalený JAR priamo s pribalenou Javou. Runtime obsahuje `runtime/bin/java.exe`
+na diagnostiku prípadných problémov.
 Spúšťač otvorí aplikáciu bez konzolového okna.
 
 Na iný Windows počítač s rovnakou architektúrou skopíruj **celý priečinok
