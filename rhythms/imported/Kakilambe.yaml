@@ -5,11 +5,11 @@
   dialect: [0, 0.33, 0]
   tracks:
     dundun:
-      base: "x.x.x.bb.b.x|x.b.x.bx.b.x"
+      base: "D.D.D.xx.x.D|D.x.D.xD.x.D"
       variations:
-        - "xxxxxxxxxxxx|xxxxxxxxxxxx"
+        - "DDDDDDDDDDDD|DDDDDDDDDDDD"
     sangban:
-      base: "b.b.b.bx.x.b|b.b.x.bx.x.b"
+      base: "x.x.x.xS.S.x|x.x.S.xS.S.x"
     kensereni:
-      base: "xx.bb.xx.bb.|xx.bb.xx.bb."
+      base: "KK.xx.KK.xx.|KK.xx.KK.xx."
   legacy: {"source":"Kakilambe.rb","symbol":"KAKILAMBE","notes":[],"definition":{"BPM":130,"TIME_SIGNATURE":[12,8],"SWING":[0,0,0],"patterns":{"dundun":{"base":["X.X.X.bb.b.C|X.b.B.bA.b.C"],"variations":["XAXXAXXAXXAX|XAXXAXXAXXAX"]},"sangban":{"base":["b.b.b.bX.X.b|b.b.X.bX.X.b"],"variations":[]},"kenken":{"base":["XX.bb.XX.bb.|XX.bb.XX.bb."],"variations":[]},"djembe":{"base":["D.oox.Do.ox.|D.oox.Do.ox."],"variations":["ooxooxooxoox|ooxooxooxoox","ooxooxooxoox|x.ooooxD.D.D"]}}}}

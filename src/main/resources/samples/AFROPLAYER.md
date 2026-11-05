@@ -29,15 +29,15 @@ Each sampler requires an explicit note through `voice(note, humanize)`. Only the
 returned voice can render samples, report its length or play a tone; the sampler
 itself has no default sound.
 
-For bass drums, `X` and the compatibility alias `x` play an open stroke, `i/I`
+For bass drums, `D/d` (dundun), `S/s` (sangban), `K/k` (kensereni) play an open stroke only on their own track; `i/I`
 play a closed stroke, and `A/B/C` play an open stroke with probability 12/40/80%.
 Every successful drum stroke also plays its matching bell at the same timestamp.
-If a probability stroke is skipped, its bell is skipped too. `b` plays only the bell.
-Separate bell tracks accept `b`, `x` or `X` and do not add another bell.
+If a probability stroke is skipped, its bell is skipped too. `x` plays only the bell.
+Separate bell tracks accept `x` and do not add another bell.
 
-`djembe2` keeps original `D/o/x/i` (bass/tone/slap/closed) and `E/p/y` (60%),
+`djembe2` uses `B/o/S/i` (bass/tone/slap/closed) and `E/p/y` (60%),
 `F/q/z` (12%). The closed sound is the original DJEMBESLAP1 recording, not a
-substitution from the Tomáš Marek djembe. Modern `d/t/s` and `D/T/S` aliases are
+substitution from the Tomáš Marek djembe. Modern `b/t/s` and `B/T/S` symbols are
 also accepted, with lowercase at 70% of the corresponding accent gain.
 
 The Java engine currently mixes mono. Original pan positions are retained in the
@@ -57,5 +57,5 @@ To repeat conversion of the 54 dundun/sangban/kensereni/bell/djembe2 recordings
 ```
 
 The old `DundunInstrument`, `SangbanInstrument`, `KensereniInstrument` and their
-CC0 WAVs are unchanged, exposed in YAML as `dundun_freesound`, `sangban_freesound`,
+CC0 WAV audio is unchanged, exposed in YAML as `dundun_freesound`, `sangban_freesound`,
 and `kensereni_freesound`.

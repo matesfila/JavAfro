@@ -5,17 +5,17 @@
   dialect: [0, 0, 0, 0]
   tracks:
     djembe:
-      base: "d.tt..s.d.tt..s."
+      base: "b.tt..s.b.tt..s."
     dundun:
-      base: "x.b.x.b.x.b.x.b."
+      base: "D.x.D.x.D.x.D.x."
       variations:
-        - "x.x.x.x.x.x.x...|x.b.x.b.x.b.x.b.|x.x.x.x.x.x.x...|x.b.x.b.x.b.x.b.|x.x.x.x.x.x.x...|...xx...x.b.x.b.|xx.bb.b.x.xxx..."
+        - "D.D.D.D.D.D.D...|D.x.D.x.D.x.D.x.|D.D.D.D.D.D.D...|D.x.D.x.D.x.D.x.|D.D.D.D.D.D.D...|...DD...D.x.D.x.|DD.xx.x.D.DDD..."
     sangban:
-      base: "x.bx.bb.x.x.i.b."
+      base: "S.xS.xx.S.S.i.x."
       variations:
-        - "x.x.x.x.x.x.x...|x.bx.bb.x.x.i.b.|x.x.x.x.x.x.x...|x.bx.bb.x.x.i.b.|x.x.x.x.x.x.x...|...xx...x.b.x.b.|xx.bb.b.x.xxx..."
+        - "S.S.S.S.S.S.S...|S.xS.xx.S.S.i.x.|S.S.S.S.S.S.S...|S.xS.xx.S.S.i.x.|S.S.S.S.S.S.S...|...SS...S.x.S.x.|SS.xx.x.S.SSS..."
     kensereni:
-      base: "b.xx.bi.b.xx.bi."
+      base: "x.KK.xi.x.KK.xi."
       variations:
-        - "x.x.x.x.x.x.x...|b.xx.bi.b.xx.bi.|x.x.x.x.x.x.x...|b.xx.bi.b.xx.bi.|x.x.x.x.x.x.x...|...xx...x.b.x.b.|xx.bb.b.x.xxx..."
+        - "K.K.K.K.K.K.K...|x.KK.xi.x.KK.xi.|K.K.K.K.K.K.K...|x.KK.xi.x.KK.xi.|K.K.K.K.K.K.K...|...KK...K.x.K.x.|KK.xx.x.K.KKK..."
   legacy: {"source":"Fakoli.rb","symbol":"FAKOLI","notes":["Original 8/4 sections were imported as 2/4, then paired into 4/4 bars; BPM and hit timing unchanged."],"definition":{"BPM":97,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["x.b.x.b.|x.b.x.b."],"variations":["x.x.x.x.|x.x.x...|x.b.x.b.|x.b.x.b.|x.x.x.x.|x.x.x...|x.b.x.b.|x.b.x.b.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"sangban":{"base":["x.bx.bb.|x.x.i.b."],"variations":["x.x.x.x.|x.x.x...|x.bx.bb.|x.x.i.b.|x.x.x.x.|x.x.x...|x.bx.bb.|x.x.i.b.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"kenken":{"base":["b.xx.bi.|b.xx.bi."],"variations":["x.x.x.x.|x.x.x...|b.xx.bi.|b.xx.bi.|x.x.x.x.|x.x.x...|b.xx.bi.|b.xx.bi.|x.x.x.x.|x.x.x...|...xx...|x.b.x.b.|xx.bb.b.|x.xxx..."]},"djembe":{"base":["ooxx.xx.|ooxxD.x."],"variations":["x.x.x.x.|x.x.x...|ooxx.xx.|ooxxD.x.|x.x.x.x.|x.x.x...|ooxx.xx.|ooxxD.x.|x.x.x.x.|x.x.x...|x..oo.x.|o.x.o.x.|oo.xx...|x.xxx..."]},"djembe2":{"base":["D.xxD.oo|D.xxD.oo"],"variations":["x.x.x.x.|x.x.x...|D.xxD.oo|D.xxD.oo|x.x.x.x.|x.x.x...|D.xxD.oo|D.xxD.oo|x.x.x.x.|x.x.x...|x..oo.x.|o.x.o.x.|oo.xx...|x.xxx..."]}}}}

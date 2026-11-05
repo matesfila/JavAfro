@@ -13,6 +13,26 @@ import java.nio.file.Path;
 import static org.junit.Assert.*;
 
 public class WavSampleInstrumentTest {
+    @Test public void singleSampleAndSyntheticDrumsUseTrackSpecificLettersAndBellOnlyX() {
+        List<Instrument> drums = List.of(
+                new picosoft.javafro.instruments.sample.jimmijames.DundunInstrument(),
+                new picosoft.javafro.instruments.sample.jimmijames.SangbanInstrument(),
+                new picosoft.javafro.instruments.sample.jimmijames.KensereniInstrument(),
+                new picosoft.javafro.instruments.synth.DundunInstrument(),
+                new picosoft.javafro.instruments.synth.SangbanInstrument(),
+                new picosoft.javafro.instruments.synth.KensereniInstrument());
+        for (int index = 0; index < drums.size(); index++) {
+            Instrument drum = drums.get(index);
+            char stroke = "DSK".charAt(index % 3);
+            for (char note : "DdSsKk".toCharArray()) assertEquals(Character.toUpperCase(note) == stroke, drum.supportsNote(note));
+            assertNotNull(drum.voice(stroke, 0));
+            assertNotNull(drum.voice(Character.toLowerCase(stroke), 0));
+            assertTrue(drum.voice('x', 0).lengthSamples(1) > 100);
+            assertFalse(drum.supportsNote('b'));
+            assertFalse(drum.supportsNote('X'));
+        }
+    }
+
     @Test
     public void bundledSamplesAreAudibleFiniteAndPlayTheirWholeTails() {
         for (Instrument instrument : List.of(new picosoft.javafro.instruments.sample.jimmijames.DundunInstrument(), new picosoft.javafro.instruments.sample.jimmijames.SangbanInstrument(), new picosoft.javafro.instruments.sample.jimmijames.KensereniInstrument())) {

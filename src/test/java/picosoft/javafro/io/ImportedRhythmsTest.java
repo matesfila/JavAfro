@@ -77,7 +77,7 @@ public class ImportedRhythmsTest {
         String steps = converted.replace("|", "");
         assertEquals(barIndex * barBeats, (double) steps.length() / stepsPerBeat, 1e-10);
         List<Double> actual = new ArrayList<>();
-        for (int i = 0; i < steps.length(); i++) if ("xXiI".indexOf(steps.charAt(i)) >= 0) actual.add((double) i / stepsPerBeat);
+        for (int i = 0; i < steps.length(); i++) if ("DdSsKkiIABC".indexOf(steps.charAt(i)) >= 0) actual.add((double) i / stepsPerBeat);
         assertEquals(expected.size(), actual.size());
         for (int i = 0; i < expected.size(); i++) assertEquals(expected.get(i), actual.get(i), 1e-10);
     }
@@ -112,7 +112,7 @@ public class ImportedRhythmsTest {
             for (int section = 0; section < sections.length; section++) {
                 String bar = sections[section];
                 for (int i = 0; i < bar.length(); i++) if (bar.charAt(i) != '.') {
-                    expectedNotes.append(bar.charAt(i));
+                    expectedNotes.append(switch (bar.charAt(i)) { case 'D' -> 'B'; case 'x' -> 'S'; default -> bar.charAt(i); });
                     double originalTime = section * 2.0 + i * 2.0 / bar.length();
                     double quantizedTime = section * 2.0 + Math.round(i * 8.0 / bar.length()) / 4.0;
                     assertTrue(Math.abs(originalTime - quantizedTime) <= 0.125);
@@ -172,8 +172,8 @@ public class ImportedRhythmsTest {
         var track = (BeepTrack) djole.tracks().stream()
                 .filter(t -> t.instrument() instanceof DundunInstrument)
                 .findFirst().orElseThrow();
-        assertEquals("x.b.b.b.x.x.b.b.", track.pattern());
-        assertEquals("xx.xxx.xxx.xx.x.", track.withVariation(0).pattern());
+        assertEquals("D.x.x.x.D.D.x.x.", track.pattern());
+        assertEquals("DD.DDD.DDD.DD.D.", track.withVariation(0).pattern());
         assertThrows(UnsupportedOperationException.class, () -> track.variations().clear());
         var kuku = RhythmLoader.load(Path.of("rhythms/imported/Kuku.yaml")).get("Kuku");
         assertEquals("4/4", kuku.timeSignature().toString());

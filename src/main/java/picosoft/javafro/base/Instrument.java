@@ -6,7 +6,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 /**
- * Zdroj zvuku, ktorý sekvencer spúšťa pri každom údere ({@code x}).
+ * Zdroj zvuku, ktorý sekvencer spúšťa pre podporovanú notu konkrétneho tracku.
  * Čas vo vzorkách sa vždy počíta od začiatku konkrétneho úderu pri 44 100 Hz.
  */
 public interface Instrument {

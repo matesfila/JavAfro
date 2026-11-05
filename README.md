@@ -2,6 +2,10 @@
 
 Prehrávač afrických rytmov so Swing GUI, YAML editorom a zvukovými samplami.
 
+Pre programátorov: [technická dokumentácia](docs/TECHNICKA_DOKUMENTACIA.md)
+opisuje architektúru, objektovú štruktúru, zodpovednosti tried a modulov,
+tok prehrávania a miesta pre rozšírenie Java aj webovej verzie.
+
 ## Konfigurácia aplikácie
 
 Predvolené nastavenia sú v [javafro.yaml](javafro.yaml):
@@ -166,11 +170,30 @@ aj po Stop/Play. Dialect je zatiaľ spoločný pre všetky tracky.
 
 ## Rhythm
 
+### Zápis nôt
+
+| Track | Úder bubna | Samostatný zvonček |
+| --- | --- | --- |
+| `dundun`, `dundun_freesound` | `D` alebo `d` | `x` |
+| `sangban`, `sangban_freesound` | `S` alebo `s` | `x` |
+| `kensereni`/`kenken`, `kensereni_freesound` | `K` alebo `k` | `x` |
+| `djembe`, `djembe2` | `B/b` bas, `T/t` tón, `S/s` slap | nepodporuje |
+| samostatné `*_bell` | — | `x` |
+
+Písmená bubnov platia iba pre príslušný track; `D/d` nie je všeobecný úder.
+Pri basových bubnoch sú veľké a malé písmená rovnocenné. Pri djembe malé
+písmená používajú 70 % hlasitosti akcentu. `.` je pauza a `|` hranica taktu.
+
+Staré súbory treba previesť podľa tracku: pôvodné `x/X` bubna na `D`, `S`
+alebo `K`, pôvodný zvonček `b` na `x`; v djembe `D/d` na `B/b` a pôvodný
+slap `x` na `S`. Knižnica v repozitári je už prevedená. Nejde o globálne
+nahradenie znakov; `legacy` uchováva pôvodné zdrojové dáta.
+
 ### Djembe z AfroPlayer
 
 Nástroj `picosoft.javafro.instruments.sample.matesamples.DjembeInstrument` používa 29 pôvodných
 samplov Tomáša Mareka. Funguje v Java aj webovom prehrávači; v knižnici je
-`rhythms/djembe-demo.yaml` s ukážkou všetkých úderov aj pôvodného zápisu.
+`rhythms/djembe-demo.yaml` s ukážkou všetkých úderov aj prevedených značiek AfroPlayer.
 
 ```yaml
 djembe-demo:
@@ -179,15 +202,15 @@ djembe-demo:
   stepsPerBeat: 4
   dialect: [0, 0, 0, 0]
   tracks:
-    djembe: "d..t.s..D.tt.S.."
+    djembe: "b..t.s..B.tt.S.."
 ```
 
-`d` = bas, `t` = tón, `s` = slap; `D/T/S` sú akcenty (malé písmená majú 70 %
+`b` = bas, `t` = tón, `s` = slap; `B/T/S` sú akcenty (malé písmená majú 70 %
 ich hlasitosti). `i/I` hrá tlmený tón, `c/C` tlmený slap a `a/A` alternatívny slap.
 Pôvodné `i` ostáva na pôvodnej hlasitosti. `.` znamená ticho a `|` oddeľuje takty.
 Basové bubny prijímajú aj pôvodné otvorené/uzavreté údery a zvonce opísané nižšie.
 
-Zachovaný je aj pôvodný zápis AfroPlayer: `D/o/x/i`. Znaky `E/p/y` hrajú bas/tón/slap
+Pôvodný tón `o` a tlmený tón `i` zostávajú podporované. Bas sa zapisuje `B/b` a slap `S/s`. Znaky `E/p/y` hrajú bas/tón/slap
 s pravdepodobnosťou 60 %, `F/q/z` s 12 %; neznamenajú nižšiu hlasitosť.
 Každý úder náhodne vyberá jeden multisample. Humanize navyše mení hlasitosť
 (pri 100 ±0,07) a ladenie/rýchlosť (±0,5 %); pri 0 sú tieto odchýlky vypnuté.
@@ -212,15 +235,15 @@ Triedy pôvodných nástrojov sú v `picosoft.javafro.instruments.sample.matesam
 | `sangban_bell` | `SangbanBellInstrument` |
 | `kensereni_bell` alebo `kenken_bell` | `KensereniBellInstrument` |
 
-Basové bubny používajú pôvodné multisample: `X` aj `x` sú otvorený úder,
-`i/I` uzavretý úder a `b` samotný zvonec. Každý úspešný úder bubna automaticky
+Basové bubny používajú pôvodné multisample: `D/d` je otvorený úder dundunu,
+`S/s` sangbanu a `K/k` kensereni. `i/I` je uzavretý úder a `x` samotný zvonec. Každý úspešný úder bubna automaticky
 pridá jeho zvonec, rovnako ako AfroPlayer. `A/B/C` sú otvorené údery
 s pravdepodobnosťou 12/40/80 %; pri vynechaní úderu nezaznie ani zvonec.
-Samostatné zvonce prijímajú `b`, `x`, `X` a ďalší zvonec už nepridávajú.
+Samostatné zvonce prijímajú `x` a ďalší zvonec už nepridávajú.
 
-`djembe2` používa pôvodné nahrávky `djembe_kontakt`: `D/o/x/i` znamená
+`djembe2` používa pôvodné nahrávky `djembe_kontakt`: `B/o/S/i` znamená
 bas/tón/slap/uzavretý zvuk; `E/p/y` majú 60 % a `F/q/z` 12 % pravdepodobnosť.
-Prijíma aj novšie aliasy `d/t/s` a akcenty `D/T/S`.
+Prijíma aj slabšie `b/t/s` a akcenty `B/T/S`.
 
 Mapovanie, zosilnenia, rýchlosti, pôvodné pan pozície a pravdepodobnosti sú
 v [afroplayer-samples.yaml](src/main/resources/samples/afroplayer-samples.yaml). Java prehráva mono;
@@ -238,7 +261,7 @@ Každý nástroj má bezparametrový konštruktor a používa reálnu nahrávku 
 v JAR. Dekódovaný sample sa zdieľa medzi inštanciami a pri údere znie celý,
 vrátane dozvuku. Nepotrebuje internet ani externý audio prehrávač.
 
-Tieto staršie triedy zostávajú nezmenené. V YAML ich vyber cez `dundun_freesound`,
+Tieto varianty používajú rovnaké trackové písmená `D/d`, `S/s`, `K/k`; `x` hrá iba zodpovedajúci zvonec. V YAML ich vyber cez `dundun_freesound`,
 `sangban_freesound`, `kensereni_freesound`. Syntetické varianty sú naďalej dostupné
 cez Java triedy v balíku `picosoft.javafro.instruments.synth`.
 
@@ -270,9 +293,9 @@ Djole:
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
-    dundun:    "x.......x.x....."
-    sangban:   "....x.......x..."
-    kensereni: "..xx..xx..xx..xx"
+    dundun:    "D.......D.D....."
+    sangban:   "....S.......S..."
+    kensereni: "..KK..KK..KK..KK"
 ```
 
 `RhythmLoader.load(Path)` alebo `RhythmLoader.load(InputStream)` v balíku
@@ -286,7 +309,7 @@ z `playback.tempo.initial` v `javafro.yaml`. Vynechaný `dialect` použije samé
 podporované nástroje zahŕňajú `dundun`, `sangban`, `kensereni`/`kenken`, `djembe`,
 `djembe2` a ich samostatné zvonce podľa tabuľky vyššie.
 `timeSignature` je voliteľné, predvolene `"4/4"`. Podporované sú kladné metrá
-s menovateľom 4 alebo 8. Bez `stepsPerBeat` každý znak `x` alebo `.` predstavuje osminu;
+s menovateľom 4 alebo 8. Bez `stepsPerBeat` každý znak noty alebo `.` predstavuje osminu;
 `|` oddeľuje takty, nezaberá čas a nespúšťa zvuk. Každý takt musí byť úplný:
 
 - `4/4`: 8 znakov na takt, napr. `"x.......|x.x....."`.
@@ -302,7 +325,7 @@ cyklus dlhý približne 2,069 sekundy (štyri beaty).
 
 Každý úsek medzi `|` môže obsahovať aj presne polovicu krokov taktu. Vtedy sa
 pri prehrávaní zahrá dvakrát za sebou a vyplní celý takt. Napríklad pri `4/4`
-a `stepsPerBeat: 4` je `"d.tt..s."` skrátený zápis `"d.tt..s.d.tt..s."`.
+a `stepsPerBeat: 4` je `"b.tt..s."` skrátený zápis `"b.tt..s.b.tt..s."`.
 Pravidlo platí aj pre variácie; iné zlomky dĺžky taktu nie sú povolené.
 
 V zložených osminových metrách (6/8, 9/8, 12/8 atď.) BPM označuje bodkovanú
@@ -321,11 +344,11 @@ Track môže zostať reťazec alebo obsahovať základ a zoznam variácií:
 ```yaml
 tracks:
   dundun:
-    base: "x.......|x.x....."
+    base: "D.......|D.D....."
     variations:
-      - "xx.xxx.x|xx.xx.x."
-  sangban: "....x...|....x..."
-  kensereni: "..xx..xx|..xx..xx"
+      - "DD.DDD.D|DD.DD.D."
+  sangban: "....S...|....S..."
+  kensereni: "..KK..KK|..KK..KK"
 ```
 
 Bežné prehrávanie používa iba `base`. Alternatívy sú dostupné cez
@@ -346,7 +369,7 @@ try (var input = AfroJavaPlayer.class.getResourceAsStream("/rhythms/imported/Djo
 }
 ```
 
-Aktuálny importér zachováva pôvodné noty basových bubnov, zvonce aj `djembe2`.
+Aktuálny importér prevádza noty podľa tracku na nový zápis a zachováva ich zvuk, zvonce, pravdepodobnosti aj `djembe2`.
 Starý `kenken` sa pri importe pomenuje `kensereni`; obidva názvy možno načítať.
 Ručne upravené existujúce rytmy sa pri implementácii nástrojov neprepisovali.
 Staršie importy môžu stále obsahovať zjednodušené `x`; úplné pôvodné dáta sú
@@ -379,7 +402,7 @@ node tools/import-gambia.cjs C:/Projects/AfroPlayer/src/rhythms/Gambia.rb
 Používa 4/4 a 4 kroky na dobu. Groove zachováva pôvodné časovanie; údery v sólach
 so 6 a 7 znakmi sa zaokrúhľujú na najbližší krok. Počet aj poradie úderov zostávajú
 zachované. Dvojice pôvodných dvojdobých úsekov tvoria jeden takt.
-Pôvodné symboly djembe `D/o/x` sa prehrávajú priamo; zvonček `b` zostáva v archíve.
+Pôvodné symboly djembe `D/o/x` sa pri importe prevádzajú na `B/o/S`; zvonček `b` sa prevádza na `x`. Archív ostáva v pôvodnom zápise.
 
 ## Humanizácia patternov
 

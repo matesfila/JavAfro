@@ -3,11 +3,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { parse } = require('../web/node_modules/yaml');
-const { convert } = require('./import-afroplayer.cjs');
+const { convert, convertNote } = require('./import-afroplayer.cjs');
 
 for (const check of [
   { label: 'closed stroke', source: /[iI]/, target: /^[iI]$/, count: 107 },
-  { label: 'standalone bell', source: /b/, target: /^b$/, count: 857 },
+  { label: 'standalone bell', source: /b/, target: /^x$/, count: 857 },
 ]) test(`all 23 playable imported rhythms retain every original ${check.label} in bases and variations`, () => {
   const root = path.resolve(__dirname, '../rhythms/imported');
   let checkedRhythms = 0;
@@ -87,7 +87,7 @@ test('imports archived Ruby data without losing original note types, probabiliti
           const bars = pattern === '' ? [''] : pattern.replace(/\|$/, '').split('|');
           for (const bar of bars) {
             [...bar].forEach((symbol, i) => {
-              if (allowed.includes(symbol)) events.push([symbol, (section + i / bar.length) * originalBarBeats]);
+              if (allowed.includes(symbol)) events.push([convertNote(id, symbol), (section + i / bar.length) * originalBarBeats]);
             });
             section++;
           }

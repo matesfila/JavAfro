@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 
 public class YamlFoldingTest {
     @Test public void quotedNamesCommentsAndUnicodeKeepCorrectFoldBoundaries() throws Exception {
-        String source = "# 🥁\n\"Prvý: rytmus\":\n  tracks: {djembe: 'd.tt..s.'}\n"
+        String source = "# 🥁\n\"Prvý: rytmus\":\n  tracks: {djembe: 'b.tt..s.'}\n"
                 + "# comment\n\"Druhý rytmus\":\n  tracks: {djembe: 's.ts..s.'}";
         SwingUtilities.invokeAndWait(() -> {
             var editor = findEditor(new RhythmPlayerPanel(source));

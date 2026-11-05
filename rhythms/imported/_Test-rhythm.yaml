@@ -5,21 +5,21 @@
   dialect: [0, 0, 0, 0]
   tracks:
     dundun:
-      base: "x.......x......."
+      base: "D.......D......."
       variations:
-        - "x..x..x..x..x..x"
-        - "xx....xx....xx.."
-        - "xxx......xxx...."
+        - "D..D..D..D..D..D"
+        - "DD....DD....DD.."
+        - "DDD......DDD...."
     sangban:
-      base: "....x.......x..."
+      base: "....S.......S..."
       variations:
-        - ".x..x..x..x..x.."
-        - "..xx....xx....xx"
-        - "...xxx......xxx."
+        - ".S..S..S..S..S.."
+        - "..SS....SS....SS"
+        - "...SSS......SSS."
     kensereni:
-      base: "..x...x...x...x."
+      base: "..K...K...K...K."
       variations:
-        - "..x..x..x..x..x."
-        - "....xx....xx...."
-        - "......xxx......x"
+        - "..K..K..K..K..K."
+        - "....KK....KK...."
+        - "......KKK......K"
   legacy: {"source":"_Test-rhythm.rb","symbol":"TESTRHYTHM","notes":["Original 8/4 sections were imported as 2/4, then paired into 4/4 bars; BPM and hit timing unchanged."],"definition":{"BPM":115,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0],"patterns":{"dundun":{"base":["X.......|X......."],"variations":["X..X..X.|.X..X..X","XX....XX|....XX..","XXX.....|.XXX...."]},"sangban":{"base":["....X...|....X..."],"variations":[".X..X..X|..X..X..","..XX....|XX....XX","...XXX..|....XXX."]},"kenken":{"base":["..X...X.|..X...X."],"variations":["..X..X..|X..X..X.","....XX..|..XX....","......XX|X......X"]},"djembe":{"base":["Dyoo..xy|o.oopyx."],"variations":[]},"djembe2":{"base":["D.xxD.oo|D.xxD.oo"],"variations":[]}},"dependencies":{"dundun":{"X..X..X.|.X..X..X":{"sangban":".X..X..X|..X..X..","kenken":"..X..X..|X..X..X."},"XX....XX|....XX..":{"sangban":"..XX....|XX....XX","kenken":"....XX..|..XX...."},"XXX.....|.XXX....":{"sangban":"...XXX..|....XXX.","kenken":"......XX|X......X"}}}}}

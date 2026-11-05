@@ -4,6 +4,6 @@ soko:
   dialect: [0, 0, 0]
 
   tracks:
-    dundun:     "x....xx.xx.x|x.......xx.x"
-    sangban:    "......xx.xx.|.........xx."
-    kensereni:  "...xx....xx.|...xx....xx."
+    dundun:     "D....DD.DD.D|D.......DD.D"
+    sangban:    "......SS.SS.|.........SS."
+    kensereni:  "...KK....KK.|...KK....KK."

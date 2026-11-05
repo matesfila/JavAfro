@@ -5,15 +5,15 @@
   dialect: [0, 0, 0, 0]
   tracks:
     djembe:
-      base: "d.tt..s."
+      base: "b.tt..s."
     dundun:
-      base: "x.b.b.b.x.x.b.b."
+      base: "D.x.x.x.D.D.x.x."
       variations:
-        - "xx.xxx.xxx.xx.x."
+        - "DD.DDD.DDD.DD.D."
     sangban:
-      base: "x.b.x.b.x.b.x.b."
+      base: "S.x.S.x.S.x.S.x."
       variations:
-        - "..x...x...x..x.x"
+        - "..S...S...S..S.S"
     kensereni:
-      base: "b.xxb.xxb.xxb.xx"
+      base: "x.KKx.KKx.KKx.KK"
   legacy: {"source":"Djole.rb","symbol":"DJOLE","notes":["Original 8/4 sections were imported as 2/4, then paired into 4/4 bars; BPM and hit timing unchanged."],"definition":{"BPM":125,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["X.b.b.b.|X.X.b.b."],"variations":["XX.XXX.X|XX.XX.X."],"echauff":["X.XX.XX.|X.XX.XX."]},"sangban":{"base":["X.b.X.b.|X.b.X.b."],"variations":["..X...X.|..X..X.X"],"echauff":["X.b.X.X.|X.b.X.X."]},"kenken":{"base":["b.XXb.XX|b.XXb.XX"],"variations":[],"echauff":[]},"djembe":{"base":["Dyoo..xy|D.oopyx."],"variations":[],"echauff":["oooxxxxx|xxxxxxxx"]},"djembe2":{"base":["D.xxD.oo|D.xxD.oo"],"variations":[],"echauff":[]}}}}

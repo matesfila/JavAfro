@@ -3,7 +3,7 @@ import { AudioEngine } from './audio';
 import { parseRhythm } from './rhythm';
 import { config } from './config';
 
-const rhythm = parseRhythm('test:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    dundun_freesound: "xxxxxxxxxxxxxxxx"');
+const rhythm = parseRhythm('test:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    dundun_freesound: "DDDDDDDDDDDDDDDD"');
 let context: FakeContext;
 class FakeContext {
   currentTime = 0;
@@ -61,7 +61,7 @@ describe('audio lifecycle', () => {
 
   it('applies the master to the full mix live and preserves it across Stop/Play', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun: "XXXXXXXXXXXXXXXX", sangban: "xxxxxxxxxxxxxxxx"}');
+    const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun: "DDDDDDDDDDDDDDDD", sangban: "SSSSSSSSSSSSSSSS"}');
     await engine.start(duet);
     const [master, first, second] = context.gains;
     expect(master.gain.value).toBe(.25 / 2);
@@ -84,7 +84,7 @@ describe('audio lifecycle', () => {
 
   it('routes tracks independently and changes live gains without restarting scheduled notes', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun: "XXXXXXXXXXXXXXXX", sangban: "xxxxxxxxxxxxxxxx"}');
+    const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun: "DDDDDDDDDDDDDDDD", sangban: "SSSSSSSSSSSSSSSS"}');
     engine.setTrackMix([{ volume: 35, muted: true }, { volume: 60, muted: false }]);
     await engine.start(duet);
     const [master, first, second] = context.gains;
@@ -112,7 +112,7 @@ describe('audio lifecycle', () => {
 
   it('loads only an AfroPlayer drum and its bell banks and applies their original stereo pan', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    const drum = parseRhythm('drum:\n  stepsPerBeat: 4\n  tracks: {dundun: "XXXXXXXXXXXXXXXX"}');
+    const drum = parseRhythm('drum:\n  stepsPerBeat: 4\n  tracks: {dundun: "DDDDDDDDDDDDDDDD"}');
     expect(await engine.start(drum)).toBe(true);
     expect(context.decodeAudioData).toHaveBeenCalledTimes(15);
     expect(context.sources).toHaveLength(8);
@@ -132,7 +132,7 @@ describe('audio lifecycle', () => {
     let release!: () => void;
     const gate = new Promise<void>(resolve => { release = resolve; });
     vi.stubGlobal('fetch', vi.fn(async () => { await gate; return { ok: true, arrayBuffer: async () => new ArrayBuffer(8) }; }));
-    const djembe = parseRhythm('dj:\n  stepsPerBeat: 4\n  tracks: {djembe: "dts............."}');
+    const djembe = parseRhythm('dj:\n  stepsPerBeat: 4\n  tracks: {djembe: "bts............."}');
     const superseded = engine.start(djembe);
     expect(oldSources.every(source => source.stop.mock.calls.length === 1)).toBe(true);
     expect(await engine.start(rhythm)).toBe(true);
@@ -146,14 +146,14 @@ describe('audio lifecycle', () => {
   it('loads djembe after playing an ordinary drum, then reuses the decoded multisamples', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
     await engine.start(rhythm);
-    expect(context.decodeAudioData).toHaveBeenCalledTimes(1);
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(5);
     engine.stop();
-    const djembe = parseRhythm('dj:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    djembe: "dts............."');
+    const djembe = parseRhythm('dj:\n  bpm: 120\n  stepsPerBeat: 4\n  tracks:\n    djembe: "bts............."');
     expect(await engine.start(djembe)).toBe(true);
-    expect(context.decodeAudioData).toHaveBeenCalledTimes(30);
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(34);
     engine.stop();
     expect(await engine.start(djembe)).toBe(true);
-    expect(context.decodeAudioData).toHaveBeenCalledTimes(30);
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(34);
     engine.dispose();
   });
 

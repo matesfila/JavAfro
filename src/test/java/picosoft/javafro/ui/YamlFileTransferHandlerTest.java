@@ -39,8 +39,8 @@ public class YamlFileTransferHandlerTest {
 
     @Test
     public void caretSelectsRhythmAndUpdatesControlsWithoutResettingSameRhythm() throws Exception {
-        String yaml = "First:\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: 'd.tt..s.'}\n"
-                + "Second:\n  bpm: 140\n  timeSignature: '12/8'\n  tracks: {djembe: 'd..t..s.....'}\n";
+        String yaml = "First:\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: 'b.tt..s.'}\n"
+                + "Second:\n  bpm: 140\n  timeSignature: '12/8'\n  tracks: {djembe: 'b..t..s.....'}\n";
         SwingUtilities.invokeAndWait(() -> {
             var panel = new RhythmPlayerPanel(yaml);
             var text = editor(panel);
@@ -50,7 +50,7 @@ public class YamlFileTransferHandlerTest {
             assertEquals(90, tempo.getValue());
             tempo.setValue(107);
             humanize.setValue(37);
-            text.setCaretPosition(yaml.indexOf("d.tt"));
+            text.setCaretPosition(yaml.indexOf("b.tt"));
             assertEquals(107, tempo.getValue());
             text.setCaretPosition(yaml.indexOf("Second:"));
             assertEquals(140, tempo.getValue());

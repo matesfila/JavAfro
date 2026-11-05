@@ -1,7 +1,7 @@
 # Pôvodné banky AfroPlayer: gain (Ruby amp), rate, pan a mapovanie nôt.
 # Globálne odchýlky HUMANIZE_DYNAMIC/PITCH sú v javafro.yaml v sekcii playback.
-# gain pri note je relatívny násobiteľ banky (napr. 0.7 pre slabší d/t/s).
-# Úspešný úder basového bubna pridá aj jeho zvonec; b hrá iba zvonec.
+# gain pri note je relatívny násobiteľ banky (napr. 0.7 pre slabší b/t/s).
+# Úspešný úder basového bubna pridá aj jeho zvonec; x hrá iba zvonec.
 # pan používa web; Java momentálne prehráva mono.
 banks:
   dundun_open:
@@ -186,8 +186,8 @@ banks:
 instruments:
   djembe:
     notes:
-      "d": { bank: dj_bass, probability: 1, gain: 0.7 }
-      "D": { bank: dj_bass, probability: 1, gain: 1 }
+      "b": { bank: dj_bass, probability: 1, gain: 0.7 }
+      "B": { bank: dj_bass, probability: 1, gain: 1 }
       "t": { bank: dj_tone, probability: 1, gain: 0.7 }
       "T": { bank: dj_tone, probability: 1, gain: 1 }
       "s": { bank: dj_slap, probability: 1, gain: 0.7 }
@@ -198,7 +198,6 @@ instruments:
       "C": { bank: dj_closed_slap, probability: 1, gain: 1 }
       "a": { bank: dj_alternate_slap, probability: 1, gain: 0.7 }
       "A": { bank: dj_alternate_slap, probability: 1, gain: 1 }
-      "x": { bank: dj_slap, probability: 1, gain: 1 }
       "o": { bank: dj_tone, probability: 1, gain: 1 }
       "E": { bank: dj_bass, probability: 0.6, gain: 1 }
       "F": { bank: dj_bass, probability: 0.12, gain: 1 }
@@ -209,57 +208,50 @@ instruments:
   dundun:
     bell: bell_dun
     notes:
-      "x": { bank: dundun_open, probability: 1, gain: 1 }
-      "X": { bank: dundun_open, probability: 1, gain: 1 }
+      "D": { bank: dundun_open, probability: 1, gain: 1 }
+      "d": { bank: dundun_open, probability: 1, gain: 1 }
       "A": { bank: dundun_open, probability: 0.12, gain: 1 }
       "B": { bank: dundun_open, probability: 0.4, gain: 1 }
       "C": { bank: dundun_open, probability: 0.8, gain: 1 }
       "i": { bank: dundun_closed, probability: 1, gain: 1 }
       "I": { bank: dundun_closed, probability: 1, gain: 1 }
-      "b": { bank: bell_dun, probability: 1, gain: 1 }
+      "x": { bank: bell_dun, probability: 1, gain: 1 }
   dundun_bell:
     notes:
       "x": { bank: bell_dun, probability: 1, gain: 1 }
-      "X": { bank: bell_dun, probability: 1, gain: 1 }
-      "b": { bank: bell_dun, probability: 1, gain: 1 }
   sangban:
     bell: bell_san
     notes:
-      "x": { bank: sangban_open, probability: 1, gain: 1 }
-      "X": { bank: sangban_open, probability: 1, gain: 1 }
+      "S": { bank: sangban_open, probability: 1, gain: 1 }
+      "s": { bank: sangban_open, probability: 1, gain: 1 }
       "A": { bank: sangban_open, probability: 0.12, gain: 1 }
       "B": { bank: sangban_open, probability: 0.4, gain: 1 }
       "C": { bank: sangban_open, probability: 0.8, gain: 1 }
       "i": { bank: sangban_closed, probability: 1, gain: 1 }
       "I": { bank: sangban_closed, probability: 1, gain: 1 }
-      "b": { bank: bell_san, probability: 1, gain: 1 }
+      "x": { bank: bell_san, probability: 1, gain: 1 }
   sangban_bell:
     notes:
       "x": { bank: bell_san, probability: 1, gain: 1 }
-      "X": { bank: bell_san, probability: 1, gain: 1 }
-      "b": { bank: bell_san, probability: 1, gain: 1 }
   kensereni:
     bell: bell_ken
     notes:
-      "x": { bank: kensereni_open, probability: 1, gain: 1 }
-      "X": { bank: kensereni_open, probability: 1, gain: 1 }
+      "K": { bank: kensereni_open, probability: 1, gain: 1 }
+      "k": { bank: kensereni_open, probability: 1, gain: 1 }
       "A": { bank: kensereni_open, probability: 0.12, gain: 1 }
       "B": { bank: kensereni_open, probability: 0.4, gain: 1 }
       "C": { bank: kensereni_open, probability: 0.8, gain: 1 }
       "i": { bank: kensereni_closed, probability: 1, gain: 1 }
       "I": { bank: kensereni_closed, probability: 1, gain: 1 }
-      "b": { bank: bell_ken, probability: 1, gain: 1 }
+      "x": { bank: bell_ken, probability: 1, gain: 1 }
   kensereni_bell:
     notes:
       "x": { bank: bell_ken, probability: 1, gain: 1 }
-      "X": { bank: bell_ken, probability: 1, gain: 1 }
-      "b": { bank: bell_ken, probability: 1, gain: 1 }
   djembe2:
     notes:
-      "D": { bank: dj2_bass, probability: 1, gain: 1 }
+      "B": { bank: dj2_bass, probability: 1, gain: 1 }
       "E": { bank: dj2_bass, probability: 0.6, gain: 1 }
       "F": { bank: dj2_bass, probability: 0.12, gain: 1 }
-      "x": { bank: dj2_slap, probability: 1, gain: 1 }
       "y": { bank: dj2_slap, probability: 0.6, gain: 1 }
       "z": { bank: dj2_slap, probability: 0.12, gain: 1 }
       "o": { bank: dj2_tone, probability: 1, gain: 1 }
@@ -267,7 +259,7 @@ instruments:
       "q": { bank: dj2_tone, probability: 0.12, gain: 1 }
       "i": { bank: dj2_closed, probability: 1, gain: 1 }
       "I": { bank: dj2_closed, probability: 1, gain: 1 }
-      "d": { bank: dj2_bass, probability: 1, gain: 0.7 }
+      "b": { bank: dj2_bass, probability: 1, gain: 0.7 }
       "t": { bank: dj2_tone, probability: 1, gain: 0.7 }
       "T": { bank: dj2_tone, probability: 1, gain: 1 }
       "s": { bank: dj2_slap, probability: 1, gain: 0.7 }

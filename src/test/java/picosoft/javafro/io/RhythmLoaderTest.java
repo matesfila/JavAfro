@@ -21,9 +21,9 @@ public class RhythmLoaderTest {
             Djole:
               bpm: 116
               tracks:
-                dundun: "x...xx.."
-                sangban: "..x...x."
-                kensereni: "x.x.x.x."
+                dundun: "D...DD.."
+                sangban: "..S...S."
+                kensereni: "K.K.K.K."
             """;
 
     private Rhythm load(String yaml) {
@@ -38,7 +38,7 @@ public class RhythmLoaderTest {
         assertEquals("Kon_Masi", renamed.get("Kon_Masi").name());
         assertEquals(116, rhythm.bpm());
         assertEquals(3, rhythm.tracks().size());
-        assertEquals("..x...x.", rhythm.tracks().get(1).pattern());
+        assertEquals("..S...S.", rhythm.tracks().get(1).pattern());
         assertTrue(rhythm.tracks().get(0).instrument() instanceof DundunInstrument);
         assertTrue(rhythm.tracks().get(1).instrument() instanceof SangbanInstrument);
         assertTrue(rhythm.tracks().get(2).instrument() instanceof KensereniInstrument);
@@ -51,7 +51,7 @@ public class RhythmLoaderTest {
         for (String invalid : new String[]{
                 YAML.replace("116", "0"), YAML.replace("116", "116.5"),
                 YAML.replace("Djole:", "'':"),
-                YAML.replace("dundun:", "unknown:"), YAML.replace("x...xx..", "x...s..."),
+                YAML.replace("dundun:", "unknown:"), YAML.replace("D...DD..", "D...s..."),
                 YAML.replace("  bpm: 116", "  bpm: 116\n  bpm: 120"),
                 YAML.replace("  bpm: 116", "  bpm: 116\n  humanize: 70"),
                 YAML.replace("  bpm: 116", "  bpm: 116\n  name: Deprecated"),
@@ -66,8 +66,8 @@ public class RhythmLoaderTest {
 
     @Test
     public void selectsFirstOrRhythmAtCaretUsingYamlNodesAndUnicodeOffsets() {
-        String first = "# 🥁 úvod\n\"Prvý rytmus\":\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: 'd.tt..s.'}\n";
-        String second = "\n# medzi rytmami\n'Druhý: rytmus':\n  bpm: 140\n  timeSignature: '12/8'\n  tracks: {djembe: 'd..t..s.....'}\n";
+        String first = "# 🥁 úvod\n\"Prvý rytmus\":\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: 'b.tt..s.'}\n";
+        String second = "\n# medzi rytmami\n'Druhý: rytmus':\n  bpm: 140\n  timeSignature: '12/8'\n  tracks: {djembe: 'b..t..s.....'}\n";
         String source = first + second;
         assertEquals("Prvý rytmus", picosoft.javafro.ui.RhythmPlayerPanel.parseRhythm(source, 116).name());
         assertEquals("Prvý rytmus", RhythmLoader.atCaret(source, 0, 116).name());
@@ -75,14 +75,14 @@ public class RhythmLoaderTest {
         assertEquals("Druhý: rytmus", RhythmLoader.atCaret(source, source.indexOf("'Druhý"), 116).name());
         assertEquals(140, RhythmLoader.atCaret(source, source.length(), 116).bpm());
         assertEquals(3, RhythmLoader.atCaret(source, source.length(), 116).dialect().offsets().size());
-        String flow = "{First: {tracks: {dundun: 'x.......'}}, Second: {tracks: {dundun: '....x...'}}}";
+        String flow = "{First: {tracks: {dundun: 'D.......'}}, Second: {tracks: {dundun: '....D...'}}}";
         assertEquals("Second", RhythmLoader.atCaret(flow, flow.indexOf("Second"), 116).name());
         assertThrows(IllegalArgumentException.class, () -> RhythmLoader.atCaret(source + first, 0, 116));
     }
 
     @Test
     public void missingTempoUsesGlobalDefaultAndMissingDialectUsesZeros() throws Exception {
-        String minimal = "Test:\n  stepsPerBeat: 4\n  tracks:\n    djembe: 'd.tt..s.'\n";
+        String minimal = "Test:\n  stepsPerBeat: 4\n  tracks:\n    djembe: 'b.tt..s.'\n";
         Rhythm rhythm = RhythmLoader.load(new ByteArrayInputStream(minimal.getBytes(StandardCharsets.UTF_8)), 93).get("Test");
         assertEquals(93, rhythm.bpm());
         assertEquals(java.util.List.of(0.0, 0.0, 0.0, 0.0), rhythm.dialect().offsets());
@@ -93,7 +93,7 @@ public class RhythmLoaderTest {
         rhythm = RhythmLoader.load(new ByteArrayInputStream(explicit.getBytes(StandardCharsets.UTF_8)), 93).get("Test");
         assertEquals(140, rhythm.bpm());
         assertEquals(java.util.List.of(0.0, -0.2, 0.0, 0.0), rhythm.dialect().offsets());
-        String compound = minimal.replace("  stepsPerBeat: 4", "  timeSignature: '12/8'").replace("d.tt..s.", "d..t..s.....");
+        String compound = minimal.replace("  stepsPerBeat: 4", "  timeSignature: '12/8'").replace("b.tt..s.", "b..t..s.....");
         rhythm = RhythmLoader.load(new ByteArrayInputStream(compound.getBytes(StandardCharsets.UTF_8)), 93).get("Test");
         assertEquals(java.util.List.of(0.0, 0.0, 0.0), rhythm.dialect().offsets());
     }
@@ -126,7 +126,7 @@ public class RhythmLoaderTest {
         Rhythm rhythm = RhythmLoader.load(Path.of("rhythms/imported/Djole.yaml")).get("Djole");
         var dundun = rhythm.tracks().stream().filter(track -> track.instrument() instanceof DundunInstrument)
                 .findFirst().orElseThrow();
-        assertEquals("x.b.b.b.x.x.b.b.", dundun.pattern());
+        assertEquals("D.x.x.x.D.D.x.x.", dundun.pattern());
         assertEquals(4, rhythm.stepsPerBeat());
         assertEquals(new TimeSignature(4, 4), rhythm.timeSignature());
     }
@@ -134,10 +134,10 @@ public class RhythmLoaderTest {
     @Test
     public void supportsTwoFourFourBarsOrOneEightFourBar() {
         String twoBars = YAML.replace("  bpm: 116", "  bpm: 116\n  timeSignature: '4/4'")
-                .replace("x...xx..", "x...xx..|x...xx..");
-        assertEquals("x...xx..|x...xx..", load(twoBars).tracks().getFirst().pattern());
+                .replace("D...DD..", "D...DD..|D...DD..");
+        assertEquals("D...DD..|D...DD..", load(twoBars).tracks().getFirst().pattern());
         String oneLongBar = twoBars.replace("'4/4'", "'8/4'").replace("|", "")
-                .replace("..x...x.", "..x...x...x...x.").replace("x.x.x.x.", "x.x.x.x.x.x.x.x.");
+                .replace("..S...S.", "..S...S...S...S.").replace("x.x.x.x.", "x.x.x.x.x.x.x.x.");
         Rhythm rhythm = load(oneLongBar);
         assertEquals(16, rhythm.timeSignature().stepsPerBar());
         assertEquals(2, rhythm.timeSignature().stepsPerBeat());
@@ -147,9 +147,9 @@ public class RhythmLoaderTest {
     @Test
     public void supportsCompoundTwelveEightWithThreeStepsPerBeat() {
         String yaml = YAML.replace("  bpm: 116", "  bpm: 116\n  timeSignature: '12/8'")
-                .replace("x...xx..", "x..x..x..x..")
-                .replace("..x...x.", "..x..x..x..x")
-                .replace("x.x.x.x.", "xxxxxxxxxxxx");
+                .replace("D...DD..", "D..D..D..D..")
+                .replace("..S...S.", "..S..S..S..S")
+                .replace("K.K.K.K.", "KKKKKKKKKKKK");
         Rhythm rhythm = load(yaml);
         assertEquals(12, rhythm.timeSignature().stepsPerBar());
         assertEquals(3, rhythm.timeSignature().stepsPerBeat());
@@ -159,11 +159,11 @@ public class RhythmLoaderTest {
     @Test
     public void acceptsHalfBarsInBaseAndVariationsButRejectsOtherFractions() {
         var meter = new TimeSignature(4, 4);
-        assertEquals("d.tt..s.d.tt..s.", meter.expandPattern("d.tt..s.", 4));
+        assertEquals("b.tt..s.b.tt..s.", meter.expandPattern("b.tt..s.", 4));
         assertEquals("x..x..x..x..", new TimeSignature(12, 8).expandPattern("x..x..", 3));
         assertThrows(IllegalArgumentException.class, () -> meter.validatePattern("x...", 4));
         assertThrows(IllegalArgumentException.class, () -> new TimeSignature(3, 4).validatePattern("x", 1));
-        String yaml = YAML.replace("dundun: \"x...xx..\"", """
+        String yaml = YAML.replace("dundun: \"D...DD..\"", """
                 dundun:
                       base: "x..."
                       variations:
@@ -180,9 +180,9 @@ public class RhythmLoaderTest {
             assertThrows(IllegalArgumentException.class,
                     () -> load(YAML.replace("  bpm: 116", "  bpm: 116\n  timeSignature: '" + signature + "'")));
         }
-        for (String pattern : new String[]{"x..|xx...", "|x...xx..", "x...xx..|", "x...xx..||x...xx..", "x...xx..x...xx.."}) {
+        for (String pattern : new String[]{"x..|xx...", "|D...DD..", "D...DD..|", "D...DD..||D...DD..", "D...DD..D...DD.."}) {
             var error = assertThrows(IllegalArgumentException.class,
-                    () -> load(YAML.replace("x...xx..", pattern)));
+                    () -> load(YAML.replace("D...DD..", pattern)));
             assertTrue(error.getMessage().contains("Djole"));
             assertTrue(error.getMessage().contains("dundun"));
         }
@@ -190,14 +190,14 @@ public class RhythmLoaderTest {
 
     @Test
     public void loadsStructuredTracksAndRejectsInvalidVariations() {
-        String structured = YAML.replace("dundun: \"x...xx..\"", """
+        String structured = YAML.replace("dundun: \"D...DD..\"", """
                 dundun:
-                      base: "x...xx.."
+                      base: "D...DD.."
                       variations:
                         - "xx......"
                 """.stripTrailing());
         var track = load(structured).tracks().getFirst();
-        assertEquals("x...xx..", track.pattern());
+        assertEquals("D...DD..", track.pattern());
         assertEquals(java.util.List.of("xx......"), track.variations());
         assertThrows(IllegalArgumentException.class, () -> load(structured.replace("xx......", "xx")));
         assertThrows(IllegalArgumentException.class, () -> load(structured.replace("variations:", "variationz:")));

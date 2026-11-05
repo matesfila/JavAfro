@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.Assert.*;
 
 public class PlaybackRestartTest {
-    private static final String YAML = "First:\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: 'd.tt..s.'}\n"
-            + "Second:\n  bpm: 140\n  timeSignature: '12/8'\n  tracks: {djembe: 'd..t..s.....'}\n"
-            + "Third:\n  bpm: 80\n  stepsPerBeat: 4\n  tracks: {djembe: 'd.tt..s.'}\n";
+    private static final String YAML = "First:\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: 'b.tt..s.'}\n"
+            + "Second:\n  bpm: 140\n  timeSignature: '12/8'\n  tracks: {djembe: 'b..t..s.....'}\n"
+            + "Third:\n  bpm: 80\n  stepsPerBeat: 4\n  tracks: {djembe: 'b.tt..s.'}\n";
 
     private static class Session implements RhythmPlayerPanel.PlaybackSession {
         final CountDownLatch started = new CountDownLatch(1);

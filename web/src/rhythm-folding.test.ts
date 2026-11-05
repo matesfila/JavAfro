@@ -32,7 +32,7 @@ describe('rhythm folding', () => {
 
   it('keeps quoted rhythm names visible and supports empty input', () => {
     expect(rhythmFoldEffects(stateFor(''))).toEqual([]);
-    const state = stateFor('# 🥁\n"Prvý: rytmus":\n  tracks: {djembe: "d.tt..s."}\n# A comment between definitions\n"Druhý rytmus":\n  tracks: {djembe: "s.ts..s."}\n');
+    const state = stateFor('# 🥁\n"Prvý: rytmus":\n  tracks: {djembe: "b.tt..s."}\n# A comment between definitions\n"Druhý rytmus":\n  tracks: {djembe: "s.ts..s."}\n');
     const effects = rhythmFoldEffects(state);
     expect(effects.map(effect => state.doc.lineAt(effect.value.from).text))
       .toEqual(['"Prvý: rytmus":', '"Druhý rytmus":']);

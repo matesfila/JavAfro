@@ -116,6 +116,13 @@ const lcm = (a, b) => a / gcd(a, b) * b;
 const quote = value => JSON.stringify(value);
 const instruments = { dundun: 'dundun', sangban: 'sangban', kenken: 'kensereni', djembe: 'djembe', djembe2: 'djembe2' };
 
+// Source files and legacy.definition keep Ruby notation; only playable patterns change.
+function convertNote(instrument, note) {
+  if (instrument.startsWith('djembe')) return ({ D: 'B', d: 'b', x: 'S' })[note] ?? note;
+  const stroke = { dundun: 'D', sangban: 'S', kensereni: 'K' }[instrument];
+  return ({ X: stroke, x: stroke, b: 'x' })[note] ?? note;
+}
+
 function convert(definition, sourceFile, id) {
   const { data, symbol } = definition;
   const notes = [];
@@ -153,7 +160,7 @@ function convert(definition, sourceFile, id) {
       for (const char of bar) {
         const supported = instrument.startsWith('djembe') ? '.DExyFzopqidtTsSI' : '.bXxIiABC';
         if (!supported.includes(char)) notes.push(`${context}: unsupported source symbol ${JSON.stringify(char)} archived; rendered as silence.`);
-        result += (supported.includes(char) ? char : '.') + '.'.repeat(spacing - 1);
+        result += (supported.includes(char) ? convertNote(instrument, char) : '.') + '.'.repeat(spacing - 1);
       }
       return result;
     }).join('|');
@@ -227,4 +234,4 @@ function main() {
   console.log(`Converted ${results.length} rhythms in ${new Set(results.map(r => r.file)).size} YAML files; all legacy definitions verified.`);
 }
 if (require.main === module) main();
-module.exports = { Reader, convert };
+module.exports = { Reader, convert, convertNote };

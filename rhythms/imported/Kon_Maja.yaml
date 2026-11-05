@@ -7,9 +7,9 @@
     djembe:
       base: "s.ts..s.ts.."
     dundun:
-      base: ".bb.bb.bb.bb|.bb.bb.bb.xx|.xx.bb.bb.bb|.bb.bb.bb.xx|.xx.bb.bb.xx|.xx.bb.xx.xx|.xx.bb.bb.xx|.x.x.x.xx.xx"
+      base: ".xx.xx.xx.xx|.xx.xx.xx.DD|.DD.xx.xx.xx|.xx.xx.xx.DD|.DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|.D.D.D.DD.DD"
     sangban:
-      base: "i.bb.bi.bb.b|i.bb.bi.bb.x|x.bb.bi.bb.b|i.bb.bi.bb.x|x.bb.bi.bb.x|x.bb.bi.xx.x|x.bb.bi.bb.b|x.x.x.x.xx.b"
+      base: "i.xx.xi.xx.x|i.xx.xi.xx.S|S.xx.xi.xx.x|i.xx.xi.xx.S|S.xx.xi.xx.S|S.xx.xi.SS.S|S.xx.xi.xx.x|S.S.S.S.SS.x"
     kensereni:
-      base: ".bx.xx.bx.xx"
+      base: ".xK.KK.xK.KK"
   legacy: {"source":"Kon.rb","symbol":"KON_MAJA","notes":[],"definition":{"BPM":115,"TIME_SIGNATURE":[12,8],"SWING":[-0.03,0.03,0],"patterns":{"dundun":{"base":[".bb.bb.bb.bb|.bb.bb.bb.XX|.XX.bb.bb.bb|.bb.bb.bb.XX|.XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|.X.X.X.XX.XX"]},"sangban":{"base":["I.bb.bI.bb.b|I.bb.bI.bb.X|X.bb.bI.bb.b|I.bb.bI.bb.X|X.bb.bI.bb.X|X.bb.bI.XX.X|X.bb.bI.bb.b|X.X.X.X.XX.b"]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[],"echauff":[]},"djembe":{"base":["x.ox..x.ox.."]}},"dependencies":{}}}

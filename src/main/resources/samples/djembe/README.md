@@ -25,13 +25,13 @@ Hlasitosť a rýchlosť riadia `gain` a `rate` pri jednotlivých bankách, rovna
 ako pôvodné Ruby `amp` a `rate`. Bas má gain 1, tón/slap/tlmený tón gain 2.
 Slabšie nové noty používajú relatívny gain 0,7; akcenty a pôvodné noty 1.
 
-Nový zápis: `d/t/s` = bas/tón/slap, `D/T/S` = akcenty. Malé písmená majú
+Nový zápis: `b/t/s` = bas/tón/slap, `B/T/S` = akcenty. Malé písmená majú
 70 % hlasitosti veľkých. `i/I` = tlmený tón, `c/C` = tlmený slap,
 `a/A` = alternatívny slap. Pôvodné malé `i` zostáva na pôvodnej hlasitosti.
 
-Pôvodný zápis sa dá prehrať priamo: `D` bas, `o` tón, `x` slap, `i` tlmený tón;
+Aktuálny zápis: `B` bas, `o` tón, `S` slap, `i` tlmený tón;
 `E/p/y` hrajú bas/tón/slap s pravdepodobnosťou 60 %, `F/q/z` s 12 %.
-Pravdepodobnosť neznamená tichší úder. Malé/veľké `d/t/s` riadia hlasitosť.
+Pravdepodobnosť neznamená tichší úder. Malé/veľké `b/t/s` riadia hlasitosť.
 
 Globálne `playback.humanizeDynamic` a `playback.humanizePitch` v `javafro.yaml`
 zodpovedajú pôvodným `HUMANIZE_DYNAMIC` a `HUMANIZE_PITCH`. Humanize riadi aj

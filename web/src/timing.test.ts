@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { parseRhythm } from './rhythm';
 import { minimumGap, planBeat, type Controls } from './timing';
 
-function rhythm(meter = '4/4', steps = 4, pattern = 'xxxxxxxxxxxxxxxx') {
+function rhythm(meter = '4/4', steps = 4, pattern = 'DDDDDDDDDDDDDDDD') {
   return parseRhythm(`Test:\n  bpm: 120\n  timeSignature: '${meter}'\n  stepsPerBeat: ${steps}\n  tracks:\n    dundun_freesound: '${pattern}'\n`);
 }
 const straight: Controls = { bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] };
@@ -19,7 +19,7 @@ describe('sample clock scheduling', () => {
   });
 
   it('gates timing, dynamics and pitch together for a drum and its automatic bell', () => {
-    const drum = parseRhythm('test:\n  stepsPerBeat: 4\n  tracks: {dundun: "X..............."}');
+    const drum = parseRhythm('test:\n  stepsPerBeat: 4\n  tracks: {dundun: "D..............."}');
     const controls = { ...straight, humanize: 100, dialect: [-.4, 0, 0, 0] };
     const baseline = planBeat(drum, { ...controls, humanize: 0 }, 1, 0, () => .75, 10);
     expect(baseline.hits).toHaveLength(2);
@@ -47,8 +47,8 @@ describe('sample clock scheduling', () => {
   });
 
   it('plays a half-bar-only track twice within a complete bar', () => {
-    const short = rhythm('4/4', 4, 'x.......');
-    const full = rhythm('4/4', 4, 'x.......x.......');
+    const short = rhythm('4/4', 4, 'D.......');
+    const full = rhythm('4/4', 4, 'D.......D.......');
     expect(short.length).toBe(16);
     for (let step = 0; step < 16; step += 4) {
       expect(planBeat(short, straight, step / 8, step))
@@ -93,14 +93,14 @@ describe('sample clock scheduling', () => {
   });
 
   it('keeps 12/8 as four dotted-quarter beats and treats pipes as notation', () => {
-    const compound = rhythm('12/8', 3, 'xxxxxxxxxxxx');
+    const compound = rhythm('12/8', 3, 'DDDDDDDDDDDD');
     const result = planBeat(compound, { ...straight, dialect: [0, 0, 0] }, 0, 0);
     expect(result.hits.map(h => h.time)).toEqual([0, 1 / 6, 1 / 3]);
     expect(result.end).toBe(0.5);
     expect(compound.length / compound.stepsPerBeat).toBe(4);
-    const split = rhythm('2/4', 4, 'xxxxxxxx|xxxxxxxx');
+    const split = rhythm('2/4', 4, 'DDDDDDDD|DDDDDDDD');
     expect(planBeat(split, straight, 1, 8)).toEqual(planBeat(rhythm(), straight, 1, 8));
-    expect(rhythm('8/4', 2, 'xxxxxxxxxxxxxxxx').length / 2).toBe(8);
+    expect(rhythm('8/4', 2, 'DDDDDDDDDDDDDDDD').length / 2).toBe(8);
   });
 
   it('applies new controls from the next planned beat without resetting the pattern', () => {

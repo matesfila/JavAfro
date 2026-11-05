@@ -110,7 +110,7 @@ public abstract class AfroSampleInstrument implements Instrument {
     private Instrument makeVoice(char symbol, int humanize) {
         Note note = definition.notes().get(symbol);
         Instrument main = bankVoice(note.bank(), note.gain(), humanize);
-        if (definition.bell() == null || symbol == 'b') return main;
+        if (definition.bell() == null || symbol == 'x') return main;
         Instrument bell = bankVoice(definition.bell(), 1, humanize);
         return new Instrument() {
             public double sample(long index) { return main.sample(index) + bell.sample(index); }

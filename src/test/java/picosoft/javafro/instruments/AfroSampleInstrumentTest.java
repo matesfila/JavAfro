@@ -14,6 +14,31 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class AfroSampleInstrumentTest {
+    @Test public void drumLettersBelongOnlyToTheirTrackAndXIsExactlyOneBell() {
+        List<Instrument> drums = List.of(new DundunInstrument(fixed()), new SangbanInstrument(fixed()), new KensereniInstrument(fixed()));
+        String[] strokes = {"Dd", "Ss", "Kk"};
+        List<Instrument> bells = List.of(new DundunBellInstrument(fixed()), new SangbanBellInstrument(fixed()), new KensereniBellInstrument(fixed()));
+        for (int index = 0; index < drums.size(); index++) {
+            Instrument drum = drums.get(index);
+            for (char note : "DdSsKk".toCharArray()) {
+                assertEquals(strokes[index].indexOf(note) >= 0, drum.supportsNote(note));
+                if (strokes[index].indexOf(note) < 0) assertThrows(IllegalArgumentException.class, () -> drum.voice(note, 0));
+            }
+            for (char removed : "Xb".toCharArray()) assertFalse(drum.supportsNote(removed));
+            Instrument bell = drum.voice('x', 0);
+            Instrument standalone = bells.get(index).voice('x', 0);
+            assertEquals(standalone.lengthSamples(1), bell.lengthSamples(1));
+            for (int sample = 0; sample < bell.lengthSamples(1); sample++) assertEquals(standalone.sample(sample), bell.sample(sample), 0);
+            assertEquals(drums.get(index).voice(strokes[index].charAt(0), 0).sample(500),
+                    drums.get(index).voice(strokes[index].charAt(1), 0).sample(500), 0);
+        }
+        for (Instrument djembe : List.of(new DjembeInstrument(fixed()), new Djembe2Instrument(fixed()))) {
+            for (char removed : "Ddx".toCharArray()) assertFalse(djembe.supportsNote(removed));
+            assertNotNull(djembe.voice('B', 0));
+            assertNotNull(djembe.voice('b', 0));
+        }
+    }
+
     private static class FixedRandom extends Random {
         final int variant;
         final double value;
@@ -93,9 +118,9 @@ public class AfroSampleInstrumentTest {
 
     @Test public void drumHitMixesOriginalOpenOrClosedVoiceWithItsBellAtOriginalRates() throws Exception {
         var instrument = new DundunInstrument(fixed());
-        var open = instrument.voice('X', 0);
+        var open = instrument.voice('D', 0);
         var closed = instrument.voice('i', 0);
-        var bell = instrument.voice('b', 0);
+        var bell = instrument.voice('x', 0);
         WavInstrument openSample = wav("afroplayer-dunduns/dundun_s2_v1.wav");
         WavInstrument closedSample = wav("afroplayer-dunduns/dundun_closed_v1.wav");
         WavInstrument bellSample = wav("afroplayer-dunduns/dundun_bell_open_v1.wav");
@@ -117,21 +142,21 @@ public class AfroSampleInstrumentTest {
                     DundunInstrument::new, SangbanInstrument::new, KensereniInstrument::new)) {
                 assertNotNull(factory.apply(new FixedRandom(0, probability.getValue() - .001)).voice(probability.getKey(), 0));
                 assertNull(factory.apply(new FixedRandom(0, probability.getValue())).voice(probability.getKey(), 100));
-                for (char note : "XxIib".toCharArray()) assertTrue(factory.apply(fixed()).supportsNote(note));
+                for (char note : "Iix".toCharArray()) assertTrue(factory.apply(fixed()).supportsNote(note));
             }
         }
         var instrument = new SangbanInstrument(fixed());
         assertThrows(IllegalArgumentException.class, () -> instrument.voice('?', 0));
-        assertThrows(IllegalArgumentException.class, () -> instrument.voice('X', 101));
+        assertThrows(IllegalArgumentException.class, () -> instrument.voice('S', 101));
     }
 
     @Test public void djembeTwoPreservesKontaktMappingPitchAndStableMultisamples() throws Exception {
         var instrument = new Djembe2Instrument(fixed());
-        Map<Character, String> files = Map.of('D', "DJEMBEBASS2", 'o', "DJEMBE2", 'x', "DJEMBESLAP2", 'i', "DJEMBESLAP1");
-        Map<Character, String> banks = Map.of('D', "dj2_bass", 'o', "dj2_tone", 'x', "dj2_slap", 'i', "dj2_closed");
+        Map<Character, String> files = Map.of('B', "DJEMBEBASS2", 'o', "DJEMBE2", 'S', "DJEMBESLAP2", 'i', "DJEMBESLAP1");
+        Map<Character, String> banks = Map.of('B', "dj2_bass", 'o', "dj2_tone", 'S', "dj2_slap", 'i', "dj2_closed");
         for (var entry : files.entrySet()) {
             Instrument voice = instrument.voice(entry.getKey(), 0);
-            double rate = entry.getKey() == 'x' ? 1.1 : 1;
+            double rate = entry.getKey() == 'S' ? 1.1 : 1;
             WavInstrument sample = wav("djembe2/" + entry.getValue() + ".wav");
             assertEquals(value(sample, 500, rate, configuredGain(banks.get(entry.getKey()))), voice.sample(500), 1e-12);
             assertEquals((long) Math.ceil(sample.lengthSamples(1) / rate), voice.lengthSamples(1));
@@ -140,10 +165,10 @@ public class AfroSampleInstrumentTest {
             assertNull(new Djembe2Instrument(new FixedRandom(0, .99)).voice(note, 0));
             assertNotNull(new Djembe2Instrument(new FixedRandom(0, 0)).voice(note, 0));
         }
-        var human = new Djembe2Instrument(new FixedRandom(0, 0)).voice('D', 100);
-        assertTrue(human.lengthSamples(1) > instrument.voice('D', 0).lengthSamples(1));
+        var human = new Djembe2Instrument(new FixedRandom(0, 0)).voice('B', 100);
+        assertTrue(human.lengthSamples(1) > instrument.voice('B', 0).lengthSamples(1));
         double before = human.sample(500);
-        instrument.voice('x', 100);
+        instrument.voice('S', 100);
         assertEquals(before, human.sample(500), 0);
         var first = new Djembe2Instrument(new FixedRandom(0, .5)).voice('o', 0);
         var second = new Djembe2Instrument(new FixedRandom(1, .5)).voice('o', 0);
@@ -154,9 +179,9 @@ public class AfroSampleInstrumentTest {
 
     @Test public void yamlAcceptsAllNewInstrumentsAliasesAndOriginalSymbols() {
         String source = "Test:\n  stepsPerBeat: 4\n  tracks:\n"
-                + "    dundun: 'X...i...b...A.BC'\n    sangban: 'X...I...b.......'\n"
-                + "    kenken: 'X...i...b.......'\n    djembe2: 'D.o.x.i.EpyFqz..'\n"
-                + "    dundun_bell: 'x...b...'\n    sangban_bell: 'x...b...'\n    kensereni_bell: 'x...b...'\n";
+                + "    dundun: 'D...i...x...A.BC'\n    sangban: 'S...I...x.......'\n"
+                + "    kenken: 'K...i...x.......'\n    djembe2: 'B.o.S.i.EpyFqz..'\n"
+                + "    dundun_bell: 'x...x...'\n    sangban_bell: 'x...x...'\n    kensereni_bell: 'x...x...'\n";
         var rhythm = RhythmLoader.load(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8))).get("Test");
         assertEquals(7, rhythm.tracks().size());
         assertTrue(rhythm.tracks().get(0).instrument() instanceof DundunInstrument);

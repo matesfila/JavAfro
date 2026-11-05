@@ -7,9 +7,9 @@
     djembe:
       base: "s.ts..s.ts.."
     dundun:
-      base: "x.xx.b.bb.b.|b.bb.b.xx.x.|x.xx.b.bb.b.|b.bb.b.xx.x.|x.xx.x.xx.x.|xx.x.x.xx.x.|x.xx.x.xx.xx|.xx.xx.xx.x."
+      base: "D.DD.x.xx.x.|x.xx.x.DD.D.|D.DD.x.xx.x.|x.xx.x.DD.D.|D.DD.D.DD.D.|DD.D.D.DD.D.|D.DD.D.DD.DD|.DD.DD.DD.D."
     sangban:
-      base: "xx.b.i.bi.b.|b.i.bi.bb.x.|x.bb.i.bi.b.|b.i.bi.bb.x.|x.bb.x.bb.x.|b.bx.b.bx.x.|x.bb.x.bb.bx|x.xx.x.bx.x."
+      base: "SS.x.i.xi.x.|x.i.xi.xx.S.|S.xx.i.xi.x.|x.i.xi.xx.S.|S.xx.S.xx.S.|x.xS.x.xS.S.|S.xx.S.xx.xS|S.SS.S.xS.S."
     kensereni:
-      base: ".bx.xx.bx.xx"
+      base: ".xK.KK.xK.KK"
   legacy: {"source":"Gbereduka.rb","symbol":"GBEREDUKA","notes":["dundun.base[0]: removed trailing bar separator."],"definition":{"BPM":120,"TIME_SIGNATURE":[12,8],"SWING":[-0.04,0.04,0],"patterns":{"dundun":{"base":["X.XX.b.bb.b.|b.bb.b.XX.X.|X.XX.b.bb.b.|b.bb.b.XX.X.|X.XX.X.XX.X.|XX.X.X.XX.X.|X.XX.X.XX.XX|.XX.XX.XX.X.|"],"variations":[]},"sangban":{"base":["XX.b.I.bI.b.|b.I.bI.bb.X.|X.bb.I.bI.b.|b.I.bI.bb.X.|X.bb.X.bb.X.|b.bX.b.bX.X.|X.bb.X.bb.bX|X.XX.X.bX.X."],"variations":[]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[]},"djembe":{"base":["x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|oyxyxyoyxyxyoyxyxyoyxyxy|oyxyxyoyxyxyoyxyxyoyxyxy|oyxyxyoyxyxyoyxyxyoyxyxy|oyxyxyoyxyxyoyxyxyoyxyxy","x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|oyxyxyoyxyxyoyxyxyoyxyxy|oyxyxyoyxyxyoyxyxyoyxyxy|oyxyxyoyxyxyoyxyxyoyxyxy|oyxyxyoyxyxyoyxyxyoyxyxy"],"variations":[]}},"dependencies":{}}}

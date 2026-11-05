@@ -7,14 +7,14 @@
     djembe:
       base: "s.ts..s.ts.."
     dundun:
-      base: ".xx.bb.bb.xx|.xx.bb.xx.xx|.xx.bb.bb.xx|.x.x.x.xx.xx|.x.x.x.xx.xx"
+      base: ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|.D.D.D.DD.DD|.D.D.D.DD.DD"
       variations:
-        - ".xx.bb.bb.xx|.xx.bb.xx.xx|.xx.bb.bb.xx|xx.xxx.xx.xx|xx.xxx.xx.xx"
-        - ".xx.bb.bb.xx|.xx.bb.xx.xx|.xx.bb.bb.xx|xx.xxx.xx.xx|xxxxxx.xx.xx"
-        - ".xx.bb.bb.xx|.xx.bb.xx.xx|.xx.bb.bb.x.|b.bx.b.xb.xx|.bb.bb.xx.bb"
-        - ".xx.bb.bb.xx|.xx.bb.xx.xx|.xx.bb.bb.xx|.x.x.b.xb.xx|.b.xxx.xx.bb"
+        - ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|DD.DDD.DD.DD|DD.DDD.DD.DD"
+        - ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|DD.DDD.DD.DD|DDDDDD.DD.DD"
+        - ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.D.|x.xD.x.Dx.DD|.xx.xx.DD.xx"
+        - ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|.D.D.x.Dx.DD|.x.DDD.DD.xx"
     sangban:
-      base: "i.i.b.b.b.x.|i.i.b.x.x.x.|i.i.b.i.i.b.|x.b.x.b.x.bb|.x.x.x.bb.x."
+      base: "i.i.x.x.x.S.|i.i.x.S.S.S.|i.i.x.i.i.x.|S.x.S.x.S.xx|.S.S.S.xx.S."
     kensereni:
-      base: ".bx.xx.bx.xx"
+      base: ".xK.KK.xK.KK"
   legacy: {"source":"Takosaba.rb","symbol":"TAKOSABA","notes":[],"definition":{"BPM":120,"TIME_SIGNATURE":[12,8],"SWING":[-0.03,0.04,-0.01],"patterns":{"dundun":{"base":[".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|.X.X.X.XX.XX|.X.X.X.XX.XX"],"variations":[".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|XX.XXX.XX.XX|XX.XXX.XX.XX",".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|XX.XXX.XX.XX|XXXXXX.XX.XX",".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.X.|b.bX.b.Xb.XX|.bb.bb.XX.bb",".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|.X.X.b.Xb.XX|.b.XXX.XX.bb"]},"sangban":{"base":["I.I.b.b.b.X.|I.I.b.X.X.X.|I.I.b.I.I.b.|X.b.X.b.X.bb|.X.X.X.bb.X."],"variations":[]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[]},"djembe":{"base":["x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..","x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..","x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|x..xoox..xoo","............|............|............|............|............","............|............|............|............|............"],"variations":[]}},"dependencies":{}}}

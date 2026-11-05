@@ -3,11 +3,11 @@
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
-    djembe:      "d.d.t.t.s.s.t.t."
-    djembe2:     "d.d.t.t.s.s.t.t."
-    dundun:      "x.x.b.b.x.x.i.i."
-    sangban:     "x.x.b.b.x.x.i.i."
-    kensereni:   "x.x.b.b.x.x.i.i."
+    djembe:      "b.b.t.t.s.s.t.t."
+    djembe2:     "b.b.t.t.s.s.t.t."
+    dundun:      "D.D.x.x.D.D.i.i."
+    sangban:     "S.S.x.x.S.S.i.i."
+    kensereni:   "K.K.x.x.K.K.i.i."
 
 "Bandodjei":
   bpm: 120
@@ -16,9 +16,9 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     ".bb.bb.xx.xx|.bb.xx.xx.xx"
-    sangban:    "b.bi.i.bx.x.|b.bb.x.bx.x."
-    kensereni:  ".bx.xx.bx.xx"
+    dundun:     ".xx.xx.DD.DD|.xx.DD.DD.DD"
+    sangban:    "x.xi.i.xS.S.|x.xx.S.xS.S."
+    kensereni:  ".xK.KK.xK.KK"
 
 "Bolokonondo":
   bpm: 120
@@ -27,9 +27,9 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     "b.bb.bb.bb.b|b.xx.x.xx.x.|b.bb.bb.bb.b|b.xx.x.xx.x.|xx.x.x.xx.x.|x.xx.x.xx.xx|.x.x.x.xx.x."
-    sangban:    "i.bi.bi.bi.b|i.bx.x.bb.x.|i.bi.bi.bi.b|i.bx.x.bb.x.|b.bx.b.bx.b.|b.xx.xb.bb.x|b.bb.xb.b.x."
-    kensereni:  ".bx.xx.bx.xx"
+    dundun:     "x.xx.xx.xx.x|x.DD.D.DD.D.|x.xx.xx.xx.x|x.DD.D.DD.D.|DD.D.D.DD.D.|D.DD.D.DD.DD|.D.D.D.DD.D."
+    sangban:    "i.xi.xi.xi.x|i.xS.S.xx.S.|i.xi.xi.xi.x|i.xS.S.xx.S.|x.xS.x.xS.x.|x.SS.Sx.xx.S|x.xx.Sx.x.S."
+    kensereni:  ".xK.KK.xK.KK"
 
 "Dji":
   bpm: 120
@@ -38,29 +38,29 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     ".x.x.x.xx.x.|x.bb.b.bb.xx"
-    sangban:    "b.bb.x.bb.b.|x.bi.i.ib.x."
-    kensereni:  ".bx.xx.bx.xx"
+    dundun:     ".D.D.D.DD.D.|D.xx.x.xx.DD"
+    sangban:    "x.xx.S.xx.x.|S.xi.i.ix.S."
+    kensereni:  ".xK.KK.xK.KK"
 
 "Djole":
   bpm: 118
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
-    djembe:     "d.tt..s."
-    dundun:     "x.b.b.b.x.x.b.b."
-    sangban:    "x.b.x.b.x.b.x.b."
-    kensereni:  "b.xxb.xxb.xxb.xx"
+    djembe:     "b.tt..s."
+    dundun:     "D.x.x.x.D.D.x.x."
+    sangban:    "S.x.S.x.S.x.S.x."
+    kensereni:  "x.KKx.KKx.KKx.KK"
 
 "Fakoli":
   bpm: 97
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
-    djembe:     "d.tt..s.d.tt..s."
-    dundun:     "x.b.x.b.x.b.x.b."
-    sangban:    "x.bx.bb.x.x.i.b."
-    kensereni:  "b.xx.bi.b.xx.bi."
+    djembe:     "b.tt..s.b.tt..s."
+    dundun:     "D.x.D.x.D.x.D.x."
+    sangban:    "S.xS.xx.S.S.i.x."
+    kensereni:  "x.KK.xi.x.KK.xi."
 
 "Gambia":
   bpm: 240
@@ -68,8 +68,8 @@
   stepsPerBeat: 4
   # Solo subdivisions are quantized to four steps per beat; original phrases remain in legacy.
   tracks:
-    djembe:     "D...o.o...x.....|....o.o...x.....|D...o.o...x.....|....o.o...x....."
-    dundun:     "b.......b......."
+    djembe:     "B...o.o...S.....|....o.o...S.....|B...o.o...S.....|....o.o...S....."
+    dundun:     "x.......x......."
     sangban:    "................"
     kensereni:  "................"
 
@@ -80,9 +80,9 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     "x.xx.b.bb.b.|b.bb.b.xx.x.|x.xx.b.bb.b.|b.bb.b.xx.x.|x.xx.x.xx.x.|xx.x.x.xx.x.|x.xx.x.xx.xx|.xx.xx.xx.x."
-    sangban:    "xx.b.i.bi.b.|b.i.bi.bb.x.|x.bb.i.bi.b.|b.i.bi.bb.x.|x.bb.x.bb.x.|b.bx.b.bx.x.|x.bb.x.bb.bx|x.xx.x.bx.x."
-    kensereni:  ".bx.xx.bx.xx"
+    dundun:     "D.DD.x.xx.x.|x.xx.x.DD.D.|D.DD.x.xx.x.|x.xx.x.DD.D.|D.DD.D.DD.D.|DD.D.D.DD.D.|D.DD.D.DD.DD|.DD.DD.DD.D."
+    sangban:    "SS.x.i.xi.x.|x.i.xi.xx.S.|S.xx.i.xi.x.|x.i.xi.xx.S.|S.xx.S.xx.S.|x.xS.x.xS.S.|S.xx.S.xx.xS|S.SS.S.xS.S."
+    kensereni:  ".xK.KK.xK.KK"
 
 "Ginefare":
   bpm: 190
@@ -90,18 +90,18 @@
   stepsPerBeat: 3
   dialect: [0, 0, 0]
   tracks:
-    dundun:     "x..b..b..b..|b.xb.xb.xb.x"
-    sangban:    "b..x..b..x..|b..x..b..x.."
-    kensereni:  "b.b.x.x..x..|b.b.x.x..x.."
+    dundun:     "D..x..x..x..|x.Dx.Dx.Dx.D"
+    sangban:    "x..S..x..S..|x..S..x..S.."
+    kensereni:  "x.x.K.K..K..|x.x.K.K..K.."
 
 "Jamakale":
   bpm: 97
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
-    dundun:     "................|................|....x.b.x.b.x...|................|....x.b.x.b.x...|................|..............x.|x...............|..............x.|x.............x.|x.......xx.xx.x.|x.............x.|x.......xx.xx...|............x.x.|x...........x.x.|x...........xxx.|x...........x.x.|x...........xxx.|x...........x.x.|x...........xxx.|x...........x.x.|x...........xxx."
+    dundun:     "................|................|....D.x.D.x.D...|................|....D.x.D.x.D...|................|..............D.|D...............|..............D.|D.............D.|D.......DD.DD.D.|D.............D.|D.......DD.DD...|............D.D.|D...........D.D.|D...........DDD.|D...........D.D.|D...........DDD.|D...........D.D.|D...........DDD.|D...........D.D.|D...........DDD."
     sangban:    "................|................|................|................|................|................|................|................|................|................|................|................|................|................"
-    kensereni:  "................|................|................|................|................|................|................|................|................|................|................|................|................|................|...x..i...x.....|...x..i...x.....|...x..i...x.....|...x..i...x.....|...x..i...x.....|...x..i...x.....|...x..i...x.....|...x..i...x....."
+    kensereni:  "................|................|................|................|................|................|................|................|................|................|................|................|................|................|...K..i...K.....|...K..i...K.....|...K..i...K.....|...K..i...K.....|...K..i...K.....|...K..i...K.....|...K..i...K.....|...K..i...K....."
 
 "Kakilambe":
   bpm: 130
@@ -109,18 +109,18 @@
   stepsPerBeat: 3
   dialect: [0, 0.21, 0]
   tracks:
-    dundun:     "x.x.x.bb.b.x|x.b.x.bx.b.x"
-    sangban:    "b.b.b.bx.x.b|b.b.x.bx.x.b"
-    kensereni:  "xx.bb.xx.bb.|xx.bb.xx.bb."
+    dundun:     "D.D.D.xx.x.D|D.x.D.xD.x.D"
+    sangban:    "x.x.x.xS.S.x|x.x.S.xS.S.x"
+    kensereni:  "KK.xx.KK.xx.|KK.xx.KK.xx."
 
 "Kawa":
   bpm: 129
   timeSignature: "12/8"
   stepsPerBeat: 3
   tracks:
-    dundun:     ".bb.xx.x.x.x|.xx.xx.bb.bb"
-    sangban:    "i.b.x.b.xx.b|x.x.x.b.xx.b"
-    kensereni:  "x.bb.xx.bb.x"
+    dundun:     ".xx.DD.D.D.D|.DD.DD.xx.xx"
+    sangban:    "i.x.S.x.SS.x|S.S.S.x.SS.x"
+    kensereni:  "K.xx.KK.xx.K"
 
 "Kon":
   bpm: 115
@@ -129,9 +129,9 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     ".bb.bb.xx.xx"
-    sangban:    "i.bb.bb.xx.b"
-    kensereni:  ".bx.xx.bx.xx"
+    dundun:     ".xx.xx.DD.DD"
+    sangban:    "i.xx.xx.SS.x"
+    kensereni:  ".xK.KK.xK.KK"
 
 "Kon_Maja":
   bpm: 115
@@ -140,9 +140,9 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     ".bb.bb.bb.bb|.bb.bb.bb.xx|.xx.bb.bb.bb|.bb.bb.bb.xx|.xx.bb.bb.xx|.xx.bb.xx.xx|.xx.bb.bb.xx|.x.x.x.xx.xx"
-    sangban:    "i.bb.bi.bb.b|i.bb.bi.bb.x|x.bb.bi.bb.b|i.bb.bi.bb.x|x.bb.bi.bb.x|x.bb.bi.xx.x|x.bb.bi.bb.b|x.x.x.x.xx.b"
-    kensereni:  ".bx.xx.bx.xx"
+    dundun:     ".xx.xx.xx.xx|.xx.xx.xx.DD|.DD.xx.xx.xx|.xx.xx.xx.DD|.DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|.D.D.D.DD.DD"
+    sangban:    "i.xx.xi.xx.x|i.xx.xi.xx.S|S.xx.xi.xx.x|i.xx.xi.xx.S|S.xx.xi.xx.S|S.xx.xi.SS.S|S.xx.xi.xx.x|S.S.S.S.SS.x"
+    kensereni:  ".xK.KK.xK.KK"
 
 "Kon_Masi":
   bpm: 115
@@ -151,9 +151,9 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     ".xx.bb.xx.xx"
-    sangban:    ".bx.bb.bx.bb"
-    kensereni:  ".bx.xx.bx.xx"
+    dundun:     ".DD.xx.DD.DD"
+    sangban:    ".xS.xx.xS.xx"
+    kensereni:  ".xK.KK.xK.KK"
 
 "Kuku":
   bpm: 110
@@ -163,9 +163,9 @@
   tracks:
     # Preserve the existing 12-step djembe cycle across three complete 4/4 bars.
     djembe:     "tt.s..s."
-    dundun:     "b.bx.bb.b.b...b.|b.bx.bb.b.b.x.b.|b.bx.bb.b.b...b.|bx.x.bb.b.b...b."
-    sangban:    "x.b.b.x.x.b.b.x."
-    kensereni:  "xx..xx..xx..xx.."
+    dundun:     "x.xD.xx.x.x...x.|x.xD.xx.x.x.D.x.|x.xD.xx.x.x...x.|xD.D.xx.x.x...x."
+    sangban:    "S.x.x.S.S.x.x.S."
+    kensereni:  "KK..KK..KK..KK.."
 
 "Lamban":
   bpm: 90
@@ -174,28 +174,28 @@
   dialect: [0, 0, 0, 0.42]
   tracks:
     djembe:     "ttss..s."
-    dundun:     "b.b.b.b.b.b.b.bx|x.x.xx.xx.xx.bxx"
-    sangban:    "x...x.x.x...x.x.|x...x.x.x...x.x."
-    kensereni:  "b.b.x.xx.b.xb.b."
+    dundun:     "x.x.x.x.x.x.x.xD|D.D.DD.DD.DD.xDD"
+    sangban:    "S...S.S.S...S.S.|S...S.S.S...S.S."
+    kensereni:  "x.x.K.KK.x.Kx.x."
 
 "Maane":
   bpm: 115
   timeSignature: "12/8"
   stepsPerBeat: 3
   tracks:
-    dundun:     "x.b.b.b.b.b.|b.b.b.xxx.x."
-    sangban:    "b.x.x.b.x.x.|b.x.x.b.x.x."
-    kensereni:  "x.bb.xx.bb.x|x.bb.xx.bb.x"
-    djembe2:    "x.o.xx.xo...|i.o.xx.xo..D"
+    dundun:     "D.x.x.x.x.x.|x.x.x.DDD.D."
+    sangban:    "x.S.S.x.S.S.|x.S.S.x.S.S."
+    kensereni:  "K.xx.KK.xx.K|K.xx.KK.xx.K"
+    djembe2:    "S.o.SS.So...|i.o.SS.So..B"
 
 "N'Nagnalen":
   bpm: 100
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
-    dundun:     ".x.x.b.bb.bb.b.b|b.bb.b.bb.xx.x.x"
-    sangban:    "x.b.b.x.b.i.b.b.|b.xx.bi.b.b.x.x."
-    kensereni:  "x.b.x.b.x.b.x.b."
+    dundun:     ".D.D.x.xx.xx.x.x|x.xx.x.xx.DD.D.D"
+    sangban:    "S.x.x.S.x.i.x.x.|x.SS.xi.x.x.S.S."
+    kensereni:  "K.x.K.x.K.x.K.x."
 
 "Sankaranba":
   bpm: 125
@@ -204,18 +204,18 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts.."
-    dundun:     "b.xx.x|x.xx.b|b.b.xx|.x.x.x|.x.x.x|x.xx.b|b.bb.b"
-    sangban:    "b.bx.b|x.b.b.|i.b.b.|x.x.x.|x.bx.b|x.b.b.|i.b.b."
-    kensereni:  "..x.xx"
+    dundun:     "x.DD.D|D.DD.x|x.x.DD|.D.D.D|.D.D.D|D.DD.x|x.xx.x"
+    sangban:    "x.xS.x|S.x.x.|i.x.x.|S.S.S.|S.xS.x|S.x.x.|i.x.x."
+    kensereni:  "..K.KK"
 
 "Sogoninkun":
   bpm: 100
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
-    djembe:     "d.tt..s.d.tt..s."
+    djembe:     "b.tt..s.b.tt..s."
     dundun:     "................"
-    sangban:    "i..i...xx.xx...."
+    sangban:    "i..i...SS.SS...."
     kensereni:  "................"
 
 "Soko":
@@ -225,9 +225,9 @@
 
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     "x.bb.xx.xx.x|x.bb.bb.xx.x"
-    sangban:    "ib.ib.xx.xx.|ib.ib.ib.xx."
-    kensereni:  "bb.xx.bb.xx.|bb.xx.bb.xx."
+    dundun:     "D.xx.DD.DD.D|D.xx.xx.DD.D"
+    sangban:    "ix.ix.SS.SS.|ix.ix.ix.SS."
+    kensereni:  "xx.KK.xx.KK.|xx.KK.xx.KK."
 
 "Soli":
   bpm: 115
@@ -236,9 +236,9 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     "x.xx.bb.xx.x"
-    sangban:    "x.b.i.i.bx.b"
-    kensereni:  ".bb.xx.bb.xx"
+    dundun:     "D.DD.xx.DD.D"
+    sangban:    "S.x.i.i.xS.x"
+    kensereni:  ".xx.KK.xx.KK"
 
 "Soli_Masi":
   bpm: 135
@@ -246,9 +246,9 @@
   stepsPerBeat: 3
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     ".x.x.x.xx.x.|x.xx.b.bb.xx"
-    sangban:    ".x.x.x.bx.x.|b.b.b.b.b.bx"
-    kensereni:  ".bb.xx.bb.xx"
+    dundun:     ".D.D.D.DD.D.|D.DD.x.xx.DD"
+    sangban:    ".S.S.S.xS.S.|x.x.x.x.x.xS"
+    kensereni:  ".xx.KK.xx.KK"
 
 "Takosaba":
   bpm: 120
@@ -257,6 +257,6 @@
   dialect: [0, -0.33, 0]
   tracks:
     djembe:     "s.ts..s.ts.."
-    dundun:     ".xx.bb.bb.xx|.xx.bb.xx.xx|.xx.bb.bb.xx|.x.x.x.xx.xx|.x.x.x.xx.xx"
-    sangban:    "i.i.b.b.b.x.|i.i.b.x.x.x.|i.i.b.i.i.b.|x.b.x.b.x.bb|.x.x.x.bb.x."
-    kensereni:  ".bx.xx.bx.xx"
+    dundun:     ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|.D.D.D.DD.DD|.D.D.D.DD.DD"
+    sangban:    "i.i.x.x.x.S.|i.i.x.S.S.S.|i.i.x.i.i.x.|S.x.S.x.S.xx|.S.S.S.xx.S."
+    kensereni:  ".xK.KK.xK.KK"

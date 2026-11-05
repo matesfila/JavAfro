@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { Reader } = require('./import-afroplayer.cjs');
+const { Reader, convertNote } = require('./import-afroplayer.cjs');
 
 const source = process.argv[2];
 if (!source) throw new Error('Usage: node tools/import-gambia.cjs <path/to/Gambia.rb>');
@@ -27,14 +27,14 @@ const convert = pattern => {
       if (note === '.') return;
       const step = Math.round(index * sectionSteps / bar.length);
       assert(step < sectionSteps && result[step] === '.', 'Quantization would lose a note');
-      result[step] = note;
+      result[step] = convertNote('djembe', note);
     });
     return result.join('');
   });
   return Array.from({ length: expanded.length / 2 }, (_, i) => expanded[2 * i] + expanded[2 * i + 1]).join('|');
 };
 const tracks = {};
-// Existing Java/Web djembe instruments understand the original D/o/x symbols.
+// Convert Ruby D/o/x to playable B/o/S; the legacy archive stays unchanged.
 tracks.djembe = { base: djembe.base.map(convert).join('|'), variations: djembe.variations.map(convert) };
 for (const [oldId, id] of Object.entries({ dundun: 'dundun', sangban: 'sangban', kenken: 'kensereni' })) {
   const base = original.patterns[oldId].base;
@@ -47,7 +47,7 @@ for (const [oldId, id] of Object.entries({ dundun: 'dundun', sangban: 'sangban',
       if (note !== 'b') return;
       const step = index * sectionSteps / bar.length;
       assert(Number.isInteger(step), 'Bell is off the four-step grid');
-      result[step] = 'b';
+      result[step] = 'x';
     });
     return result.join('');
   }).join('') };
@@ -55,10 +55,10 @@ for (const [oldId, id] of Object.entries({ dundun: 'dundun', sangban: 'sangban',
 const legacy = {
   source: path.basename(source), symbol: 'GAMBIA',
   notes: [
-    'Reimported directly from Ruby including djembe base and all four variations; original D/o/x symbols retained.',
+    'Reimported directly from Ruby including djembe base and all four variations; D/o/x converted to B/o/S for playback.',
     'Pairs of original two-beat sections form 4/4 bars; BPM, section durations, note order and note counts are unchanged.',
     'Four steps per beat: off-grid solo hits are rounded to the nearest step; the base groove timing is unchanged.',
-    'Standalone bells b are retained; silent drum sections do not affect grid resolution.',
+    'Standalone source bells b are converted to x; silent drum sections do not affect grid resolution.',
     'Echauff remains archived and is not played automatically.'
   ],
   definition: original

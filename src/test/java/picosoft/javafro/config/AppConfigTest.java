@@ -84,7 +84,7 @@ public class AppConfigTest {
             assertEquals(100, tempo.getMaximum());
             assertEquals(90, tempo.getValue());
             assertEquals(19, find(panel, "yamlEditor").getFont().getSize());
-            String yaml = "test:\n  bpm: 125\n  tracks:\n    dundun: 'x.......'\n";
+            String yaml = "test:\n  bpm: 125\n  tracks:\n    dundun: 'D.......'\n";
             var loaded = new RhythmPlayerPanel(yaml, config);
             assertEquals(125, ((JSlider) find(loaded, "tempoSlider")).getValue());
             assertEquals(125, ((JSlider) find(loaded, "tempoSlider")).getMaximum());

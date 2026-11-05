@@ -7,17 +7,17 @@
     djembe:
       base: "s.ts..s.ts.."
     dundun:
-      base: ".x.x.x.xx.x.|x.bb.b.bb.xx"
+      base: ".D.D.D.DD.D.|D.xx.x.xx.DD"
       variations:
-        - ".x.x.x.xx.x.|x.bb.b.bb.xx|.x.xxx.xx.x.|x.bb.b.bb.xx"
-        - ".x.x.x.xx.x.|x.bb.b.bb.xx|xx.xxx.xx.xx|xx.x.b.bb.xx"
-        - ".x.x.x.xx.x.|x.bb.b.bb.xx|.x.x.x.xx.x.|xx.x.x.xx.xx"
+        - ".D.D.D.DD.D.|D.xx.x.xx.DD|.D.DDD.DD.D.|D.xx.x.xx.DD"
+        - ".D.D.D.DD.D.|D.xx.x.xx.DD|DD.DDD.DD.DD|DD.D.x.xx.DD"
+        - ".D.D.D.DD.D.|D.xx.x.xx.DD|.D.D.D.DD.D.|DD.D.D.DD.DD"
     sangban:
-      base: "b.bb.x.bb.b.|x.bi.i.ib.x."
+      base: "x.xx.S.xx.x.|S.xi.i.ix.S."
       variations:
-        - "b.bb.x.bb.b.|x.bi.i.ib.bx|x.xx.bb.xx.x|x.bi.i.ib.x."
-        - "b.bb.x.bb.b.|x.bi.i.ib.x.|b.bb.x.bb.b.|xx.i.i.ib.x."
-        - "b.bb.x.bb.b.|x.bi.i.ib.x.|i.bi.x.bi.i.|xx.i.i.ib.x."
+        - "x.xx.S.xx.x.|S.xi.i.ix.xS|S.SS.xx.SS.S|S.xi.i.ix.S."
+        - "x.xx.S.xx.x.|S.xi.i.ix.S.|x.xx.S.xx.x.|SS.i.i.ix.S."
+        - "x.xx.S.xx.x.|S.xi.i.ix.S.|i.xi.S.xi.i.|SS.i.i.ix.S."
     kensereni:
-      base: ".bx.xx.bx.xx"
+      base: ".xK.KK.xK.KK"
   legacy: {"source":"Dji.rb","symbol":"DJI","notes":[],"definition":{"BPM":120,"TIME_SIGNATURE":[12,8],"SWING":[-0.03,0.04,-0.01],"patterns":{"dundun":{"base":[".X.X.X.XX.X.|X.bb.b.bb.XX"],"variations":[".X.X.X.XX.X.|X.bb.b.bb.XX|.X.XXX.XX.X.|X.bb.b.bb.XX",".X.X.X.XX.X.|X.bb.b.bb.XX|XX.XXX.XX.XX|XX.X.b.bb.XX",".X.X.X.XX.X.|X.bb.b.bb.XX|.X.X.X.XX.X.|XX.X.X.XX.XX"]},"sangban":{"base":["b.bb.X.bb.b.|X.bI.I.Ib.X."],"variations":["b.bb.X.bb.b.|X.bI.I.Ib.bX|X.XX.bb.XX.X|X.bI.I.Ib.X.","b.bb.X.bb.b.|X.bI.I.Ib.X.|b.bb.X.bb.b.|XX.I.I.Ib.X.","b.bb.X.bb.b.|X.bI.I.Ib.X.|I.bI.X.bI.I.|XX.I.I.Ib.X."]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[]},"djembe":{"base":["x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..","x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..","x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|x..xoox..xoo","............|............|............|............","............|............|............|............"],"variations":[]}},"dependencies":{}}}

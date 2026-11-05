@@ -7,17 +7,17 @@
     djembe:
       base: "s.ts.."
     dundun:
-      base: "b.xx.x|x.xx.b|b.b.xx|.x.x.x|.x.x.x|x.xx.b|b.bb.b"
+      base: "x.DD.D|D.DD.x|x.x.DD|.D.D.D|.D.D.D|D.DD.x|x.xx.x"
       variations:
-        - "b.xb.x|b.xb.b|b.b.xx|.x.x.x|.x.x.x|x.xx.b|b.bb.b"
-        - "b.xb.x|b.xb.b|b.b.xx|.x.xxx|.xx.x.|x.xx.b|b.bb.b"
-        - "b.xx.x|x.xx.b|b.b.xx|.x.xxx|.x.xxx|.x.xxx|.x.xxx|.x.xxx|.x.xxx|.x.xxx|.x.x.x|.x.x.x|x.xx.b|b.bb.b"
+        - "x.Dx.D|x.Dx.x|x.x.DD|.D.D.D|.D.D.D|D.DD.x|x.xx.x"
+        - "x.Dx.D|x.Dx.x|x.x.DD|.D.DDD|.DD.D.|D.DD.x|x.xx.x"
+        - "x.DD.D|D.DD.x|x.x.DD|.D.DDD|.D.DDD|.D.DDD|.D.DDD|.D.DDD|.D.DDD|.D.DDD|.D.D.D|.D.D.D|D.DD.x|x.xx.x"
     sangban:
-      base: "b.bx.b|x.b.b.|i.b.b.|x.x.x.|x.bx.b|x.b.b.|i.b.b."
+      base: "x.xS.x|S.x.x.|i.x.x.|S.S.S.|S.xS.x|S.x.x.|i.x.x."
       variations:
-        - "b.bx.b|x.b.b.|i.b.b.|x.b.x.|b.xx.b|x.b.b.|i.b.b."
-        - "b.bx.b|x.b.b.|i.b.b.|x.b.x.|b.bx.b|x.b.b.|i.b.b."
-        - "b.bx.b|x.b.b.|i.b.b.|xx.bxx|.bxx.b|x.b.b.|i.b.b."
+        - "x.xS.x|S.x.x.|i.x.x.|S.x.S.|x.SS.x|S.x.x.|i.x.x."
+        - "x.xS.x|S.x.x.|i.x.x.|S.x.S.|x.xS.x|S.x.x.|i.x.x."
+        - "x.xS.x|S.x.x.|i.x.x.|SS.xSS|.xSS.x|S.x.x.|i.x.x."
     kensereni:
-      base: "..x.xx"
+      base: "..K.KK"
   legacy: {"source":"Sankaranba.rb","symbol":"SANKARANBA","notes":[],"definition":{"BPM":125,"TIME_SIGNATURE":[6,8],"SWING":[-0.03,0.03,0],"patterns":{"dundun":{"base":["b.XX.X|X.XX.b|b.b.XX|.X.X.X|.X.X.X|X.XX.b|b.bb.b"],"variations":["b.Xb.X|b.Xb.b|b.b.XX|.X.X.X|.X.X.X|X.XX.b|b.bb.b","b.Xb.X|b.Xb.b|b.b.XX|.X.XXX|.XX.X.|X.XX.b|b.bb.b","b.XX.X|X.XX.b|b.b.XX|.X.XXX|.X.XXX|.X.XXX|.X.XXX|.X.XXX|.X.XXX|.X.XXX|.X.X.X|.X.X.X|X.XX.b|b.bb.b"],"echauff-in":["b.XX.X|X.XX.b|b.b.XX|.XX.XX|.XX.XX|.XX.XX|.XX.XX"],"echauff":[".XX.XX|.XX.XX|.XX.XX|.XX.XX|.XX.XX|.XX.XX|.XX.XX"],"echauff-out":[".XX.XX|.XX.XX|.XX.XX|.X.X.X|.X.X.X|X.XX.b|b.bb.b"]},"sangban":{"base":["b.bX.b|X.b.b.|I.b.b.|X.X.X.|X.bX.b|X.b.b.|I.b.b."],"variations":["b.bX.b|X.b.b.|I.b.b.|X.b.X.|b.XX.b|X.b.b.|I.b.b.","b.bX.b|X.b.b.|I.b.b.|X.b.X.|b.bX.b|X.b.b.|I.b.b.","b.bX.b|X.b.b.|I.b.b.|XX.bXX|.bXX.b|X.b.b.|I.b.b."],"echauff":[],"echauff-in":[],"echauff-out":[]},"kenken":{"base":["..X.XX"]},"djembe":{"base":["x.ox.."]}},"dependencies":{}}}

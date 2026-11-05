@@ -35,7 +35,7 @@ public class DjembeInstrumentTest {
         return sum;
     }
     @Test public void allTwentyNineVariantsAreAudibleAndKeepTheirFullTails() {
-        Map<Character, Integer> banks = Map.of('D', 1, 'T', 6, 'S', 8, 'I', 3, 'C', 3, 'A', 8);
+        Map<Character, Integer> banks = Map.of('B', 1, 'T', 6, 'S', 8, 'I', 3, 'C', 3, 'A', 8);
         for (var bank : banks.entrySet()) {
             Set<Double> fingerprints = new HashSet<>();
             for (int variant = 0; variant < bank.getValue(); variant++) {
@@ -49,20 +49,20 @@ public class DjembeInstrumentTest {
         }
     }
     @Test public void accentsAndHumanizationChangeDynamicsAndPitchWithoutMutatingVoices() {
-        for (char note : new char[]{'d', 't', 's'}) {
+        for (char note : new char[]{'b', 't', 's'}) {
             var normal = new DjembeInstrument(new FixedRandom(0, .5)).voice(note, 0);
             var accent = new DjembeInstrument(new FixedRandom(0, .5)).voice(Character.toUpperCase(note), 0);
             assertEquals(.49, energy(normal) / energy(accent), 1e-10);
         }
         var instrument = new DjembeInstrument(new FixedRandom(0, 0));
-        var straight = instrument.voice('D', 0);
-        var human = instrument.voice('D', 100);
+        var straight = instrument.voice('B', 0);
+        var human = instrument.voice('B', 100);
         assertTrue(human.lengthSamples(1) > straight.lengthSamples(1));
         double before = human.sample(500);
         instrument.voice('S', 100);
         assertEquals(before, human.sample(500), 0);
         assertThrows(IllegalArgumentException.class, () -> instrument.voice('?', 0));
-        assertThrows(IllegalArgumentException.class, () -> instrument.voice('D', 101));
+        assertThrows(IllegalArgumentException.class, () -> instrument.voice('B', 101));
     }
     @Test public void oldProbabilitySymbolsRemainCompatible() {
         var play = new DjembeInstrument(new FixedRandom(0, 0));
@@ -71,7 +71,7 @@ public class DjembeInstrumentTest {
             assertNotNull(play.voice(note, 0));
             assertNull(skip.voice(note, 100));
         }
-        for (char note : "Doxi".toCharArray()) assertNotNull(skip.voice(note, 0));
+        for (char note : "BoSi".toCharArray()) assertNotNull(skip.voice(note, 0));
         assertThrows(IllegalArgumentException.class, () -> new BeepTrack("d.......", new picosoft.javafro.base.BeepInstrument()));
     }
     @Test public void loaderAndSequencerPlayNoteSpecificVoicesAtTheExistingPulseTimes() throws Exception {
@@ -80,7 +80,7 @@ public class DjembeInstrumentTest {
         List<Character> played = new ArrayList<>();
         Instrument instrument = new Instrument() {
             public double sample(long i) { return 0; }
-            public boolean supportsNote(char note) { return "dts".indexOf(note) >= 0; }
+            public boolean supportsNote(char note) { return "bts".indexOf(note) >= 0; }
             public Instrument voice(char note, int humanize) {
                 played.add(note);
                 return new Instrument() {
@@ -92,8 +92,8 @@ public class DjembeInstrumentTest {
         var pcm = new ByteArrayOutputStream();
         var line = (SourceDataLine) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[]{SourceDataLine.class},
                 (proxy, method, args) -> { if (method.getName().equals("write")) { pcm.write((byte[]) args[0], (int) args[1], (int) args[2]); return args[2]; } return null; });
-        new BeepSequencer(format -> line).playRhythm(new Rhythm("Notes", List.of(new BeepTrack("d.t.s...", instrument)), 120), 1, 0);
-        assertEquals(List.of('d', 't', 's'), played);
+        new BeepSequencer(format -> line).playRhythm(new Rhythm("Notes", List.of(new BeepTrack("b.t.s...", instrument)), 120), 1, 0);
+        assertEquals(List.of('b', 't', 's'), played);
         List<Integer> onsets = new ArrayList<>();
         byte[] audio = pcm.toByteArray();
         for (int i = 0; i < audio.length; i += 2) if (audio[i] != 0 || audio[i + 1] != 0) onsets.add(i / 2);

@@ -5,13 +5,13 @@
   dialect: [0, 0, 0]
   tracks:
     dundun:
-      base: "x.b.b.b.b.b.|b.b.b.xxx.x."
+      base: "D.x.x.x.x.x.|x.x.x.DDD.D."
       variations:
-        - "x.b.b.b.b.b.|b.b.b.x.bx.b"
+        - "D.x.x.x.x.x.|x.x.x.D.xD.x"
     sangban:
-      base: "b.x.x.b.x.x.|b.x.x.b.x.x."
+      base: "x.S.S.x.S.S.|x.S.S.x.S.S."
     kensereni:
-      base: "x.bb.xx.bb.x|x.bb.xx.bb.x"
+      base: "K.xx.KK.xx.K|K.xx.KK.xx.K"
     djembe2:
-      base: "x.o.xx.xo...|i.o.xx.xo..D"
+      base: "S.o.SS.So...|i.o.SS.So..B"
   legacy: {"source":"Maane.rb","symbol":"MAANE","notes":[],"definition":{"BPM":115,"TIME_SIGNATURE":[12,8],"SWING":[0,0,0],"patterns":{"dundun":{"base":["X.b.b.b.b.b.|b.b.b.XXX.X."],"variations":["X.b.b.b.b.b.|b.b.b.X.bX.b"]},"sangban":{"base":["b.X.X.b.X.X.|b.X.X.b.X.X."],"variations":[]},"kenken":{"base":["X.bb.XX.bb.X|X.bb.XX.bb.X"],"variations":[]},"djembe":{"base":["xDo.xxx.o.xx|x.o.xxx.ooxD"],"variations":[]},"djembe2":{"base":["x.o.xx.xo...|i.o.xx.xo..D"],"variations":[]},"balafon":{"base":["c1 e1 g0 c1 g0 c1 c1 e1 a0 d1 a0 d1"],"variations":[]}},"dependencies":{}}}

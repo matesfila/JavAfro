@@ -5,14 +5,14 @@ djembe-demo:
   dialect: [0, 0, 0, 0]
 
   tracks:
-    dundun:    "x.......x......."
-    sangban:   "....x.......x..."
-    kensereni: "..x...x...x...x."
+    dundun:    "D.......D......."
+    sangban:   "....S.......S..."
+    kensereni: "..K...K...K...K."
     djembe:
-      # d = bas, t = tón, s = slap; veľké písmená sú akcenty.
-      base: "d..t.s..D.tt.S.."
+      # b = bas, t = tón, s = slap; veľké písmená sú akcenty.
+      base: "b..t.s..B.tt.S.."
       variations:
         # i = tlmený tón, c = tlmený slap, a = alternatívny slap.
-        - "D.tsI.c.a.T.s..."
-        # Pôvodné značky AfroPlayer: D/o/x/i, E/p/y (60 %), F/q/z (12 %).
-        - "D.oxE.pyF.qz.i.."
+        - "B.tsI.c.a.T.s..."
+        # Prevedené značky AfroPlayer: B/o/S/i, E/p/y (60 %), F/q/z (12 %).
+        - "B.oSE.pyF.qz.i.."

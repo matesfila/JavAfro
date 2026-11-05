@@ -11,16 +11,16 @@ const source = `Test:
   stepsPerBeat: 4
   dialect: [0, -0.4, 0, 0]
   tracks:
-    dundun: "x.......x.x....."
+    dundun: "D.......D.D....."
     sangban:
-      base: "....x.......x..."
-      variations: ["x..............."]
+      base: "....S.......S..."
+      variations: ["S..............."]
 `;
 
 describe('YAML compatibility with Java', () => {
   it('selects the first definition or the one containing the caret, including quoted keys and flow maps', () => {
-    const first = '# 🥁 úvod\n"Prvý rytmus":\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: "d.tt..s."}\n';
-    const second = '\n# medzi rytmami\n"Druhý: rytmus":\n  bpm: 140\n  timeSignature: "12/8"\n  tracks: {djembe: "d..t..s....."}\n';
+    const first = '# 🥁 úvod\n"Prvý rytmus":\n  bpm: 90\n  stepsPerBeat: 4\n  tracks: {djembe: "b.tt..s."}\n';
+    const second = '\n# medzi rytmami\n"Druhý: rytmus":\n  bpm: 140\n  timeSignature: "12/8"\n  tracks: {djembe: "b..t..s....."}\n';
     const source = first + second;
     expect(parseRhythmEntries(source).map(entry => entry.rhythm.id)).toEqual(['Prvý rytmus', 'Druhý: rytmus']);
     expect(parseRhythm(source).id).toBe('Prvý rytmus');
@@ -28,7 +28,7 @@ describe('YAML compatibility with Java', () => {
     expect(parseRhythmAtCaret(source, source.indexOf('# medzi')).id).toBe('Prvý rytmus');
     expect(parseRhythmAtCaret(source, source.indexOf('"Druhý')).id).toBe('Druhý: rytmus');
     expect(parseRhythmAtCaret(source, source.length)).toMatchObject({ bpm: 140, dialect: [0, 0, 0] });
-    const flow = '{First: {tracks: {dundun: "x......."}}, Second: {tracks: {dundun: "....x..."}}}';
+    const flow = '{First: {tracks: {dundun: "D......."}}, Second: {tracks: {dundun: "....D..."}}}';
     expect(parseRhythmAtCaret(flow, flow.indexOf('Second')).id).toBe('Second');
     expect(() => parseRhythm(source + first)).toThrow();
   });
@@ -42,7 +42,7 @@ describe('YAML compatibility with Java', () => {
     expect(parseRhythm(source, 93).dialect).toEqual([0, -0.4, 0, 0]);
     expect(() => parseRhythm(source.replace('bpm: 120', 'bpm: null'), 93)).toThrow();
     expect(() => parseRhythm(source.replace('[0, -0.4, 0, 0]', 'null'), 93)).toThrow();
-    const compound = 'Test:\n  timeSignature: "12/8"\n  tracks:\n    djembe: "d..t..s....."\n';
+    const compound = 'Test:\n  timeSignature: "12/8"\n  tracks:\n    djembe: "b..t..s....."\n';
     expect(parseRhythm(compound, 93).dialect).toEqual([0, 0, 0]);
   });
 
@@ -76,7 +76,7 @@ describe('YAML compatibility with Java', () => {
     expect(rhythm.length).toBe(16);
     expect(rhythm.stepsPerBar).toBe(16);
     expect(rhythm.dialect).toEqual([0, -0.4, 0, 0]);
-    expect(rhythm.tracks[1].variations).toEqual(['x...............']);
+    expect(rhythm.tracks[1].variations).toEqual(['S...............']);
   });
 
   it('defaults an omitted dialect to zero and rejects the old parameter name', () => {
@@ -86,12 +86,12 @@ describe('YAML compatibility with Java', () => {
 
   it('expands each half bar independently, including variations', () => {
     const rhythm = parseRhythm(source
-      .replace('x.......x.x.....', 'x.......|....x...')
-      .replace('x...............', 'xx......'));
-    expect(rhythm.tracks[0].base).toBe('x.......x.......|....x.......x...');
-    expect(rhythm.tracks[1].variations).toEqual(['xx......xx......']);
+      .replace('D.......D.D.....', 'D.......|....D...')
+      .replace('S...............', 'SS......'));
+    expect(rhythm.tracks[0].base).toBe('D.......D.......|....D.......D...');
+    expect(rhythm.tracks[1].variations).toEqual(['SS......SS......']);
     expect(rhythm.length).toBe(32);
-    expect(() => parseRhythm(source.replace('x.......x.x.....', 'x...'))).toThrow();
+    expect(() => parseRhythm(source.replace('D.......D.D.....', 'x...'))).toThrow();
   });
 
   it.each([
@@ -100,7 +100,7 @@ describe('YAML compatibility with Java', () => {
     source.replace('bpm: 120', 'bpm: 120.5'),
     source.replace('bpm: 120', 'bpm: 120\n  bpm: 100'),
     source.replace('dundun:', 'unknown:'),
-    source.replace('x.......x.x.....', 'x......|x.x......'),
+    source.replace('D.......D.D.....', 'D......|D.D......'),
     source.replace('[0, -0.4, 0, 0]', '[0, 0, 0]'),
     source.replace('[0, -0.4, 0, 0]', '[0, -1.1, 0, 0]'),
     source.replace('[0, -0.4, 0, 0]', '[0, .nan, 0, 0]'),

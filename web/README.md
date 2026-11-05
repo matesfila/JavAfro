@@ -95,23 +95,23 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 Formát zodpovedá Java triede Rhythm: `timeSignature`, `stepsPerBeat`, `dialect`,
 tracky `dundun`, `sangban`, `kensereni` (alias `kenken`), `djembe`, `djembe2`
 a samostatné `dundun_bell`, `sangban_bell`, `kensereni_bell`; string alebo objekt `base`/`variations`.
-Znak `x` hrá úder, `.` ticho, `|` oddeľuje celé takty bez pridaného času.
+Znak `x` hrá iba zvonček; `D/d` úder dundunu, `S/s` sangbanu a `K/k` kensereni, vždy iba na príslušnom tracku. `.` je ticho, `|` oddeľuje celé takty bez pridaného času.
 Variácie a pôvodné `legacy` dáta zostávajú zachované, automaticky sa nehrajú.
 
-Basové bubny používajú pôvodné multisample AfroPlayer: `X/x` je otvorený úder,
-`i/I` uzavretý, `b` iba zvonec. Každý úspešný úder bubna pridá aj jeho zvonec.
+Basové bubny používajú pôvodné multisample AfroPlayer: `D/d`, `S/s`, `K/k` sú otvorené údery príslušného bubna,
+`i/I` uzavretý a `x` iba zvonec. Každý úspešný úder bubna pridá aj jeho zvonec.
 `A/B/C` majú pravdepodobnosti 12/40/80 % vrátane zvonca. `djembe2` zachováva
-pôvodné `D/o/x/i`, pravdepodobnostné `E/p/y/F/q/z` a prijíma aj `d/t/s`.
+zvuky `B/o/S/i`, pravdepodobnostné `E/p/y/F/q/z` a prijíma aj `b/t/s`.
 Mapovanie, gain, rate a pan sú v spoločnom `samples/afroplayer-samples.yaml`.
 Staršie CC0 nahrávky sú dostupné ako `dundun_freesound`, `sangban_freesound`, `kensereni_freesound`.
 
 Úsek medzi `|` môže mať aj presne polovicu krokov taktu; prehrá sa dvakrát
 za sebou, aby vyplnil celý takt. Platí to pre základné patterny aj variácie.
-Pri `4/4` a `stepsPerBeat: 4` teda `"d.tt..s."` znie ako `"d.tt..s.d.tt..s."`.
+Pri `4/4` a `stepsPerBeat: 4` teda `"b.tt..s."` znie ako `"b.tt..s.b.tt..s."`.
 
 Djembe používa 29 samplov Tomáša Mareka z AfroPlayer, spoločných s Java verziou.
-`d/t/s` = bas/tón/slap, `D/T/S` = akcenty; `i/I`, `c/C`, `a/A` = tlmený tón,
-tlmený slap a alternatívny slap. Funguje aj pôvodný zápis `D/o/x/i` a pravdepodobnostné
+`b/t/s` = bas/tón/slap, `B/T/S` = akcenty; `i/I`, `c/C`, `a/A` = tlmený tón,
+tlmený slap a alternatívny slap. Bas sa zapisuje `B/b`, pôvodný tón `o` zostáva podporovaný, slap používa `S/s`; podporované sú aj pravdepodobnostné
 údery `E/p/y` (60 %) a `F/q/z` (12 %). Humanize ovplyvňuje čas aj jemné zmeny
 dynamiky a ladenia. V knižnici vyber **djembe-demo**. Prehrávač načítava iba
 sample nástrojov aktuálneho rytmu a dekódované zvuky používa opakovane.

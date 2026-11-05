@@ -1,35 +1,35 @@
-# Original Djole symbols from AfroPlayer Djole.rb, paired into 4/4 bars.
+# Djole from AfroPlayer Djole.rb, converted to track-specific notes and paired into 4/4 bars.
 DjoleOriginal:
   bpm: 125
   stepsPerBeat: 4
   tracks:
-    djembe: "Dyoo..xyD.oopyx."
-    djembe2: "D.xxD.ooD.xxD.oo"
-    dundun: "X.b.b.b.X.X.b.b."
-    sangban: "X.b.X.b.X.b.X.b."
-    kenken: "b.XXb.XXb.XXb.XX"
+    djembe: "Byoo..SyB.oopyS."
+    djembe2: "B.SSB.ooB.SSB.oo"
+    dundun: "D.x.x.x.D.D.x.x."
+    sangban: "S.x.S.x.S.x.S.x."
+    kenken: "x.KKx.KKx.KKx.KK"
 
-# X/x = open drum + bell; i/I = closed drum + bell; b = bell only.
+# D/d (dundun), S/s (sangban), K/k (kensereni) = open drum + bell; i/I = closed drum + bell; x = bell only.
 OpenClosedAndBell:
   bpm: 100
   stepsPerBeat: 4
   tracks:
-    dundun: "X...i...b...I..."
-    sangban: "X...i...b...I..."
-    kensereni: "X...i...b...I..."
+    dundun: "D...i...x...I..."
+    sangban: "S...i...x...I..."
+    kensereni: "K...i...x...I..."
 
 SeparateBells:
   bpm: 100
   stepsPerBeat: 4
   tracks:
-    dundun_bell: "x...b...x...b..."
-    sangban_bell: "..x...b...x...b."
-    kensereni_bell: ".x...b...x...b.."
+    dundun_bell: "x...x...x...x..."
+    sangban_bell: "..x...x...x...x."
+    kensereni_bell: ".x...x...x...x.."
 
 # A/B/C = open drum + bell with probabilities 12/40/80 percent.
 Probabilities:
   bpm: 100
   stepsPerBeat: 4
   tracks:
-    dundun: "X...A...B...C..."
-    djembe2: "D.E.F.o.p.q.x.yz"
+    dundun: "D...A...B...C..."
+    djembe2: "B.E.F.o.p.q.S.yz"
