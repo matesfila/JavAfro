@@ -57,7 +57,7 @@ public class YamlFileTransferHandlerTest {
             assertEquals(37, humanize.getValue());
             assertNull(named(panel, "dialectPulse4"));
             assertNotNull(named(panel, "dialectPulse3"));
-            assertEquals("Pripravené · Second", ((JLabel) named(panel, "playbackStatus")).getText());
+            assertEquals("", ((JLabel) named(panel, "playbackStatus")).getText());
             text.setCaretPosition(0);
             assertEquals(90, tempo.getValue());
             assertNotNull(named(panel, "dialectPulse4"));

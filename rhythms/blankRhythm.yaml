@@ -1,0 +1,10 @@
+"New rhythm":
+  bpm: 116
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  tracks:
+    djembe:     "d.tt..s."
+    djembe2:     "................"
+    dundun:      "................"
+    sangban:     "................"
+    kensereni:   "................"

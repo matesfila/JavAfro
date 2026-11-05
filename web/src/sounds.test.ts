@@ -41,9 +41,10 @@ describe('AfroPlayer djembe', () => {
     try {
       config.humanizeDynamic = .2;
       config.humanizePitch = .05;
-      expect(selectSound('djembe', 'T', 100, () => 0)).toMatchObject({ gain: 1.8, rate: .95 });
-      expect(selectSound('djembe', 'T', 50, () => 0)).toMatchObject({ gain: 1.9, rate: .975 });
-      expect(selectSound('djembe', 'T', 0, () => 0)).toMatchObject({ gain: 2, rate: 1 });
+      const toneGain = manifest.banks.dj_tone.gain;
+      expect(selectSound('djembe', 'T', 100, () => 0)).toMatchObject({ gain: toneGain - .2, rate: .95 });
+      expect(selectSound('djembe', 'T', 50, () => 0)).toMatchObject({ gain: toneGain - .1, rate: .975 });
+      expect(selectSound('djembe', 'T', 0, () => 0)).toMatchObject({ gain: toneGain, rate: 1 });
       expect(selectSound('dundun', 'X', 100, () => 0)?.gain).toBeCloseTo(manifest.banks.dundun_open.gain - .2);
       expect(selectSound('dundun', 'X', 100, () => 0)?.rate).toBeCloseTo(.69);
     } finally {

@@ -83,10 +83,11 @@ public class AfroSampleInstrumentTest {
                 "playback: {humanizeDynamic: 0.2, humanizePitch: 0.05}".getBytes(StandardCharsets.UTF_8)), java.nio.file.Path.of("."));
         var instrument = new AfroSampleInstrument("djembe", new FixedRandom(0, 0), config) {};
         WavInstrument tone = wav("djembe/dj_tm_ton_v1.wav");
+        double toneGain = configuredGain("dj_tone");
         for (int humanize : new int[]{0, 50, 100}) {
             double amount = humanize / 100.0;
             var voice = instrument.voice('T', humanize);
-            assertEquals(value(tone, 500, 1 - .05 * amount, 2 - .2 * amount), voice.sample(500), 1e-12);
+            assertEquals(value(tone, 500, 1 - .05 * amount, toneGain - .2 * amount), voice.sample(500), 1e-12);
         }
     }
 
@@ -127,11 +128,12 @@ public class AfroSampleInstrumentTest {
     @Test public void djembeTwoPreservesKontaktMappingPitchAndStableMultisamples() throws Exception {
         var instrument = new Djembe2Instrument(fixed());
         Map<Character, String> files = Map.of('D', "DJEMBEBASS2", 'o', "DJEMBE2", 'x', "DJEMBESLAP2", 'i', "DJEMBESLAP1");
+        Map<Character, String> banks = Map.of('D', "dj2_bass", 'o', "dj2_tone", 'x', "dj2_slap", 'i', "dj2_closed");
         for (var entry : files.entrySet()) {
             Instrument voice = instrument.voice(entry.getKey(), 0);
             double rate = entry.getKey() == 'x' ? 1.1 : 1;
             WavInstrument sample = wav("djembe2/" + entry.getValue() + ".wav");
-            assertEquals(value(sample, 500, rate, .5), voice.sample(500), 1e-12);
+            assertEquals(value(sample, 500, rate, configuredGain(banks.get(entry.getKey()))), voice.sample(500), 1e-12);
             assertEquals((long) Math.ceil(sample.lengthSamples(1) / rate), voice.lengthSamples(1));
         }
         for (char note : "EpyFqz".toCharArray()) {

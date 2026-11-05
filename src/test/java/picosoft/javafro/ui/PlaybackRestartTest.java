@@ -95,13 +95,18 @@ public class PlaybackRestartTest {
             first.release.countDown();
             assertTrue(first.finished.await(2, TimeUnit.SECONDS));
             long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
-            var status = new AtomicReference<String>();
+            var ready = new AtomicReference<Boolean>(false);
             do {
-                SwingUtilities.invokeAndWait(() -> status.set(((JLabel) named(panel, "playbackStatus")).getText()));
-                if ("Zastavené".equals(status.get())) break;
+                SwingUtilities.invokeAndWait(() -> ready.set(((JButton) named(panel, "openButton")).isEnabled()));
+                if (ready.get()) break;
                 Thread.sleep(10);
             } while (System.nanoTime() < deadline);
-            assertEquals("Zastavené", status.get());
+            assertTrue(ready.get());
+            SwingUtilities.invokeAndWait(() -> {
+                assertTrue(((JButton) named(panel, "playButton")).isEnabled());
+                assertFalse(((JButton) named(panel, "stopButton")).isEnabled());
+                assertEquals("", ((JLabel) named(panel, "playbackStatus")).getText());
+            });
             assertEquals(1, sessions.size());
         } finally { close(panel, sessions); }
     }

@@ -21,7 +21,7 @@ describe('original AfroPlayer instruments', () => {
   it('plays open/closed drums with a simultaneous bell, but b and standalone bells only once', () => {
     expect(selectSounds('dundun', 'X', 0, () => 0)).toEqual([
       { sample: 'afroplayer-dunduns/dundun_s2_v1.wav', gain: manifest.banks.dundun_open.gain, rate: .74, pan: -.3 },
-      { sample: 'afroplayer-dunduns/dundun_bell_open_v1.wav', gain: .8, rate: .8, pan: -.3 },
+      { sample: 'afroplayer-dunduns/dundun_bell_open_v1.wav', gain: manifest.banks.bell_dun.gain, rate: .8, pan: -.3 },
     ]);
     expect(selectSounds('sangban', 'i', 0, () => 0)[0]).toMatchObject({ sample: 'afroplayer-dunduns/sangban_closed_v1.wav', gain: manifest.banks.sangban_closed.gain, rate: .9 });
     expect(selectSounds('dundun', 'b', 0, () => 0)).toHaveLength(1);
@@ -35,9 +35,9 @@ describe('original AfroPlayer instruments', () => {
     }
   });
   it('keeps Kontakt djembe2 symbols, accent aliases and original slap pitch', () => {
-    expect(selectSounds('djembe2', 'x', 0, () => 0)[0]).toEqual({ sample: 'djembe2/DJEMBESLAP2.wav', gain: .5, rate: 1.1, pan: 0 });
+    expect(selectSounds('djembe2', 'x', 0, () => 0)[0]).toEqual({ sample: 'djembe2/DJEMBESLAP2.wav', gain: manifest.banks.dj2_slap.gain, rate: 1.1, pan: 0 });
     expect(selectSounds('djembe2', 'i', 0, () => 0)[0].sample).toBe('djembe2/DJEMBESLAP1.wav');
-    expect(selectSounds('djembe2', 'd', 0, () => 0)[0].gain).toBeCloseTo(.35);
+    expect(selectSounds('djembe2', 'd', 0, () => 0)[0].gain).toBeCloseTo(manifest.banks.dj2_bass.gain * .7);
     expect(selectSounds('djembe2', 'o', 0, () => .99)[0].sample).toBe('djembe2/DJEMBE3.wav');
     for (const note of 'EpyFqz') expect(selectSounds('djembe2', note, 0, () => .99)).toEqual([]);
     expect(supportsNote('dundun', 'o')).toBe(false);

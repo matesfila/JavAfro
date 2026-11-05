@@ -3,6 +3,8 @@ package picosoft.javafro.ui;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.TextMode;
+import picosoft.javafro.AppInfo;
 import picosoft.javafro.base.Rhythm;
 import picosoft.javafro.config.AppConfig;
 import picosoft.javafro.io.RhythmLoader;
@@ -38,7 +40,7 @@ public final class RhythmPlayerPanel extends JPanel {
     private final JSlider tempo;
     private final JSlider humanize;
     private final JSlider humanizeProbability;
-    private final JLabel status = new JLabel("Pripravené");
+    private final JLabel status = new JLabel("");
     private PlaybackSettings settings;
     private final MixerPanel mixer;
     private JDialog mixerWindow;
@@ -84,7 +86,17 @@ public final class RhythmPlayerPanel extends JPanel {
         title.setFont(title.getFont().deriveFont(Font.BOLD, 22f));
         JPanel header = new JPanel(new BorderLayout());
         header.add(title, BorderLayout.WEST);
-        header.add(open, BorderLayout.EAST);
+        JPanel headerActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        JButton about = new JButton("O aplikácii");
+        about.setName("aboutButton");
+        about.addActionListener(event -> JOptionPane.showMessageDialog(this, new String[]{
+                "JavAfro · verzia " + AppInfo.version(),
+                "Autor: " + AppInfo.creator(),
+                "Pomocník pri vývoji: " + AppInfo.assistant()
+        }, "O aplikácii", JOptionPane.INFORMATION_MESSAGE));
+        headerActions.add(open);
+        headerActions.add(about);
+        header.add(headerActions, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
         editor.setName("yamlEditor");
         editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, config.editorFontSize()));
@@ -102,17 +114,39 @@ public final class RhythmPlayerPanel extends JPanel {
         editor.setSelectedTextColor(SandTheme.INK);
         editor.setMargin(new Insets(14, 14, 14, 14));
         editor.setLineWrap(false);
+        JToggleButton editMode = new JToggleButton("Insert mode");
+        editMode.setName("insertModeButton");
+        editMode.setToolTipText("Prepnúť vkladanie a prepisovanie znakov (Insert)");
+        editMode.setFocusable(false);
+        editMode.addActionListener(event -> {
+            boolean overwrite = editMode.isSelected();
+            editor.setTextMode(overwrite ? TextMode.OVERWRITE : TextMode.INSERT);
+            editMode.setText(overwrite ? "Overwrite mode" : "Insert mode");
+            editor.requestFocusInWindow();
+        });
+        editor.getInputMap().put(KeyStroke.getKeyStroke("INSERT"), "toggleEditMode");
+        editor.getActionMap().put("toggleEditMode", new AbstractAction() {
+            @Override public void actionPerformed(java.awt.event.ActionEvent event) { editMode.doClick(); }
+        });
         editor.getAccessibleContext().setAccessibleName("YAML definícia rytmu");
         RTextScrollPane scroll = new RTextScrollPane(editor);
         scroll.setFoldIndicatorEnabled(true);
         scroll.setLineNumbersEnabled(false);
         int foldIconSize = Math.max(10, Math.min(20, editor.getLineHeight() - 2));
         scroll.getGutter().setFoldIcons(new EditorFoldIcon(true, foldIconSize), new EditorFoldIcon(false, foldIconSize));
+        // The library also uses this color for separators below collapsed folds.
+        // Our chevrons paint their own color, so keep only the separators transparent.
+        scroll.getGutter().setFoldIndicatorForeground(new Color(0, 0, 0, 0));
         scroll.getGutter().setBackground(SandTheme.GUTTER);
         scroll.getGutter().setBorderColor(SandTheme.BORDER);
         scroll.getGutter().setLineNumberColor(SandTheme.MUTED);
         scroll.setBorder(BorderFactory.createTitledBorder("Zdrojový YAML rytmu"));
-        add(scroll, BorderLayout.CENTER);
+        JPanel editorToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        editorToolbar.add(editMode);
+        JPanel editorPanel = new JPanel(new BorderLayout(0, 6));
+        editorPanel.add(editorToolbar, BorderLayout.NORTH);
+        editorPanel.add(scroll, BorderLayout.CENTER);
+        add(editorPanel, BorderLayout.CENTER);
 
         tempo.setName("tempoSlider");
         humanize.setName("humanizeSlider");
@@ -135,6 +169,7 @@ public final class RhythmPlayerPanel extends JPanel {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         play.setName("playButton");
         stop.setName("stopButton");
+        open.setName("openButton");
         play.setPreferredSize(new Dimension(110, 36));
         stop.setPreferredSize(new Dimension(110, 36));
         stop.setEnabled(false);
@@ -149,7 +184,13 @@ public final class RhythmPlayerPanel extends JPanel {
         JPanel footer = new JPanel(new BorderLayout(0, 12));
         footer.add(liveControls, BorderLayout.NORTH);
         footer.add(buttons, BorderLayout.CENTER);
-        footer.add(new JLabel("Tempo a dialect určujú posuvníky. Zmeny YAML sa použijú pri ďalšom Play."), BorderLayout.SOUTH);
+        JPanel notes = new JPanel(new GridLayout(0, 1, 0, 6));
+        notes.add(new JLabel("Tempo a dialect určujú posuvníky. Zmeny YAML sa použijú pri ďalšom Play."));
+        JLabel copyright = new JLabel("© 2026 " + AppInfo.creator(), SwingConstants.CENTER);
+        copyright.setFont(copyright.getFont().deriveFont(Font.PLAIN, 11f));
+        copyright.setForeground(SandTheme.MUTED);
+        notes.add(copyright);
+        footer.add(notes, BorderLayout.SOUTH);
         add(footer, BorderLayout.SOUTH);
         tempo.addChangeListener(event -> { if (settings != null) settings.setBpm(tempo.getValue()); });
         humanize.addChangeListener(event -> { if (settings != null) settings.setHumanize(humanize.getValue()); });
@@ -211,7 +252,7 @@ public final class RhythmPlayerPanel extends JPanel {
 
     private JPanel sliderRow(String text, JSlider slider, String unit) {
         JLabel label = new JLabel(text);
-        if (slider == tempo) label.setFont(label.getFont().deriveFont(Font.BOLD));
+        label.setFont(label.getFont().deriveFont(slider == tempo ? Font.BOLD : Font.PLAIN, 15f));
         label.setLabelFor(slider);
         label.setPreferredSize(new Dimension(Math.max(110, label.getPreferredSize().width), 24));
         slider.getAccessibleContext().setAccessibleName(text);
@@ -249,7 +290,7 @@ public final class RhythmPlayerPanel extends JPanel {
             dialectYaml = editor.getText();
             selectedRhythmId = rhythm.name();
         }
-        status.setText("Pripravené · " + rhythm.name());
+        status.setText("");
     }
 
     private void loadYaml(String yaml) {
@@ -309,7 +350,7 @@ public final class RhythmPlayerPanel extends JPanel {
         PlaybackRequest request = new PlaybackRequest(rhythm, settings);
         if (worker != null) {
             pendingPlayback = request; // Repeated clicks keep only the latest request.
-            status.setText("Prepínam · " + rhythm.name());
+            status.setText("");
             stop.setEnabled(true);
             sequencer.stop();
             return;
@@ -326,7 +367,7 @@ public final class RhythmPlayerPanel extends JPanel {
         play.setEnabled(!editor.getText().isBlank());
         stop.setEnabled(true);
         open.setEnabled(false);
-        status.setText("Prehráva sa · " + rhythm.name());
+        status.setText("");
         worker = new SwingWorker<>() {
             protected Void doInBackground() throws Exception {
                 session.play(rhythm, controls);
@@ -350,7 +391,7 @@ public final class RhythmPlayerPanel extends JPanel {
                 play.setEnabled(!editor.getText().isBlank());
                 stop.setEnabled(false);
                 open.setEnabled(true);
-                status.setText("Zastavené");
+                status.setText("");
                 if (failure != null) showError(failure);
             }
         };
@@ -361,7 +402,7 @@ public final class RhythmPlayerPanel extends JPanel {
     public void stopPlayback() {
         pendingPlayback = null;
         if (sequencer != null) {
-            status.setText("Zastavujem…");
+            status.setText("");
             stop.setEnabled(false);
             sequencer.stop();
         }

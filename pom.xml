@@ -6,12 +6,14 @@
 
     <groupId>com.picosoft</groupId>
     <artifactId>JavAfro</artifactId>
-    <version>0.0.1</version>
+    <version>0.5.1</version>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <app.creator>Matúš Fila</app.creator>
+        <app.assistant>Codex (OpenAI)</app.assistant>
     </properties>
 
     <dependencies>
@@ -36,7 +38,15 @@
     <build>
         <finalName>JavAfro</finalName>
         <resources>
-            <resource><directory>src/main/resources</directory></resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes><exclude>app-info.properties</exclude></excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes><include>app-info.properties</include></includes>
+            </resource>
             <resource>
                 <directory>${project.basedir}</directory>
                 <includes><include>javafro.yaml</include></includes>

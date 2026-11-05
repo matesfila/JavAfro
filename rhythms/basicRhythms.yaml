@@ -52,16 +52,6 @@
     sangban:    "x.b.x.b.x.b.x.b."
     kensereni:  "b.xxb.xxb.xxb.xx"
 
-#Djole:
-#  timeSignature: "4/4"
-#  stepsPerBeat: 4
-#
-#  tracks:
-#    djembe:     "d.tt..s."
-#    dundun:     "x.......x.x....."
-#    sangban:    "....x.......x..."
-#    kensereni:  "..xx..xx..xx..xx"
-
 "Fakoli":
   bpm: 97
   timeSignature: "4/4"

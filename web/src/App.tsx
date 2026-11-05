@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { YamlEditor } from './Editor';
-import { OfflinePanel } from './OfflinePanel';
+import { AboutDialog } from './AboutDialog';
+import { appInfo } from './app-info';
 import { AudioEngine, defaultTrackMix, type TrackMix } from './audio';
-import { parseRhythm, parseRhythmAtCaret, parseRhythmEntries, type Rhythm } from './rhythm';
+import { parseRhythmAtCaret, parseRhythmEntries, type Rhythm } from './rhythm';
+import { readRhythmDocument } from './rhythm-document';
+import blankRhythmSource from '../../rhythms/blankRhythm.yaml?raw';
 import { type Controls } from './timing';
 import { config } from './config';
 import { OUTPUT_GAIN } from './audio-constants';
@@ -13,9 +16,12 @@ const mixerKey = (rhythm: Rhythm) => JSON.stringify([rhythm.id, rhythm.tracks.ma
 function PlayIcon() { return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6 3.5v13l11-6.5z" /></svg>; }
 function FolderIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M2 6V4h6l2 2h8v10H2V6Z" /><path d="M2 8h16" /></svg>; }
 function DownloadIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M10 2v10m-4-4 4 4 4-4M3 13v4h14v-4" /></svg>; }
+function NewIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M10 3v14M3 10h14" /></svg>; }
 
 export function App() {
   const [source, setSource] = useState('');
+  const [overwrite, setOverwriteMode] = useState(false);
+  const [editorDocument, setEditorDocument] = useState({ revision: 0, foldRhythms: true });
   const [caretOffset, setCaretOffset] = useState(0);
   const caretRef = useRef(0);
   const [fileName, setFileName] = useState('rytmus.yaml');
@@ -38,6 +44,7 @@ export function App() {
   const engine = useRef<AudioEngine | null>(null);
   const busy = isPlaying || isStarting;
   const displayedRhythm = playingRhythm ?? rhythm;
+  const editorStatus = validation || (busy && source !== playingSource.current ? 'Upravené · stlač Play' : '');
   const [mixes, setMixes] = useState<Record<string, TrackMix[]>>({});
   const [masterVolume, setMasterVolume] = useState(OUTPUT_GAIN * 100);
   const [humanizeProbability, setHumanizeProbability] = useState(config.humanizeApplianceProbability);
@@ -52,15 +59,24 @@ export function App() {
 
   function updateControls(next: Controls) { controlsRef.current = next; setControls(next); }
 
-  function applySource(text: string, filename: string) {
-    const parsed = parseRhythm(text);
+  function applySource(text: string, filename: string, foldRhythms = true) {
+    const document = readRhythmDocument(text);
+    const parsed = document.rhythm;
     setMixes({});
     caretRef.current = 0; setCaretOffset(0);
-    setSource(text); setFileName(filename); setRhythm(parsed); setValidation('');
+    setSource(document.source); setFileName(filename); setRhythm(parsed); setValidation(document.validation);
+    // A different file starts a fresh editor session, including selection and undo history.
+    setEditorDocument(previous => ({ revision: previous.revision + 1, foldRhythms }));
     syncedSource.current = text;
-    syncedRhythmId.current = parsed.id;
-    updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] });
+    syncedRhythmId.current = parsed?.id ?? '';
+    if (parsed) updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] });
     setMessage('');
+  }
+
+  function newRhythm() {
+    if (busy || isLoading) return;
+    loadRequest.current++;
+    applySource(blankRhythmSource, 'rytmus.yaml', false);
   }
 
   async function loadDefaultFile() {
@@ -111,7 +127,7 @@ export function App() {
     try {
       const text = await file.text();
       if (request === loadRequest.current) applySource(text, file.name);
-    } catch (error) { setMessage(`Súbor sa nepodarilo otvoriť: ${(error as Error).message}`); }
+    } catch (error) { if (request === loadRequest.current) setMessage(`Súbor sa nepodarilo otvoriť: ${(error as Error).message}`); }
     finally { if (request === loadRequest.current) setLoading(false); }
   }
 
@@ -176,6 +192,7 @@ export function App() {
   }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false); }} onDrop={drop}>
     <header className="site-header">
       <div className="brand"><img src={asset('icons/djembe.svg')} alt="" /><span>JavAfro</span></div>
+      <AboutDialog />
     </header>
     <main>
       <div className="workspace">
@@ -183,6 +200,7 @@ export function App() {
           <div className="editor-toolbar">
             <span className="file-name" title={fileName}>{isLoading ? 'Načítavam…' : fileName}</span>
             <div className="editor-actions">
+              <button className="button subtle" onClick={newRhythm} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Nový rytmus z prázdnej šablóny'}><NewIcon /><span>Nový rytmus</span></button>
               <button className="button subtle" onClick={() => fileInput.current?.click()} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Otvoriť YAML súbor'}><FolderIcon /><span>Otvoriť</span></button>
               <button className="button subtle" onClick={() => void save()} disabled={!rhythm || isLoading || (busy && source !== playingSource.current)}><DownloadIcon /><span>Uložiť</span></button>
             </div>
@@ -190,24 +208,23 @@ export function App() {
           <input ref={fileInput} type="file" accept=".yaml,.yml,application/yaml,text/yaml" hidden onChange={event => {
             const file = event.target.files?.[0]; if (file) void openFile(file); event.target.value = '';
           }} />
-          <div className="editor-wrap"><YamlEditor value={source} onChange={setSource} caretOffset={caretOffset} onCaretChange={offset => {
+          <div className="editor-mode-bar"><button className="button mode-button" aria-pressed={overwrite} title="Prepnúť vkladanie a prepisovanie znakov (Insert)" onMouseDown={event => event.preventDefault()} onClick={() => setOverwriteMode(previous => !previous)}>{overwrite ? 'Overwrite mode' : 'Insert mode'}</button></div>
+          <div className="editor-wrap"><YamlEditor key={editorDocument.revision} foldRhythms={editorDocument.foldRhythms} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={setSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);
           }} />
             {!source && !isLoading && <div className="editor-placeholder">Otvor YAML súbor.</div>}
           </div>
-          <div className={'editor-status' + (validation ? ' invalid' : '')} role={validation ? 'alert' : 'status'}>
-            {validation || (busy && source !== playingSource.current ? 'Upravené · stlač Play' : 'Play prehrá rytmus pod kurzorom.')}
-          </div>
+          {editorStatus && <div className={'editor-status' + (validation ? ' invalid' : '')} role={validation ? 'alert' : 'status'}>
+            {editorStatus}
+          </div>}
           {dragging && <div className="drop-overlay"><FolderIcon /><strong>{busy ? 'Najprv stlač Stop' : 'Pusti sem YAML súbor'}</strong></div>}
         </section>
 
         <aside className="playback-card card" aria-label="Prehrávanie">
-          <div className="rhythm-heading"><h1>{displayedRhythm?.name ?? 'Rytmus'}</h1>
-            {busy && <span className="activity" role="status"><span className="status-dot" />{isStarting ? 'Načítavam' : 'Hrá'}</span>}
-          </div>
+          <div className="rhythm-heading"><h1>{displayedRhythm?.name ?? 'Rytmus'}</h1></div>
           <div className="playback-controls">
           <div className="transport">
-            <button className="button play" onClick={() => void play()} disabled={!source.trim() || isLoading}><PlayIcon />Play</button>
+            <button className="button play" aria-pressed={busy} onClick={() => void play()} disabled={!source.trim() || isLoading}><PlayIcon />Play</button>
             <button className="button stop" onClick={stop} disabled={!busy}><span className="stop-square" />Stop</button>
           </div>
           {message && <p className="playback-message" role="status">{message}</p>}
@@ -258,15 +275,7 @@ export function App() {
           </div>
         </aside>
       </div>
-      <footer className="app-footer">
-        <details className="help"><summary>Pomoc</summary><div className="help-content">
-          <p>Klikni do rytmu v editore a stlač Play. Ďalšie Play spustí aktuálny výber od začiatku.</p>
-          <p>Tempo, Humanize, Dialect aj Mixer môžeš meniť počas hrania. Mute stlmí track a zachová jeho hlasitosť. Mixer platí počas otvorenia súboru a neukladá sa do YAML.</p>
-          <p>Tempo a Dialect si stiahni tlačidlom Uložiť.</p>
-          <p className="credits">Zvuky dununov: JIMMYJAMES112 / Freesound, CC0. Djembe: AfroPlayer / Tomáš Marek.</p>
-        </div></details>
-        <OfflinePanel />
-      </footer>
+      <small className="copyright">© 2026 {appInfo.creator}</small>
     </main>
   </div>;
 }

@@ -1,16 +1,17 @@
 import type { EditorState } from '@codemirror/state';
-import { ensureSyntaxTree, foldNodeProp, foldEffect } from '@codemirror/language';
+import { foldEffect } from '@codemirror/language';
+import { isMap, isScalar, parseDocument } from 'yaml';
 
 /** Fold only rhythm definitions, leaving their nested fields expanded when reopened. */
 export function rhythmFoldEffects(state: EditorState) {
-  const tree = ensureSyntaxTree(state, state.doc.length, 200);
-  const mapping = tree?.topNode.getChild('Document')?.getChild('BlockMapping');
-  const pairs = mapping?.getChildren('Pair') ?? [];
-  return pairs.flatMap((pair, index) => {
-    // Use the completed tree: foldable(state) may still see the initial partial parse.
-    const range = pair.type.prop(foldNodeProp)?.(pair, state);
+  // Use the document's YAML offsets, independent of the editor's incremental syntax tree.
+  const document = parseDocument(state.doc.toString(), { version: '1.1' });
+  if (document.errors.length || !isMap(document.contents) || document.contents.flow) return [];
+  const offsets = document.contents.items.flatMap(({ key }) => isScalar(key) && key.range ? [key.range[0]] : []);
+  return offsets.flatMap((offset, index) => {
+    const from = state.doc.lineAt(offset).to;
     // Include comments and blank lines between rhythms in the collapsed body.
-    const to = index + 1 < pairs.length ? state.doc.lineAt(pairs[index + 1].from).from - 1 : state.doc.length;
-    return range && to > range.from ? [foldEffect.of({ from: range.from, to })] : [];
+    const to = index + 1 < offsets.length ? state.doc.lineAt(offsets[index + 1]).from - 1 : state.doc.length;
+    return to > from ? [foldEffect.of({ from, to })] : [];
   });
 }

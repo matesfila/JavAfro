@@ -5,6 +5,10 @@ pre zvuk. Na prehrávanie nepotrebuje Java server. Java aplikácia zostáva nezm
 
 ## Konfigurácia
 
+Verziu a autorstvo pre okno **O aplikácii** preberá web aj Java z `../pom.xml`.
+Pri vydaní aktualizuj hlavné `<version>` v POM a verziu balíka vo
+`package.json` aj `package-lock.json`.
+
 Web preberá spoločný [javafro.yaml](../javafro.yaml) pri `npm run dev` alebo
 `npm run build`. Používa predvolenú humanizáciu, počiatočné tempo a rozsah jeho
 posuvníka, veľkosť písma editora, priečinok knižnice a prvý vybraný rytmus.
@@ -62,7 +66,7 @@ Pri otvorení sa priamo načíta `basicRhythms.yaml` (alebo súbor z
 `library.initialRhythm`). Rozhranie nemá zoznam knižnice. Vždy pracuješ s jedným
 otvoreným YAML súborom; ďalší môžeš otvoriť tlačidlom **Otvoriť** alebo presunutím
 do okna. Na hlavnej ploche sú Play/Stop, tempo, humanizácia a editor.
-Ovládanie dialectu je pod rozbaľovacou položkou **Dialect**, krátky návod pod **Pomoc**.
+Ovládanie dialectu je pod rozbaľovacou položkou **Dialect**.
 
 Jeden YAML súbor môže obsahovať viac rytmov pod samostatnými hlavnými kľúčmi.
 Po načítaní je vybraný prvý. Play prehrá definíciu pod kurzorom a zostáva dostupné
@@ -76,6 +80,9 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Vlastný YAML otvoríš tlačidlom alebo presunutím jedného súboru do okna.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.
 - Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť.
+- Tlačidlo **Insert mode / Overwrite mode** alebo kláves **Insert** prepína
+  vkladanie a prepisovanie znakov pod kurzorom. Prepisovanie neodstraňuje
+  koniec riadka; na jeho konci sa znaky pridávajú. Označený text sa nahrádza bežne.
 - Play opakuje základné patterny nepretržite. Stop zruší aj naplánované údery.
 - Tempo, humanize a nezávislé posuvníky dialectu fungujú za behu. Zmena sa prejaví
   pri ďalšom plánovanom beate; už naplánovaný zvuk má krátky predstih.
@@ -154,7 +161,7 @@ napríklad `http://192.168.1.66:4180/`; virtuálne adaptéry sa na telefóne nep
 5. Vráť sa na inštalačnú stránku a otvor jej odkaz na **HTTPS aplikáciu**.
 6. V Safari zvoľ **Zdieľať → Pridať na plochu → Pridať**. Ak sa ponúka prepínač
    otvorenia ako webovej aplikácie, zapni ho.
-7. Otvor novú ikonku djembe a počkaj na **Pripravené offline**. Až potom vypni PC.
+7. Otvor novú ikonku djembe a nechaj aplikáciu pri zapnutom PC stiahnuť offline dáta na pozadí.
    Odporúčané overenie: zapni na telefóne režim lietadlo, aplikáciu zatvor a znovu
    otvor z ikonky, vyber iný rytmus a stlač Play.
 
@@ -183,12 +190,12 @@ Pri guest Wi-Fi s izoláciou klientov sa telefón s PC nemusí spojiť.
 
 Každý produkčný build vytvorí manifest a service worker `dist/sw.js`. Ten uloží
 všetky JS/CSS/fonty, ikony, všetky YAML a všetky WAV vrátane 29 djembe samplov.
-Stav **Pripravené offline** sa zobrazí až po overení úplnej cache. Pri zlyhaní
-je dostupné opakovanie; neúplná nová verzia nenahradí funkčnú starú verziu.
+Offline dáta sa pripravujú automaticky na pozadí bez stavového panelu alebo ponuky Inštalácia.
+Neúplná nová verzia nenahradí funkčnú starú verziu.
 Úpravy vlastného YAML si naďalej ulož tlačidlom **Uložiť** do Súborov.
 
 Na aktualizáciu spusti na PC znovu `npm run phone` a otvor aplikáciu na telefóne
-pri zapnutom PC. Nová verzia sa stiahne na pozadí a zobrazí sa upozornenie.
+pri zapnutom PC. Nová verzia sa stiahne na pozadí.
 Prehrávanie sa nepreruší; nová verzia sa použije po zatvorení všetkých okien
 JavAfro (vrátane Safari tabu) a opätovnom otvorení. Pri zmene IP treba na nové
 stiahnutie otvoriť novú HTTPS adresu zo servera; pôvodná offline inštalácia tým
