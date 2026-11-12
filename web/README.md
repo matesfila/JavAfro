@@ -118,17 +118,20 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Vlastný YAML otvoríš tlačidlom alebo presunutím jedného súboru do okna.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.
 - Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť.
-- Na telefóne sa editor otvorí so zapnutým tlačidlom **Noty** a panelom
+- Na telefóne sa editor otvorí v režime **Noty** s panelom
   úderov `B`, `s`, `t`, `D`, `S`, `K`, `x`, `i`, pauzy `.`, štyroch šípok a Backspace.
-  Vypnutie tlačidla **Noty** zapne systémovú klávesnicu na úpravu ostatného YAML.
-  Prepnutie zachová dokument, výber aj históriu úprav. Panel a editor sú na
-  hlavnej obrazovke telefónu; posúva sa iba obsah dokumentu.
+  Tlačidlo cyklicky prepína **Noty → Klávesnica → Plocha → Noty** a zobrazuje
+  aktuálny režim. **Klávesnica** priamo pri kliknutí zameria editor a vyvolá
+  systémovú klávesnicu na úpravu ostatného YAML. **Plocha** skryje panel nôt aj
+  systémovú klávesnicu; editor využije uvoľnenú výšku nad kompaktným prehrávačom.
+  Dotyk editora v režime Plocha systémovú klávesnicu nevyvoláva.
+  Prepnutie zachová dokument, výber aj históriu úprav. Posúva sa iba obsah dokumentu.
 - **Noty**, **Prepisovanie** a **Súbor** sú v spoločnej hornej
   lište. Ponuka **Súbor** obsahuje nový rytmus, otvorenie, uloženie a **O aplikácii**.
   Názov otvoreného súboru sa nezobrazuje, pri ukladaní zostáva zachovaný.
 - Zapnuté tlačidlo **Prepisovanie** prepisuje znaky pod kurzorom, vypnuté vkladá.
-  Režim prepína aj kláves **Insert**. Názvy prepínačov sa nemenia a zapnuté
-  tlačidlá sú zvýraznené. Prepisovanie neodstraňuje
+  Režim prepína aj kláves **Insert**. Zapnuté prepisovanie je zvýraznené.
+  Prepisovanie neodstraňuje
   koniec riadka; na jeho konci sa znaky pridávajú. Označený text sa nahrádza bežne.
 - Play opakuje základné patterny nepretržite. Stop zruší aj naplánované údery.
 - Tempo, humanize a nezávislé posuvníky dialectu fungujú za behu. Zmena sa prejaví

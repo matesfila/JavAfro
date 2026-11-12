@@ -2,11 +2,9 @@
 
 ## Najbližšie
 
-- [] Tlačidlo "Noty" nech má tri stavy: Noty, Klávesnica, Plocha. Ak sa klikne na Noty, zobrazia sa noty. Ak sa klikne klávesnica, nech sa natvrdo zobrazí systémová klávesnica. Ak sa Klikne Plocha, nech sa schovajú obe klávesnice a môže sa natiahnuť textový editor do výšky na celú plochu. Tieto tri stavy sa budú switchovať cyklicky.
 - [] Stlačenie Play by malo spustiť nový pattern absolutne plynulo, bez prerušenia
 - [] Prihlasovanie/licencie ???
 - [] Doplniť do about info o pôvode samplov
-- [] Zlepšiť editovatelnosť zápisu na PC aj mobile
 - [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
 - [] Tlačidlo otvoriť súbor by nemalo byť disabled počas prehrávania, otvoriť súbor a hrať súčasne je štandardná činnosť
 - [] Všetky parametre by mali byť nastaviteľné per pattern (humanize, dialect, ...)
@@ -23,6 +21,8 @@
 
 ## Hotové
 
+- [x] Zlepšiť editovatelnosť zápisu na PC aj mobile
+- [x] Cyklické režimy Noty / Klávesnica / Plocha so zobrazením systémovej klávesnice a využitím uvoľnenej výšky editora
 - [x] Nastavenie tempa otočným ovládačom, s jemným ťahaním a tlačidlami ±1 BPM
 - [x] Zväčšiť úchyty všetkých posuvníkov na mobile a dotykovú plochu na 44 px
 - [x] Na mobile tak aby sa všetko zmestihol na plochu, bez nutnosti scrollovania

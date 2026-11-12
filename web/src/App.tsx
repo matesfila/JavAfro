@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type DragEvent } from 'react';
-import { YamlEditor, type YamlEditorHandle } from './Editor';
+import { YamlEditor, type EditorInputMode, type YamlEditorHandle } from './Editor';
 import { AboutDialog } from './AboutDialog';
 import { SettingsPanel } from './SettingsPanel';
 import { TempoControl } from './TempoControl';
@@ -25,7 +25,7 @@ function NewIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="current
 
 export function App() {
   const viewport = useViewport();
-  const [notesMode, setNotesMode] = useState(() => viewport.compact);
+  const [inputMode, setInputMode] = useState<EditorInputMode>(() => viewport.compact ? 'notes' : 'keyboard');
   const editor = useRef<YamlEditorHandle>(null);
   const [source, setSource] = useState('');
   const [overwrite, setOverwriteMode] = useState(false);
@@ -281,14 +281,16 @@ export function App() {
     }}>Obnoviť predchádzajúci dokument</button>
   </>;
   const modeButton = <button className="button mode-button" aria-pressed={overwrite} title="Zapnuté: prepisovanie. Vypnuté: vkladanie. (Insert)" onMouseDown={event => event.preventDefault()} onClick={() => setOverwriteMode(previous => !previous)}>Prepisovanie</button>;
-  function changeInputMode(nextNotesMode: boolean) {
+  function changeInputMode(nextMode: EditorInputMode) {
     // Keep focus inside the tap handler so iOS can open the software keyboard.
-    editor.current?.setInputMode(nextNotesMode);
-    setNotesMode(nextNotesMode);
+    editor.current?.setInputMode(nextMode);
+    setInputMode(nextMode);
   }
-  const inputModeButton = <button type="button" className="button mode-button" aria-pressed={notesMode} title="Zapnuté: panel nôt. Vypnuté: systémová klávesnica." onMouseDown={event => event.preventDefault()} onClick={() => changeInputMode(!notesMode)}>Noty</button>;
+  const inputModes = { notes: { label: 'Noty', next: 'keyboard' }, keyboard: { label: 'Klávesnica', next: 'surface' }, surface: { label: 'Plocha', next: 'notes' } } as const;
+  const currentInputMode = inputModes[inputMode];
+  const inputModeButton = <button type="button" className="button mode-button input-mode-button" title={`Režim: ${currentInputMode.label}. Prepnúť na ${inputModes[currentInputMode.next].label}.`} onMouseDown={event => event.preventDefault()} onClick={() => changeInputMode(currentInputMode.next)}>{currentInputMode.label}</button>;
 
-  return <div className={'app' + (viewport.keyboard ? ' keyboard-open' : '') + (notesMode ? ' notes-mode' : '')} style={{ height: viewport.compact ? viewport.height : undefined, '--viewport-height': `${viewport.height}px` } as CSSProperties} onDragOver={event => {
+  return <div className={'app' + (viewport.keyboard ? ' keyboard-open' : '') + (inputMode === 'notes' ? ' notes-mode' : inputMode === 'surface' ? ' surface-mode' : '')} style={{ height: viewport.compact ? viewport.height : undefined, '--viewport-height': `${viewport.height}px` } as CSSProperties} onDragOver={event => {
     if (event.dataTransfer.types.includes('Files')) { event.preventDefault(); event.dataTransfer.dropEffect = busy ? 'none' : 'copy'; setDragging(true); }
   }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false); }} onDrop={drop}>
     <header className="site-header">
@@ -313,7 +315,7 @@ export function App() {
           <input ref={fileInput} type="file" accept=".yaml,.yml,application/yaml,text/yaml" hidden onChange={event => {
             const file = event.target.files?.[0]; if (file) void openFile(file); event.target.value = '';
           }} />
-          <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} notesMode={notesMode} foldRhythms={editorDocument.foldRhythms} wrapLines={viewport.compact} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
+          <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} foldRhythms={editorDocument.foldRhythms} wrapLines={viewport.compact} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);
             if (activeDraft.current) persistDraft({ ...activeDraft.current, caretOffset: Math.min(offset, activeDraft.current.source.length) });
           }} />

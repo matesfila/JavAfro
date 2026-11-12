@@ -26,37 +26,42 @@ const theme = EditorView.theme({
   '&.cm-overwrite .cm-cursor': { borderLeftWidth: '0', borderBottom: '2px solid #745137', width: '0.6em' },
 });
 
+export type EditorInputMode = 'notes' | 'keyboard' | 'surface';
+
 export interface YamlEditorHandle {
-  setInputMode: (notesMode: boolean) => void;
+  setInputMode: (mode: EditorInputMode) => void;
 }
 
-export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, onOverwriteChange, wrapLines = false, notesMode = false, readOnly = false }: {
+export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, onOverwriteChange, wrapLines = false, inputMode = 'keyboard', readOnly = false }: {
   ref?: Ref<YamlEditorHandle>;
   value: string; onChange: (value: string) => void; onCaretChange: (offset: number) => void; caretOffset: number;
   foldRhythms?: boolean;
   overwrite?: boolean; onOverwriteChange: (overwrite: boolean) => void;
   wrapLines?: boolean;
-  notesMode?: boolean;
+  inputMode?: EditorInputMode;
   readOnly?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const wrapping = useRef(new Compartment());
-  const inputMode = useRef(new Compartment());
+  const inputAttributes = useRef(new Compartment());
   const editing = useRef(new Compartment());
   const change = useRef(onChange); change.current = onChange;
   const caretChange = useRef(onCaretChange); caretChange.current = onCaretChange;
   const modeChange = useRef(onOverwriteChange); modeChange.current = onOverwriteChange;
   useImperativeHandle(ref, () => ({
-    setInputMode(nextNotesMode) {
+    setInputMode(nextMode) {
       const editor = view.current;
       if (!editor) return;
       // iOS needs the new inputmode and focus during the original tap,
-      // before React commits or runs effects. Repeated Text taps reopen a dismissed keyboard.
-      editor.contentDOM.blur();
-      editor.dispatch({ effects: inputMode.current.reconfigure(EditorView.contentAttributes.of({ inputmode: nextNotesMode ? 'none' : 'text' })) });
-      editor.focus();
-      editor.dispatch({ scrollIntoView: true });
+      // before React commits or runs effects.
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement) focused.blur();
+      editor.dispatch({ effects: inputAttributes.current.reconfigure(EditorView.contentAttributes.of({ inputmode: nextMode === 'keyboard' ? 'text' : 'none' })) });
+      if (nextMode !== 'surface') {
+        editor.focus();
+        editor.dispatch({ scrollIntoView: true });
+      }
     },
   }), []);
   useEffect(() => {
@@ -65,7 +70,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
       extensions: [overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), theme,
         editing.current.of([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]),
         wrapping.current.of(wrapLines ? EditorView.lineWrapping : []),
-        inputMode.current.of(EditorView.contentAttributes.of({ inputmode: notesMode ? 'none' : 'text' })),
+        inputAttributes.current.of(EditorView.contentAttributes.of({ inputmode: inputMode === 'keyboard' ? 'text' : 'none' })),
         EditorView.contentAttributes.of({ 'aria-label': 'YAML editor rytmu', spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),
         EditorView.updateListener.of(update => {
           if (update.docChanged) change.current(update.state.doc.toString());
@@ -101,10 +106,11 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   }, [readOnly]);
   useEffect(() => {
     const editor = view.current;
-    if (!editor || editor.contentDOM.getAttribute('inputmode') === (notesMode ? 'none' : 'text')) return;
+    const attribute = inputMode === 'keyboard' ? 'text' : 'none';
+    if (!editor || editor.contentDOM.getAttribute('inputmode') === attribute) return;
     // Sync declarative updates without a second blur/focus after the tap.
-    editor.dispatch({ effects: inputMode.current.reconfigure(EditorView.contentAttributes.of({ inputmode: notesMode ? 'none' : 'text' })) });
-  }, [notesMode]);
+    editor.dispatch({ effects: inputAttributes.current.reconfigure(EditorView.contentAttributes.of({ inputmode: attribute })) });
+  }, [inputMode]);
   function runCommand(command: NoteCommand) {
     const editor = view.current;
     if (!editor) return;
@@ -113,7 +119,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   }
   return <div className="editor-surface">
     <div className="editor-host" ref={host} />
-    {notesMode && <NotePad insert={text => {
+    {inputMode === 'notes' && <NotePad insert={text => {
       if (view.current && !readOnly) { insertNote(view.current, text); view.current.focus(); }
     }} command={runCommand} />}
   </div>;
