@@ -62,11 +62,49 @@ Bežné `npm run build`, `npm run phone` a vývoj cez `npm run dev` používajú
 
 ## Ovládanie
 
+### Ochrana rozpracovaného dokumentu
+
+Web priebežne ukladá koncept do úložiska tohto prehliadača: celý text (aj prázdny
+alebo neplatný YAML), názov súboru, polohu kurzora a rozpracované tempo/dialect
+aktuálneho rytmu. Po opätovnom otvorení obnoví koncept namiesto predvolenej ukážky.
+Koncept sa neposiela na server; patrí konkrétnej adrese a prehliadaču.
+
+Pri nahradení upraveného dokumentu cez **Nový rytmus**, **Otvoriť**, presunutie
+súboru alebo obnovu zálohy sa ponúkne **Zrušiť**, **Stiahnuť a pokračovať** alebo
+**Nahradiť bez stiahnutia**. Zrušenie zachová editor aj undo. Posledný nahradený
+dokument je dostupný cez **Súbor → Obnoviť predchádzajúci dokument**; nejde o
+neobmedzenú históriu. **Uložiť** umožňuje stiahnuť aj neplatný YAML bez zmeny textu.
+Pri platnom dokumente naďalej zohľadňuje tempo a dialect vybraného rytmu.
+
+Ak ukladanie zlyhá (napríklad plné alebo blokované úložisko), zobrazí sa upozornenie.
+Pri zistenej zmene konceptu v inom okne sa novšia uložená verzia neprepíše;
+prácu z konfliktného okna treba stiahnuť pred jeho obnovením. Prehliadač môže
+pri odchode s nestiahnutými zmenami zobraziť aj vlastné varovanie.
+Vymazanie dát stránky alebo ukončenie súkromného prehliadania môže koncept
+odstrániť. Dôležité rytmy si preto naďalej ukladaj do súborov. Príkaz Uložiť
+vyvoláva sťahovanie; aplikácia nevie potvrdiť jeho dokončenie na disku.
+
 Pri otvorení sa priamo načíta `basicRhythms.yaml` (alebo súbor z
-`library.initialRhythm`). Rozhranie nemá zoznam knižnice. Vždy pracuješ s jedným
+`library.initialRhythm`), ak neexistuje uložený koncept. Rozhranie nemá zoznam knižnice. Vždy pracuješ s jedným
 otvoreným YAML súborom; ďalší môžeš otvoriť tlačidlom **Otvoriť** alebo presunutím
-do okna. Na hlavnej ploche sú Play/Stop, tempo, humanizácia a editor.
-Ovládanie dialectu je pod rozbaľovacou položkou **Dialect**.
+do okna.
+
+Na telefóne sa hlavná plocha zmestí na jednu obrazovku bez posúvania stránky:
+približne polovicu zaberá editor a druhú názov rytmu, **Play**, **Stop** a **Tempo**.
+**Humanize**, **Mixer** a **Dialect** sa otvárajú tlačidlami v samostatných dialógoch;
+**Súbor** nad editorom ponúka nový rytmus, otvorenie, uloženie a Insert/Overwrite.
+Dialóg zatvoríš tlačidlom **Zavrieť**, klávesom Escape alebo kliknutím na pozadie.
+Zatvorenie zachová nastavenia aj prehrávanie. Dlhé riadky editora sa na mobile
+zalamujú bez zmeny uloženého textu. Posúva sa iba text v editore alebo
+obsah dlhého dialógu; jeho tlačidlo Zavrieť zostáva dostupné.
+Na šírku sú editor a prehrávač vedľa seba. Rozloženie rešpektuje výrezy displeja
+a dostupnú výšku pri otvorení softvérovej klávesnice; vtedy dostane prednosť editor
+a hlavné ovládanie prehrávania. Na počítači zostávajú rozšírené ovládače v rozbaľovacích paneloch.
+
+Tempo sa nastavuje okrúhlym ovládačom: potiahnutie hore zrýchľuje, dole spomaľuje
+(4 px na 1 BPM, bez skoku pri dotyku). Veľké tlačidlá **−** a **+** menia tempo
+presne o 1 BPM; číslo BPM sa dá upraviť aj priamo. Ovládač podporuje šípky
+(1 BPM), Page Up/Down (10 BPM) a Home/End (predvolené hranice tempa).
 
 Jeden YAML súbor môže obsahovať viac rytmov pod samostatnými hlavnými kľúčmi.
 Po načítaní je vybraný prvý. Play prehrá definíciu pod kurzorom a zostáva dostupné
@@ -80,8 +118,17 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Vlastný YAML otvoríš tlačidlom alebo presunutím jedného súboru do okna.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.
 - Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť.
-- Tlačidlo **Insert mode / Overwrite mode** alebo kláves **Insert** prepína
-  vkladanie a prepisovanie znakov pod kurzorom. Prepisovanie neodstraňuje
+- Na telefóne sa editor otvorí so zapnutým tlačidlom **Noty** a panelom
+  úderov `B`, `s`, `t`, `D`, `S`, `K`, `x`, `i`, pauzy `.`, štyroch šípok a Backspace.
+  Vypnutie tlačidla **Noty** zapne systémovú klávesnicu na úpravu ostatného YAML.
+  Prepnutie zachová dokument, výber aj históriu úprav. Panel a editor sú na
+  hlavnej obrazovke telefónu; posúva sa iba obsah dokumentu.
+- **Noty**, **Prepisovanie** a **Súbor** sú v spoločnej hornej
+  lište. Ponuka **Súbor** obsahuje nový rytmus, otvorenie, uloženie a **O aplikácii**.
+  Názov otvoreného súboru sa nezobrazuje, pri ukladaní zostáva zachovaný.
+- Zapnuté tlačidlo **Prepisovanie** prepisuje znaky pod kurzorom, vypnuté vkladá.
+  Režim prepína aj kláves **Insert**. Názvy prepínačov sa nemenia a zapnuté
+  tlačidlá sú zvýraznené. Prepisovanie neodstraňuje
   koniec riadka; na jeho konci sa znaky pridávajú. Označený text sa nahrádza bežne.
 - Play opakuje základné patterny nepretržite. Stop zruší aj naplánované údery.
 - Tempo, humanize a nezávislé posuvníky dialectu fungujú za behu. Zmena sa prejaví
@@ -109,7 +156,8 @@ Staršie CC0 nahrávky sú dostupné ako `dundun_freesound`, `sangban_freesound`
 za sebou, aby vyplnil celý takt. Platí to pre základné patterny aj variácie.
 Pri `4/4` a `stepsPerBeat: 4` teda `"b.tt..s."` znie ako `"b.tt..s.b.tt..s."`.
 
-Djembe používa 29 samplov Tomáša Mareka z AfroPlayer, spoločných s Java verziou.
+Djembe používa 29 nahrávok Matúša Filu z AfroPlayer, na ktorých hrá Tomáš Marek
+na svojom djembe; nahrávky sú spoločné s Java verziou.
 `b/t/s` = bas/tón/slap, `B/T/S` = akcenty; `i/I`, `c/C`, `a/A` = tlmený tón,
 tlmený slap a alternatívny slap. Bas sa zapisuje `B/b`, pôvodný tón `o` zostáva podporovaný, slap používa `S/s`; podporované sú aj pravdepodobnostné
 údery `E/p/y` (60 %) a `F/q/z` (12 %). Humanize ovplyvňuje čas aj jemné zmeny
@@ -129,8 +177,13 @@ Web Audio plánuje údery podľa zvukových hodín; časovač iba dopĺňa plán
 Knižnica aj zvuky sa teda aktualizujú pri ďalšom spustení/buildovaní.
 
 Staršie nahrávky troch dununov JIMMYJAMES112 / Freesound a ikona djembe / SVG Repo sú CC0.
-Nové sample AfroPlayer majú samostatný pôvod a podmienky, opísané v `generated/samples/AFROPLAYER.md`.
-Djembe má samostatný pôvod a podmienky zo starého AfroPlayer; detaily sú v
+Nahrávky djembe a basových bubnov osobne vyhotovil Matúš Fila. Na prvom djembe
+hral Tomáš Marek na svojom nástroji. Dundun, sangban, kensereni a ich zvonce
+nahral aj zahral Matúš Fila na nástrojoch pražskej skupiny Aneboafro, ktorej bol
+v tom čase členom. Verejná licencia na ďalšie používanie týchto samplov nie je určená.
+Sedem samplov `djembe2` má neznámy pôvod a je z licenčného vyhlásenia vynechaných;
+technicky zostávajú pribalené. Podrobnosti sú v `generated/samples/AFROPLAYER.md`.
+Detaily prvého djembe sú v
 `generated/samples/djembe/README.md`, jeho mapovanie v spoločnom `samples/afroplayer-samples.yaml`.
 Podrobné zdroje a úpravy sú v skopírovaných `generated/samples/README.md`
 a `generated/icons/README.txt`. Fonty Manrope a DM Sans sú pribalené lokálne

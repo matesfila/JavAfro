@@ -7,15 +7,12 @@
 .control-group+.control-group{margin-top:18px}.control-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:32px}.control-heading label{font-size:14px}.control-heading output,.bpm-value input{color:#795739;font-family:'Manrope Variable',sans-serif;font-size:23px;font-weight:600;font-variant-numeric:tabular-nums}.control-heading output small,.bpm-value span{font-family:'DM Sans Variable',sans-serif;font-size:11px;color:var(--muted);margin-left:4px;font-weight:400}.bpm-value{display:flex;align-items:baseline}.bpm-value input{width:70px;border:0;border-bottom:1px dashed #d3c2ac;background:transparent;text-align:right;appearance:textfield;-moz-appearance:textfield;padding:0}.bpm-value input::-webkit-inner-spin-button{display:none}input[type=range]{width:100%;height:38px;margin:3px 0 0;accent-color:#987047;cursor:pointer;touch-action:pan-y}
 .dialect-options{margin-top:21px;border-top:1px solid var(--border)}.dialect-options summary{padding:16px 0 0;font-size:14px;color:#705840}.dialect-toolbar{display:flex;justify-content:end}.text-button{border:0;background:transparent;text-decoration:underline;text-underline-offset:3px;color:#816447;min-height:38px;padding:6px 0;font-size:12px}.pulse-control{padding:7px 0}.pulse-control>div{display:flex;align-items:center;justify-content:space-between;font-size:13px}.pulse-control output{font-family:ui-monospace,Consolas,monospace;color:#795739;font-variant-numeric:tabular-nums}
 @media(max-width:850px){.site-header,main{width:calc(100% - 32px)}.workspace{grid-template-columns:minmax(0,1fr) 270px;gap:12px}.playback-card{padding:18px}}
-@media(max-width:680px){.site-header,main{width:calc(100% - 24px)}.site-header{height:62px}.workspace{display:flex;flex-direction:column;gap:14px}.workspace>.card{width:100%}.playback-card{display:contents}.rhythm-heading{order:0;width:100%;padding:18px;background:var(--paper);border:1px solid var(--border);border-radius:12px}.playback-controls{order:2;width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:20px;padding:18px;background:var(--paper);border:1px solid var(--border);border-radius:12px}.transport,.playback-message,.dialect-options{grid-column:1/-1}h1{font-size:24px}.transport{margin:14px 0}.transport .button{min-height:48px}.control-group+.control-group{margin-top:0}.control-heading label{font-size:14px}.control-heading output,.bpm-value input{font-size:21px}input[type=range]{height:44px}.dialect-options{margin-top:10px}.dialect-options summary{min-height:44px}.editor-card{order:1}.editor-toolbar{padding:10px 12px;gap:8px;flex-wrap:wrap}.file-name{flex:1;min-width:110px}.editor-actions .button{min-height:44px;padding:8px 10px;font-size:13px}.editor-wrap{height:55dvh;min-height:360px}.editor-host .cm-content{padding:12px 0}.editor-host .cm-line{padding:0 10px}.editor-status{font-size:12px;padding:10px 12px}}
 @supports(padding:env(safe-area-inset-top)){.app{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}}
-@media(max-width:420px){.playback-controls{grid-template-columns:minmax(0,1fr)}.control-group+.control-group{margin-top:8px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
 .mixer{grid-column:1/-1;margin-top:20px;border-top:1px solid var(--border);}.mixer summary{padding:16px 0 0;font-size:14px;color:#705840;min-height:44px}.mixer-tracks{padding-top:12px}.mixer-track+.mixer-track{border-top:1px solid var(--border);margin-top:8px;padding-top:10px}.mixer-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.mixer-heading label{font-size:13px;overflow-wrap:anywhere;min-width:0}.mute-button{min-height:38px;padding:6px 10px;background:#f2eadf;border-color:var(--border);font-size:12px;flex-shrink:0}.mute-button[aria-pressed=true]{background:#805638;color:#fffaf4;border-color:#805638}.mixer-volume{display:flex;align-items:center;gap:10px}.mixer-volume input{min-width:0;flex:1}.mixer-volume output{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:40px;text-align:right;color:var(--muted)}.mixer-track.muted .mixer-volume{opacity:.6}
-.humanize-options{grid-column:1/-1;margin-top:18px;border-top:1px solid var(--border)}.humanize-options summary{padding:16px 0 0;font-size:14px;color:#705840;min-height:44px}.humanize-controls{padding-top:10px}.humanize-controls .control-group+.control-group{margin-top:14px}.humanize-hint{margin:8px 0 0;font-size:12px;line-height:1.5;color:var(--muted)}
+.humanize-options{grid-column:1/-1;margin-top:18px;border-top:1px solid var(--border)}.humanize-options summary{padding:16px 0 0;font-size:14px;color:#705840;min-height:44px}.humanize-controls{padding-top:10px}.humanize-controls .control-group+.control-group{margin-top:14px}
 .control-heading label[for=tempo],.humanize-options summary,.dialect-options summary{font-weight:700}
-@media(max-width:680px){.workspace>.editor-card{margin-left:24px;width:calc(100% - 24px)}}
 
 .site-header{justify-content:space-between;gap:16px}
 .humanize-options summary,.dialect-options summary,.mixer summary{font-size:17px;font-weight:700;line-height:1.5;min-height:44px}
@@ -34,3 +31,242 @@
 .editor-mode-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)}
 .mode-button{min-height:32px;padding:4px 9px;font-size:12px;border-color:var(--border);background:transparent;color:#705840}
 .mode-button[aria-pressed=true]{background:#805638;border-color:#805638;color:#fffaf4}
+.header-controls{display:flex;align-items:center;gap:10px;min-width:0}
+.header-controls>.button{min-height:36px}
+.file-about{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+.file-about>.button{width:100%;min-height:44px;justify-content:flex-start;padding-inline:16px}
+
+.tempo-dial-row{display:flex;align-items:center;justify-content:center;gap:4px}
+.tempo-step{flex:0 0 44px;width:44px;height:44px;border:1px solid var(--border);border-radius:50%;background:#f2eadf;color:var(--accent);font-size:26px;line-height:1;touch-action:manipulation}
+.tempo-step:active:not(:disabled){background:#dfc8aa}
+.tempo-dial{flex:0 0 80px;width:80px;height:80px;border-radius:50%;touch-action:none;user-select:none;-webkit-user-select:none;cursor:ns-resize}
+.tempo-dial:focus-visible{outline:3px solid #b88a5b;outline-offset:2px}
+.tempo-dial svg{display:block;width:100%;height:100%;pointer-events:none}
+.tempo-dial-track{fill:none;stroke:#d3c2ac;stroke-width:5;stroke-linecap:round}
+.tempo-dial-face{fill:#f2eadf;stroke:#987047;stroke-width:2}
+.tempo-dial-indicator{stroke:var(--accent);stroke-width:5;stroke-linecap:round}
+.tempo-dial:active .tempo-dial-face{fill:#dfc8aa}
+
+.editor-surface{position:absolute;inset:0;display:flex;flex-direction:column;min-height:0}
+.editor-surface>.editor-host{position:relative;inset:auto;flex:1;min-height:0;overflow:hidden}
+.note-pad button{border:1px solid var(--border);border-radius:6px;background:#f7f0e5;color:#705840;touch-action:manipulation}
+.note-pad{flex:0 0 auto;padding:6px;border-top:1px solid var(--border);background:var(--paper);user-select:none;-webkit-user-select:none}
+.note-keys{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.note-keys button:last-child{grid-column:span 2}
+.note-navigation{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-top:5px}
+.note-pad button{min-width:0;min-height:52px;padding:2px;font-size:22px;font-weight:600;line-height:1}
+.note-pad button:active{background:#dfc8aa}
+
+.settings-launchers { display: contents; }
+.settings-button { min-height: 44px; padding: 8px 12px; border-color: var(--border); background: #f2eadf; }
+.settings-button:hover { background: #eaddcb; }
+.control-dialog {
+  width: min(480px, calc(100vw - 24px));
+  max-height: calc(var(--viewport-height, 100dvh) - 24px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--paper);
+  color: inherit;
+  box-shadow: 0 16px 64px #44372e33;
+  overflow: hidden;
+}
+.control-dialog[open] { display: flex; flex-direction: column; }
+.control-dialog::backdrop { background: #30251cb3; }
+.dialog-heading {
+  display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.dialog-heading h2 { margin: 0; font: 700 21px 'Manrope Variable', sans-serif; }
+.dialog-heading form { margin: 0; }
+.dialog-heading .button { min-height: 44px; }
+.dialog-body { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 18px; }
+.dialog-body .humanize-controls, .dialog-body .mixer-tracks { padding-top: 0; }
+.dialog-body input[type=range] { height: 44px; }
+.dialog-body .mute-button { min-height: 44px; }
+.dialog-file-name { margin: 0 0 18px; overflow-wrap: anywhere; color: var(--muted); }
+.file-dialog-actions { display: grid; gap: 10px; }
+.file-dialog-actions .button { min-height: 48px; justify-content: flex-start; padding-inline: 16px; }
+.file-editor-mode { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; }
+.file-editor-mode .button { min-height: 44px; }
+
+/* The main phone screen never scrolls; only the document and modal bodies can scroll. */
+@media (max-width: 680px), (max-width: 960px) and (max-height: 500px) {
+  html, body, #root { width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+  .app {
+    position: fixed; inset: 0; width: 100%; height: 100dvh; min-height: 0;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .site-header, main { width: 100%; margin: 0; }
+  .site-header { flex: 0 0 46px; height: 46px; padding: 0 12px; gap: 8px; }
+  .brand { gap: 7px; font-size: 19px; }
+  .brand img { width: 20px; height: 26px; }
+  .site-header > .button { min-height: 40px; padding: 6px 10px; font-size: 12px; }
+  main { flex: 1; min-height: 0; padding: 0 8px 8px; overflow: hidden; }
+  .workspace {
+    height: 100%; min-height: 0; display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px; align-items: stretch;
+  }
+  .workspace > .card { width: 100%; min-height: 0; margin: 0; border-radius: 10px; }
+  .editor-card { display: flex; flex-direction: column; }
+  .editor-toolbar { flex: 0 0 auto; min-height: 46px; padding: 3px 8px; gap: 8px; flex-wrap: nowrap; }
+  .file-name { flex: 1; font-size: 12px; min-width: 0; }
+  .editor-toolbar > .settings-button { min-height: 40px; padding: 6px 12px; font-size: 13px; }
+  .editor-wrap { flex: 1; height: auto; min-height: 0; overflow: hidden; }
+  .editor-host .cm-content { padding: 8px 0; font-size: max(16px, 1em); }
+  .editor-host .cm-line { padding: 0 8px; }
+  .editor-host .cm-scroller { overscroll-behavior: contain; }
+  .editor-placeholder { top: 16px; left: 40px; font-size: 13px; }
+  .editor-status { flex: 0 0 auto; min-height: 0; max-height: 48px; padding: 5px 8px; font-size: 11px; overflow: auto; }
+  .playback-card { display: flex; flex-direction: column; gap: 8px; padding: 12px; overflow: hidden; }
+  .rhythm-heading { flex: 0 0 auto; min-height: 24px; }
+  .rhythm-heading h1 { font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .playback-controls { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .transport { flex: 0 0 auto; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
+  .transport .button { min-height: 48px; font-size: 17px; }
+  .playback-message { flex: 0 1 auto; margin: 0; max-height: 38px; overflow: auto; font-size: 12px; line-height: 1.4; }
+  .control-heading { min-height: 30px; }
+  .control-heading label { font-size: 15px; }
+  .bpm-value input { font-size: 23px; width: 76px; }
+  input[type=range] { height: 44px; margin: 0; }
+  .settings-launchers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .settings-launchers > .settings-button { width: 100%; min-width: 0; padding: 8px 4px; font-size: 13px; }
+  .copyright { display: none; }
+  .control-dialog, .about-dialog {
+    top: max(12px, env(safe-area-inset-top)); bottom: auto; margin: 0 auto;
+    max-height: calc(var(--viewport-height, 100dvh) - max(12px, env(safe-area-inset-top)) - max(12px, env(safe-area-inset-bottom)));
+  }
+  .about-content { padding: 20px; }
+}
+
+@media (max-width: 680px) and (max-height: 620px), (max-width: 960px) and (max-height: 500px) {
+  .site-header { flex-basis: 40px; height: 40px; }
+  .playback-card { padding: 8px; gap: 4px; }
+  .rhythm-heading { min-height: 18px; }
+  .rhythm-heading h1 { font-size: 16px; }
+  .playback-controls { gap: 4px; }
+  .transport .button { min-height: 44px; }
+  .playback-controls > .control-group > input[type=range] { height: 44px; }
+  .settings-launchers { gap: 6px; }
+}
+
+/* Landscape phones use the two halves side by side. */
+@media (max-width: 960px) and (max-height: 500px) and (orientation: landscape) {
+  .workspace { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+}
+
+/* Preserve the editor and transport when the on-screen keyboard takes most of the viewport. */
+@media (max-width: 680px), (max-width: 960px) and (max-height: 500px) {
+  .keyboard-open .workspace { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .keyboard-open .playback-card { padding: 4px 8px; }
+  .keyboard-open .rhythm-heading, .keyboard-open .settings-launchers, .keyboard-open .playback-message { display: none; }
+  .keyboard-open .playback-controls { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 12px; }
+  .keyboard-open .transport .button { min-height: 44px; font-size: 14px; gap: 5px; }
+  .keyboard-open .control-heading { min-height: 24px; }
+  .keyboard-open .control-heading label { display: none; }
+  .keyboard-open .bpm-value { margin-left: auto; }
+  .keyboard-open .bpm-value input { font-size: 18px; }
+  .keyboard-open .playback-controls > .control-group > input { height: 44px; }
+}
+
+/* Reserve space for the note pad, giving the remaining height to the document. */
+@media (max-width: 680px), (max-width: 960px) and (max-height: 500px) {
+  .editor-mode-bar{flex:0 0 auto;flex-wrap:nowrap;justify-content:space-between;padding:3px 8px;gap:6px}
+  .editor-mode-bar .mode-button{min-height:36px}
+  .notes-mode .workspace{grid-template-rows:minmax(0,1fr) auto}
+  .notes-mode .playback-card{padding:6px 8px;gap:4px}
+  .notes-mode .rhythm-heading{display:none}
+  .notes-mode .playback-controls{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+  .notes-mode .transport{gap:5px}
+  .notes-mode .transport .button{min-height:44px;font-size:14px;gap:5px}
+  .notes-mode .control-heading{min-height:24px}
+  .notes-mode .control-heading label{display:none}
+  .notes-mode .bpm-value{margin-left:auto}
+  .notes-mode .bpm-value input{font-size:18px}
+  .notes-mode .playback-controls>.control-group>input{height:44px}
+  .notes-mode .settings-launchers{grid-column:1/-1}
+  .notes-mode .settings-launchers>.settings-button{min-height:40px;padding:4px;font-size:12px}
+  .notes-mode .playback-message{grid-column:1/-1;max-height:30px}
+}
+@media (max-width: 960px) and (max-height: 500px) and (orientation: landscape) {
+  .notes-mode .workspace{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+  .notes-mode .playback-controls{display:flex}
+  .notes-mode .settings-launchers{gap:3px}
+  .notes-mode .note-pad button{min-height:44px}
+}
+@media (max-width: 680px) and (max-height: 620px) and (orientation: portrait) {
+  .notes-mode .note-pad{padding:4px}
+  .notes-mode .note-keys,.notes-mode .note-navigation{gap:4px}
+  .notes-mode .note-pad button{min-height:44px}
+  .notes-mode .settings-launchers>.settings-button{min-height:36px}
+  .notes-mode .transport .button{min-height:40px}
+}
+@media (max-width: 960px) and (max-height: 360px) and (orientation: landscape) {
+  .notes-mode .note-pad button{min-height:40px}
+  .notes-mode .note-pad{padding:4px}
+}
+
+/* All editor controls share one top row; the document starts immediately below it. */
+@media (max-width: 680px), (max-width: 960px) and (max-height: 500px) {
+  .site-header{height:48px;flex-basis:48px;padding:0 8px;gap:6px}
+  .header-controls{gap:5px}
+  .header-controls>.button{min-height:40px;padding:5px 9px;font-size:12px;white-space:nowrap}
+}
+@media (max-width: 420px) {
+  .brand span{display:none}
+}
+
+@media (max-width: 680px), (max-width: 960px) and (max-height: 500px) {
+  .tempo-dial{flex-basis:56px;width:56px;height:56px}
+  .tempo-dial-row{gap:2px}
+  .notes-mode .playback-controls,.keyboard-open .playback-controls{grid-template-columns:minmax(0,1fr) minmax(148px,1.25fr)}
+  .notes-mode .tempo-control,.keyboard-open .tempo-control{min-width:0}
+}
+
+/* A 32px visible grip with a 44px touch target, including in compact player modes. */
+@media (max-width: 680px), (max-width: 960px) and (max-height: 500px), (any-pointer: coarse) {
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: #d3c2ac;
+  }
+  input[type=range]::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: #d3c2ac;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    margin-top: -19px;
+    border: 6px solid transparent;
+    border-radius: 50%;
+    background: #987047;
+    background-clip: padding-box;
+  }
+  input[type=range]::-moz-range-thumb {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    border: 6px solid transparent;
+    border-radius: 50%;
+    background: #987047;
+    background-clip: padding-box;
+  }
+  input[type=range]:active::-webkit-slider-thumb { background-color: var(--accent); }
+  input[type=range]:active::-moz-range-thumb { background-color: var(--accent); }
+}

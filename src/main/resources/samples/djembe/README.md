@@ -1,6 +1,9 @@
 # Djembe / AfroPlayer
 
 29 pôvodných nahrávok z `C:/Projects/AfroPlayer/resources/samples/djembe_tomasmarek`.
+Nahrávky osobne vyhotovil **Matúš Fila**. Na svojom djembe hral **Tomáš Marek**.
+Pôvod doplnil Matúš Fila 6. novembra 2026. Názov Djembe1 v tomto kontexte
+označuje nástroj `djembe`, nie samostatnú sadu `djembe2`.
 Priradenie bas/tón/slap/tlmený tón a ich zosilnenie vychádza zo starého
 `src/core/afp-sampler.rb`. Navyše sú dostupné aj pôvodné alternatívne slapy
 `slap2` a tlmené slapy `slapclos`, ktoré starý sampler nepoužíval.
@@ -13,8 +16,10 @@ ffmpeg -i INPUT.flac -map_metadata -1 -ac 1 -ar 44100 -c:a pcm_s16le OUTPUT.wav
 
 Bez normalizácie, kompresie, orezania začiatku/konca alebo zmeny ladenia.
 Zachovávame rozdiely medzi nahrávkami. V JavAfro sa už FFmpeg nevyžaduje.
-Súbory nie sú súčasťou CC0 sady JIMMYJAMES112; zachovávajú pôvodné podmienky
-z používateľovho projektu AfroPlayer. V pôvodnom adresári nie je licenčný súbor.
+Súbory nie sú súčasťou CC0 sady JIMMYJAMES112. Verejná licencia na ďalšie
+používanie samplov nebola určená; doplnenie pôvodu neobsahuje údaj o súhlase
+Tomáša Mareka na verejné použitie zaznamenaného výkonu. Podrobné kredity
+a samostatný stav `djembe2` sú v [AFROPLAYER.md](../AFROPLAYER.md).
 
 Spoločný manifest `../afroplayer-samples.yaml` používa Java aj web. Obsahuje šestice bánk
 (bas 1, tón 6, slap 8, tlmený tón 3, tlmený slap 3, alternatívny slap 8),

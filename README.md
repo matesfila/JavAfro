@@ -192,7 +192,8 @@ nahradenie znakov; `legacy` uchováva pôvodné zdrojové dáta.
 ### Djembe z AfroPlayer
 
 Nástroj `picosoft.javafro.instruments.sample.matesamples.DjembeInstrument` používa 29 pôvodných
-samplov Tomáša Mareka. Funguje v Java aj webovom prehrávači; v knižnici je
+samplov, ktoré nahral Matúš Fila; na svojom djembe hrá Tomáš Marek.
+Funguje v Java aj webovom prehrávači; v knižnici je
 `rhythms/djembe-demo.yaml` s ukážkou všetkých úderov aj prevedených značiek AfroPlayer.
 
 ```yaml

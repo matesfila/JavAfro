@@ -44,10 +44,30 @@ The Java engine currently mixes mono. Original pan positions are retained in the
 manifest; the web engine applies them with StereoPannerNode. All other gain/rate,
 sample, note and bell behavior is shared.
 
-These files are separate from the CC0 Freesound recordings. No redistribution
-license was found alongside these source FLACs. Keep their original provenance
-and conditions; do not relabel them as CC0. The djembe_kontakt directory name is
-source provenance, not a claim of a redistribution license.
+## Recording credits and license status
+
+Provenance supplied by Matúš Fila on 2026-11-06:
+
+| Recordings | Recording by | Performer | Instruments |
+| --- | --- | --- | --- |
+| 29 djembe recordings (`djembe_tomasmarek`) | Matúš Fila | Tomáš Marek | Tomáš Marek's djembe |
+| 47 bass drum and bell recordings (`dunduns_rudo`) | Matúš Fila | Matúš Fila | Instruments belonging to the Prague group Aneboafro; Matúš Fila was a member at the time |
+| 7 `djembe2` recordings (`djembe_kontakt`) | Unknown | Unknown | Unknown |
+
+Matúš Fila personally recorded the first two sets. The historical directory
+names are retained for traceability; `dunduns_rudo` is not a recording credit.
+This provenance statement does not specify a public sample reuse license or
+document Tomáš Marek's consent to public use of his recorded performance.
+Do not label these recordings as CC0 or infer an unrestricted reuse license.
+
+The origin of `djembe2` is not remembered. At Matúš Fila's request, these seven
+recordings are excluded from any license granted for his recordings. No license
+is granted for `djembe2` by this document. The `djembe_kontakt` name does not
+establish its source or license. This exclusion is documentation only: the
+files remain in the application and its distribution/offline bundle.
+
+The separate JIMMYJAMES112 Freesound recordings retain their documented CC0
+status in [README.md](README.md).
 
 To repeat conversion of the 54 dundun/sangban/kensereni/bell/djembe2 recordings
 (the 29 Tomáš Marek djembe recordings were imported separately; requires local FFmpeg and `npm ci` in `web/`):

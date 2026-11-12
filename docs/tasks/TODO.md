@@ -2,19 +2,35 @@
 
 ## Najbližšie
 
-- [] Aktívny riadok tmavší - teraz je dôležitý, rytmus pod ním sa prehráva
+- [] Tlačidlo "Noty" nech má tri stavy: Noty, Klávesnica, Plocha. Ak sa klikne na Noty, zobrazia sa noty. Ak sa klikne klávesnica, nech sa natvrdo zobrazí systémová klávesnica. Ak sa Klikne Plocha, nech sa schovajú obe klávesnice a môže sa natiahnuť textový editor do výšky na celú plochu. Tieto tri stavy sa budú switchovať cyklicky.
+- [] Stlačenie Play by malo spustiť nový pattern absolutne plynulo, bez prerušenia
+- [] Prihlasovanie/licencie ???
+- [] Doplniť do about info o pôvode samplov
+- [] Zlepšiť editovatelnosť zápisu na PC aj mobile
+- [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
+- [] Tlačidlo otvoriť súbor by nemalo byť disabled počas prehrávania, otvoriť súbor a hrať súčasne je štandardná činnosť
+- [] Všetky parametre by mali byť nastaviteľné per pattern (humanize, dialect, ...)
+  - pattern sa zo String zrejme zmení na triedu Pattern
 - [] Desktop verzia: vstupný súbor nebude zakompilovaný, ale normálny externý súbor
 - [] Generátor stringov - preskúmať, či existuje nejaká knižnica na generovanie stringov
   - cieľom by bolo mať možnosť v jednom riadku zapísať rôzne varianty patternu
 - [] Zaviesť rodinu rytmov (meniť sa im bude zrejme dialekt)
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
-- [] Globálny konfiguračný súbor (tam by malo byť defaultné humanize, možno defaultné dialekty pre dané rodiny rytmov...)
+  - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
 
 ## Neskôr
 
 
 ## Hotové
 
+- [x] Nastavenie tempa otočným ovládačom, s jemným ťahaním a tlačidlami ±1 BPM
+- [x] Zväčšiť úchyty všetkých posuvníkov na mobile a dotykovú plochu na 44 px
+- [x] Na mobile tak aby sa všetko zmestihol na plochu, bez nutnosti scrollovania
+- [x] Zmeniť zápis nôt: x bude zvonček, B bas na djembe, D/S/K dun/san/ken
+- [x] Custom klávesy na písanie rytmus, zrušiť ios klávesnicu na telefóne nech sa nezobrazuje
+- [x] Web: automatické uloženie a obnova konceptu, ochrana pred nahradením, záloha predchádzajúceho dokumentu a export neplatného YAML (fyzické mobilné skúšky zostávajú otvorené)
+- [x] Aktívny riadok tmavší - teraz je dôležitý, rytmus pod ním sa prehráva
+- [x] Globálny konfiguračný súbor (tam by malo byť defaultné humanize, možno defaultné dialekty pre dané rodiny rytmov...)
 - [x] Zjednodušiť mobilné rozhranie
 - [x] Ovládacie prvky oddeliť do podpanelov
 - [x] Prehodnotiť zápis timeSignature a oddelovača taktov |
