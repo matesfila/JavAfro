@@ -23,6 +23,7 @@ final class MixerPanel extends JPanel {
         this.initialVolume = initialVolume * 2;
         setBorder(BorderFactory.createTitledBorder("Mixer"));
         master.setName("masterVolume");
+        TouchSliders.install(master);
         master.getAccessibleContext().setAccessibleName("Master hlasitosť");
         JLabel label = new JLabel("Master");
         label.setFont(label.getFont().deriveFont(Font.BOLD));
@@ -63,6 +64,7 @@ final class MixerPanel extends JPanel {
             String instrument = rhythm.tracks().get(i).instrument().getClass().getSimpleName().replace("Instrument", "");
             String name = (i + 1) + " · " + instrument;
             JSlider volume = new JSlider(0, 200, initialVolume);
+            TouchSliders.install(volume);
             volume.setName("trackVolume-" + i);
             volume.getAccessibleContext().setAccessibleName("Hlasitosť " + name);
             JToggleButton mute = new JToggleButton("Mute");
@@ -88,6 +90,19 @@ final class MixerPanel extends JPanel {
         this.settings = settings;
         settings.setMasterVolume(master.getValue());
         for (int i = 0; i < volumes.size(); i++) update(i);
+    }
+
+    /** Prepare the queued mix without rebinding controls away from the sounding rhythm. */
+    void configure(PlaybackSettings target, Rhythm rhythm) {
+        List<String> next = new ArrayList<>();
+        next.add(rhythm.name());
+        rhythm.tracks().forEach(track -> next.add(track.instrument().getClass().getName()));
+        target.setMasterVolume(master.getValue());
+        boolean same = signature.equals(next);
+        for (int i = 0; i < rhythm.tracks().size(); i++) {
+            target.setTrackMix(i, same ? volumes.get(i).getValue() : initialVolume,
+                    same && mutes.get(i).isSelected());
+        }
     }
 
     private void update(int index) {

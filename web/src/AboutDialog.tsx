@@ -16,6 +16,11 @@ export function AboutDialog() {
           <dt>Autor</dt><dd>{appInfo.creator}</dd>
           <dt>Pomocník pri vývoji</dt><dd>{appInfo.assistant}</dd>
         </dl>
+        <section className="sample-credits" aria-labelledby="sample-credits-title">
+          <h3 id="sample-credits-title">Použité sample</h3>
+          <p>Basové bubny (dundun, sangban, kensereni) nahrávané v skúšobni Aneboafro v Prahe v roku 2011. Nahral: {appInfo.creator}</p>
+          <p>Sample djembe nahrané počas Kon workshopu Tomáša Mareka v Prahe. Na djembe hral Tomáš Marek, nahral {appInfo.creator}</p>
+        </section>
         <form method="dialog"><button className="button subtle" autoFocus>Zavrieť</button></form>
       </div>
     </dialog>

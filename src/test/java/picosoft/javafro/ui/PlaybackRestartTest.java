@@ -28,6 +28,9 @@ public class PlaybackRestartTest {
         volatile boolean stopped;
         Rhythm rhythm;
         PlaybackSettings controls;
+        Rhythm queuedRhythm;
+        PlaybackSettings queuedControls;
+        Runnable queuedStarted;
         public void play(Rhythm rhythm, PlaybackSettings controls) throws Exception {
             this.rhythm = rhythm;
             this.controls = controls;
@@ -35,7 +38,20 @@ public class PlaybackRestartTest {
             try { assertTrue(release.await(5, TimeUnit.SECONDS)); }
             finally { finished.countDown(); }
         }
-        public void stop() { stopped = true; }
+        public synchronized boolean queue(Rhythm rhythm, PlaybackSettings controls, Runnable started) {
+            if (stopped) return false;
+            queuedRhythm = rhythm; queuedControls = controls; queuedStarted = started;
+            return true;
+        }
+        public synchronized void cancelQueued() { queuedRhythm = null; queuedControls = null; queuedStarted = null; }
+        synchronized void boundary() {
+            if (stopped || queuedRhythm == null) return;
+            rhythm = queuedRhythm; controls = queuedControls;
+            Runnable started = queuedStarted;
+            cancelQueued();
+            started.run();
+        }
+        public void stop() { stopped = true; cancelQueued(); }
         public boolean isStopped() { return stopped; }
     }
 
@@ -57,7 +73,7 @@ public class PlaybackRestartTest {
     }
 
     @Test
-    public void repeatedPlayWaitsForOldSessionAndStartsOnlyLatestSelection() throws Exception {
+    public void repeatedPlayQueuesOnlyLatestSelectionOnTheSameAudioSession() throws Exception {
         var sessions = new CopyOnWriteArrayList<Session>();
         RhythmPlayerPanel panel = panel(sessions);
         try {
@@ -68,17 +84,82 @@ public class PlaybackRestartTest {
             selectAndPlay(panel, "Second:");
             selectAndPlay(panel, "First:");
             selectAndPlay(panel, "Third:");
-            assertTrue(first.stopped);
-            assertEquals(1, sessions.size()); // The previous audio session still owns its device.
+            assertFalse(first.stopped);
+            assertEquals(1, sessions.size());
+            assertEquals("First", first.rhythm.name());
+            assertEquals(90, first.controls.snapshot().bpm());
+            assertEquals("Third", first.queuedRhythm.name());
+            first.boundary();
+            SwingUtilities.invokeAndWait(() -> {});
+            assertEquals("Third", first.rhythm.name());
+            assertEquals(80, first.controls.snapshot().bpm());
+            assertEquals(4, first.controls.snapshot().dialect().offsets().size());
+            assertEquals(1, sessions.size());
+            assertEquals(1, first.finished.getCount());
+        } finally { close(panel, sessions); }
+    }
+
+    @Test
+    public void queuedSelectionKeepsRunningTempoAndSubdivisionUntilBoundary() throws Exception {
+        var sessions = new CopyOnWriteArrayList<Session>();
+        RhythmPlayerPanel panel = panel(sessions);
+        try {
+            click(panel, "playButton");
+            Session session = sessions.getFirst();
+            assertTrue(session.started.await(2, TimeUnit.SECONDS));
+            selectAndPlay(panel, "Second:");
+            assertEquals("First", session.rhythm.name());
+            assertEquals(90, session.controls.snapshot().bpm());
+            assertEquals(4, session.controls.snapshot().dialect().offsets().size());
+            SwingUtilities.invokeAndWait(() -> ((JSlider) named(panel, "tempoSlider")).setValue(110));
+            assertEquals(110, session.controls.snapshot().bpm());
+            assertEquals(140, session.queuedControls.snapshot().bpm());
+            session.boundary();
+            SwingUtilities.invokeAndWait(() -> {});
+            assertEquals("Second", session.rhythm.name());
+            assertEquals(140, session.controls.snapshot().bpm());
+            assertEquals(3, session.controls.snapshot().dialect().offsets().size());
+            SwingUtilities.invokeAndWait(() -> ((JSlider) named(panel, "tempoSlider")).setValue(150));
+            assertEquals(150, session.controls.snapshot().bpm());
+        } finally { close(panel, sessions); }
+    }
+
+    @Test
+    public void editsWhileQueuedAreAppliedOnlyByTheNextPlay() throws Exception {
+        var sessions = new CopyOnWriteArrayList<Session>();
+        RhythmPlayerPanel panel = panel(sessions);
+        try {
+            click(panel, "playButton");
+            Session session = sessions.getFirst();
+            assertTrue(session.started.await(2, TimeUnit.SECONDS));
+            selectAndPlay(panel, "Second:");
+            SwingUtilities.invokeAndWait(() -> ((JTextArea) named(panel, "yamlEditor")).setText(YAML.replace("bpm: 140", "bpm: 145")));
+            session.boundary();
+            SwingUtilities.invokeAndWait(() -> {});
+            assertEquals(140, session.controls.snapshot().bpm());
+            selectAndPlay(panel, "Second:");
+            assertEquals(145, session.queuedControls.snapshot().bpm());
+            assertEquals(140, session.controls.snapshot().bpm());
+        } finally { close(panel, sessions); }
+    }
+
+    @Test
+    public void playAfterStopWaitsForDeviceReleaseBeforeOpeningANewSession() throws Exception {
+        var sessions = new CopyOnWriteArrayList<Session>();
+        RhythmPlayerPanel panel = panel(sessions);
+        try {
+            click(panel, "playButton");
+            Session first = sessions.getFirst();
+            assertTrue(first.started.await(2, TimeUnit.SECONDS));
+            click(panel, "stopButton");
+            selectAndPlay(panel, "Second:");
+            assertEquals(1, sessions.size());
             first.release.countDown();
             awaitSessionCount(sessions, 2);
-            Session next = sessions.get(1);
-            assertTrue(next.started.await(2, TimeUnit.SECONDS));
-            assertEquals(0, first.finished.getCount());
-            assertEquals("Third", next.rhythm.name());
-            assertEquals(80, next.controls.snapshot().bpm());
-            assertEquals(4, next.controls.snapshot().dialect().offsets().size());
-            assertEquals(2, sessions.size());
+            Session second = sessions.get(1);
+            assertTrue(second.started.await(2, TimeUnit.SECONDS));
+            assertEquals("Second", second.rhythm.name());
+            assertEquals(140, second.controls.snapshot().bpm());
         } finally { close(panel, sessions); }
     }
 

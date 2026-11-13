@@ -29,18 +29,22 @@ export function minimumGap(dialect: number[]): number {
 export function planBeat(rhythm: Rhythm, controls: Controls, beatStart: number,
                          stepIndex: number, random: () => number = Math.random,
                          humanizeMaxOffsetMs = AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS,
-                         humanizeApplianceProbability = 100): { hits: Hit[]; end: number; nextStep: number } {
+                         humanizeApplianceProbability = 100,
+                         pulseCount = rhythm.stepsPerBeat,
+                         pulseOffset = 0): { hits: Hit[]; end: number; nextStep: number } {
   validateControls(controls, rhythm.stepsPerBeat);
   validateHumanizeMaxOffsetMs(humanizeMaxOffsetMs);
   validateHumanizeApplianceProbability(humanizeApplianceProbability);
+  if (!Number.isInteger(pulseCount) || pulseCount < 1 || pulseCount > rhythm.stepsPerBeat) throw new Error('Neplatný počet pulzov.');
+  if (!Number.isInteger(pulseOffset) || pulseOffset < 0 || pulseOffset + pulseCount > rhythm.stepsPerBeat) throw new Error('Neplatný začiatok pulzov.');
   const step = AudioConstants.SECONDS_PER_MINUTE / (controls.bpm * rhythm.stepsPerBeat);
   const jitter = Math.min(humanizeMaxOffsetMs / AudioConstants.MILLISECONDS_PER_SECOND,
     step * minimumGap(controls.dialect) * AudioConstants.HUMANIZE_GAP_FRACTION) * controls.humanize / AudioConstants.HUMANIZE_PERCENT_MAX;
   const hits: Hit[] = [];
-  for (let pulse = 0; pulse < rhythm.stepsPerBeat; pulse++) {
+  for (let pulse = 0; pulse < pulseCount; pulse++) {
     const position = (stepIndex + pulse) % rhythm.length;
     const nominal = beatStart + pulse * step;
-    const shifted = Math.max(0, nominal + step * controls.dialect[pulse] * AudioConstants.DIALECT_STEP_FRACTION);
+    const shifted = Math.max(0, nominal + step * controls.dialect[pulseOffset + pulse] * AudioConstants.DIALECT_STEP_FRACTION);
     for (const [trackIndex, track] of rhythm.tracks.entries()) {
       const pattern = track.base.replaceAll('|', '');
       const note = pattern[position % pattern.length];
@@ -55,5 +59,5 @@ export function planBeat(rhythm: Rhythm, controls: Controls, beatStart: number,
       }
     }
   }
-  return { hits, end: beatStart + AudioConstants.SECONDS_PER_MINUTE / controls.bpm, nextStep: (stepIndex + rhythm.stepsPerBeat) % rhythm.length };
+  return { hits, end: beatStart + step * pulseCount, nextStep: (stepIndex + pulseCount) % rhythm.length };
 }

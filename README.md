@@ -19,7 +19,7 @@ Predvolené nastavenia sú v [javafro.yaml](javafro.yaml):
 | `playback.humanizeDynamic` | Globálna odchýlka gain samplov pri humanize 100, predvolene ±0,07 ako pôvodné `HUMANIZE_DYNAMIC`. |
 | `playback.humanizePitch` | Globálna odchýlka rate samplov pri humanize 100, predvolene ±0,005 ako pôvodné `HUMANIZE_PITCH`. |
 | `playback.tempo.initial` | Globálne predvolené BPM; použije sa aj pre rytmus bez `bpm`. |
-| `playback.tempo.minimum`, `maximum` | Predvolený rozsah posuvníka; rozšíri sa pre rytmus s BPM mimo rozsahu. |
+| `playback.tempo.minimum`, `maximum` | Predvolený rozsah ovládača tempa; rozšíri sa pre rytmus s BPM mimo rozsahu. |
 | `library.directory` | Priečinok rytmov pre Java výber súborov a zostavenie webovej knižnice. |
 | `library.initialRhythm` | Relatívna cesta prvého rytmu webovej verzie, napr. `imported/Djole.yaml`. |
 | `editor.fontSize` | Veľkosť písma YAML editora v Java aj webovej verzii. |
@@ -88,12 +88,16 @@ mvn package
 ```
 
 Voliteľný argument je cesta k jednému YAML súboru na disku (UTF-8).
-Bez argumentu sa otvorí prázdny editor; predvolený rytmus z resources sa nenačítava.
+Bez argumentu sa obnoví posledný koncept; ak neexistuje, otvorí sa prázdny editor.
+Predvolený rytmus z resources sa nenačítava. Explicitný súbor má prednosť pred
+konceptom; predchádzajúci koncept zostane dostupný ako jedna obnoviteľná záloha.
 Relatívna cesta sa vyhodnocuje voči pracovnému priečinku. V okne je aj tlačidlo **Otvoriť YAML…**.
 Jeden súbor `.yaml` alebo `.yml` možno tiež presunúť z Prieskumníka priamo do okna
 alebo editora. Načíta sa jeho obsah, tempo a dialect. Počas prehrávania treba najprv
-stlačiť Stop. Viac súborov, priečinky a iné prípony sa odmietnu; pri neplatnom YAML
-zostane doterajší obsah zachovaný. Bežné kopírovanie a vkladanie textu funguje naďalej.
+stlačiť Stop. Viac súborov, priečinky a iné prípony sa odmietnu.
+Pred nahradením neuloženej práce sa ponúkne zrušenie, uloženie a pokračovanie
+alebo pokračovanie bez uloženia. Aj neplatný YAML sa dá otvoriť na opravu.
+Bežné kopírovanie a vkladanie textu funguje naďalej.
 Editor RSyntaxTextArea zvýrazňuje YAML syntax,
 skrýva čísla riadkov a pri stlačení Tab odsádza dvoma medzerami.
 Má veľkú plochu s neproporcionálnym
@@ -101,17 +105,45 @@ písmom a posuvníkmi pre dlhšie zápisy. Jeden súbor môže obsahovať viac r
 ako samostatné hlavné YAML kľúče. Play prehrá rytmus, v ktorého definícii je kurzor.
 Text pred prvým kľúčom vyberá prvý rytmus; medzera alebo komentár medzi definíciami
 patrí predchádzajúcemu rytmu. Presun kurzora počas hrania neprepína zvuk.
-Play zostáva dostupné: ďalšie stlačenie zastaví aktuálny rytmus a od začiatku
-spustí definíciu pod kurzorom vrátane úprav YAML. Pri rýchlych kliknutiach platí
-posledný výber; Stop zruší aj čakajúce spustenie. Súbor z argumentu príkazového riadka
+Play zostáva dostupné: ďalšie stlačenie zaradí definíciu pod kurzorom vrátane úprav
+YAML na koniec aktuálneho patternu (vrátane všetkých jeho taktov). Nový rytmus
+začne od začiatku v tej istej audio linke, bez pridanej pauzy; pôvodné údery
+prirodzene doznejú so svojím mixom. Počas čakania ovládanie stále patrí hrajúcemu
+rytmu; nové tempo, dialect a mixer sa pripoja pri prepnutí. Pri rýchlych kliknutiach
+platí posledný výber; Stop zruší aj čakajúce spustenie. Už pripravený zvuk v bufferoch
+sa pri prepínaní nezahadzuje. Súbor z argumentu príkazového riadka
 sa iba načíta, s kurzorom na začiatku. Prehrávanie sa spustí až po stlačení Play.
 
 **Play** načíta aktuálny YAML a prehráva základné patterny nepretržite až po **Stop**.
-Posuvníky **Tempo** a **Humanize** fungujú aj počas prehrávania bez reštartovania
+Ovládače **Tempo** a **Humanize** fungujú aj počas prehrávania bez reštartovania
 rytmu. Zmena sa použije od ďalšieho generovaného kroku, s malým oneskorením daným
-už pripraveným zvukom. Tempo posuvníka má pri prehrávaní prednosť pred BPM v editore;
-pri otvorení súboru sa posuvník inicializuje jeho BPM. Zmeny YAML sa použijú pri
+už pripraveným zvukom. Nastavené tempo má pri prehrávaní prednosť pred BPM v editore;
+pri otvorení súboru sa ovládač inicializuje jeho BPM. Zmeny YAML sa použijú pri
 ďalšom Play. Zatvorenie okna zastaví aj zvuk. Spúšťací JAR teraz otvára rytmický prehrávač.
+
+Tempo sa nastavuje okrúhlym ovládačom: relatívne ťahanie hore/dole mení BPM
+bez skoku pri prvom dotyku (4 px na 1 BPM). Tlačidlá **−/+** menia hodnotu
+presne o 1 BPM, číslo vedľa ovládača umožňuje priamy zápis. Ostatné posuvníky
+majú 32 px úchyt a 44 px záchytnú plochu aj pre dotykové displeje.
+
+Desktop používa fyzickú klávesnicu na úpravu YAML. **Prepisovanie** má stály názov;
+zapnutý stav alebo kláves Insert zapne prepisovanie.
+
+Ponuka **Súbor** poskytuje nový rytmus, **Uložiť**, **Uložiť ako…** a obnovu
+predchádzajúceho dokumentu. Skratky: Ctrl+N, Ctrl+O, Ctrl+S a Ctrl+Shift+S.
+Uložiť funguje aj pre prázdny alebo neplatný YAML, ktorý zapíše presne tak,
+ako je v editore. Pri platnom nezmenenom zápise zahrnie upravené BPM/dialect
+aktuálneho rytmu a zachová komentáre aj ostatné definície. Zmenený súbor na disku
+sa pred prepísaním znovu potvrdzuje. Zápis používa dočasný súbor a následné nahradenie.
+
+Spustená aplikácia priebežne ukladá surový text, kurzor, cestu k súboru a rozpracované
+BPM/dialect do `%USERPROFILE%\.javafro\desktop-draft.yaml`. Záznam obsahuje aj jednu
+predchádzajúcu verziu dokumentu. Ukladanie má krátke oneskorenie 400 ms a vykoná sa
+aj pri strate aktivácie okna a potvrdenom zatvorení. Pred zatvorením neuloženej práce
+sa dá uložiť súbor alebo odchod zrušiť. Nejde o neobmedzenú históriu ani náhradu
+za vlastné YAML súbory. Koncept zostáva lokálny; neposiela sa na server.
+Poškodený záznam ani novší koncept z iného okna sa automaticky neprepíše.
+Chyba úložiska je viditeľná pod editorom; prácu možno naďalej uložiť do súboru.
 
 Nepretržité prehrávanie možno použiť aj bez GUI (blokuje volajúce vlákno):
 
@@ -165,8 +197,9 @@ Pre skoršie údery si prehrávač pripravuje krátky úsek zvuku dopredu; živ�
 preto majú oneskorenie podľa tempa a delenia beatu.
 
 Načítanie súboru alebo zmena YAML a ďalší Play nastavia posuvníky podľa YAML.
-Posuvníky nemenia zdrojový YAML; bez jeho úpravy zostanú ich nastavenia zachované
-aj po Stop/Play. Dialect je zatiaľ spoločný pre všetky tracky.
+Posuvníky nemenia zdrojový YAML počas ťahania; **Uložiť** môže zapísať aktuálny
+dialect do platného dokumentu. Bez úpravy YAML zostanú nastavenia zachované aj
+po Stop/Play. Dialect je zatiaľ spoločný pre všetky tracky.
 
 ## Rhythm
 

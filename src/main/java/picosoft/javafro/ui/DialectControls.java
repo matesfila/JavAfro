@@ -52,6 +52,7 @@ public final class DialectControls extends JPanel {
             slider.setName("dialectPulse" + (i + 1));
             slider.setMajorTickSpacing(100);
             slider.setPaintTicks(true);
+            TouchSliders.install(slider);
             slider.setToolTipText("−1: skôr o polovicu kroku; 0: presne; +1: neskôr o polovicu kroku.");
             label.setLabelFor(slider);
             slider.getAccessibleContext().setAccessibleName("Dialect pozícia pulzu " + (i + 1));

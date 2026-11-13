@@ -18,7 +18,7 @@ public class EditorModeTest {
             editor.setCaretPosition(1);
             button.doClick();
             assertEquals(TextMode.OVERWRITE, editor.getTextMode());
-            assertEquals("Overwrite mode", button.getText());
+            assertEquals("Prepisovanie", button.getText());
             assertEquals(1, editor.getCaretPosition());
             editor.replaceSelection("x");
             assertTrue(editor.getText().startsWith("Txst:"));
@@ -26,7 +26,7 @@ public class EditorModeTest {
             editor.getActionMap().get(key).actionPerformed(new ActionEvent(editor, ActionEvent.ACTION_PERFORMED, ""));
             assertEquals(TextMode.INSERT, editor.getTextMode());
             assertFalse(button.isSelected());
-            assertEquals("Insert mode", button.getText());
+            assertEquals("Prepisovanie", button.getText());
         });
     }
 

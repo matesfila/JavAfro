@@ -271,3 +271,11 @@
   input[type=range]:active::-webkit-slider-thumb { background-color: var(--accent); }
   input[type=range]:active::-moz-range-thumb { background-color: var(--accent); }
 }
+
+.editor-file-name { flex: 0 0 auto; padding: 5px 16px; border-top: 1px solid var(--border); font-size: 11px; line-height: 1.5; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sample-credits { margin-bottom: 24px; }
+.sample-credits h3 { margin: 0 0 10px; font-size: 15px; }
+.sample-credits p { margin: 8px 0; font-size: 14px; line-height: 1.6; }
+@media (max-width: 680px), (max-width: 960px) and (max-height: 500px) {
+  .editor-file-name { padding: 3px 8px; }
+}

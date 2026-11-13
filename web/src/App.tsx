@@ -219,22 +219,24 @@ export function App() {
   async function play() {
     if (isLoading || !source.trim()) return;
     const request = ++playRequest.current;
+    engine.current?.cancelPendingStart();
     try {
       const parsed = parseRhythmAtCaret(source, caretRef.current);
-      if (syncedSource.current !== source || syncedRhythmId.current !== parsed.id) {
-        updateControls({ bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] });
-        syncedSource.current = source;
-        syncedRhythmId.current = parsed.id;
-      }
-      setPlaying(false); setStarting(true); setPlayingRhythm(parsed); setMessage('');
-      playingSource.current = source;
-      engine.current!.setTrackMix(mixes[mixerKey(parsed)] ?? []);
-      const started = await engine.current!.start(parsed);
+      const nextControls = syncedSource.current !== source || syncedRhythmId.current !== parsed.id
+        ? { bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] }
+        : controlsRef.current;
+      setStarting(true); setMessage(isPlaying ? `Po skončení patternu: ${parsed.name}` : '');
+      const started = await engine.current!.start(parsed, nextControls, mixes[mixerKey(parsed)] ?? []);
       if (request !== playRequest.current) return;
-      if (started) setPlaying(true);
+      if (started) {
+        updateControls(nextControls);
+        syncedSource.current = source; syncedRhythmId.current = parsed.id;
+        playingSource.current = source;
+        setPlayingRhythm(parsed); setPlaying(true);
+        setMessage('');
+      }
     } catch (error) {
       if (request !== playRequest.current) return;
-      engine.current?.stop(); setPlayingRhythm(null); setPlaying(false);
       setMessage(`Prehrávanie sa nepodarilo: ${(error as Error).message}`);
     } finally { if (request === playRequest.current) setStarting(false); }
   }
@@ -321,6 +323,7 @@ export function App() {
           }} />
             {!source && !isLoading && <div className="editor-placeholder">Otvor YAML súbor.</div>}
           </div>
+          <div className="editor-file-name" title={fileName} aria-label="Otvorený súbor">{fileName}</div>
           {editorStatus && <div className={'editor-status' + (validation ? ' invalid' : '')} role={validation ? 'alert' : 'status'}>
             {editorStatus}
           </div>}
@@ -340,18 +343,6 @@ export function App() {
             limit={Math.max(1000, config.maximumTempo, displayedRhythm?.bpm ?? 0)}
             onChange={bpm => editControls({ ...controls, bpm })} />
           <div className="settings-launchers">
-          <SettingsPanel title="Humanize" compact={viewport.compact} className="humanize-options">
-          <div className="humanize-controls">
-          <div className="control-group"><div className="control-heading"><label htmlFor="humanize">Intenzita</label><output htmlFor="humanize">{controls.humanize}<small>%</small></output></div>
-            <input id="humanize" type="range" min="0" max="100" value={controls.humanize} onChange={event => updateControls({ ...controls, humanize: Number(event.target.value) })} />
-          </div>
-          <div className="control-group"><div className="control-heading"><label htmlFor="humanize-probability">Pravdepodobnosť</label><output htmlFor="humanize-probability">{humanizeProbability}<small>%</small></output></div>
-            <input id="humanize-probability" type="range" min="0" max="100" value={humanizeProbability} onChange={event => {
-              const probability = Number(event.target.value); setHumanizeProbability(probability); engine.current?.setHumanizeApplianceProbability(probability);
-            }} />
-          </div>
-          </div>
-          </SettingsPanel>
           <SettingsPanel title="Mixer" compact={viewport.compact} className="mixer">
             {displayedRhythm ? <>
             <div className="mixer-tracks">
@@ -378,6 +369,18 @@ export function App() {
                   const dialect = [...controls.dialect]; dialect[i] = Number(event.target.value); editControls({ ...controls, dialect });
                 }} /></div>)}
             </div>
+          </SettingsPanel>
+          <SettingsPanel title="Humanize" compact={viewport.compact} className="humanize-options">
+          <div className="humanize-controls">
+          <div className="control-group"><div className="control-heading"><label htmlFor="humanize">Intenzita</label><output htmlFor="humanize">{controls.humanize}<small>%</small></output></div>
+            <input id="humanize" type="range" min="0" max="100" value={controls.humanize} onChange={event => updateControls({ ...controls, humanize: Number(event.target.value) })} />
+          </div>
+          <div className="control-group"><div className="control-heading"><label htmlFor="humanize-probability">Pravdepodobnosť</label><output htmlFor="humanize-probability">{humanizeProbability}<small>%</small></output></div>
+            <input id="humanize-probability" type="range" min="0" max="100" value={humanizeProbability} onChange={event => {
+              const probability = Number(event.target.value); setHumanizeProbability(probability); engine.current?.setHumanizeApplianceProbability(probability);
+            }} />
+          </div>
+          </div>
           </SettingsPanel>
           </div>
           </div>

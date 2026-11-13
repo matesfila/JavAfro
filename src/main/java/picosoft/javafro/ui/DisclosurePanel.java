@@ -6,7 +6,7 @@ import java.awt.*;
 /** Keyboard-accessible disclosure that keeps the same controls when collapsed. */
 final class DisclosurePanel extends JPanel {
     DisclosurePanel(String title, String name, JComponent content) {
-        super(new BorderLayout(0, 6));
+        super(new BorderLayout());
         JToggleButton toggle = new JToggleButton("▸ " + title);
         toggle.setName(name);
         toggle.setFont(toggle.getFont().deriveFont(Font.BOLD, 16f));
@@ -16,7 +16,7 @@ final class DisclosurePanel extends JPanel {
         toggle.setBorderPainted(false);
         toggle.setMargin(new Insets(6, 0, 6, 0));
         JPanel body = new JPanel(new BorderLayout());
-        body.setBorder(BorderFactory.createEmptyBorder(0, 12, 6, 0));
+        body.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 0));
         body.add(content, BorderLayout.CENTER);
         body.setVisible(false);
         toggle.addActionListener(event -> {

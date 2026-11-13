@@ -134,6 +134,14 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   Prepisovanie neodstraňuje
   koniec riadka; na jeho konci sa znaky pridávajú. Označený text sa nahrádza bežne.
 - Play opakuje základné patterny nepretržite. Stop zruší aj naplánované údery.
+- Opätovné **Play** zaradí zvolený rytmus na prehratie po skončení aktuálneho
+  patternu, vrátane všetkých jeho taktov. Na tejto hranici začne nový rytmus
+  od začiatku bez pridanej pauzy; doznievajúce údery sa neprerušia.
+  Ďalšie **Play** nahradí čakajúcu voľbu a **Stop** ju zruší.
+  Ak nové sample ešte nie sú pripravené, pôvodný pattern sa opakuje až do
+  najbližšej pripravenej hranice. Chyba YAML alebo načítania ho nezastaví.
+  Prvý štart stále závisí od načítania samplov a prebudenia zvuku v prehliadači;
+  prirodzené pauzy zapísané v patterne zostávajú zachované.
 - Tempo, humanize a nezávislé posuvníky dialectu fungujú za behu. Zmena sa prejaví
   pri ďalšom plánovanom beate; už naplánovaný zvuk má krátky predstih.
 - Úpravy zdrojového YAML sa použijú pri ďalšom Play. Pred otvorením iného súboru

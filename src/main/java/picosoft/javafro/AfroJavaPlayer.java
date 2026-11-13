@@ -54,9 +54,11 @@ public class AfroJavaPlayer {
                 AppConfig config = AppConfig.load();
                 String yaml = readYaml(args);
                 RhythmPlayerPanel player = new RhythmPlayerPanel(yaml, config);
+                player.enableDraftRecovery(Path.of(System.getProperty("user.home"), ".javafro"),
+                        args.length == 1 ? Path.of(args[0]) : null);
                 JFrame frame = new JFrame("JavAfro");
                 frame.setIconImages(loadIcons());
-                frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
                 frame.setContentPane(player);
                 frame.setMinimumSize(new Dimension(760, 560));
                 frame.pack();
@@ -64,7 +66,10 @@ public class AfroJavaPlayer {
                 frame.setSize(Math.min(config.windowWidth(), screen.width - 80), Math.min(config.windowHeight(), screen.height - 100));
                 frame.setLocationRelativeTo(null);
                 frame.addWindowListener(new WindowAdapter() {
-                    public void windowClosing(WindowEvent event) { player.stopPlayback(); }
+                    public void windowDeactivated(WindowEvent event) { player.flushDraft(); }
+                    public void windowClosing(WindowEvent event) {
+                        if (player.requestClose()) { frame.dispose(); System.exit(0); }
+                    }
                 });
                 frame.setVisible(true);
             } catch (Exception exception) {

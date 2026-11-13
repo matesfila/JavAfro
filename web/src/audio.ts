@@ -8,19 +8,29 @@ import { config } from './config';
 export interface TrackMix { volume: number; muted: boolean }
 export const defaultTrackMix: TrackMix = { volume: config.defaultTrackVolume * 2, muted: false };
 
+interface PlaybackGraph {
+  gain: GainNode;
+  tracks: GainNode[];
+  sources: Map<AudioBufferSourceNode, { start: number; loopStart: number }>;
+  trackCount: number;
+  startTime: number;
+  scheduledBoundary?: number;
+  disconnected?: boolean;
+}
+
 export class AudioEngine {
   private context: AudioContext | null = null;
   private buffers = new Map<string, AudioBuffer>();
   private pending = new Map<string, Promise<void>>();
   private interval: ReturnType<typeof setInterval> | null = null;
-  private sources = new Set<AudioBufferSourceNode>();
-  private gain: GainNode | null = null;
+  private graph: PlaybackGraph | null = null;
+  private tails = new Set<PlaybackGraph>();
+  private request = 0;
+  private queued: { activate: (time: number) => void; cancel: () => void } | null = null;
   private generation = 0;
   private active = false;
-  private trackGains: GainNode[] = [];
   private mix: TrackMix[] = [];
   private masterVolume = AudioConstants.OUTPUT_GAIN * 100;
-  private trackCount = 1;
 
   setHumanizeApplianceProbability(probability: number) {
     validateHumanizeApplianceProbability(probability);
@@ -30,7 +40,9 @@ export class AudioEngine {
   setMasterVolume(volume: number) {
     if (!Number.isFinite(volume) || volume < 0 || volume > 100) throw new Error('Master hlasitosť musí byť 0–100 %.');
     this.masterVolume = volume;
-    this.gain?.gain.setTargetAtTime(volume / 100 / this.trackCount, this.context!.currentTime, .01);
+    for (const graph of [...this.tails, ...(this.graph ? [this.graph] : [])]) {
+      graph.gain.gain.setTargetAtTime(volume / 100 / graph.trackCount, this.context!.currentTime, .01);
+    }
   }
 
   setTrackMix(mix: TrackMix[]) {
@@ -38,7 +50,7 @@ export class AudioEngine {
       throw new Error('Hlasitosť tracku musí byť 0–200 %.');
     }
     this.mix = mix.map(track => ({ ...track }));
-    this.trackGains.forEach((gain, index) => {
+    this.graph?.tracks.forEach((gain, index) => {
       const track = this.mix[index] ?? defaultTrackMix;
       gain.gain.setTargetAtTime(track.muted ? 0 : track.volume / 100, this.context!.currentTime, .01);
     });
@@ -52,10 +64,22 @@ export class AudioEngine {
     validateHumanizeApplianceProbability(humanizeApplianceProbability);
   }
 
-  async start(rhythm: Rhythm): Promise<boolean> {
-    this.stop();
-    const generation = this.generation;
-    validateControls(this.controls(), rhythm.stepsPerBeat);
+  /** Invalidate a loading Play request without interrupting the currently sounding rhythm. */
+  cancelPendingStart() {
+    this.request++;
+    this.queued?.cancel();
+    this.queued = null;
+  }
+
+  async start(rhythm: Rhythm, initial: Controls = this.controls(), mix: TrackMix[] = this.mix): Promise<boolean> {
+    this.cancelPendingStart();
+    const request = this.request;
+    initial = { ...initial, dialect: [...initial.dialect] };
+    mix = mix.map(track => ({ ...track }));
+    validateControls(initial, rhythm.stepsPerBeat);
+    if (mix.some(track => !Number.isFinite(track.volume) || track.volume < 0 || track.volume > 200)) {
+      throw new Error('Hlasitosť tracku musí byť 0–200 %.');
+    }
     if (!this.context || this.context.state === 'closed') {
       this.context = new AudioContext({ latencyHint: 'interactive' });
       this.buffers.clear(); this.pending.clear();
@@ -70,25 +94,63 @@ export class AudioEngine {
     // Called directly from the Play gesture, before any file/network await (iOS).
     const resumed = context.resume();
     await Promise.all([resumed, this.load(context, rhythm)]);
-    if (generation !== this.generation) return false;
+    if (request !== this.request) return false;
     if (context.state !== 'running') throw new Error('Zvuk sa nepodarilo spustiť. Skús znova stlačiť Play.');
-    this.active = true;
-    this.gain = context.createGain();
-    this.trackCount = rhythm.tracks.length;
-    this.gain.gain.value = this.masterVolume / 100 / this.trackCount;
-    this.gain.connect(context.destination);
-    this.trackGains = rhythm.tracks.map((_, index) => {
+    if (this.active) {
+      // The look-ahead scheduler may already have queued the start of the next
+      // loop. Replace that unplayed loop rather than making the user wait another.
+      const earliest = context.currentTime + AudioConstants.MIN_SOURCE_START_DELAY_SECONDS;
+      const boundary = this.graph!.startTime > earliest ? this.graph!.startTime : this.graph!.scheduledBoundary;
+      if (boundary !== undefined && boundary > earliest) return this.activate(rhythm, initial, mix, boundary);
+      return new Promise<boolean>((resolve, reject) => {
+        this.queued = {
+          activate: time => {
+            try { resolve(this.activate(rhythm, initial, mix, time)); }
+            catch (error) { reject(error); throw error; }
+          },
+          cancel: () => resolve(false),
+        };
+      });
+    }
+    return this.activate(rhythm, initial, mix, context.currentTime + AudioConstants.MIN_SOURCE_START_DELAY_SECONDS);
+  }
+
+  private activate(rhythm: Rhythm, initial: Controls, mix: TrackMix[], handoff: number): boolean {
+    const context = this.context!;
+    const gain = context.createGain();
+    const graph: PlaybackGraph = { gain, tracks: [], sources: new Map(), trackCount: rhythm.tracks.length, startTime: handoff };
+    gain.gain.value = this.masterVolume / 100 / graph.trackCount;
+    gain.connect(context.destination);
+    graph.tracks = rhythm.tracks.map((_, index) => {
       const gain = context.createGain();
-      const track = this.mix[index] ?? defaultTrackMix;
+      const track = mix[index] ?? defaultTrackMix;
       gain.gain.value = track.muted ? 0 : track.volume / 100;
-      gain.connect(this.gain!);
+      gain.connect(graph.gain);
       return gain;
     });
-    const initial = this.controls();
-    let nextBeat = context.currentTime + AudioConstants.PLAYBACK_START_DELAY_SECONDS
-      + AudioConstants.SECONDS_PER_MINUTE * AudioConstants.DIALECT_STEP_FRACTION / (initial.bpm * rhythm.stepsPerBeat)
-      + this.humanizeMaxOffsetMs / AudioConstants.MILLISECONDS_PER_SECOND;
+    // The old scheduler supplies the exact end of its pattern on the audio clock.
+    const previous = this.graph;
+    if (this.interval !== null) clearInterval(this.interval);
+    this.interval = null;
+    const generation = ++this.generation;
+    this.graph = graph;
+    this.mix = mix;
+    this.active = true;
+    if (previous) {
+      this.tails.add(previous);
+      for (const [source, { start, loopStart }] of previous.sources) {
+        // Keep already sounding drum tails; cancel only future hits of the old pattern.
+        if (start >= handoff || loopStart >= handoff) {
+          try { source.stop(Math.min(start, handoff)); } catch { /* already ended */ }
+        }
+      }
+      if (!previous.sources.size) this.disconnectGraph(previous);
+    }
+    let nextBeat = handoff;
+    let firstTick = true;
     let step = 0;
+    let pulseOffset = 0;
+    let loopStart = handoff;
     let beat = 0;
     const tick = () => {
       try {
@@ -96,7 +158,7 @@ export class AudioEngine {
         const now = context.currentTime;
         let iterations = 0;
         while (iterations++ < AudioConstants.MAX_BEATS_PER_TICK) {
-          const controls = this.controls();
+          const controls = firstTick ? initial : this.controls();
           validateControls(controls, rhythm.stepsPerBeat);
           // Include the earliest possible negative pulse position and humanization.
           const anticipation = AudioConstants.SECONDS_PER_MINUTE * AudioConstants.DIALECT_STEP_FRACTION
@@ -106,8 +168,22 @@ export class AudioEngine {
             // A stalled/backgrounded UI must not emit a burst of overdue notes.
             nextBeat = now + anticipation + AudioConstants.STALLED_PLAYBACK_RECOVERY_SECONDS;
           }
-          const plan = planBeat(rhythm, controls, nextBeat, step, Math.random, this.humanizeMaxOffsetMs, this.humanizeApplianceProbability);
-          const scheduledBeat = beat++;
+          if (step === 0 && this.queued) {
+            const queued = this.queued;
+            this.queued = null;
+            queued.activate(nextBeat);
+            return;
+          }
+          if (step === 0) {
+            loopStart = nextBeat;
+            if (beat > 0) graph.scheduledBoundary = nextBeat;
+          }
+          // Split at pattern boundaries, preserving the musical beat phase in
+          // short meters such as 3/8. This also lets late Play replace a queued loop.
+          const pulses = Math.min(rhythm.stepsPerBeat - pulseOffset, rhythm.length - step);
+          const plan = planBeat(rhythm, controls, nextBeat, step, Math.random, this.humanizeMaxOffsetMs, this.humanizeApplianceProbability, pulses, pulseOffset);
+          const scheduledBeat = beat;
+          if (pulseOffset === 0) beat++;
           for (const hit of plan.hits) {
             const source = context.createBufferSource();
             source.buffer = this.buffers.get(hit.sample)!;
@@ -116,19 +192,27 @@ export class AudioEngine {
             volume.gain.value = hit.gain;
             source.connect(volume);
             const panner = hit.pan && typeof context.createStereoPanner === 'function' ? context.createStereoPanner() : null;
-            if (panner) { panner.pan.value = hit.pan!; volume.connect(panner); panner.connect(this.trackGains[hit.trackIndex]); }
-            else volume.connect(this.trackGains[hit.trackIndex]);
-            this.sources.add(source);
-            source.onended = () => { this.sources.delete(source); source.disconnect(); volume.disconnect(); panner?.disconnect(); };
-            source.start(Math.max(now + AudioConstants.MIN_SOURCE_START_DELAY_SECONDS, hit.time));
+            if (panner) { panner.pan.value = hit.pan!; volume.connect(panner); panner.connect(graph.tracks[hit.trackIndex]); }
+            else volume.connect(graph.tracks[hit.trackIndex]);
+            const start = Math.max(handoff, now + AudioConstants.MIN_SOURCE_START_DELAY_SECONDS, hit.time);
+            graph.sources.set(source, { start, loopStart });
+            source.onended = () => {
+              graph.sources.delete(source); source.disconnect(); volume.disconnect(); panner?.disconnect();
+              if (graph !== this.graph && !graph.sources.size) this.disconnectGraph(graph);
+            };
+            source.start(start);
           }
           // This is visual feedback only; audio never depends on this callback.
-          const delay = Math.max(0, (nextBeat - now) * AudioConstants.MILLISECONDS_PER_SECOND);
-          setTimeout(() => {
-            if (this.active && generation === this.generation) this.onBeat(scheduledBeat);
-          }, delay);
+          if (pulseOffset === 0) {
+            const delay = Math.max(0, (nextBeat - now) * AudioConstants.MILLISECONDS_PER_SECOND);
+            setTimeout(() => {
+              if (this.active && generation === this.generation) this.onBeat(scheduledBeat);
+            }, delay);
+          }
+          pulseOffset = (pulseOffset + pulses) % rhythm.stepsPerBeat;
           nextBeat = plan.end; step = plan.nextStep;
         }
+        firstTick = false;
       } catch (error) { this.stop(); this.onError((error as Error).message); }
     };
     tick();
@@ -154,25 +238,29 @@ export class AudioEngine {
     }));
   }
 
+  private disconnectGraph(graph: PlaybackGraph) {
+    if (graph.disconnected) return;
+    graph.disconnected = true;
+    this.tails.delete(graph);
+    graph.tracks.forEach(gain => gain.disconnect());
+    graph.gain.disconnect();
+  }
+
   stop() {
-    this.active = false; this.generation++;
+    this.active = false; this.generation++; this.cancelPendingStart();
     if (this.interval !== null) clearInterval(this.interval);
     this.interval = null;
-    const trackGains = this.trackGains;
-    this.trackGains = [];
-    setTimeout(() => trackGains.forEach(gain => gain.disconnect()), AudioConstants.STOP_GAIN_DISCONNECT_DELAY_MS);
     const now = this.context?.currentTime ?? 0;
-    if (this.gain) {
-      const gain = this.gain;
-      gain.gain.cancelScheduledValues(now);
-      gain.gain.setTargetAtTime(0, now, AudioConstants.STOP_GAIN_TIME_CONSTANT_SECONDS);
-      setTimeout(() => gain.disconnect(), AudioConstants.STOP_GAIN_DISCONNECT_DELAY_MS);
-      this.gain = null;
+    for (const graph of [...this.tails, ...(this.graph ? [this.graph] : [])]) {
+      graph.gain.gain.cancelScheduledValues(now);
+      graph.gain.gain.setTargetAtTime(0, now, AudioConstants.STOP_GAIN_TIME_CONSTANT_SECONDS);
+      setTimeout(() => this.disconnectGraph(graph), AudioConstants.STOP_GAIN_DISCONNECT_DELAY_MS);
+      for (const source of graph.sources.keys()) {
+        try { source.stop(now + AudioConstants.STOP_SOURCE_DELAY_SECONDS); } catch { /* already ended */ }
+      }
     }
-    for (const source of this.sources) {
-      try { source.stop(now + AudioConstants.STOP_SOURCE_DELAY_SECONDS); } catch { /* already ended */ }
-    }
-    this.sources.clear();
+    this.graph = null;
+    this.tails.clear();
   }
 
   dispose() { this.stop(); void this.context?.close(); this.context = null; }

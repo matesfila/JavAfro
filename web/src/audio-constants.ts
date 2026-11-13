@@ -10,7 +10,6 @@ export const DIALECT_STEP_FRACTION = 0.5;
 export const HUMANIZE_GAP_FRACTION = 0.25;
 export const OUTPUT_GAIN = 0.25;
 
-export const PLAYBACK_START_DELAY_SECONDS = 0.08;
 export const SCHEDULE_AHEAD_SECONDS = 0.120;
 export const SCHEDULER_INTERVAL_MS = 25;
 export const MAX_BEATS_PER_TICK = 64;

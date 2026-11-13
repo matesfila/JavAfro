@@ -2,9 +2,9 @@
 
 ## Najbližšie
 
-- [] Stlačenie Play by malo spustiť nový pattern absolutne plynulo, bez prerušenia
+- [x] Zobraziť meno aktuálne otvoreného súboru
 - [] Prihlasovanie/licencie ???
-- [] Doplniť do about info o pôvode samplov
+- [x] Doplniť do about info o pôvode samplov
 - [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
 - [] Tlačidlo otvoriť súbor by nemalo byť disabled počas prehrávania, otvoriť súbor a hrať súčasne je štandardná činnosť
 - [] Všetky parametre by mali byť nastaviteľné per pattern (humanize, dialect, ...)
@@ -21,8 +21,10 @@
 
 ## Hotové
 
+- [x] Swing: tempo ovládač ±1 BPM a číselný vstup, väčšie úchyty, ukladanie a obnova konceptu, ochrana dokumentu a export aj neplatného YAML
+- [x] Play zaradí nový rytmus na koniec aktuálneho patternu bez pridanej pauzy; pôvodné údery prirodzene doznejú (posluch na telefóne zostáva na overenie)
 - [x] Zlepšiť editovatelnosť zápisu na PC aj mobile
-- [x] Cyklické režimy Noty / Klávesnica / Plocha so zobrazením systémovej klávesnice a využitím uvoľnenej výšky editora
+- [x] Web: cyklické režimy Noty / Klávesnica / Plocha so zobrazením systémovej klávesnice a využitím uvoľnenej výšky editora
 - [x] Nastavenie tempa otočným ovládačom, s jemným ťahaním a tlačidlami ±1 BPM
 - [x] Zväčšiť úchyty všetkých posuvníkov na mobile a dotykovú plochu na 44 px
 - [x] Na mobile tak aby sa všetko zmestihol na plochu, bez nutnosti scrollovania

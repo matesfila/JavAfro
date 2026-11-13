@@ -110,10 +110,40 @@ public final class BeepSequencer implements Sequencer {
 
     private volatile boolean stopped;
     private SourceDataLine activeLine;
+    private PendingRhythm pendingRhythm;
+
+    private record PendingRhythm(List<BeepTrack> tracks, PlaybackSettings settings,
+                                 int steps, Dialect dialect, Runnable onStarted) {}
+    private record Transition(long position, Runnable onStarted) {}
+
+    /** Prepare a replacement without closing the audio device or changing the running controls. */
+    public boolean queueRhythm(Rhythm rhythm, PlaybackSettings settings, Runnable onStarted) {
+        Objects.requireNonNull(rhythm);
+        Objects.requireNonNull(settings);
+        Objects.requireNonNull(onStarted);
+        List<BeepTrack> tracks = validatedTracks(expandedTracks(rhythm));
+        Dialect dialect = settings.snapshot().dialect() == null ? rhythm.dialect() : settings.snapshot().dialect();
+        if (dialect.offsets().size() != rhythm.stepsPerBeat()) throw new IllegalArgumentException("Dialect does not match steps per beat.");
+        validateTempo(settings.snapshot().bpm(), rhythm.stepsPerBeat());
+        synchronized (this) {
+            if (stopped) return false;
+            pendingRhythm = new PendingRhythm(tracks, settings, rhythm.stepsPerBeat(), rhythm.dialect(), onStarted);
+            return true;
+        }
+    }
+
+    public synchronized void cancelQueuedRhythm() { pendingRhythm = null; }
+
+    private synchronized PendingRhythm takePendingRhythm() {
+        PendingRhythm next = pendingRhythm;
+        pendingRhythm = null;
+        return next;
+    }
 
     /** Stops this sequencer permanently and discards queued audio immediately. */
     public synchronized void stop() {
         stopped = true;
+        pendingRhythm = null;
         if (activeLine != null) {
             activeLine.stop();
             activeLine.flush();
@@ -125,7 +155,8 @@ public final class BeepSequencer implements Sequencer {
         return stopped;
     }
 
-    private record Voice(Instrument instrument, long start, long length, int track) {
+    private record Voice(Instrument instrument, long start, long length, int track,
+                         PlaybackSettings settings, int trackCount) {
         long end() {
             return start + length;
         }
@@ -191,13 +222,7 @@ public final class BeepSequencer implements Sequencer {
 
     private void play(List<? extends Track> tracks, int repetitions, PlaybackSettings settings,
                       int stepsPerBeat, Dialect dialect) throws LineUnavailableException {
-        if (tracks == null || tracks.isEmpty() || tracks.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException("At least one non-null track is required; tracks must not contain null.");
-        }
-        List<BeepTrack> validatedTracks = tracks.stream()
-                .map(track -> new BeepTrack(track.pattern(), track.instrument()))
-                .map(track -> new BeepTrack(track.pattern().replace("|", ""), track.instrument()))
-                .toList();
+        List<BeepTrack> validatedTracks = validatedTracks(tracks);
         Dialect activeDialect = settings.snapshot().dialect() == null ? dialect : settings.snapshot().dialect();
         if (activeDialect.offsets().size() != stepsPerBeat) throw new IllegalArgumentException("Dialect does not match steps per beat.");
         double shortestGap = activeDialect.minimumGap();
@@ -206,46 +231,50 @@ public final class BeepSequencer implements Sequencer {
 
         // A fixed lookbehind also accommodates a sudden increase in humanization or decrease in tempo.
         long humanizeLimit = Math.round(AudioConstants.SAMPLE_RATE * ((double) humanizeMaxOffsetMs / AudioConstants.MILLISECONDS_PER_SECOND));
-        // Reserve early pulse positions even when live tempo is reduced to the UI's minimum.
-        long lookbehind = humanizeLimit + (long) Math.ceil(AudioConstants.SAMPLE_RATE
-                * AudioConstants.SECONDS_PER_MINUTE * AudioConstants.DIALECT_STEP_FRACTION
-                / (Math.min(LOOKBEHIND_MINIMUM_TEMPO_BPM, settings.snapshot().bpm()) * (long) stepsPerBeat));
+        long lookbehind = lookbehind(settings, stepsPerBeat, humanizeLimit);
         AudioFormat format = AudioConstants.audioFormat();
-        if (stopped) {
-            return;
-        }
+        if (stopped) return;
         try (SourceDataLine line = lineFactory.create(format)) {
-            // About 46 ms queued audio, so live controls remain responsive.
             line.open(format, AudioConstants.OUTPUT_LINE_BUFFER_SAMPLES * format.getFrameSize());
             synchronized (this) {
-                if (stopped) {
-                    return;
-                }
+                if (stopped) return;
                 activeLine = line;
                 line.start();
             }
 
             byte[] buffer = new byte[AudioConstants.SAMPLES_PER_BUFFER * AudioConstants.BYTES_PER_SAMPLE];
             List<Voice> voices = new ArrayList<>();
+            List<Transition> transitions = new ArrayList<>();
             long position = 0;
             long renderedPosition = 0;
+            long rhythmStart = 0;
             double remainder = 0;
             int repeat = 0;
             int dialectStep = 0;
             while (!stopped && (repetitions == 0 || repeat < repetitions)) {
+                PendingRhythm next = repetitions == 0 ? takePendingRhythm() : null;
+                if (next != null) {
+                    validatedTracks = next.tracks();
+                    settings = next.settings();
+                    stepsPerBeat = next.steps();
+                    dialect = next.dialect();
+                    activeDialect = settings.snapshot().dialect() == null ? dialect : settings.snapshot().dialect();
+                    shortestGap = activeDialect.minimumGap();
+                    patternLength = validatedTracks.stream().mapToInt(track -> track.pattern().length()).max().orElseThrow();
+                    dialectStep = 0;
+                    rhythmStart = position;
+                    lookbehind = Math.max(lookbehind, lookbehind(settings, stepsPerBeat, humanizeLimit));
+                    transitions.add(new Transition(position, next.onStarted()));
+                }
                 for (int pulse = 0; pulse < patternLength; pulse++) {
-                    if (stopped) {
-                        return;
-                    }
+                    if (stopped) return;
                     PlaybackSettings.Values controls = settings.snapshot();
-                    // Apply the new pulse positions together at the next beat.
                     if (dialectStep == 0) {
                         activeDialect = controls.dialect() == null ? dialect : controls.dialect();
                         if (activeDialect.offsets().size() != stepsPerBeat) throw new IllegalArgumentException("Dialect does not match steps per beat.");
                         shortestGap = activeDialect.minimumGap();
                     }
                     validateTempo(controls.bpm(), stepsPerBeat);
-                    // Fractional samples remain meaningful even when the tempo changes.
                     double straightSamples = AudioConstants.SAMPLE_RATE * AudioConstants.SECONDS_PER_MINUTE / (controls.bpm() * (long) stepsPerBeat);
                     long dialectOffset = Math.round(straightSamples * activeDialect.offsets().get(dialectStep) * AudioConstants.DIALECT_STEP_FRACTION);
                     double exactSamples = straightSamples + remainder;
@@ -263,37 +292,49 @@ public final class BeepSequencer implements Sequencer {
                             int noteHumanize = noteHumanize(controls.humanize(), settings.humanizeApplianceProbability(),
                                     () -> ThreadLocalRandom.current().nextDouble());
                             Instrument voice = track.instrument().voice(note, noteHumanize);
-                            if (voice == null) continue; // Probability notes may intentionally skip a hit.
+                            if (voice == null) continue;
                             long length = voice.lengthSamples(pulseSamples);
                             if (length > 0) {
-                                long start = humanizedStart(Math.max(0, position + dialectOffset), noteHumanize == 0 ? 0 : maxOffset);
-                                voices.add(new Voice(voice, Math.max(renderedPosition, start), length, trackIndex));
+                                long start = humanizedStart(Math.max(rhythmStart, position + dialectOffset), noteHumanize == 0 ? 0 : maxOffset);
+                                voices.add(new Voice(voice, Math.max(rhythmStart, Math.max(renderedPosition, start)), length, trackIndex, settings, validatedTracks.size()));
                             }
                         }
                     }
                     position += pulseSamples;
-                    // Leave room for early hits in the next pulse, including across repeats.
                     long renderUntil = Math.max(0, position - lookbehind);
-                    renderedPosition = render(line, buffer, voices, renderedPosition,
-                            renderUntil - renderedPosition, validatedTracks.size(), settings);
+                    renderedPosition = render(line, buffer, voices, renderedPosition, renderUntil - renderedPosition);
+                    while (!stopped && !transitions.isEmpty() && transitions.getFirst().position() <= renderedPosition) {
+                        transitions.removeFirst().onStarted().run();
+                    }
                 }
                 if (repetitions != 0) repeat++;
             }
 
             long tailEnd = Math.max(position, voices.stream().mapToLong(Voice::end).max().orElse(position));
-            render(line, buffer, voices, renderedPosition, tailEnd - renderedPosition, validatedTracks.size(), settings);
-            if (!stopped) {
-                line.drain();
-            }
+            render(line, buffer, voices, renderedPosition, tailEnd - renderedPosition);
+            if (!stopped) line.drain();
         } finally {
-            synchronized (this) {
-                activeLine = null;
-            }
+            synchronized (this) { activeLine = null; }
         }
     }
 
+    private long lookbehind(PlaybackSettings settings, int stepsPerBeat, long humanizeLimit) {
+        return humanizeLimit + (long) Math.ceil(AudioConstants.SAMPLE_RATE
+                * AudioConstants.SECONDS_PER_MINUTE * AudioConstants.DIALECT_STEP_FRACTION
+                / (Math.min(LOOKBEHIND_MINIMUM_TEMPO_BPM, settings.snapshot().bpm()) * (long) stepsPerBeat));
+    }
+
+    private List<BeepTrack> validatedTracks(List<? extends Track> tracks) {
+        if (tracks == null || tracks.isEmpty() || tracks.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("At least one non-null track is required; tracks must not contain null.");
+        }
+        return tracks.stream()
+                .map(track -> new BeepTrack(track.pattern(), track.instrument()))
+                .map(track -> new BeepTrack(track.pattern().replace("|", ""), track.instrument()))
+                .toList();
+    }
     /** Vyrenderuje {@code count} vzoriek od pozície {@code from}, zapíše ich do linky a vráti novú pozíciu. */
-    private long render(SourceDataLine line, byte[] buffer, List<Voice> voices, long from, long count, int trackCount, PlaybackSettings settings) {
+    private long render(SourceDataLine line, byte[] buffer, List<Voice> voices, long from, long count) {
         long position = from;
         long end = from + count;
         while (position < end) {
@@ -301,18 +342,22 @@ public final class BeepSequencer implements Sequencer {
                 return position;
             }
             int block = (int) Math.min(AudioConstants.SAMPLES_PER_BUFFER, end - position);
-            double[] gains = new double[trackCount];
-            double masterGain = settings.masterVolume() / 100.0;
-            for (int track = 0; track < trackCount; track++) gains[track] = settings.trackMix(track).gain();
+            double[] gains = new double[voices.size()];
+            for (int v = 0; v < voices.size(); v++) {
+                Voice voice = voices.get(v);
+                gains[v] = voice.settings().trackMix(voice.track()).gain()
+                        * voice.settings().masterVolume() / 100.0 / voice.trackCount();
+            }
             for (int i = 0; i < block; i++, position++) {
                 double mixed = 0;
-                for (Voice voice : voices) {
+                for (int v = 0; v < voices.size(); v++) {
+                    Voice voice = voices.get(v);
                     long index = position - voice.start();
                     if (index >= 0 && index < voice.length()) {
-                        mixed += voice.instrument().sample(index) * voice.instrument().envelope(index, voice.length()) * gains[voice.track()];
+                        mixed += voice.instrument().sample(index) * voice.instrument().envelope(index, voice.length()) * gains[v];
                     }
                 }
-                AudioConstants.putSample(buffer, i, mixed / trackCount, masterGain);
+                AudioConstants.putSample(buffer, i, mixed, 1);
             }
             try {
                 line.write(buffer, 0, block * AudioConstants.BYTES_PER_SAMPLE);
