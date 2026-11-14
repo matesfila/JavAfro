@@ -41,7 +41,8 @@ export function App() {
   const [draftRestored, setDraftRestored] = useState(false);
   const [replacement, setReplacement] = useState<{ text: string; name: string; fold: boolean; draft?: Draft } | null>(null);
   const replacementDialog = useRef<HTMLDialogElement>(null);
-  const [rhythm, setRhythm] = useState<Rhythm | null>(null);
+  const [parsedDocument, setParsedDocument] = useState<{ source: string; rhythm: Rhythm | null }>({ source: '', rhythm: null });
+  const { rhythm } = parsedDocument;
   const [playingRhythm, setPlayingRhythm] = useState<Rhythm | null>(null);
   const [validation, setValidation] = useState('');
   const [message, setMessage] = useState('');
@@ -107,7 +108,7 @@ export function App() {
     try { parsed = parseRhythmAtCaret(text, offset); } catch { /* retain validation */ }
     setMixes({});
     caretRef.current = offset; setCaretOffset(offset);
-    setSource(document.source); setFileName(filename); setRhythm(parsed); setValidation(document.validation);
+    setSource(document.source); setFileName(filename); setParsedDocument({ source: text, rhythm: parsed }); setValidation(document.validation);
     // A different file starts a fresh editor session, including selection and undo history.
     setEditorDocument(previous => ({ revision: previous.revision + 1, foldRhythms }));
     syncedSource.current = text;
@@ -188,21 +189,26 @@ export function App() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (!source.trim()) { setRhythm(null); setValidation(''); return; }
-      try { setRhythm(parseRhythmAtCaret(source, caretOffset)); setValidation(''); }
-      catch (error) { setRhythm(null); setValidation((error as Error).message); }
+      try {
+        const parsed = source.trim() ? parseRhythmAtCaret(source, caretOffset) : null;
+        setParsedDocument({ source, rhythm: parsed });
+        setValidation('');
+      } catch (error) {
+        setParsedDocument({ source, rhythm: null });
+        setValidation((error as Error).message);
+      }
     }, 150);
     return () => clearTimeout(timeout);
   }, [source, caretOffset]);
 
   useEffect(() => {
-    if (rhythm && !busy && (syncedSource.current !== source || syncedRhythmId.current !== rhythm.id)) {
+    if (rhythm && parsedDocument.source === source && !busy && (syncedSource.current !== source || syncedRhythmId.current !== rhythm.id)) {
       updateControls({ bpm: rhythm.bpm, humanize: controlsRef.current.humanize, dialect: [...rhythm.dialect] });
       syncedSource.current = source;
       syncedRhythmId.current = rhythm.id;
       setMessage('');
     }
-  }, [rhythm, source, busy]);
+  }, [rhythm, parsedDocument.source, source, busy]);
 
   async function openFile(file: File) {
     if (busy) { setMessage('Pred otvorením iného rytmu stlač Stop.'); return; }
@@ -379,7 +385,7 @@ export function App() {
           </SettingsPanel>
           <SettingsPanel title="Humanize" compact={viewport.compact} className="humanize-options">
           <div className="humanize-controls">
-          <div className="control-group"><div className="control-heading"><label htmlFor="humanize">Intenzita</label><output htmlFor="humanize">{controls.humanize}<small>%</small></output></div>
+          <div className="control-group"><div className="control-heading"><label htmlFor="humanize">Miera odchýlky</label><output htmlFor="humanize">{controls.humanize}<small>%</small></output></div>
             <input id="humanize" type="range" min="0" max="100" value={controls.humanize} onChange={event => updateControls({ ...controls, humanize: Number(event.target.value) })} />
           </div>
           <div className="control-group"><div className="control-heading"><label htmlFor="humanize-probability">Pravdepodobnosť</label><output htmlFor="humanize-probability">{humanizeProbability}<small>%</small></output></div>
