@@ -5,8 +5,6 @@
 ### Otvorené úlohy
 - [] Zjednodusit menu Subor: odstranit text, button na otvorenie predch suboru, pred about pridat separator
 - [] Bug: Skladba sa ulozila aj s dialektom aj ked v nej predtym nebol, navyse v multiriadkovó formate
-- [] Bug: nefungoval tempo potenciometer
-- [] Verzionovanie, changelist
 - [] Prihlasovanie/licencie ???
 - [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
 - [] Tlačidlo otvoriť súbor by nemalo byť disabled počas prehrávania, otvoriť súbor a hrať súčasne je štandardná činnosť
@@ -19,7 +17,11 @@
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
   - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
 
-### v0.5.2
+
+### v0.5.3 (next release)
+- [x] Bug: nefungoval tempo potenciometer
+
+### v0.5.2 (current)
 - [x] Preusporiadat klavesnicu: šipky, noty zobraziť iba pre daný nástroj, nad šipkou vľavo bude bodka, vpravo backspace
 - [x] Pridať button na aktualizáciu aplikácie
 - [x] Verzionovanie, changelist
