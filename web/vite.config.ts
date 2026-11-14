@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { parseConfig } from './src/config-schema';
-import { applicationObfuscator } from './build/obfuscate';
+import { applicationObfuscator } from './scripts/obfuscate';
 import { nextBuildNumber, readBuildNumber } from './scripts/build-version';
 
 parseConfig(readFileSync(new URL('../javafro.yaml', import.meta.url), 'utf8'));
@@ -25,7 +26,8 @@ export default defineConfig(({ mode, command, isPreview }) => {
   base: './',
   define: { __APP_INFO__: JSON.stringify(appInfo) },
   plugins: [react(), ...(mode === 'obfuscated' ? [applicationObfuscator()] : [])],
-  server: { port: 5173, strictPort: true },
+  server: { port: 5173, strictPort: true,
+    ...(mode === 'test' && { fs: { allow: [fileURLToPath(new URL('../', import.meta.url))] } }) },
   build: {
     sourcemap: false,
     rollupOptions: {

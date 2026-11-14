@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { fileURLToPath } from 'node:url';
-import { obfuscateApplicationChunk } from '../build/obfuscate';
+import { obfuscateApplicationChunk } from '../scripts/obfuscate';
 
 const applicationModule = fileURLToPath(new URL('./sounds.ts', import.meta.url));
 

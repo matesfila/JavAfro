@@ -1,9 +1,16 @@
+export interface RhythmControls { rhythmId: string; bpm: number; dialect: number[] }
+
 export interface Draft {
   source: string;
   fileName: string;
   caretOffset: number;
   savedSource: string;
-  controls?: { rhythmId: string; bpm: number; dialect: number[] };
+  controls?: RhythmControls | RhythmControls[]; // Older drafts stored one rhythm's controls.
+}
+
+export function pendingControls(draft: Draft | null): RhythmControls[] {
+  const controls = draft?.controls;
+  return controls === undefined ? [] : Array.isArray(controls) ? controls : [controls];
 }
 
 interface DraftHistory { version: 1; current: Draft; previous?: Draft }
@@ -15,10 +22,10 @@ function validDraft(value: unknown): value is Draft {
   return typeof draft.source === 'string' && typeof draft.fileName === 'string'
     && typeof draft.savedSource === 'string' && Number.isInteger(draft.caretOffset)
     && draft.caretOffset >= 0 && draft.caretOffset <= draft.source.length
-    && (draft.controls === undefined || (typeof draft.controls?.rhythmId === 'string'
-      && Number.isInteger(draft.controls.bpm) && draft.controls.bpm > 0
-      && Array.isArray(draft.controls.dialect) && draft.controls.dialect.length > 0
-      && draft.controls.dialect.every(value => Number.isFinite(value) && Math.abs(value) <= 1)));
+    && pendingControls(draft).every(control => typeof control?.rhythmId === 'string'
+      && Number.isInteger(control.bpm) && control.bpm > 0
+      && Array.isArray(control.dialect) && control.dialect.length > 0
+      && control.dialect.every(value => Number.isFinite(value) && Math.abs(value) <= 1));
 }
 
 /** One atomic record preserves the previous document as well as an invalid/empty current draft.
@@ -58,5 +65,5 @@ export class DraftStore {
 }
 
 export function hasUnsavedChanges(draft: Draft) {
-  return draft.source !== draft.savedSource || draft.controls !== undefined;
+  return draft.source !== draft.savedSource || pendingControls(draft).length > 0;
 }

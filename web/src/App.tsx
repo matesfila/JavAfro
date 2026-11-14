@@ -8,7 +8,7 @@ import { appInfo } from './app-info';
 import { AudioEngine, defaultTrackMix, type TrackMix } from './audio';
 import { parseRhythmAtCaret, type Rhythm } from './rhythm';
 import { readRhythmDocument } from './rhythm-document';
-import { DraftStore, hasUnsavedChanges, type Draft } from './draft';
+import { DraftStore, hasUnsavedChanges, pendingControls, type Draft } from './draft';
 import { exportRhythm } from './rhythm-export';
 import blankRhythmSource from '../../rhythms/blankRhythm.yaml?raw';
 import { type Controls } from './timing';
@@ -89,14 +89,26 @@ export function App() {
 
   function editSource(text: string) {
     setSource(text);
-    if (activeDraft.current) persistDraft({ ...activeDraft.current, source: text,
+    const draft = activeDraft.current ?? { fileName, savedSource: '' };
+    persistDraft({ ...draft, source: text,
       caretOffset: Math.min(caretRef.current, text.length), controls: undefined });
   }
 
   function editControls(next: Controls) {
     updateControls(next);
-    if (activeDraft.current && displayedRhythm) persistDraft({ ...activeDraft.current,
-      controls: { rhythmId: displayedRhythm.id, bpm: next.bpm, dialect: [...next.dialect] } });
+    const draft = activeDraft.current;
+    if (!draft || !displayedRhythm || draft.source !== syncedSource.current) return;
+    const edits = pendingControls(draft).filter(edit => edit.rhythmId !== displayedRhythm.id);
+    if (busy || next.bpm !== displayedRhythm.bpm || next.dialect.some((n, i) => n !== displayedRhythm.dialect[i])) {
+      edits.push({ rhythmId: displayedRhythm.id, bpm: next.bpm, dialect: [...next.dialect] });
+    }
+    persistDraft({ ...draft, controls: edits });
+  }
+
+  function controlsFor(rhythm: Rhythm, draft: Draft | null): Controls {
+    const edit = pendingControls(draft).find(edit => edit.rhythmId === rhythm.id);
+    return { bpm: edit?.bpm ?? rhythm.bpm, humanize: controlsRef.current.humanize,
+      dialect: [...(edit?.dialect ?? rhythm.dialect)] };
   }
 
   function applySource(text: string, filename: string, foldRhythms = true, restored?: Draft) {
@@ -112,10 +124,7 @@ export function App() {
     setEditorDocument(previous => ({ revision: previous.revision + 1, foldRhythms }));
     syncedSource.current = text;
     syncedRhythmId.current = parsed?.id ?? '';
-    const restoredControls = restored?.controls;
-    if (parsed) updateControls({ bpm: restoredControls?.rhythmId === parsed.id ? restoredControls.bpm : parsed.bpm,
-      humanize: controlsRef.current.humanize,
-      dialect: restoredControls?.rhythmId === parsed.id ? [...restoredControls.dialect] : [...parsed.dialect] });
+    if (parsed) updateControls(controlsFor(parsed, restored ?? null));
     persistDraft(restored ?? { source: text, fileName: filename, caretOffset: offset, savedSource: text }, !!activeDraft.current);
     setMessage('');
   }
@@ -201,7 +210,7 @@ export function App() {
 
   useEffect(() => {
     if (rhythm && parsedDocument.source === source && !busy && (syncedSource.current !== source || syncedRhythmId.current !== rhythm.id)) {
-      updateControls({ bpm: rhythm.bpm, humanize: controlsRef.current.humanize, dialect: [...rhythm.dialect] });
+      updateControls(controlsFor(rhythm, activeDraft.current));
       syncedSource.current = source;
       syncedRhythmId.current = rhythm.id;
       setMessage('');
@@ -228,7 +237,7 @@ export function App() {
     try {
       const parsed = parseRhythmAtCaret(source, caretRef.current);
       const nextControls = syncedSource.current !== source || syncedRhythmId.current !== parsed.id
-        ? { bpm: parsed.bpm, humanize: controlsRef.current.humanize, dialect: [...parsed.dialect] }
+        ? controlsFor(parsed, activeDraft.current)
         : controlsRef.current;
       setStarting(true); setMessage(isPlaying ? `Po skončení patternu: ${parsed.name}` : '');
       const started = await engine.current!.start(parsed, nextControls, mixes[mixerKey(parsed)] ?? []);
@@ -254,16 +263,15 @@ export function App() {
 
   function save() {
     try {
-      let selectedId: string | undefined;
-      try { selectedId = parseRhythmAtCaret(source, caretRef.current).id; } catch { /* raw export remains available */ }
-      const useControls = busy ? source === playingSource.current
-        : syncedSource.current === source && syncedRhythmId.current === selectedId;
-      const exported = exportRhythm(source, caretRef.current, useControls ? controlsRef.current : undefined,
-        busy ? playingRhythm?.id : undefined);
+      let exported = source;
+      for (const edit of pendingControls(activeDraft.current)) {
+        exported = exportRhythm(exported, 0, edit, edit.rhythmId);
+      }
       const url = URL.createObjectURL(new Blob([exported], { type: 'application/yaml;charset=utf-8' }));
       const link = documentNode(url, fileName); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       setSource(exported); syncedSource.current = exported;
+      if (playingSource.current === source) playingSource.current = exported;
       if (activeDraft.current) persistDraft({ ...activeDraft.current, source: exported, savedSource: exported,
         caretOffset: Math.min(caretRef.current, exported.length), controls: undefined });
       setMessage('Súbor je pripravený na uloženie.');

@@ -3,6 +3,9 @@
 
 
 ### Otvorené úlohy
+- [] Dá sa JavAfro zverejniť cez github pages ??
+- [] Prepnutie do režimu systémovej klávesnice musí hneď zobraziť klávesnicu, nie až vtedy keď editor znovuzíska focus
+- [] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
 - [] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...
 - [] Podpora MIDI
 - [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
@@ -20,12 +23,14 @@
   - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
 
 
-### v0.5.3 (next release)
+
+
+### v0.5.3 (current)
 - [x] Bug: Skladba sa ulozila aj s dialektom aj ked v nej predtym nebol, navyse v multiriadkovó formate
 - [x] Bug: nefungoval tempo potenciometer
 - [x] Zjednodusit menu Subor: odstranit text, button na otvorenie predch suboru, pred about pridat separator
 
-### v0.5.2 (current)
+### v0.5.2
 - [x] Preusporiadat klavesnicu: šipky, noty zobraziť iba pre daný nástroj, nad šipkou vľavo bude bodka, vpravo backspace
 - [x] Pridať button na aktualizáciu aplikácie
 - [x] Verzionovanie, changelist

@@ -61,7 +61,7 @@ npm run build:obfuscated
 Výstup je v rovnakom `dist/`. Lokálny `javascript-obfuscator` obfuskuje aplikačné
 JS moduly po minifikácii; knižnice React, CodeMirror a YAML zostávajú minifikované.
 Následne sa vypočítajú finálne názvy súborov a vygeneruje offline cache.
-Source mapy sa nevytvárajú. Nastavenia sú v `build/obfuscate.ts`; náročné
+Source mapy sa nevytvárajú. Nastavenia sú v `scripts/obfuscate.ts`; náročné
 transformácie toku programu a ochrany proti debuggeru sú vypnuté kvôli mobilom.
 Obfuskácia sťažuje čítanie JavaScriptu; YAML rytmy a WAV sample zostávajú dostupné.
 
