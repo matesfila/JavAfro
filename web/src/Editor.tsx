@@ -55,15 +55,27 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
     setInputMode(nextMode) {
       const editor = view.current;
       if (!editor) return;
-      // iOS needs the new inputmode and focus during the original tap,
-      // before React commits or runs effects.
-      const focused = document.activeElement;
-      if (focused instanceof HTMLElement) focused.blur();
       editor.dispatch({ effects: inputAttributes.current.reconfigure(EditorView.contentAttributes.of({ inputmode: nextMode === 'keyboard' ? 'text' : 'none' })) });
-      if (nextMode !== 'surface') {
-        editor.focus();
-        editor.dispatch({ scrollIntoView: true });
+      if (nextMode === 'keyboard' && editor.state.facet(EditorView.editable)) {
+        // Start a native text-input session inside the tap, then hand focus back
+        // to CodeMirror. Refocusing the same contenteditable can keep the IME hidden.
+        const input = document.createElement('input');
+        input.tabIndex = -1;
+        input.inputMode = 'text';
+        input.setAttribute('aria-label', 'Klávesnica');
+        input.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;font-size:16px';
+        editor.dom.before(input);
+        try {
+          input.focus({ preventScroll: true });
+          editor.focus();
+        } finally {
+          input.remove();
+        }
+      } else {
+        editor.contentDOM.blur();
+        if (nextMode === 'notes') editor.focus();
       }
+      if (nextMode !== 'surface') editor.dispatch({ scrollIntoView: true });
     },
   }), []);
   useEffect(() => {

@@ -38,6 +38,33 @@ function click(label: string) {
   return act(() => button.click());
 }
 
+it('starts native text input on the mode tap and returns focus to the existing selection', async () => {
+  vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const view = editor();
+  await act(() => {
+    view.focus();
+    view.dispatch({ selection: { anchor: 2, head: 5 } });
+  });
+  const focused: Element[] = [];
+  const recordFocus = (event: FocusEvent) => focused.push(event.target as Element);
+  document.addEventListener('focusin', recordFocus);
+  try {
+    await click('Noty');
+  } finally {
+    document.removeEventListener('focusin', recordFocus);
+  }
+  expect(focused[0]).toBeInstanceOf(HTMLInputElement);
+  expect(focused[0].isConnected).toBe(false);
+  expect(document.activeElement).toBe(view.contentDOM);
+  expect(view.contentDOM.getAttribute('inputmode')).toBe('text');
+  expect(view.state.selection.main).toMatchObject({ anchor: 2, head: 5 });
+  await click('Klávesnica');
+  expect(view.contentDOM.getAttribute('inputmode')).toBe('none');
+  expect(document.activeElement).not.toBe(view.contentDOM);
+});
+
 it('guards typed work after a failed initial load and restores it on reload', async () => {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
   await act(() => root.render(createElement(App)));
