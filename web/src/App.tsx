@@ -35,6 +35,7 @@ export function App() {
   const [fileName, setFileName] = useState('rytmus.yaml');
   const draftStore = useRef<DraftStore | null>(null);
   const activeDraft = useRef<Draft | null>(null);
+  const updateReload = useRef(false);
   const [draftError, setDraftError] = useState('');
   const [hasPreviousDraft, setHasPreviousDraft] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
@@ -171,7 +172,7 @@ export function App() {
     const flush = () => { if (activeDraft.current) persistDraft(activeDraft.current); };
     const hide = () => { if (document.hidden) flush(); };
     const leave = (event: BeforeUnloadEvent) => {
-      if (activeDraft.current && hasUnsavedChanges(activeDraft.current)) {
+      if (!updateReload.current && activeDraft.current && hasUnsavedChanges(activeDraft.current)) {
         event.preventDefault(); event.returnValue = '';
       }
     };
@@ -307,7 +308,13 @@ export function App() {
           {isLoading && <p role="status">Načítavam…</p>}
           {message && <p role="status">{message}</p>}
           <p role="status">{draftError || (draftRestored ? 'Rozpracovaný dokument bol obnovený z tohto prehliadača.' : 'Koncept sa automaticky ukladá v tomto prehliadači.')}</p>
-          <div className="file-about"><AboutDialog /></div>
+          <div className="file-about">
+            <AboutDialog updateDisabled={busy || isLoading} beforeUpdateReload={reloading => {
+              if (!draftStore.current || !activeDraft.current) throw new Error('Pred aktualizáciou ulož rytmus cez Súbor → Uložiť. Úložisko konceptov nie je dostupné.');
+              draftStore.current.save(activeDraft.current);
+              updateReload.current = reloading;
+            }} />
+          </div>
         </SettingsPanel>
       </div>
     </header>

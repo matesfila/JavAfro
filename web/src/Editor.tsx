@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useRef, type Ref } from 'react';
+import { useEffect, useImperativeHandle, useMemo, useRef, type Ref } from 'react';
 import { EditorView } from 'codemirror';
 import { Compartment, EditorState } from '@codemirror/state';
 import { editorSetup } from './editor-setup';
@@ -8,6 +8,7 @@ import { rhythmFoldEffects } from './rhythm-folding';
 import { overwriteExtension, overwriteState, setOverwrite } from './overwrite';
 import { NotePad } from './NotePad';
 import { insertNote, noteCommands, type NoteCommand } from './note-input';
+import { instrumentAtCaret } from './note-context';
 
 const theme = EditorView.theme({
   '&': { height: '100%', backgroundColor: '#fffcf8', color: '#443429', fontSize: `${config.editorFontSize}px` },
@@ -49,6 +50,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   const change = useRef(onChange); change.current = onChange;
   const caretChange = useRef(onCaretChange); caretChange.current = onCaretChange;
   const modeChange = useRef(onOverwriteChange); modeChange.current = onOverwriteChange;
+  const activeInstrument = useMemo(() => instrumentAtCaret(value, caretOffset), [value, caretOffset]);
   useImperativeHandle(ref, () => ({
     setInputMode(nextMode) {
       const editor = view.current;
@@ -119,7 +121,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   }
   return <div className="editor-surface">
     <div className="editor-host" ref={host} />
-    {inputMode === 'notes' && <NotePad insert={text => {
+    {inputMode === 'notes' && <NotePad instrument={activeInstrument} insert={text => {
       if (view.current && !readOnly) { insertNote(view.current, text); view.current.focus(); }
     }} command={runCommand} />}
   </div>;

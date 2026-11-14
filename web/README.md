@@ -43,6 +43,15 @@ Produkčným výstupom je `dist/`: statické HTML, JS, CSS, fonty, YAML a zvuky.
 Na neskoršie nasadenie stačí statický hosting s HTTPS. `base: './'` umožňuje
 aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 
+Verzia webovej aplikácie má tvar `0.5.2.1`: prvé tri čísla pochádzajú z `pom.xml`,
+štvrté je počítadlo v `web/build-number.json`. Každé produkčné zostavenie
+(`npm run build`, `build:obfuscated` aj zostavenie cez `phone`) ho zvýši raz.
+Vývoj, testy a `preview` počítadlo nemenia. Aktuálna verzia sa vypíše pri builde
+a zobrazí v **O aplikácii**. Počítadlo zostáva zachované aj po vymazaní `dist/`;
+pri prenose zdrojov alebo commite zahrň aj aktualizovaný `build-number.json`.
+Číslo sa rezervuje pri spustení Vite buildu; pri jeho zlyhaní sa už nevracia späť.
+Opätovné nahratie rovnakého `dist/` na Netlify číslo nemení. Java verzia zostáva trojčíselná.
+
 ### Zostavenie s obfuskáciou
 
 ```powershell
@@ -118,8 +127,11 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Vlastný YAML otvoríš tlačidlom alebo presunutím jedného súboru do okna.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.
 - Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť.
-- Na telefóne sa editor otvorí v režime **Noty** s panelom
-  úderov `B`, `s`, `t`, `D`, `S`, `K`, `x`, `i`, pauzy `.`, štyroch šípok a Backspace.
+- Na telefóne sa editor otvorí v režime **Noty**. Panel ponúka všetky povolené
+  noty nástroja na aktuálnom riadku kurzora vrátane akcentov a pravdepodobnostných
+  úderov; funguje aj v jeho `base` a `variations`. Mimo tracku sa noty skryjú.
+  Vpravo dole sú šípky v tvare obráteného T (`← ↓ →`, nad `↓` je `↑`), nad `←`
+  je pauza `.`, nad `→` oddeľovač taktov `|` a vpravo hore Backspace.
   Tlačidlo cyklicky prepína **Noty → Klávesnica → Plocha → Noty** a zobrazuje
   aktuálny režim. **Klávesnica** priamo pri kliknutí zameria editor a vyvolá
   systémovú klávesnicu na úpravu ostatného YAML. **Plocha** skryje panel nôt aj
@@ -258,10 +270,20 @@ Offline dáta sa pripravujú automaticky na pozadí bez stavového panelu alebo 
 Neúplná nová verzia nenahradí funkčnú starú verziu.
 Úpravy vlastného YAML si naďalej ulož tlačidlom **Uložiť** do Súborov.
 
-Na aktualizáciu spusti na PC znovu `npm run phone` a otvor aplikáciu na telefóne
-pri zapnutom PC. Nová verzia sa stiahne na pozadí.
-Prehrávanie sa nepreruší; nová verzia sa použije po zatvorení všetkých okien
-JavAfro (vrátane Safari tabu) a opätovnom otvorení. Pri zmene IP treba na nové
+Na Netlify použi **Súbor → O aplikácii → Aktualizovať aplikáciu** vedľa čísla verzie. Tlačidlo skontroluje server,
+počká na úplné stiahnutie novej verzie a obnoví aplikáciu. Ak už je verzia
+pripravená, zobrazí **Nainštalovať novú verziu**. Pred aktualizáciou zastav
+prehrávanie. Rozpracovaný dokument, kurzor a uložené nastavenia tempa/dialectu
+sa obnovia z konceptu; ak sa koncept nedá bezpečne uložiť, aplikácia sa neobnoví
+a zobrazí chybu. Bez novej verzie sa zobrazí potvrdenie, bez pripojenia chyba.
+Aktualizácia nemaže koncepty ani všetky offline dáta a neobnovuje ostatné otvorené okná.
+
+Pri lokálnom hostovaní najprv spusti na PC znovu `npm run phone` a otvor
+aplikáciu na telefóne pri zapnutom PC. Nová verzia sa sťahuje aj na pozadí.
+Bez stlačenia tlačidla sa prehrávanie nepreruší; nová verzia sa použije po
+zatvorení všetkých okien JavAfro (vrátane Safari tabu) a opätovnom otvorení.
+Staršiu inštaláciu, ktorá tlačidlo ešte nemá, takto jednorazovo obnov.
+Pri zmene IP treba na nové
 stiahnutie otvoriť novú HTTPS adresu zo servera; pôvodná offline inštalácia tým
 nezíska novú adresu automaticky.
 

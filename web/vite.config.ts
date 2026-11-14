@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
 import { parseConfig } from './src/config-schema';
 import { applicationObfuscator } from './build/obfuscate';
+import { nextBuildNumber, readBuildNumber } from './scripts/build-version';
 
 parseConfig(readFileSync(new URL('../javafro.yaml', import.meta.url), 'utf8'));
 
@@ -14,9 +15,13 @@ function pomValue(tag: string) {
   if (!value) throw new Error(`pom.xml: missing ${tag}`);
   return value.trim();
 }
-const appInfo = { version: pomValue('version'), creator: pomValue('app.creator'), assistant: pomValue('app.assistant') };
+const buildNumberFile = new URL('./build-number.json', import.meta.url);
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode, command, isPreview }) => {
+  const buildNumber = command === 'build' && !isPreview ? nextBuildNumber(buildNumberFile) : readBuildNumber(buildNumberFile);
+  const appInfo = { version: `${pomValue('version')}.${buildNumber}`, creator: pomValue('app.creator'), assistant: pomValue('app.assistant') };
+  if (command === 'build') console.log(`JavAfro: version ${appInfo.version}`);
+  return {
   base: './',
   define: { __APP_INFO__: JSON.stringify(appInfo) },
   plugins: [react(), ...(mode === 'obfuscated' ? [applicationObfuscator()] : [])],
@@ -32,4 +37,5 @@ export default defineConfig(({ mode }) => ({
     },
   },
   test: { include: ['src/**/*.test.ts'] },
-}));
+  };
+});

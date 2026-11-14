@@ -205,17 +205,30 @@ po Stop/Play. Dialect je zatiaľ spoločný pre všetky tracky.
 
 ### Zápis nôt
 
-| Track | Úder bubna | Samostatný zvonček |
+| Track | Všetky podporované noty a ich význam | Samostatný zvonček |
 | --- | --- | --- |
-| `dundun`, `dundun_freesound` | `D` alebo `d` | `x` |
-| `sangban`, `sangban_freesound` | `S` alebo `s` | `x` |
-| `kensereni`/`kenken`, `kensereni_freesound` | `K` alebo `k` | `x` |
-| `djembe`, `djembe2` | `B/b` bas, `T/t` tón, `S/s` slap | nepodporuje |
-| samostatné `*_bell` | — | `x` |
+| `dundun` | `D/d` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
+| `sangban` | `S/s` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
+| `kensereni` / `kenken` | `K/k` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
+| `djembe` | `B/b` bas; `T/t` a `o` tón; `S/s` slap; `i/I` tlmený tón; `c/C` tlmený slap; `a/A` alternatívny slap; `E/p/y` bas/tón/slap s pravdepodobnosťou 60 %; `F/q/z` bas/tón/slap s pravdepodobnosťou 12 % | nepodporuje |
+| `djembe2` | `B/b` bas; `T/t` a `o` tón; `S/s` slap; `i/I` uzavretý zvuk; `E/p/y` bas/tón/slap s pravdepodobnosťou 60 %; `F/q/z` bas/tón/slap s pravdepodobnosťou 12 % | nepodporuje |
+| `dundun_bell`, `sangban_bell`, `kensereni_bell` / `kenken_bell` | — | `x` |
 
-Písmená bubnov platia iba pre príslušný track; `D/d` nie je všeobecný úder.
-Pri basových bubnoch sú veľké a malé písmená rovnocenné. Pri djembe malé
-písmená používajú 70 % hlasitosti akcentu. `.` je pauza a `|` hranica taktu.
+Zápis `D/d` znamená dva povolené znaky `D` a `d`; veľkosť písmen je významná
+a povolené sú iba uvedené varianty. Písmená bubnov platia iba pre príslušný
+track; `D/d` nie je všeobecný úder. Pri basových bubnoch sú uvedené veľké
+a malé varianty rovnocenné. Pri `djembe` a `djembe2` majú `b/t/s` 70 %
+hlasitosti akcentov `B/T/S`; pri `djembe` to platí aj pre `c/a` voči `C/A`.
+`i` a `I` majú rovnakú hlasitosť, `o` je rovnocenné `T`. Každý úspešný úder
+`dundun`, `sangban` a `kensereni` / `kenken` pridá aj zvonec; varianty
+`*_freesound` ho k úderu automaticky nepridávajú. `x` hrá vždy iba zvonec.
+`.` je pauza a `|` hranica taktu pre všetky tracky.
+
+Úplné mapovanie samplovaných nástrojov určuje
+[`afroplayer-samples.yaml`](src/main/resources/samples/afroplayer-samples.yaml).
+Varianty `*_freesound` povoľujú iba príslušné písmeno bubna vo veľkom a malom
+tvare a `x`, podľa Java `DrumInstrument.supportsNote()` a webového `supportsNote()`
+v `web/src/sounds.ts`.
 
 Staré súbory treba previesť podľa tracku: pôvodné `x/X` bubna na `D`, `S`
 alebo `K`, pôvodný zvonček `b` na `x`; v djembe `D/d` na `B/b` a pôvodný

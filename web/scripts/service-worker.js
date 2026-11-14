@@ -70,6 +70,9 @@ self.addEventListener('message', event => {
     event.waitUntil(cacheAll().then(async () => {
       await broadcast({ type: 'OFFLINE_STATUS', ready: true });
     }).catch(async () => { await broadcast({ type: 'OFFLINE_ERROR' }); }));
+  } else if (event.data?.type === 'SKIP_WAITING') {
+    // A user explicitly requested an update; installation has cached this release.
+    event.waitUntil(self.skipWaiting());
   }
 });
 self.addEventListener('fetch', event => {

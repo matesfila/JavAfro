@@ -12,7 +12,7 @@ Ak chceš počas hrania prepnúť na iný rytmus, klikni doň a znova stlač **P
 
 - **Noty / Klávesnica / Plocha** – jedno tlačidlo, ktoré postupne prepína režimy. **Noty** zobrazí tlačidlá na zadávanie úderov a páuz. **Klávesnica** umožní bežné písanie a na telefóne otvorí klávesnicu. **Plocha** skryje klávesnice a ponechá viac miesta editoru.
 - **Prepisovanie** – keď je zapnuté, nové znaky nahrádzajú znaky pod kurzorom. Keď je vypnuté, vkladajú sa medzi existujúce znaky.
-- **Súbor** – umožňuje vytvoriť nový rytmus, otvoriť YAML súbor, uložiť ho do zariadenia alebo obnoviť predchádzajúci dokument. Nájdeš tu aj informácie o aplikácii.
+- **Súbor** – umožňuje vytvoriť nový rytmus, otvoriť YAML súbor, uložiť ho do zariadenia alebo obnoviť predchádzajúci dokument. V **O aplikácii** vedľa čísla verzie nájdeš **Aktualizovať aplikáciu**: pri pripojení na internet vyhľadá novú verziu, stiahne ju a obnoví aplikáciu so zachovaním rozpracovaného rytmu. Pred aktualizáciou zastav prehrávanie.
 
 ## Pre pokročilých
 

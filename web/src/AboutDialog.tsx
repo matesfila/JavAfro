@@ -1,7 +1,10 @@
 import { useRef } from 'react';
 import { appInfo } from './app-info';
+import { UpdateButton } from './UpdateButton';
 
-export function AboutDialog() {
+export function AboutDialog({ updateDisabled, beforeUpdateReload }: {
+  updateDisabled: boolean; beforeUpdateReload: (reloading: boolean) => void;
+}) {
   const dialog = useRef<HTMLDialogElement>(null);
 
   return <>
@@ -11,7 +14,10 @@ export function AboutDialog() {
     }}>
       <div className="about-content">
         <h2 id="about-title">JavAfro</h2>
-        <p className="about-version">Verzia {appInfo.version}</p>
+        <div className="about-release">
+          <p className="about-version">Verzia {appInfo.version}</p>
+          <UpdateButton disabled={updateDisabled} beforeReload={beforeUpdateReload} />
+        </div>
         <dl>
           <dt>Autor</dt><dd>{appInfo.creator}</dd>
           <dt>Pomocník pri vývoji</dt><dd>{appInfo.assistant}</dd>

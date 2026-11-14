@@ -1,10 +1,10 @@
 # TODO
 
-## Najbližšie
 
-- [x] Zobraziť meno aktuálne otvoreného súboru
+
+### Otvorené úlohy
+- [] Verzionovanie, changelist
 - [] Prihlasovanie/licencie ???
-- [x] Doplniť do about info o pôvode samplov
 - [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
 - [] Tlačidlo otvoriť súbor by nemalo byť disabled počas prehrávania, otvoriť súbor a hrať súčasne je štandardná činnosť
 - [] Všetky parametre by mali byť nastaviteľné per pattern (humanize, dialect, ...)
@@ -16,11 +16,16 @@
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
   - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
 
-## Neskôr
+### v0.5.2
+- [x] Preusporiadat klavesnicu: šipky, noty zobraziť iba pre daný nástroj, nad šipkou vľavo bude bodka, vpravo backspace
+- [x] Pridať button na aktualizáciu aplikácie
+- [ ] Verzionovanie, changelist
 
+### v0.5.1
+- [x] Doplniť do about info o pôvode samplov
+- [x] Zobraziť meno aktuálne otvoreného súboru
 
-## Hotové
-
+### v0.5.0
 - [x] Swing: tempo ovládač ±1 BPM a číselný vstup, väčšie úchyty, ukladanie a obnova konceptu, ochrana dokumentu a export aj neplatného YAML
 - [x] Play zaradí nový rytmus na koniec aktuálneho patternu bez pridanej pauzy; pôvodné údery prirodzene doznejú (posluch na telefóne zostáva na overenie)
 - [x] Zlepšiť editovatelnosť zápisu na PC aj mobile
@@ -29,6 +34,9 @@
 - [x] Zväčšiť úchyty všetkých posuvníkov na mobile a dotykovú plochu na 44 px
 - [x] Na mobile tak aby sa všetko zmestihol na plochu, bez nutnosti scrollovania
 - [x] Zmeniť zápis nôt: x bude zvonček, B bas na djembe, D/S/K dun/san/ken
+
+### v0.1.0
+
 - [x] Custom klávesy na písanie rytmus, zrušiť ios klávesnicu na telefóne nech sa nezobrazuje
 - [x] Web: automatické uloženie a obnova konceptu, ochrana pred nahradením, záloha predchádzajúceho dokumentu a export neplatného YAML (fyzické mobilné skúšky zostávajú otvorené)
 - [x] Aktívny riadok tmavší - teraz je dôležitý, rytmus pod ním sa prehráva
