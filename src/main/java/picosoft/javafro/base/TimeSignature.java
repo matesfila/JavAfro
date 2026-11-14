@@ -49,7 +49,7 @@ public record TimeSignature(int numerator, int denominator) {
     /** Each pipe-delimited bar may be written in half and is then played twice. */
     public String expandPattern(String pattern, int stepsPerBeat) {
         int expected = stepsPerBar(stepsPerBeat);
-        if (pattern == null || !pattern.matches("[a-zA-Z.]+(\\|[a-zA-Z.]+)*")) {
+        if (!Track.isValidPattern(pattern)) {
             throw new IllegalArgumentException("Pattern must contain non-empty bars of note letters and '.', separated by '|'.");
         }
         var bars = pattern.split("\\|", -1);

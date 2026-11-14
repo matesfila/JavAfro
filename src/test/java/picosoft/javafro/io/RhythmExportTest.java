@@ -26,7 +26,17 @@ public class RhythmExportTest {
     }
     @Test public void untouchedDocumentsKeepExactFormatting() {
         String source = "First:\n  tracks: {djembe: 'b.tt..s.'}\n";
+        assertEquals(source, RhythmExport.export(source, new DesktopDraftStore.Controls("First", 116, List.of(0., 0.)), 116));
         assertEquals(source, RhythmExport.export(source, null, 116));
         assertEquals(source, RhythmExport.export(source, new DesktopDraftStore.Controls("missing", 120, List.of(0., 0.)), 116));
+    }
+    @Test public void exportsOnlyTheControlThatChanged() {
+        String source = "First:\n  tracks: {djembe: 'b.tt..s.'}\n";
+        String tempo = RhythmExport.export(source, new DesktopDraftStore.Controls("First", 140, List.of(0., 0.)), 116);
+        assertTrue(tempo.contains("bpm: 140"));
+        assertFalse(tempo.contains("dialect:"));
+        String dialect = RhythmExport.export(source, new DesktopDraftStore.Controls("First", 116, List.of(0., -.2)), 116);
+        assertTrue(dialect.contains("dialect: [0.0, -0.2]"));
+        assertFalse(dialect.contains("bpm:"));
     }
 }

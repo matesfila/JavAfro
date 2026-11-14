@@ -15,7 +15,11 @@ public final class RhythmExport {
         if (controls == null) return source;
         try {
             var rhythms = RhythmLoader.load(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), defaultBpm);
-            if (!rhythms.containsKey(controls.rhythm()) || rhythms.get(controls.rhythm()).stepsPerBeat() != controls.dialect().size()) return source;
+            var selected = rhythms.get(controls.rhythm());
+            if (selected == null || selected.stepsPerBeat() != controls.dialect().size()) return source;
+            boolean tempoChanged = selected.bpm() != controls.bpm();
+            boolean dialectChanged = !selected.dialect().offsets().equals(controls.dialect());
+            if (!tempoChanged && !dialectChanged) return source;
             LoaderOptions loader = new LoaderOptions(); loader.setProcessComments(true); loader.setAllowDuplicateKeys(false);
             DumperOptions dumper = new DumperOptions(); dumper.setProcessComments(true);
             Yaml yaml = new Yaml(new SafeConstructor(loader), new Representer(dumper), dumper, loader);
@@ -23,9 +27,11 @@ public final class RhythmExport {
             for (NodeTuple tuple : root.getValue()) {
                 if (((ScalarNode) tuple.getKeyNode()).getValue().equals(controls.rhythm())) {
                     MappingNode definition = (MappingNode) tuple.getValueNode();
-                    put(definition, "bpm", scalar(Tag.INT, Integer.toString(controls.bpm())));
-                    List<Node> offsets = controls.dialect().stream().map(value -> (Node) scalar(Tag.FLOAT, Double.toString(value))).toList();
-                    put(definition, "dialect", new SequenceNode(Tag.SEQ, offsets, DumperOptions.FlowStyle.FLOW));
+                    if (tempoChanged) put(definition, "bpm", scalar(Tag.INT, Integer.toString(controls.bpm())));
+                    if (dialectChanged) {
+                        List<Node> offsets = controls.dialect().stream().map(value -> (Node) scalar(Tag.FLOAT, Double.toString(value))).toList();
+                        put(definition, "dialect", new SequenceNode(Tag.SEQ, offsets, DumperOptions.FlowStyle.FLOW));
+                    }
                 }
             }
             StringWriter out = new StringWriter(); yaml.serialize(root, out); return out.toString();

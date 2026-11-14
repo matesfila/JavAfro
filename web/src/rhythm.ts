@@ -6,7 +6,7 @@ export const instruments = ['dundun', 'sangban', 'kensereni', 'kenken', 'djembe'
   'dundun_bell', 'sangban_bell', 'kensereni_bell', 'kenken_bell',
   'dundun_freesound', 'sangban_freesound', 'kensereni_freesound'] as const;
 export type Instrument = typeof instruments[number];
-export interface Track { instrument: Instrument; base: string; variations: string[] }
+export interface Track { instrument: Instrument; base: string; notes: string; variations: string[] }
 export interface Rhythm {
   id: string; name: string; bpm: number; timeSignature: string;
   stepsPerBeat: number; stepsPerBar: number; dialect: number[]; tracks: Track[]; length: number;
@@ -109,9 +109,10 @@ function parseDefinition(id: string, definition: unknown, defaultBpm: number): R
           variations = track.variations.map(value => pattern(value, stepsPerBar, instrument as Instrument));
         }
       }
-      return { instrument: instrument as Instrument, base: pattern(base, stepsPerBar, instrument as Instrument), variations };
+      const expanded = pattern(base, stepsPerBar, instrument as Instrument);
+      return { instrument: instrument as Instrument, base: expanded, notes: expanded.replaceAll('|', ''), variations };
     } catch (error) { throw new Error(`${instrument}: ${(error as Error).message}`); }
   });
   return { id, name: id, bpm, timeSignature, stepsPerBeat, stepsPerBar, dialect: [...dialect], tracks,
-    length: Math.max(...tracks.map(t => t.base.replaceAll('|', '').length)) };
+    length: Math.max(...tracks.map(t => t.notes.length)) };
 }

@@ -47,6 +47,19 @@ public class RhythmLoaderTest {
     }
 
     @Test
+    public void loadsLongBaseAndVariationAndRejectsMalformedBars() {
+        String bars = "D.......|".repeat(5000) + "D.......";
+        String source = "Djole:\n  tracks:\n    dundun:\n      base: '" + bars
+                + "'\n      variations: ['" + bars + "']\n";
+        var track = load(source).tracks().getFirst();
+        assertEquals(bars, track.pattern());
+        assertEquals(bars, track.variations().getFirst());
+        for (String invalid : new String[]{"", "|D.......", "D.......||D.......", bars + "|", bars + "!"}) {
+            assertThrows(IllegalArgumentException.class, () -> load(YAML.replace("D...DD..", invalid)));
+        }
+    }
+
+    @Test
     public void rejectsInvalidDefinitions() {
         for (String invalid : new String[]{
                 YAML.replace("116", "0"), YAML.replace("116", "116.5"),

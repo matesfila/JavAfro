@@ -46,8 +46,7 @@ export function planBeat(rhythm: Rhythm, controls: Controls, beatStart: number,
     const nominal = beatStart + pulse * step;
     const shifted = Math.max(0, nominal + step * controls.dialect[pulseOffset + pulse] * AudioConstants.DIALECT_STEP_FRACTION);
     for (const [trackIndex, track] of rhythm.tracks.entries()) {
-      const pattern = track.base.replaceAll('|', '');
-      const note = pattern[position % pattern.length];
+      const note = track.notes[position % track.notes.length];
       if (note !== '.') {
         const noteHumanize = controls.humanize === 0 || humanizeApplianceProbability === 0 ? 0
           : humanizeApplianceProbability === 100 || random() < humanizeApplianceProbability / 100 ? controls.humanize : 0;

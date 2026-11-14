@@ -11,14 +11,13 @@ public record BeepTrack(String pattern, Instrument instrument, List<String> vari
     }
 
     public BeepTrack {
-        if (pattern == null || !pattern.matches("[a-zA-Z.]+(\\|[a-zA-Z.]+)*")) {
+        if (!Track.isValidPattern(pattern)) {
             throw new IllegalArgumentException("Pattern must contain non-empty bars of notes and '.', separated by '|'.");
         }
         if (instrument == null) {
             throw new IllegalArgumentException("Track instrument must not be null.");
         }
-        if (variations == null || variations.stream().anyMatch(value -> value == null
-                || !value.matches("[a-zA-Z.]+(\\|[a-zA-Z.]+)*"))) {
+        if (variations == null || !variations.stream().allMatch(Track::isValidPattern)) {
             throw new IllegalArgumentException("Variations must be non-null valid patterns.");
         }
         variations = List.copyOf(variations);
