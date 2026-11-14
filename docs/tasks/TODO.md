@@ -3,6 +3,8 @@
 
 
 ### Otvorené úlohy
+- Zjednodusit menu Subor: odstranit text, button na otvorenie predch suboru, pred about pridat separator
+- Bug: nefungoval tempo potenciometer
 - [] Verzionovanie, changelist
 - [] Prihlasovanie/licencie ???
 - [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
