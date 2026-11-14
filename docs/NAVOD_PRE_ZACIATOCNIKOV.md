@@ -16,7 +16,7 @@ Ak chceš počas hrania prepnúť na iný rytmus, klikni doň a znova stlač **P
 
 ## Pre pokročilých
 
-- **Humanize** pridáva drobné náhodné odchýlky v časovaní a hlasitosti, aby hra pôsobila prirodzenejšie. **Intenzita** určuje veľkosť odchýlok, **Pravdepodobnosť** určuje, ako často sa použijú.
+- **Humanize** pridáva drobné náhodné odchýlky v časovaní a hlasitosti, aby hra pôsobila prirodzenejšie. **Miera odchýlky** určuje veľkosť odchýlok, **Pravdepodobnosť** určuje, ako často sa použijú.
 - **Mixer** nastavuje hlasitosť jednotlivých nástrojov. **Mute** nástroj stíši, **Master** mení celkovú hlasitosť.
 - **Dialect** mení rozloženie pulzov v dobe a tým charakter rytmu. Záporná hodnota posunie pulz skôr, kladná neskôr. **Vynulovať** obnoví rovnomerné rozloženie.
 

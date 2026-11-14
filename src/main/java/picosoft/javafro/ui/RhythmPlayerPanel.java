@@ -196,7 +196,7 @@ public final class RhythmPlayerPanel extends JPanel {
         humanizeProbability.setPaintTicks(true);
         TouchSliders.install(humanize); TouchSliders.install(humanizeProbability);
         JPanel humanizeControls = new JPanel(new GridLayout(2, 1, 0, 8));
-        humanizeControls.add(sliderRow("Intenzita", humanize, " %"));
+        humanizeControls.add(sliderRow("Miera odchýlky", humanize, " %"));
         humanizeControls.add(sliderRow("Pravdepodobnosť", humanizeProbability, " %"));
         JPanel disclosures = new JPanel(new BorderLayout(0, 8));
         disclosures.add(new DisclosurePanel("Humanize", "humanizeDisclosure", humanizeControls), BorderLayout.NORTH);

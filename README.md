@@ -39,12 +39,12 @@ Konfigurácia sa automaticky neprepisuje pri posúvaní ovládacích prvkov.
 najkratšej medzery medzi pulzmi podľa dialectu. Vypnutie časových odchýlok nemení
 humanizáciu hlasitosti a ladenia djembe.
 `humanizeApplianceProbability` vyberá raz pre každú notu, či sa na ňu použije
-nastavená intenzita Humanize (čas, hlasitosť aj ladenie spolu), alebo Humanize 0.
+nastavená miera odchýlky Humanize (čas, hlasitosť aj ladenie spolu), alebo Humanize 0.
 Pri 100 sa zachová pôvodné správanie, pri 0 sa humanizácia nepoužije.
 Automatický zvonček zdieľa rozhodnutie bubna. Dialect, náhodný výber samplov
 a pravdepodobnosť zahratia noty zostávajú aktívne aj pri vynechaní humanizácie.
 Pravdepodobnosť možno meniť aj počas hrania. V desktopovej aj webovej verzii sú
-posuvníky **Intenzita** a **Pravdepodobnosť** spolu v rozbaľovacom paneli **Humanize**.
+posuvníky **Miera odchýlky** a **Pravdepodobnosť** spolu v rozbaľovacom paneli **Humanize**.
 Samostatne možno rozbaliť aj **Dialect**. Oba panely sú predvolene zbalené;
 zbalenie zachová nastavenia aj prehrávanie. Konfigurácia určuje počiatočnú hodnotu;
 zmeny posuvníka sa zachovajú pri Stop/Play aj zmene rytmu a neukladajú sa do YAML.
