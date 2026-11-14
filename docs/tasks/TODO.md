@@ -3,8 +3,10 @@
 
 
 ### Otvorené úlohy
-- [] Zjednodusit menu Subor: odstranit text, button na otvorenie predch suboru, pred about pridat separator
-- [] Bug: Skladba sa ulozila aj s dialektom aj ked v nej predtym nebol, navyse v multiriadkovó formate
+- [] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...
+- [] Podpora MIDI
+- [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
+- [] Djembe so sese ???
 - [] Prihlasovanie/licencie ???
 - [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
 - [] Tlačidlo otvoriť súbor by nemalo byť disabled počas prehrávania, otvoriť súbor a hrať súčasne je štandardná činnosť
@@ -19,7 +21,9 @@
 
 
 ### v0.5.3 (next release)
+- [x] Bug: Skladba sa ulozila aj s dialektom aj ked v nej predtym nebol, navyse v multiriadkovó formate
 - [x] Bug: nefungoval tempo potenciometer
+- [x] Zjednodusit menu Subor: odstranit text, button na otvorenie predch suboru, pred about pridat separator
 
 ### v0.5.2 (current)
 - [x] Preusporiadat klavesnicu: šipky, noty zobraziť iba pre daný nástroj, nad šipkou vľavo bude bodka, vpravo backspace

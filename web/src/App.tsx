@@ -37,9 +37,9 @@ export function App() {
   const activeDraft = useRef<Draft | null>(null);
   const updateReload = useRef(false);
   const [draftError, setDraftError] = useState('');
-  const [hasPreviousDraft, setHasPreviousDraft] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
-  const [replacement, setReplacement] = useState<{ text: string; name: string; fold: boolean; draft?: Draft } | null>(null);
+  const editorCaption = draftRestored ? 'Obnovený stav editora z tohto prehliadača' : fileName;
+  const [replacement, setReplacement] = useState<{ text: string; name: string; fold: boolean } | null>(null);
   const replacementDialog = useRef<HTMLDialogElement>(null);
   const [parsedDocument, setParsedDocument] = useState<{ source: string; rhythm: Rhythm | null }>({ source: '', rhythm: null });
   const { rhythm } = parsedDocument;
@@ -81,7 +81,6 @@ export function App() {
     try {
       if (!draftStore.current) throw new Error('Úložisko prehliadača nie je dostupné.');
       draftStore.current.save(draft, replace);
-      setHasPreviousDraft(!!draftStore.current.previous);
       setDraftError('');
     } catch (error) {
       setDraftError(`Koncept sa nepodarilo uložiť v prehliadači. Stiahni si súbor cez Súbor → Uložiť. ${(error as Error).message}`);
@@ -121,10 +120,10 @@ export function App() {
     setMessage('');
   }
 
-  function requestReplacement(text: string, name: string, fold = true, draft?: Draft) {
+  function requestReplacement(text: string, name: string, fold = true) {
     if (activeDraft.current && hasUnsavedChanges(activeDraft.current)) {
-      setReplacement({ text, name, fold, draft });
-    } else applySource(text, name, fold, draft);
+      setReplacement({ text, name, fold });
+    } else applySource(text, name, fold);
   }
 
   useEffect(() => {
@@ -160,7 +159,6 @@ export function App() {
       const draft = draftStore.current.current;
       if (draft) {
         applySource(draft.source, draft.fileName, false, draft);
-        setDraftRestored(true);
       } else void loadDefaultFile();
     } catch {
       setDraftError('Koncept sa nedá obnoviť z úložiska prehliadača. Pôvodné uložené dáta neprepisujeme. Prácu si ukladaj cez Súbor → Uložiť.');
@@ -284,10 +282,6 @@ export function App() {
     <button className="button subtle" onClick={newRhythm} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Nový rytmus z prázdnej šablóny'}><NewIcon /><span>Nový rytmus</span></button>
     <button className="button subtle" onClick={() => fileInput.current?.click()} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Otvoriť YAML súbor'}><FolderIcon /><span>Otvoriť</span></button>
     <button className="button subtle" onClick={save} disabled={isLoading}><DownloadIcon /><span>Uložiť</span></button>
-    <button className="button subtle" disabled={!hasPreviousDraft || busy || isLoading} onClick={() => {
-      const previous = draftStore.current?.previous;
-      if (previous) requestReplacement(previous.source, previous.fileName, false, previous);
-    }}>Obnoviť predchádzajúci dokument</button>
   </>;
   const modeButton = <button className="button mode-button" aria-pressed={overwrite} title="Zapnuté: prepisovanie. Vypnuté: vkladanie. (Insert)" onMouseDown={event => event.preventDefault()} onClick={() => setOverwriteMode(previous => !previous)}>Prepisovanie</button>;
   function changeInputMode(nextMode: EditorInputMode) {
@@ -313,7 +307,7 @@ export function App() {
           }}>{fileActions}</div>
           {isLoading && <p role="status">Načítavam…</p>}
           {message && <p role="status">{message}</p>}
-          <p role="status">{draftError || (draftRestored ? 'Rozpracovaný dokument bol obnovený z tohto prehliadača.' : 'Koncept sa automaticky ukladá v tomto prehliadači.')}</p>
+          <hr className="file-separator" />
           <div className="file-about">
             <AboutDialog updateDisabled={busy || isLoading} beforeUpdateReload={reloading => {
               if (!draftStore.current || !activeDraft.current) throw new Error('Pred aktualizáciou ulož rytmus cez Súbor → Uložiť. Úložisko konceptov nie je dostupné.');
@@ -336,7 +330,7 @@ export function App() {
           }} />
             {!source && !isLoading && <div className="editor-placeholder">Otvor YAML súbor.</div>}
           </div>
-          <div className="editor-file-name" title={fileName} aria-label="Otvorený súbor">{fileName}</div>
+          <div className="editor-file-name" title={editorCaption}>{editorCaption}</div>
           {editorStatus && <div className={'editor-status' + (validation ? ' invalid' : '')} role={validation ? 'alert' : 'status'}>
             {editorStatus}
           </div>}
@@ -405,14 +399,13 @@ export function App() {
       <div className="about-content">
         <h2 id="replace-title">Nahradiť rozpracovaný dokument?</h2>
         <p>Aktuálny dokument má zmeny, ktoré neboli stiahnuté do súboru.</p>
-        <p>Predchádzajúci dokument zostane dostupný cez Súbor → Obnoviť predchádzajúci dokument, ak funguje úložisko prehliadača.</p>
         <div className="file-dialog-actions">
           <button className="button subtle" autoFocus onClick={() => setReplacement(null)}>Zrušiť</button>
           <button className="button subtle" onClick={() => {
-            if (replacement && save()) { applySource(replacement.text, replacement.name, replacement.fold, replacement.draft); setReplacement(null); }
+            if (replacement && save()) { applySource(replacement.text, replacement.name, replacement.fold); setReplacement(null); }
           }}>Stiahnuť a pokračovať</button>
           <button className="button subtle" onClick={() => {
-            if (replacement) { applySource(replacement.text, replacement.name, replacement.fold, replacement.draft); setReplacement(null); }
+            if (replacement) { applySource(replacement.text, replacement.name, replacement.fold); setReplacement(null); }
           }}>Nahradiť bez stiahnutia</button>
         </div>
       </div>

@@ -43,7 +43,7 @@ Produkčným výstupom je `dist/`: statické HTML, JS, CSS, fonty, YAML a zvuky.
 Na neskoršie nasadenie stačí statický hosting s HTTPS. `base: './'` umožňuje
 aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 
-Verzia webovej aplikácie má tvar `0.5.2.1`: prvé tri čísla pochádzajú z `pom.xml`,
+Verzia webovej aplikácie má tvar `0.5.3.1`: prvé tri čísla pochádzajú z `pom.xml`,
 štvrté je počítadlo v `web/build-number.json`. Každé produkčné zostavenie
 (`npm run build`, `build:obfuscated` aj zostavenie cez `phone`) ho zvýši raz.
 Vývoj, testy a `preview` počítadlo nemenia. Aktuálna verzia sa vypíše pri builde
@@ -78,11 +78,10 @@ alebo neplatný YAML), názov súboru, polohu kurzora a rozpracované tempo/dial
 aktuálneho rytmu. Po opätovnom otvorení obnoví koncept namiesto predvolenej ukážky.
 Koncept sa neposiela na server; patrí konkrétnej adrese a prehliadaču.
 
-Pri nahradení upraveného dokumentu cez **Nový rytmus**, **Otvoriť**, presunutie
-súboru alebo obnovu zálohy sa ponúkne **Zrušiť**, **Stiahnuť a pokračovať** alebo
-**Nahradiť bez stiahnutia**. Zrušenie zachová editor aj undo. Posledný nahradený
-dokument je dostupný cez **Súbor → Obnoviť predchádzajúci dokument**; nejde o
-neobmedzenú históriu. **Uložiť** umožňuje stiahnuť aj neplatný YAML bez zmeny textu.
+Po obnovení konceptu sa pod editorom zobrazí oznam o obnovení. Pri nahradení
+upraveného dokumentu cez **Nový rytmus**, **Otvoriť** alebo presunutím súboru
+sa ponúkne **Zrušiť**, **Stiahnuť a pokračovať** alebo **Nahradiť bez stiahnutia**.
+Zrušenie zachová editor aj undo. **Uložiť** umožňuje stiahnuť aj neplatný YAML bez zmeny textu.
 Pri platnom dokumente naďalej zohľadňuje tempo a dialect vybraného rytmu.
 
 Ak ukladanie zlyhá (napríklad plné alebo blokované úložisko), zobrazí sa upozornenie.
