@@ -3,6 +3,7 @@
 
 
 ### Otvorené úlohy
+- Skladba sa ulozila aj s dialektom aj ked v nej predtym nebol, navyse v multiriadkovó formate
 - Zjednodusit menu Subor: odstranit text, button na otvorenie predch suboru, pred about pridat separator
 - Bug: nefungoval tempo potenciometer
 - [] Verzionovanie, changelist
