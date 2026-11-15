@@ -1,4 +1,4 @@
-import { isMap, parseDocument } from 'yaml';
+import { isMap, isScalar, parseDocument } from 'yaml';
 import { supportsNote } from './sounds';
 import { config } from './config';
 
@@ -75,9 +75,7 @@ export function parseRhythmEntries(source: string, defaultBpm = config.initialTe
   });
 }
 
-function parseDefinition(id: string, definition: unknown, defaultBpm: number): Rhythm {
-  const data = record(definition, id);
-  keys(data, ['bpm', 'timeSignature', 'stepsPerBeat', 'dialect', 'tracks', 'legacy'], id);
+function parseMetadata(data: Record<string, unknown>, defaultBpm: number) {
   const bpm = integer(data.bpm === undefined ? defaultBpm : data.bpm, 'BPM');
   const timeSignature = data.timeSignature === undefined ? '4/4' : text(data.timeSignature, 'Metrum');
   if (!/^[1-9][0-9]*\/[48]$/.test(timeSignature)) throw new Error('Metrum: očakáva sa napríklad 4/4 alebo 12/8.');
@@ -93,6 +91,52 @@ function parseDefinition(id: string, definition: unknown, defaultBpm: number): R
     throw new Error(`Dialect musí obsahovať ${stepsPerBeat} hodnôt medzi −1 a +1.`);
   }
   if ('legacy' in data) record(data.legacy, 'Legacy archív');
+  return { bpm, timeSignature, stepsPerBeat, stepsPerBar, dialect: [...dialect] };
+}
+
+/** Recover editor context independently of document and pattern validation. */
+export function rhythmContextAtCaret(source: string, caretOffset: number): Rhythm | null {
+  if (source.length > 3 * 1024 * 1024) return null;
+  const document = parseDocument(source, { version: '1.1', uniqueKeys: true });
+  if (!isMap(document.contents)) return null;
+  const entries = document.contents.items.filter(pair => isScalar(pair.key) && typeof pair.key.value === 'string');
+  let selected = entries[0];
+  for (const entry of entries) {
+    if ((entry.key.range?.[0] ?? 0) > caretOffset) break;
+    selected = entry;
+  }
+  if (!selected || !isScalar(selected.key)) return null;
+  const id = String(selected.key.value);
+  let data: Record<string, unknown> = {};
+  try { data = record(selected.value?.toJSON(), id); } catch { /* recover the name of an unfinished definition */ }
+  let metadata = parseMetadata({}, config.initialTempo);
+  const accepted: Record<string, unknown> = {};
+  for (const field of ['bpm', 'timeSignature', 'stepsPerBeat', 'dialect']) {
+    try {
+      const next = { ...accepted, [field]: data[field] };
+      metadata = parseMetadata(next, config.initialTempo);
+      Object.assign(accepted, next);
+    } catch { /* use valid metadata while this field is being edited */ }
+  }
+  const tracks: Track[] = [];
+  if (typeof data.tracks === 'object' && data.tracks && !Array.isArray(data.tracks)) {
+    for (const [name, definition] of Object.entries(data.tracks)) {
+      if (!instruments.includes(name as Instrument)) continue;
+      try {
+        tracks.push(...parseDefinition(id, { ...accepted, tracks: { [name]: definition } }, config.initialTempo).tracks);
+      } catch {
+        tracks.push({ instrument: name as Instrument, base: '', notes: '', variations: [] });
+      }
+    }
+  }
+  return { id, name: id, ...metadata, tracks, length: Math.max(0, ...tracks.map(track => track.notes.length)) };
+}
+
+function parseDefinition(id: string, definition: unknown, defaultBpm: number): Rhythm {
+  const data = record(definition, id);
+  keys(data, ['bpm', 'timeSignature', 'stepsPerBeat', 'dialect', 'tracks', 'legacy'], id);
+  const metadata = parseMetadata(data, defaultBpm);
+  const { stepsPerBar } = metadata;
   const rawTracks = record(data.tracks, 'Tracks');
   if (!Object.keys(rawTracks).length) throw new Error('Rytmus musí mať aspoň jeden track.');
   const tracks = Object.entries(rawTracks).map(([instrument, definition]): Track => {
@@ -113,6 +157,6 @@ function parseDefinition(id: string, definition: unknown, defaultBpm: number): R
       return { instrument: instrument as Instrument, base: expanded, notes: expanded.replaceAll('|', ''), variations };
     } catch (error) { throw new Error(`${instrument}: ${(error as Error).message}`); }
   });
-  return { id, name: id, bpm, timeSignature, stepsPerBeat, stepsPerBar, dialect: [...dialect], tracks,
+  return { id, name: id, ...metadata, tracks,
     length: Math.max(...tracks.map(t => t.notes.length)) };
 }

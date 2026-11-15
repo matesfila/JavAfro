@@ -41,6 +41,28 @@ function click(label: string) {
   return act(() => button.click());
 }
 
+it('updates rhythm context across invalid patterns and YAML syntax errors', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  for (const invalidPattern of ['"?"', '@']) {
+    const source = 'One:\n  bpm: 90\n  tracks:\n    dundun: ' + invalidPattern
+      + '\nTwo:\n  bpm: 95\n  tracks:\n    sangban: "S......."\n';
+    await act(() => editor().dispatch({
+      changes: { from: 0, to: editor().state.doc.length, insert: source },
+      selection: { anchor: source.indexOf('Two:') },
+    }));
+    await act(() => vi.advanceTimersByTimeAsync(200));
+    expect(document.querySelector('h1')?.textContent).toBe('Two');
+    expect(document.querySelector('[aria-label="Tempo"]')?.getAttribute('aria-valuenow')).toBe('95');
+    expect(document.querySelector('label[for="volume-0"]')?.textContent).toBe('sangban');
+    await act(() => editor().dispatch({ selection: { anchor: source.indexOf('dundun:') } }));
+    await act(() => vi.advanceTimersByTimeAsync(200));
+    expect(document.querySelector('h1')?.textContent).toBe('One');
+    expect(document.querySelector('[aria-label="Tempo"]')?.getAttribute('aria-valuenow')).toBe('90');
+    expect(document.querySelector('label[for="volume-0"]')?.textContent).toBe('dundun');
+  }
+});
+
 it('uses the configured tempo limits for dial accessibility and keyboard input', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));

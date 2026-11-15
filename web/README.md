@@ -82,7 +82,7 @@ Koncept sa neposiela na server; patrí konkrétnej adrese a prehliadaču.
 
 Pri nahradení upraveného dokumentu cez **Nový rytmus**, **Otvoriť**,
 **Obnoviť naposledy otvorený súbor** alebo presunutím súboru
-sa ponúkne **Zrušiť**, **Stiahnuť a pokračovať** alebo **Nahradiť bez stiahnutia**.
+sa ponúkne **Zrušiť**, **Uložiť a pokračovať** alebo **Zrušiť zmeny**.
 Zrušenie zachová editor aj undo. **Uložiť** umožňuje stiahnuť aj neplatný YAML bez zmeny textu.
 Pri platnom dokumente naďalej zohľadňuje tempo a dialect vybraného rytmu.
 

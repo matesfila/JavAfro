@@ -6,7 +6,7 @@ import { TempoControl } from './TempoControl';
 import { useViewport } from './useViewport';
 import { appInfo } from './app-info';
 import { AudioEngine, defaultTrackMix, type TrackMix } from './audio';
-import { parseRhythmAtCaret, parseRhythmEntries, type Rhythm } from './rhythm';
+import { parseRhythmAtCaret, parseRhythmEntries, rhythmContextAtCaret, type Rhythm } from './rhythm';
 import { readRhythmDocument } from './rhythm-document';
 import { DraftStore, hasUnsavedChanges, pendingControls, type Draft } from './draft';
 import { exportRhythm, writeDialect } from './rhythm-export';
@@ -123,7 +123,8 @@ export function App() {
         if (entry?.rhythm.stepsPerBeat !== dialect.length) return;
       } catch { return; }
     }
-    const target = busy ? displayedRhythm : parseRhythmAtCaret(draft.source, caretRef.current);
+    const target = busy ? displayedRhythm : rhythmContextAtCaret(draft.source, caretRef.current);
+    if (!target) return;
     if (target.id !== displayedRhythm.id) return;
     const text = writeDialect(draft.source, target.id, dialect);
     if (synced) editControls(next);
@@ -146,7 +147,7 @@ export function App() {
     const document = readRhythmDocument(text);
     const offset = restored?.caretOffset ?? 0;
     let parsed = document.rhythm;
-    try { parsed = parseRhythmAtCaret(text, offset); } catch { /* retain validation */ }
+    try { parsed = parseRhythmAtCaret(text, offset); } catch { parsed = rhythmContextAtCaret(text, offset); }
     setMixes({});
     caretRef.current = offset; setCaretOffset(offset);
     setSource(document.source); setFileName(filename); setParsedDocument({ source: text, rhythm: parsed }); setValidation(document.validation);
@@ -239,7 +240,7 @@ export function App() {
         setParsedDocument({ source, rhythm: parsed });
         setValidation('');
       } catch (error) {
-        setParsedDocument({ source, rhythm: null });
+        setParsedDocument({ source, rhythm: rhythmContextAtCaret(source, caretOffset) });
         setValidation((error as Error).message);
       }
     }, 150);
@@ -448,16 +449,15 @@ export function App() {
     </main>
     <dialog ref={replacementDialog} className="about-dialog" aria-labelledby="replace-title" onCancel={() => setReplacement(null)}>
       <div className="about-content">
-        <h2 id="replace-title">Nahradiť rozpracovaný dokument?</h2>
-        <p>Aktuálny dokument má zmeny, ktoré neboli stiahnuté do súboru.</p>
+        <h2 id="replace-title">Uložiť rozpracované zmeny?</h2>
         <div className="file-dialog-actions">
-          <button className="button subtle" autoFocus onClick={() => setReplacement(null)}>Zrušiť</button>
           <button className="button subtle" onClick={() => {
             if (replacement && save()) { applySource(replacement.text, replacement.name, replacement.fold, replacement.restored); setReplacement(null); }
-          }}>Stiahnuť a pokračovať</button>
+          }}>Áno</button>
           <button className="button subtle" onClick={() => {
             if (replacement) { applySource(replacement.text, replacement.name, replacement.fold, replacement.restored); setReplacement(null); }
-          }}>Nahradiť bez stiahnutia</button>
+          }}>Nie</button>
+          <button className="button subtle" autoFocus onClick={() => setReplacement(null)}>Zrušiť</button>
         </div>
       </div>
     </dialog>
