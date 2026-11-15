@@ -411,7 +411,7 @@ export function App() {
               }} /><output htmlFor="master-volume">{masterVolume} %</output></div>
             </div>
             {displayedRhythm.tracks.map((track, index) => <div className={'mixer-track' + (mix[index].muted ? ' muted' : '')} key={index + '-' + track.instrument}>
-              <div className="mixer-heading"><label htmlFor={'volume-' + index}>{index + 1} · {track.instrument.replaceAll('_', ' ')}</label>
+              <div className="mixer-heading"><label htmlFor={'volume-' + index}>{track.instrument.replaceAll('_', ' ')}</label>
                 <button className="button mute-button" aria-label={'Mute track ' + (index + 1) + ' ' + track.instrument} aria-pressed={mix[index].muted} onClick={() => updateMix(index, { ...mix[index], muted: !mix[index].muted })}>Mute</button>
               </div>
               <div className="mixer-volume"><input id={'volume-' + index} aria-label={'Hlasitosť tracku ' + (index + 1) + ' ' + track.instrument} type="range" min="0" max="100" step="0.5" value={mix[index].volume / 2} onChange={event => updateMix(index, { ...mix[index], volume: Number(event.target.value) * 2 })} /><output htmlFor={'volume-' + index}>{mix[index].volume / 2} %</output></div>

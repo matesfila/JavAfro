@@ -72,7 +72,7 @@ final class MixerPanel extends JPanel {
             mute.getAccessibleContext().setAccessibleName("Mute " + name);
             JLabel value = new JLabel(trackVolumeText(initialVolume), SwingConstants.RIGHT);
             value.setPreferredSize(new Dimension(50, 24));
-            JLabel label = new JLabel(name);
+            JLabel label = new JLabel(instrument);
             label.setLabelFor(volume);
             label.setPreferredSize(new Dimension(150, 24));
             JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
