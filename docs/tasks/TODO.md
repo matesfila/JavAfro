@@ -3,8 +3,7 @@
 
 
 ### Otvorené úlohy
-- [] Dá sa JavAfro zverejniť cez github pages ??
-- [] Prepnutie do režimu systémovej klávesnice musí hneď zobraziť klávesnicu, nie až vtedy keď editor znovuzíska focus
+- [] Dununba dialekty, dialekt má byť medzi druhý a tretím pulzom, ale má byť aj medzi prvým a druhým ?? Na djembe asi ano, ale na dunoch ??
 - [] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
 - [] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...
 - [] Podpora MIDI
@@ -24,15 +23,16 @@
 
 
 
-
 ### v0.5.3 (current)
+- [x] Dá sa JavAfro zverejniť cez github pages ??
+- [x] Prepnutie do režimu systémovej klávesnice musí hneď zobraziť klávesnicu, nie až vtedy keď editor znovuzíska focus
 - [x] Bug: Skladba sa ulozila aj s dialektom aj ked v nej predtym nebol, navyse v multiriadkovó formate
 - [x] Bug: nefungoval tempo potenciometer
 - [x] Zjednodusit menu Subor: odstranit text, button na otvorenie predch suboru, pred about pridat separator
 
 ### v0.5.2
 - [x] Preusporiadat klavesnicu: šipky, noty zobraziť iba pre daný nástroj, nad šipkou vľavo bude bodka, vpravo backspace
-- [x] Pridať button na aktualizáciu aplikácie
+- [x] Pridať button na aktualizáciu aplikácie (do About dialogu vedla čísla verzie)
 - [x] Verzionovanie, changelist
 
 ### v0.5.1
