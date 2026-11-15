@@ -23,7 +23,9 @@ describe('AfroPlayer djembe', () => {
       const normal = selectSound('djembe', symbol, 0, () => 0)!;
       const accent = selectSound('djembe', symbol.toUpperCase(), 0, () => 0)!;
       expect(normal.sample).toBe(accent.sample);
-      expect(normal.gain / accent.gain).toBeCloseTo(.7);
+      const notes = manifest.instruments.djembe.notes;
+      expect(normal.gain).toBeCloseTo(manifest.banks[notes[symbol].bank].gain * notes[symbol].gain);
+      expect(accent.gain).toBeCloseTo(manifest.banks[notes[symbol.toUpperCase()].bank].gain * notes[symbol.toUpperCase()].gain);
       expect(normal.rate).toBe(1);
     }
     const early = selectSound('djembe', 'B', 100, () => 0)!;
@@ -45,7 +47,7 @@ describe('AfroPlayer djembe', () => {
       expect(selectSound('djembe', 'T', 100, () => 0)).toMatchObject({ gain: toneGain - .2, rate: .95 });
       expect(selectSound('djembe', 'T', 50, () => 0)).toMatchObject({ gain: toneGain - .1, rate: .975 });
       expect(selectSound('djembe', 'T', 0, () => 0)).toMatchObject({ gain: toneGain, rate: 1 });
-      expect(selectSound('dundun', 'D', 100, () => 0)?.gain).toBeCloseTo(manifest.banks.dundun_open.gain - .2);
+      expect(selectSound('dundun', 'D', 100, () => 0)?.gain).toBeCloseTo(manifest.banks.dundun_open.gain * manifest.instruments.dundun.notes.D.gain - .2);
       expect(selectSound('dundun', 'D', 100, () => 0)?.rate).toBeCloseTo(.69);
     } finally {
       config.humanizeDynamic = saved.dynamic;

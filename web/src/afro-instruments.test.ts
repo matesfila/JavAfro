@@ -24,12 +24,18 @@ describe('original AfroPlayer instruments', () => {
         if (!strokes.includes(note)) expect(() => selectSounds(instrument, note, 0)).toThrow();
       }
       expect(selectSounds(instrument, 'x', 0, () => 0)).toEqual(selectSounds(bell, 'x', 0, () => 0));
-      expect(selectSounds(instrument, strokes[0], 0, () => 0)).toEqual(selectSounds(instrument, strokes[1], 0, () => 0));
+      const accent = selectSounds(instrument, strokes[0], 0, () => 0);
+      const normal = selectSounds(instrument, strokes[1], 0, () => 0);
+      const definition = manifest.instruments[instrument === 'kenken' ? 'kensereni' : instrument];
+      const gainRatio = definition ? definition.notes[strokes[0]].gain / definition.notes[strokes[1]].gain : 1;
+      expect(accent[0]).toEqual({ ...normal[0], gain: normal[0].gain * gainRatio });
+      expect(accent.slice(1)).toEqual(normal.slice(1));
       for (const note of 'Xb') expect(supportsNote(instrument, note)).toBe(false);
     }
     for (const instrument of ['djembe', 'djembe2'] as const) {
       for (const note of 'Ddx') expect(supportsNote(instrument, note)).toBe(false);
-      expect(selectSounds(instrument, 'b', 0, () => 0)[0].gain / selectSounds(instrument, 'B', 0, () => 0)[0].gain).toBeCloseTo(.7);
+      const notes = manifest.instruments[instrument].notes;
+      expect(selectSounds(instrument, 'b', 0, () => 0)[0].gain / selectSounds(instrument, 'B', 0, () => 0)[0].gain).toBeCloseTo(notes.b.gain / notes.B.gain);
     }
   });
   it('bundles all 54 used original samples and only requests the selected instrument banks', () => {
@@ -43,7 +49,7 @@ describe('original AfroPlayer instruments', () => {
   });
   it('plays open/closed drums with a simultaneous bell, but x and standalone bells only once', () => {
     expect(selectSounds('dundun', 'D', 0, () => 0)).toEqual([
-      { sample: 'afroplayer-dunduns/dundun_s2_v1.wav', gain: manifest.banks.dundun_open.gain, rate: .74, pan: -.3 },
+      { sample: 'afroplayer-dunduns/dundun_s2_v1.wav', gain: manifest.banks.dundun_open.gain * manifest.instruments.dundun.notes.D.gain, rate: .74, pan: -.3 },
       { sample: 'afroplayer-dunduns/dundun_bell_open_v1.wav', gain: manifest.banks.bell_dun.gain, rate: .8, pan: -.3 },
     ]);
     expect(selectSounds('sangban', 'i', 0, () => 0)[0]).toMatchObject({ sample: 'afroplayer-dunduns/sangban_closed_v1.wav', gain: manifest.banks.sangban_closed.gain, rate: .9 });
