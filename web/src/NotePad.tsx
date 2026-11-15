@@ -1,6 +1,6 @@
 import type { NoteCommand } from './note-input';
 import type { Instrument } from './rhythm';
-import { notesForInstrument } from './note-context';
+import { notesForInstrument } from './sounds';
 
 export function NotePad({ instrument, insert, command }: {
   instrument: Instrument | null;

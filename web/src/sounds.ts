@@ -21,6 +21,14 @@ const canonical = (instrument: Instrument) => instrument === 'kenken' ? 'kensere
   : instrument === 'kenken_bell' ? 'kensereni_bell' : instrument;
 export interface Sound { sample: string; gain: number; rate: number; pan?: number }
 
+export function notesForInstrument(instrument: Instrument | null): string[] {
+  if (!instrument) return [];
+  const definition = afro.instruments[canonical(instrument)];
+  if (definition) return Object.keys(definition.notes);
+  const strokes = freesoundNotes[instrument];
+  return strokes ? [...strokes, 'x'] : [];
+}
+
 export function supportsNote(instrument: Instrument, note: string): boolean {
   const definition = afro.instruments[canonical(instrument)];
   return definition ? Object.hasOwn(definition.notes, note)

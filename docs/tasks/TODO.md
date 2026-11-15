@@ -22,9 +22,10 @@
   - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
 
 ### v0.5.4 (current)
-- [] Aktualizovať rytmy, nedokončené odstrániť z basicRhythms.```yaml
-- [] Fix tempo potenciometra
-- [] Správa o dokončenej aktualizácii
+- [x] Aktualizovať rytmy, nedokončené odstrániť z basicRhythms.```yaml
+- [x] Fix tempo potenciometra
+- [x] Info hláška o dokončenej aktualizácii
+- [x] Preusporiadanie nôt na klávesnici Noty - najpoužívanejšie nech sú ako prvé
 ```
 
 ### v0.5.3 (current)

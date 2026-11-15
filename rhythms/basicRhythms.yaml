@@ -64,13 +64,13 @@
     kensereni:  ".xK.KK.xK.KK"
 
 "Ginefare":
-  bpm: 190
-  timeSignature: "12/8"
-  stepsPerBeat: 3
-  dialect: [-0.22, -0.42, -0.66]
+  bpm: 95
+  timeSignature: "6/8"
+  stepsPerBeat: 6
+  dialect: [0, -0.20, -0.44, 0, -0.20, -0.44]
   tracks:
     djembe:     "s..tt.s..tt.|s..tt.s..tt."
-    dundun:     "D..x..x..x..|x.D..D..D..D"
+    dundun:     "D..x..x..x..|x..x..x..x.C|D..x..x..x..|x.D..D..D..C"
     sangban:    "x..S..x..S..|x..S..x..S.."
     kensereni:  "x.x.K.K..K..|x.x.K.K..K.."
 

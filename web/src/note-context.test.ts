@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { instrumentAtCaret, notesForInstrument } from './note-context';
+import { instrumentAtCaret } from './note-context';
 import { instruments } from './rhythm';
-import { supportsNote } from './sounds';
+import { notesForInstrument, supportsNote } from './sounds';
+import { parse } from 'yaml';
+import manifestSource from '../../src/main/resources/samples/afroplayer-samples.yaml?raw';
 
 function at(source: string) {
   const caret = source.indexOf('¦');
@@ -36,6 +38,14 @@ describe('note keyboard context', () => {
       expect(at(source)).toBeNull();
     }
     expect(notesForInstrument(null)).toEqual([]);
+  });
+
+  it('lays out each instrument in manifest order, including aliases', () => {
+    const { instruments: definitions } = parse(manifestSource);
+    for (const instrument of instruments) {
+      const definition = definitions[instrument.replace('kenken', 'kensereni')];
+      if (definition) expect(notesForInstrument(instrument)).toEqual(Object.keys(definition.notes));
+    }
   });
 
   it('offers every supported letter exactly once and excludes unsupported letters', () => {

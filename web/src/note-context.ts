@@ -1,6 +1,5 @@
 import { isMap, isScalar, parseDocument } from 'yaml';
 import { instruments, type Instrument } from './rhythm';
-import { supportsNote } from './sounds';
 
 /** Resolve track ownership from YAML structure, even while a pattern is invalid. */
 export function instrumentAtCaret(source: string, caret: number): Instrument | null {
@@ -27,10 +26,4 @@ export function instrumentAtCaret(source: string, caret: number): Instrument | n
     }
   }
   return null;
-}
-
-/** Keep common strokes first; filter through the same rules as playback. */
-export function notesForInstrument(instrument: Instrument | null): string[] {
-  return instrument ? [...'DdKkBbTtSsxiIcCaAoEpyFqz']
-    .filter(note => supportsNote(instrument, note)) : [];
 }
