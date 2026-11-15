@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useMemo, useRef, type Ref } from 'react';
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
 import { EditorView } from 'codemirror';
 import { Compartment, EditorState } from '@codemirror/state';
 import { editorSetup } from './editor-setup';
@@ -9,6 +9,7 @@ import { overwriteExtension, overwriteState, setOverwrite } from './overwrite';
 import { NotePad } from './NotePad';
 import { insertNote, noteCommands, type NoteCommand } from './note-input';
 import { instrumentAtCaret } from './note-context';
+import type { Instrument } from './rhythm';
 
 const theme = EditorView.theme({
   '&': { height: '100%', backgroundColor: '#fffcf8', color: '#443429', fontSize: `${config.editorFontSize}px` },
@@ -50,7 +51,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   const change = useRef(onChange); change.current = onChange;
   const caretChange = useRef(onCaretChange); caretChange.current = onCaretChange;
   const modeChange = useRef(onOverwriteChange); modeChange.current = onOverwriteChange;
-  const activeInstrument = useMemo(() => instrumentAtCaret(value, caretOffset), [value, caretOffset]);
+  const [activeInstrument, setActiveInstrument] = useState<Instrument | null>(null);
   useImperativeHandle(ref, () => ({
     setInputMode(nextMode) {
       const editor = view.current;
@@ -79,6 +80,10 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
     },
   }), []);
   useEffect(() => {
+    function updateInstrument(state: EditorState) {
+      // The selection uses CodeMirror's single-character line breaks, even for CRLF files.
+      setActiveInstrument(instrumentAtCaret(state.doc.toString(), state.selection.main.head));
+    }
     const editor = new EditorView({
       parent: host.current!, doc: value, selection: { anchor: Math.min(caretOffset, value.length) },
       extensions: [overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), theme,
@@ -88,11 +93,15 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
         EditorView.contentAttributes.of({ 'aria-label': 'YAML editor rytmu', spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),
         EditorView.updateListener.of(update => {
           if (update.docChanged) change.current(update.state.doc.toString());
-          if (update.docChanged || update.selectionSet) caretChange.current(update.state.selection.main.head);
+          if (update.docChanged || update.selectionSet) {
+            updateInstrument(update.state);
+            caretChange.current(update.state.selection.main.head);
+          }
           if (update.state.field(overwriteState) !== update.startState.field(overwriteState)) modeChange.current(update.state.field(overwriteState));
         })],
     });
     view.current = editor;
+    updateInstrument(editor.state);
     if (foldRhythms) editor.dispatch({ effects: rhythmFoldEffects(editor.state) });
     return () => { editor.destroy(); view.current = null; };
     // The editor instance is retained while documents change.

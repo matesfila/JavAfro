@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { EditorView } from 'codemirror';
-import { foldedRanges } from '@codemirror/language';
+import { foldedRanges, unfoldAll } from '@codemirror/language';
 import { parse } from 'yaml';
 import { App } from './App';
 import basicRhythms from '../../rhythms/basicRhythms.yaml?raw';
@@ -96,6 +96,21 @@ it('collapses rhythms when the default document finishes loading', async () => {
     resolve({ ok: true, text: async () => source });
   });
   expect(foldedRanges(editor().state).size).toBe(count);
+});
+
+it('follows the editor caret between tracks in a Windows-line-ending file on mobile', async () => {
+  vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
+  const source = '# rhythm\r\n'.repeat(22) + 'One:\r\n  tracks:\r\n    dundun: "D......."\r\n    djembe: "b.tt..s."\r\n';
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => source }));
+  await act(() => root.render(createElement(App)));
+  const view = editor();
+  await act(() => { unfoldAll(view); });
+  const text = view.state.doc.toString();
+  for (const instrument of ['djembe', 'dundun', 'djembe']) {
+    const anchor = text.indexOf('"', text.indexOf(instrument)) + 1;
+    await act(() => view.dispatch({ selection: { anchor } }));
+    expect(document.querySelector('.note-instrument')?.textContent).toBe(instrument);
+  }
 });
 
 it('starts native text input on the mode tap and returns focus to the existing selection', async () => {
