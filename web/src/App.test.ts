@@ -41,6 +41,22 @@ function click(label: string) {
   return act(() => button.click());
 }
 
+it.each([false, true])('offers the software keyboard when primary input is touch: %s', async touch => {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === '(pointer: coarse)' && touch, addEventListener() {}, removeEventListener() {},
+  }));
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  await click('Plocha');
+  await click('Noty');
+  if (touch) {
+    expect(editor().contentDOM.getAttribute('inputmode')).toBe('text');
+    await click('Klávesnica');
+  }
+  expect(document.querySelector('.input-mode-button')?.textContent).toBe('Plocha');
+  expect(editor().contentDOM.getAttribute('inputmode')).toBe('none');
+});
+
 it('updates rhythm context across invalid patterns and YAML syntax errors', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));

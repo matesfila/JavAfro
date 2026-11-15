@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 
 // Keep this query in sync with the compact layout rules in style.css.
 const compactQuery = '(max-width: 680px), (max-width: 960px) and (max-height: 500px)';
+const touchInputQuery = '(pointer: coarse)';
 
 function viewport() {
   const visual = window.visualViewport;
   // A zoomed visual viewport is smaller even when the keyboard is closed.
   const height = visual ? visual.height * visual.scale : window.innerHeight;
   return { compact: window.matchMedia(compactQuery).matches, height,
+    touchInput: window.matchMedia(touchInputQuery).matches,
     keyboard: window.innerHeight - height > 120 };
 }
 
@@ -17,6 +19,7 @@ export function useViewport() {
   useEffect(() => {
     const update = () => setSize(viewport());
     const media = window.matchMedia(compactQuery);
+    const touchInput = window.matchMedia(touchInputQuery);
     const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
     const normalViewport = meta?.content;
     let restoreTimer: number | undefined;
@@ -35,6 +38,7 @@ export function useViewport() {
     if (orientation) orientation.addEventListener('change', rotate);
     else window.addEventListener('orientationchange', rotate);
     media.addEventListener('change', update);
+    touchInput.addEventListener('change', update);
     window.addEventListener('resize', update);
     window.visualViewport?.addEventListener('resize', update);
     update();
@@ -43,6 +47,7 @@ export function useViewport() {
       else window.removeEventListener('orientationchange', rotate);
       if (restoreTimer !== undefined) restoreZoomLimits();
       media.removeEventListener('change', update);
+      touchInput.removeEventListener('change', update);
       window.removeEventListener('resize', update);
       window.visualViewport?.removeEventListener('resize', update);
     };

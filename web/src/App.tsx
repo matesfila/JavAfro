@@ -25,7 +25,8 @@ function NewIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="current
 
 export function App() {
   const viewport = useViewport();
-  const [inputMode, setInputMode] = useState<EditorInputMode>('surface');
+  const [selectedMode, setInputMode] = useState<EditorInputMode>('surface');
+  const inputMode = selectedMode === 'keyboard' && !viewport.touchInput ? 'surface' : selectedMode;
   const editor = useRef<YamlEditorHandle>(null);
   const [source, setSource] = useState('');
   const [overwrite, setOverwriteMode] = useState(false);
@@ -337,7 +338,11 @@ export function App() {
     editor.current?.setInputMode(nextMode);
     setInputMode(nextMode);
   }
-  const inputModes = { notes: { label: 'Noty', next: 'keyboard' }, keyboard: { label: 'Klávesnica', next: 'surface' }, surface: { label: 'Plocha', next: 'notes' } } as const;
+  const inputModes = {
+    notes: { label: 'Noty', next: viewport.touchInput ? 'keyboard' : 'surface' },
+    keyboard: { label: 'Klávesnica', next: 'surface' },
+    surface: { label: 'Plocha', next: 'notes' },
+  } as const;
   const currentInputMode = inputModes[inputMode];
   const inputModeButton = <button type="button" className="button mode-button input-mode-button" title={`Režim: ${currentInputMode.label}. Prepnúť na ${inputModes[currentInputMode.next].label}.`} onMouseDown={event => event.preventDefault()} onClick={() => changeInputMode(currentInputMode.next)}>{currentInputMode.label}</button>;
 

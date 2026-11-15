@@ -128,12 +128,13 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Vlastný YAML otvoríš tlačidlom alebo presunutím jedného súboru do okna.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.
 - Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť.
-- Na telefóne sa editor otvorí v režime **Noty**. Panel ponúka všetky povolené
+- Editor sa otvorí v režime **Plocha**. V režime **Noty** panel ponúka všetky povolené
   noty nástroja na aktuálnom riadku kurzora vrátane akcentov a pravdepodobnostných
   úderov; funguje aj v jeho `base` a `variations`. Mimo tracku sa noty skryjú.
   Vpravo dole sú šípky v tvare obráteného T (`← ↓ →`, nad `↓` je `↑`), nad `←`
   je pauza `.`, nad `→` oddeľovač taktov `|` a vpravo hore Backspace.
-  Tlačidlo cyklicky prepína **Noty → Klávesnica → Plocha → Noty** a zobrazuje
+  Pri ovládaní myšou alebo touchpadom tlačidlo prepína medzi **Plocha** a **Noty**.
+  Na primárne dotykových zariadeniach cyklicky prepína **Plocha → Noty → Klávesnica → Plocha** a zobrazuje
   aktuálny režim. **Klávesnica** priamo pri kliknutí zameria editor a vyvolá
   systémovú klávesnicu na úpravu ostatného YAML. **Plocha** skryje panel nôt aj
   systémovú klávesnicu; editor využije uvoľnenú výšku nad kompaktným prehrávačom.

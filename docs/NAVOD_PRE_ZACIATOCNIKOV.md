@@ -12,10 +12,10 @@ Ak chceš počas hrania prepnúť na iný rytmus, klikni doň a znova stlač **P
 
 ## Editor nôt
 
-Názov súboru a tlačidlá editora nájdeš nad editorom. Začínaš v režime **Plocha**, v ktorom máš najviac miesta na čítanie. Tlačidlom **Plocha** prepneš na **Noty**, ďalším stlačením na **Klávesnica** a potom späť na **Plocha**.
+Začínaš v režime **Plocha**. Na počítači s myšou alebo touchpadom prepínaš tlačidlom nad editorom medzi **Plocha** a **Noty**. V oboch režimoch môžeš kliknúť do zápisu a písať fyzickou klávesnicou. Na telefóne alebo tablete s dotykovým ovládaním sa režimy striedajú v poradí **Plocha → Noty → Klávesnica → Plocha**.
 
 - V režime **Noty** klikni do riadka nástroja. Pod editorom sa zobrazí jeho názov a tlačidlá s údermi, ktoré vie zahrať. Na djembe skús `B` a `b`. Obe znamenajú basový úder, malé `b` znie tichšie. Bodkou `.` vložíš pauzu.
-- V režime **Klávesnica** môžeš písať aj názvy rytmov a nástrojov. Na telefóne sa otvorí bežná klávesnica.
+- Ak chceš na dotykovom zariadení napísať napríklad názov rytmu, v režime **Noty** klepni na tlačidlo **Noty**. Prepneš na **Klávesnica** a otvorí sa systémová klávesnica.
 - **Prepisovanie** – keď je zapnuté, nové znaky nahrádzajú znaky pod kurzorom. Keď je vypnuté, vkladajú sa medzi existujúce znaky.
 
 Na telefóne roztiahni dva prsty v editore, ak chceš zväčšiť písmo. Priblížením prstov ho zmenšíš. Dlhý riadok si posuň do strany prstom.
