@@ -21,7 +21,11 @@
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
   - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
 
-
+### v0.5.4 (current)
+- [] Aktualizovať rytmy, nedokončené odstrániť z basicRhythms.```yaml
+- [] Fix tempo potenciometra
+- [] Správa o dokončenej aktualizácii
+```
 
 ### v0.5.3 (current)
 - [x] Dá sa JavAfro zverejniť cez github pages ??

@@ -43,7 +43,7 @@ Produkčným výstupom je `dist/`: statické HTML, JS, CSS, fonty, YAML a zvuky.
 Na neskoršie nasadenie stačí statický hosting s HTTPS. `base: './'` umožňuje
 aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 
-Verzia webovej aplikácie má tvar `0.5.3.1`: prvé tri čísla pochádzajú z `pom.xml`,
+Verzia webovej aplikácie má tvar `0.5.4.1`: prvé tri čísla pochádzajú z `pom.xml`,
 štvrté je počítadlo v `web/build-number.json`. Každé produkčné zostavenie
 (`npm run build`, `build:obfuscated` aj zostavenie cez `phone`) ho zvýši raz.
 Vývoj, testy a `preview` počítadlo nemenia. Aktuálna verzia sa vypíše pri builde
