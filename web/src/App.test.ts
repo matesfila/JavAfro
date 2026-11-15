@@ -3,8 +3,10 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { EditorView } from 'codemirror';
+import { foldedRanges } from '@codemirror/language';
 import { parse } from 'yaml';
 import { App } from './App';
+import basicRhythms from '../../rhythms/basicRhythms.yaml?raw';
 
 let root: Root;
 const yaml = 'One:\n  bpm: 90\n  tracks: {djembe: "b.tt..s."}\nTwo:\n  bpm: 95\n  tracks: {djembe: "b.tt..s."}\n';
@@ -38,6 +40,25 @@ function click(label: string) {
   return act(() => button.click());
 }
 
+it('collapses rhythms when the default document finishes loading', async () => {
+  const source = basicRhythms.replace(/\r?\n/g, '\r\n');
+  const count = Object.keys(parse(source)).length;
+  let resolve!: (response: unknown) => void;
+  vi.stubGlobal('fetch', vi.fn(() => new Promise(done => { resolve = done; })));
+  await act(() => root.render(createElement(App)));
+  await act(async () => {
+    resolve({ ok: true, text: async () => source });
+  });
+  expect(editor().state.doc.toString()).toBe(source.replace(/\r\n/g, '\n'));
+  expect(foldedRanges(editor().state).size).toBe(count);
+  await act(() => root.render(null));
+  await act(() => root.render(createElement(App)));
+  await act(async () => {
+    resolve({ ok: true, text: async () => source });
+  });
+  expect(foldedRanges(editor().state).size).toBe(count);
+});
+
 it('starts native text input on the mode tap and returns focus to the existing selection', async () => {
   vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
@@ -65,7 +86,7 @@ it('starts native text input on the mode tap and returns focus to the existing s
   expect(document.activeElement).not.toBe(view.contentDOM);
 });
 
-it('guards typed work after a failed initial load and restores it on reload', async () => {
+it('preserves typed work across clean starts until explicitly restored', async () => {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
   await act(() => root.render(createElement(App)));
   await act(() => editor().dispatch({ changes: { from: 0, insert: 'first draft' } }));
@@ -74,7 +95,15 @@ it('guards typed work after a failed initial load and restores it on reload', as
   expect(document.querySelector<HTMLDialogElement>('[aria-labelledby="replace-title"]')?.open).toBe(true);
   await click('Zrušiť');
   await act(() => root.render(null));
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
+  expect(editor().state.doc.toString()).toBe(yaml);
+  expect(document.body.textContent).not.toContain('Obnovený stav editora');
+  await act(() => window.dispatchEvent(new Event('pagehide')));
+  await act(() => root.render(null));
+  await act(() => root.render(createElement(App)));
+  await click('Súbor');
+  await click('Obnoviť naposledy otvorený súbor');
   expect(editor().state.doc.toString()).toBe('first draft');
 });
 
@@ -87,6 +116,8 @@ it('saves the controls of both rhythms after switching selection and restoring t
   await click('Zrýchliť o 1 BPM');
   await act(() => root.render(null));
   await act(() => root.render(createElement(App)));
+  await click('Súbor');
+  await click('Obnoviť naposledy otvorený súbor');
   expect(document.querySelector<HTMLInputElement>('#bpm-number')?.value).toBe('96');
   const download = vi.fn(() => 'blob:download');
   URL.createObjectURL = download;

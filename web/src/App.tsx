@@ -35,11 +35,12 @@ export function App() {
   const [fileName, setFileName] = useState('rytmus.yaml');
   const draftStore = useRef<DraftStore | null>(null);
   const activeDraft = useRef<Draft | null>(null);
+  const saveActiveDraft = useRef(false);
+  const [restorableDraft, setRestorableDraft] = useState<Draft | null>(null);
   const updateReload = useRef(false);
   const [draftError, setDraftError] = useState('');
-  const [draftRestored, setDraftRestored] = useState(false);
-  const editorCaption = draftRestored ? 'Obnovený stav editora z tohto prehliadača' : fileName;
-  const [replacement, setReplacement] = useState<{ text: string; name: string; fold: boolean } | null>(null);
+  const editorCaption = fileName;
+  const [replacement, setReplacement] = useState<{ text: string; name: string; fold: boolean; restored?: Draft } | null>(null);
   const replacementDialog = useRef<HTMLDialogElement>(null);
   const [parsedDocument, setParsedDocument] = useState<{ source: string; rhythm: Rhythm | null }>({ source: '', rhythm: null });
   const { rhythm } = parsedDocument;
@@ -78,9 +79,11 @@ export function App() {
 
   function persistDraft(draft: Draft, replace = false) {
     activeDraft.current = draft;
+    saveActiveDraft.current = true;
     try {
       if (!draftStore.current) throw new Error('Úložisko prehliadača nie je dostupné.');
       draftStore.current.save(draft, replace);
+      setRestorableDraft(draft);
       setDraftError('');
     } catch (error) {
       setDraftError(`Koncept sa nepodarilo uložiť v prehliadači. Stiahni si súbor cez Súbor → Uložiť. ${(error as Error).message}`);
@@ -139,8 +142,7 @@ export function App() {
       dialect: [...(edit?.dialect ?? rhythm.dialect)] };
   }
 
-  function applySource(text: string, filename: string, foldRhythms = true, restored?: Draft) {
-    setDraftRestored(!!restored);
+  function applySource(text: string, filename: string, foldRhythms = true, restored?: Draft, persist = true) {
     const document = readRhythmDocument(text);
     const offset = restored?.caretOffset ?? 0;
     let parsed = document.rhythm;
@@ -153,7 +155,9 @@ export function App() {
     syncedSource.current = text;
     syncedRhythmId.current = parsed?.id ?? '';
     if (parsed) updateControls(controlsFor(parsed, restored ?? null));
-    persistDraft(restored ?? { source: text, fileName: filename, caretOffset: offset, savedSource: text }, !!activeDraft.current);
+    const draft = restored ?? { source: text, fileName: filename, caretOffset: offset, savedSource: text };
+    if (persist) persistDraft(draft, !!activeDraft.current);
+    else activeDraft.current = draft;
     setMessage('');
   }
 
@@ -161,6 +165,15 @@ export function App() {
     if (activeDraft.current && hasUnsavedChanges(activeDraft.current)) {
       setReplacement({ text, name, fold });
     } else applySource(text, name, fold);
+  }
+
+  function restoreLastFile() {
+    if (busy || isLoading || !restorableDraft) return;
+    const draft = restorableDraft;
+    loadRequest.current++;
+    if (activeDraft.current && hasUnsavedChanges(activeDraft.current)) {
+      setReplacement({ text: draft.source, name: draft.fileName, fold: false, restored: draft });
+    } else applySource(draft.source, draft.fileName, false, draft);
   }
 
   useEffect(() => {
@@ -181,7 +194,7 @@ export function App() {
       const response = await fetch(asset(`rhythms/${config.initialRhythm}`));
       if (!response.ok) throw new Error('Predvolený YAML sa nepodarilo načítať. Otvor vlastný súbor.');
       const text = await response.text();
-      if (request === loadRequest.current) applySource(text, config.initialRhythm.split('/').at(-1)!);
+      if (request === loadRequest.current) applySource(text, config.initialRhythm.split('/').at(-1)!, true, undefined, false);
     } catch (error) { if (request === loadRequest.current) setMessage((error as Error).message); }
     finally { if (request === loadRequest.current) setLoading(false); }
   }
@@ -193,19 +206,16 @@ export function App() {
     }, undefined, config.humanizeMaxOffsetMs, config.humanizeApplianceProbability);
     try {
       draftStore.current = new DraftStore(window.localStorage, `javafro:draft:v1:${import.meta.env.BASE_URL}`);
-      const draft = draftStore.current.current;
-      if (draft) {
-        applySource(draft.source, draft.fileName, false, draft);
-      } else void loadDefaultFile();
+      setRestorableDraft(draftStore.current.current ?? null);
     } catch {
       setDraftError('Koncept sa nedá obnoviť z úložiska prehliadača. Pôvodné uložené dáta neprepisujeme. Prácu si ukladaj cez Súbor → Uložiť.');
-      void loadDefaultFile();
     }
+    void loadDefaultFile();
     return () => { loadRequest.current++; playRequest.current++; engine.current?.dispose(); };
   }, []);
 
   useEffect(() => {
-    const flush = () => { if (activeDraft.current) persistDraft(activeDraft.current); };
+    const flush = () => { if (saveActiveDraft.current && activeDraft.current) persistDraft(activeDraft.current); };
     const hide = () => { if (document.hidden) flush(); };
     const leave = (event: BeforeUnloadEvent) => {
       if (!updateReload.current && activeDraft.current && hasUnsavedChanges(activeDraft.current)) {
@@ -317,6 +327,7 @@ export function App() {
   const fileActions = <>
     <button className="button subtle" onClick={newRhythm} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Nový rytmus z prázdnej šablóny'}><NewIcon /><span>Nový rytmus</span></button>
     <button className="button subtle" onClick={() => fileInput.current?.click()} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Otvoriť YAML súbor'}><FolderIcon /><span>Otvoriť</span></button>
+    <button className="button subtle" onClick={restoreLastFile} disabled={busy || isLoading || !restorableDraft}><FolderIcon /><span>Obnoviť naposledy otvorený súbor</span></button>
     <button className="button subtle" onClick={save} disabled={isLoading}><DownloadIcon /><span>Uložiť</span></button>
   </>;
   const modeButton = <button className="button mode-button" aria-pressed={overwrite} title="Zapnuté: prepisovanie. Vypnuté: vkladanie. (Insert)" onMouseDown={event => event.preventDefault()} onClick={() => setOverwriteMode(previous => !previous)}>Prepisovanie</button>;
@@ -362,7 +373,11 @@ export function App() {
           }} />
           <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} foldRhythms={editorDocument.foldRhythms} wrapLines={viewport.compact} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);
-            if (activeDraft.current) persistDraft({ ...activeDraft.current, caretOffset: Math.min(offset, activeDraft.current.source.length) });
+            if (activeDraft.current) {
+              const draft = { ...activeDraft.current, caretOffset: Math.min(offset, activeDraft.current.source.length) };
+              if (saveActiveDraft.current) persistDraft(draft);
+              else activeDraft.current = draft;
+            }
           }} />
             {!source && !isLoading && <div className="editor-placeholder">Otvor YAML súbor.</div>}
           </div>
@@ -438,10 +453,10 @@ export function App() {
         <div className="file-dialog-actions">
           <button className="button subtle" autoFocus onClick={() => setReplacement(null)}>Zrušiť</button>
           <button className="button subtle" onClick={() => {
-            if (replacement && save()) { applySource(replacement.text, replacement.name, replacement.fold); setReplacement(null); }
+            if (replacement && save()) { applySource(replacement.text, replacement.name, replacement.fold, replacement.restored); setReplacement(null); }
           }}>Stiahnuť a pokračovať</button>
           <button className="button subtle" onClick={() => {
-            if (replacement) { applySource(replacement.text, replacement.name, replacement.fold); setReplacement(null); }
+            if (replacement) { applySource(replacement.text, replacement.name, replacement.fold, replacement.restored); setReplacement(null); }
           }}>Nahradiť bez stiahnutia</button>
         </div>
       </div>

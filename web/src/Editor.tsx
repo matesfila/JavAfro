@@ -99,13 +99,15 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   }, []);
   useEffect(() => {
     const editor = view.current;
-    if (editor && editor.state.doc.toString() !== value) {
+    if (!editor) return;
+    const next = editor.state.toText(value).toString();
+    if (editor.state.doc.toString() !== next) {
       const previous = editor.state.doc.toString();
       let from = 0;
-      while (from < previous.length && previous[from] === value[from]) from++;
-      let to = previous.length, end = value.length;
-      while (to > from && end > from && previous[to - 1] === value[end - 1]) { to--; end--; }
-      editor.dispatch({ changes: { from, to, insert: value.slice(from, end) } });
+      while (from < previous.length && previous[from] === next[from]) from++;
+      let to = previous.length, end = next.length;
+      while (to > from && end > from && previous[to - 1] === next[end - 1]) { to--; end--; }
+      editor.dispatch({ changes: { from, to, insert: next.slice(from, end) } });
     }
   }, [value, caretOffset, foldRhythms]);
   useEffect(() => {
