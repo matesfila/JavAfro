@@ -36,6 +36,8 @@
 .header-controls{display:flex;align-items:center;gap:10px;min-width:0}
 
 .file-separator{margin:18px 0 16px;border:0;border-top:1px solid var(--border)}
+.file-about{display:grid;gap:8px}
+.file-about>a.button{color:inherit;text-decoration:none}
 .file-about>.button{width:100%;min-height:44px;justify-content:flex-start;padding-inline:16px}
 .app-update{display:contents}.app-update>.button{justify-self:end;min-width:0;min-height:44px;padding:8px 10px}
 .app-update p{grid-column:1 / -1;margin:0;font-size:13px;line-height:1.5;color:var(--muted)}

@@ -355,6 +355,7 @@ export function App() {
           {message && <p role="status">{message}</p>}
           <hr className="file-separator" />
           <div className="file-about">
+            <a className="button subtle" href={`${import.meta.env.BASE_URL}navod-pre-zaciatocnikov.pdf`} target="_blank" rel="noopener">Dokumentácia</a>
             <AboutDialog updateDisabled={busy || isLoading} beforeUpdateReload={reloading => {
               if (!draftStore.current || !activeDraft.current) throw new Error('Pred aktualizáciou ulož rytmus cez Súbor → Uložiť. Úložisko konceptov nie je dostupné.');
               draftStore.current.save(activeDraft.current);
