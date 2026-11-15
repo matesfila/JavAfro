@@ -7,6 +7,7 @@ import { foldedRanges } from '@codemirror/language';
 import { parse } from 'yaml';
 import { App } from './App';
 import basicRhythms from '../../rhythms/basicRhythms.yaml?raw';
+import { config } from './config';
 
 let root: Root;
 const yaml = 'One:\n  bpm: 90\n  tracks: {djembe: "b.tt..s."}\nTwo:\n  bpm: 95\n  tracks: {djembe: "b.tt..s."}\n';
@@ -39,6 +40,22 @@ function click(label: string) {
   if (!button) throw new Error('Missing button ' + label);
   return act(() => button.click());
 }
+
+it('uses the configured tempo limits for dial accessibility and keyboard input', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const dial = document.querySelector<HTMLElement>('[role="slider"][aria-label="Tempo"]')!;
+  expect(dial.getAttribute('aria-valuemin')).toBe(String(config.minimumTempo));
+  expect(dial.getAttribute('aria-valuemax')).toBe(String(config.maximumTempo));
+  for (const key of ['Home', 'ArrowDown', 'PageDown']) {
+    await act(() => dial.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })));
+    expect(dial.getAttribute('aria-valuenow')).toBe(String(config.minimumTempo));
+  }
+  for (const key of ['End', 'ArrowUp', 'PageUp']) {
+    await act(() => dial.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })));
+    expect(dial.getAttribute('aria-valuenow')).toBe(String(config.maximumTempo));
+  }
+});
 
 it('collapses rhythms when the default document finishes loading', async () => {
   const source = basicRhythms.replace(/\r?\n/g, '\r\n');

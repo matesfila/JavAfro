@@ -1,23 +1,26 @@
 import { useRef, useState, type KeyboardEvent } from 'react';
 
-export function tempoFromDrag(start: number, distance: number, maximum: number) {
-  return Math.max(1, Math.min(maximum, start + Math.round(distance / 4)));
+export function tempoFromDrag(start: number, distance: number, minimum: number, maximum: number) {
+  return Math.max(minimum, Math.min(maximum, start + Math.round(distance / 4)));
 }
 
 export function TempoControl({ value, minimum, maximum, limit, onChange }: {
   value: number; minimum: number; maximum: number; limit: number;
   onChange: (value: number) => void;
 }) {
-  const drag = useRef<{ pointer: number; y: number; value: number } | null>(null);
+  const drag = useRef<{ pointer: number; y: number; value: number; minimum: number; maximum: number } | null>(null);
   const [entry, setEntry] = useState<string | null>(null);
   const change = (next: number) => onChange(Math.max(1, Math.min(limit, Math.round(next))));
-  const angle = -135 + Math.max(0, Math.min(1, (value - minimum) / Math.max(1, maximum - minimum))) * 270;
+  const dialMinimum = Math.min(minimum, value);
+  const dialMaximum = Math.max(maximum, value);
+  const changeDial = (next: number) => onChange(Math.max(dialMinimum, Math.min(dialMaximum, Math.round(next))));
+  const angle = -135 + (value - dialMinimum) / Math.max(1, dialMaximum - dialMinimum) * 270;
 
   function keyDown(event: KeyboardEvent<HTMLDivElement>) {
     const steps: Record<string, number> = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1, PageUp: 10, PageDown: -10 };
-    if (event.key in steps) { event.preventDefault(); change(value + steps[event.key]); }
+    if (event.key in steps) { event.preventDefault(); changeDial(value + steps[event.key]); }
     else if (event.key === 'Home' || event.key === 'End') {
-      event.preventDefault(); change(event.key === 'Home' ? minimum : maximum);
+      event.preventDefault(); changeDial(event.key === 'Home' ? dialMinimum : dialMaximum);
     }
   }
 
@@ -38,17 +41,17 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
       <button type="button" className="tempo-step" aria-label="Spomaliť o 1 BPM"
         disabled={value <= 1} onClick={() => change(value - 1)}>−</button>
       <div className="tempo-dial" role="slider" tabIndex={0} aria-label="Tempo"
-        aria-valuemin={1} aria-valuemax={limit} aria-valuenow={value} aria-valuetext={`${value} BPM`}
+        aria-valuemin={dialMinimum} aria-valuemax={dialMaximum} aria-valuenow={value} aria-valuetext={`${value} BPM`}
         title="Ťahaj hore pre zrýchlenie, dole pre spomalenie"
         onKeyDown={keyDown} onPointerDown={event => {
           if (!event.isPrimary || event.button !== 0) return;
           event.preventDefault();
           event.currentTarget.focus();
           event.currentTarget.setPointerCapture(event.pointerId);
-          drag.current = { pointer: event.pointerId, y: event.clientY, value };
+          drag.current = { pointer: event.pointerId, y: event.clientY, value, minimum: dialMinimum, maximum: dialMaximum };
         }} onPointerMove={event => {
           const start = drag.current;
-          if (start?.pointer === event.pointerId) onChange(tempoFromDrag(start.value, start.y - event.clientY, limit));
+          if (start?.pointer === event.pointerId) onChange(tempoFromDrag(start.value, start.y - event.clientY, start.minimum, start.maximum));
         }} onPointerUp={event => {
           if (drag.current?.pointer !== event.pointerId) return;
           drag.current = null;
