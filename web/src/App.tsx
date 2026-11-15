@@ -25,7 +25,7 @@ function NewIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="current
 
 export function App() {
   const viewport = useViewport();
-  const [inputMode, setInputMode] = useState<EditorInputMode>(() => viewport.compact ? 'notes' : 'keyboard');
+  const [inputMode, setInputMode] = useState<EditorInputMode>('surface');
   const editor = useRef<YamlEditorHandle>(null);
   const [source, setSource] = useState('');
   const [overwrite, setOverwriteMode] = useState(false);
@@ -347,8 +347,6 @@ export function App() {
     <header className="site-header">
       <div className="brand"><img src={asset('icons/djembe.svg')} alt="" /><span>JavAfro</span></div>
       <div className="header-controls">
-        {inputModeButton}
-        {modeButton}
         <SettingsPanel title="Súbor" compact className="file-options">
           <div className="file-dialog-actions" onClick={event => {
             if ((event.target as Element).closest('button:not(:disabled)')) event.currentTarget.closest('dialog')?.close();
@@ -372,6 +370,10 @@ export function App() {
           <input ref={fileInput} type="file" accept=".yaml,.yml,application/yaml,text/yaml" hidden onChange={event => {
             const file = event.target.files?.[0]; if (file) void openFile(file); event.target.value = '';
           }} />
+          <div className="editor-toolbar">
+            <span className="file-name" title={editorCaption}>{editorCaption}</span>
+            <div className="editor-actions">{inputModeButton}{modeButton}</div>
+          </div>
           <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} foldRhythms={editorDocument.foldRhythms} wrapLines={viewport.compact} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);
             if (activeDraft.current) {
@@ -382,7 +384,6 @@ export function App() {
           }} />
             {!source && !isLoading && <div className="editor-placeholder">Otvor YAML súbor.</div>}
           </div>
-          <div className="editor-file-name" title={editorCaption}>{editorCaption}</div>
           {editorStatus && <div className={'editor-status' + (validation ? ' invalid' : '')} role={validation ? 'alert' : 'status'}>
             {editorStatus}
           </div>}

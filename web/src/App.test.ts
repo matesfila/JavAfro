@@ -104,6 +104,7 @@ it('follows the editor caret between tracks in a Windows-line-ending file on mob
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => source }));
   await act(() => root.render(createElement(App)));
   const view = editor();
+  await click('Plocha');
   await act(() => { unfoldAll(view); });
   const text = view.state.doc.toString();
   for (const instrument of ['djembe', 'dundun', 'djembe']) {
@@ -118,6 +119,7 @@ it('starts native text input on the mode tap and returns focus to the existing s
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
   const view = editor();
+  await click('Plocha');
   await act(() => {
     view.focus();
     view.dispatch({ selection: { anchor: 2, head: 5 } });
