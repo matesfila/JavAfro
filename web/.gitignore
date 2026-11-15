@@ -4,4 +4,3 @@ dist/
 public/generated/
 preview.jpg
 .local/
-build-number.json.*

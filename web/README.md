@@ -43,14 +43,14 @@ Produkčným výstupom je `dist/`: statické HTML, JS, CSS, fonty, YAML a zvuky.
 Na neskoršie nasadenie stačí statický hosting s HTTPS. `base: './'` umožňuje
 aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 
-Verzia webovej aplikácie má tvar `0.5.4.1`: prvé tri čísla pochádzajú z `pom.xml`,
-štvrté je počítadlo v `web/build-number.json`. Každé produkčné zostavenie
-(`npm run build`, `build:obfuscated` aj zostavenie cez `phone`) ho zvýši raz.
-Vývoj, testy a `preview` počítadlo nemenia. Aktuálna verzia sa vypíše pri builde
-a zobrazí v **O aplikácii**. Počítadlo zostáva zachované aj po vymazaní `dist/`;
-pri prenose zdrojov alebo commite zahrň aj aktualizovaný `build-number.json`.
-Číslo sa rezervuje pri spustení Vite buildu; pri jeho zlyhaní sa už nevracia späť.
-Opätovné nahratie rovnakého `dist/` na Netlify číslo nemení. Java verzia zostáva trojčíselná.
+Verzia webovej aplikácie má tvar `0.5.4.69`. Prvé tri čísla pochádzajú z `pom.xml`.
+Štvrté číslo udáva počet commitov dostupných z práve zostavovaného commitu
+(`git rev-list --count HEAD`). Opakované zostavenie toho istého commitu má rovnakú verziu.
+Verzia sa vypíše pri zostavení a zobrazí sa v **O aplikácii**. Java používa tri čísla z `pom.xml`.
+
+Na zostavenie potrebuješ Git a klon s úplnou históriou. Ak máš plytký klon,
+doplň históriu príkazom `git fetch --unshallow`. GitHub Actions načíta úplnú históriu
+pri prevzatí kódu. Pri zostavení na Netlify si aplikácia chýbajúcu históriu stiahne z `origin`.
 
 ### Zostavenie s obfuskáciou
 

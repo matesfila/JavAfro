@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parseConfig } from './src/config-schema';
 import { applicationObfuscator } from './scripts/obfuscate';
-import { nextBuildNumber, readBuildNumber } from './scripts/build-version';
+import { gitCommitCount } from './scripts/build-version';
 
 parseConfig(readFileSync(new URL('../javafro.yaml', import.meta.url), 'utf8'));
 
@@ -16,10 +16,8 @@ function pomValue(tag: string) {
   if (!value) throw new Error(`pom.xml: missing ${tag}`);
   return value.trim();
 }
-const buildNumberFile = new URL('./build-number.json', import.meta.url);
-
-export default defineConfig(({ mode, command, isPreview }) => {
-  const buildNumber = command === 'build' && !isPreview ? nextBuildNumber(buildNumberFile) : readBuildNumber(buildNumberFile);
+export default defineConfig(({ mode, command }) => {
+  const buildNumber = gitCommitCount(fileURLToPath(new URL('../', import.meta.url)), process.env.NETLIFY === 'true');
   const appInfo = { version: `${pomValue('version')}.${buildNumber}`, creator: pomValue('app.creator'), assistant: pomValue('app.assistant') };
   if (command === 'build') console.log(`JavAfro: version ${appInfo.version}`);
   return {

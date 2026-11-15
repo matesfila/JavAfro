@@ -1,41 +1,30 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, expect, it } from 'vitest';
-import { nextBuildNumber, readBuildNumber } from '../scripts/build-version';
+import { pathToFileURL } from 'node:url';
+import { expect, it } from 'vitest';
+import { gitCommitCount } from '../scripts/build-version';
 
-const temporaryFolders: string[] = [];
-function counter(value: unknown) {
-  const directory = mkdtempSync(join(tmpdir(), 'javafro-build-'));
-  temporaryFolders.push(directory);
-  const file = join(directory, 'build-number.json');
-  writeFileSync(file, JSON.stringify({ buildNumber: value }));
-  return file;
-}
-afterEach(() => { for (const directory of temporaryFolders.splice(0)) rmSync(directory, { recursive: true }); });
+it('counts commits reproducibly and completes shallow Netlify checkouts', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'javafro-version-'));
+  try {
+    const repo = join(directory, 'source');
+    const shallow = join(directory, 'shallow');
+    execFileSync('git', ['init', '--quiet', repo]);
+    const commit = () => execFileSync('git', ['-C', repo, '-c', 'user.name=Test',
+      '-c', 'user.email=test@example.com', '-c', 'commit.gpgSign=false', 'commit', '--allow-empty', '-m', 'test']);
+    commit();
+    expect(gitCommitCount(repo)).toBe(1);
+    commit();
+    expect(gitCommitCount(repo)).toBe(2);
+    expect(gitCommitCount(repo)).toBe(2);
 
-it('persists increasing numbers across builds and keeps reads unchanged', () => {
-  const file = counter(0);
-  expect(readBuildNumber(file)).toBe(0);
-  expect(nextBuildNumber(file)).toBe(1);
-  expect(readBuildNumber(file)).toBe(1);
-  expect(readBuildNumber(file)).toBe(1);
-  expect(nextBuildNumber(file)).toBe(2);
-  expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual({ buildNumber: 2 });
-});
-
-it('rejects invalid counters without resetting or overwriting them', () => {
-  for (const value of [-1, 1.5, '7', null, Number.MAX_SAFE_INTEGER + 1]) {
-    const file = counter(value);
-    const before = readFileSync(file, 'utf8');
-    expect(() => nextBuildNumber(file)).toThrow();
-    expect(readFileSync(file, 'utf8')).toBe(before);
+    execFileSync('git', ['clone', '--quiet', '--depth=1', pathToFileURL(repo).href, shallow]);
+    expect(() => gitCommitCount(shallow)).toThrow('git fetch --unshallow');
+    expect(gitCommitCount(shallow, true)).toBe(2);
+    expect(gitCommitCount(shallow)).toBe(2);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
   }
-});
-
-it('rejects a concurrent writer without reusing its number', () => {
-  const file = counter(4);
-  writeFileSync(`${file}.lock`, '');
-  expect(() => nextBuildNumber(file)).toThrow();
-  expect(readBuildNumber(file)).toBe(4);
 });
