@@ -1,5 +1,7 @@
 # JavAfro – krátky návod
 
+[Obrázkový návod (PDF)](../web/public/obrazovy-navod.pdf) ukazuje, kde spustiť rytmus, upraviť úder a nastaviť hlasitosť. V aplikácii ho otvoríš cez **Súbor → Obrázkový návod**.
+
 ## Prehratie rytmu
 
 1. Pri otvorení webovej aplikácie uvidíš zbalené rytmy zo súboru `basicRhythms.yaml`. Šípkou vľavo pri názve rozbaľ napríklad **Ginefare**. Klikni do jeho zápisu a pri prehrávači si skontroluj názov vybraného rytmu.
