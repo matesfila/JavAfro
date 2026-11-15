@@ -8,9 +8,10 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
   value: number; minimum: number; maximum: number; limit: number;
   onChange: (value: number) => void;
 }) {
-  const drag = useRef<{ pointer: number; y: number; value: number; minimum: number; maximum: number } | null>(null);
+  const drag = useRef<{ pointer: number; y: number; value: number; minimum: number; maximum: number; moved: boolean; onNumber: boolean } | null>(null);
+  const numberInput = useRef<HTMLInputElement>(null);
+  const slider = useRef<HTMLDivElement>(null);
   const [entry, setEntry] = useState<string | null>(null);
-  const change = (next: number) => onChange(Math.max(1, Math.min(limit, Math.round(next))));
   const dialMinimum = Math.min(minimum, value);
   const dialMaximum = Math.max(maximum, value);
   const changeDial = (next: number) => onChange(Math.max(dialMinimum, Math.min(dialMaximum, Math.round(next))));
@@ -26,33 +27,39 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
 
   return <div className="control-group tempo-control">
     <div className="tempo-dial-row">
-      <button type="button" className="tempo-step" aria-label="Spomaliť o 1 BPM"
-        disabled={value <= 1} onClick={() => change(value - 1)}>−</button>
-      <div className="tempo-knob">
-        <div className="tempo-dial" role="slider" tabIndex={0} aria-label="Tempo"
+      <div className="tempo-knob" onPointerDown={event => {
+        if (!event.isPrimary || event.button !== 0 || drag.current) return;
+        event.preventDefault();
+        slider.current?.focus({ preventScroll: true });
+        event.currentTarget.setPointerCapture(event.pointerId);
+        drag.current = { pointer: event.pointerId, y: event.clientY, value, minimum: dialMinimum,
+          maximum: dialMaximum, moved: false, onNumber: event.target === numberInput.current };
+      }} onPointerMove={event => {
+        const start = drag.current;
+        if (start?.pointer !== event.pointerId) return;
+        const distance = start.y - event.clientY;
+        if (!start.moved && Math.abs(distance) < 4) return;
+        start.moved = true;
+        onChange(tempoFromDrag(start.value, distance, start.minimum, start.maximum));
+      }} onPointerUp={event => {
+        const start = drag.current;
+        if (start?.pointer !== event.pointerId) return;
+        drag.current = null;
+        event.currentTarget.releasePointerCapture(event.pointerId);
+        if (start.onNumber && !start.moved) numberInput.current?.focus({ preventScroll: true });
+      }} onLostPointerCapture={event => {
+        if (drag.current?.pointer === event.pointerId) drag.current = null;
+      }}>
+        <div ref={slider} className="tempo-dial" role="slider" tabIndex={0} aria-label="Tempo"
           aria-valuemin={dialMinimum} aria-valuemax={dialMaximum} aria-valuenow={value} aria-valuetext={`${value} BPM`}
-          title="Ťahaj hore pre zrýchlenie, dole pre spomalenie"
-          onKeyDown={keyDown} onPointerDown={event => {
-            if (!event.isPrimary || event.button !== 0) return;
-            event.preventDefault();
-            event.currentTarget.focus();
-            event.currentTarget.setPointerCapture(event.pointerId);
-            drag.current = { pointer: event.pointerId, y: event.clientY, value, minimum: dialMinimum, maximum: dialMaximum };
-          }} onPointerMove={event => {
-            const start = drag.current;
-            if (start?.pointer === event.pointerId) onChange(tempoFromDrag(start.value, start.y - event.clientY, start.minimum, start.maximum));
-          }} onPointerUp={event => {
-            if (drag.current?.pointer !== event.pointerId) return;
-            drag.current = null;
-            event.currentTarget.releasePointerCapture(event.pointerId);
-          }} onPointerCancel={() => { drag.current = null; }} onLostPointerCapture={() => { drag.current = null; }}>
+          title="Ťahaj hore pre zrýchlenie, dole pre spomalenie" onKeyDown={keyDown}>
           <svg viewBox="0 0 80 80" aria-hidden="true">
             <path className="tempo-dial-track" d="M 15.25 64.75 A 35 35 0 1 1 64.75 64.75" />
             <circle className="tempo-dial-face" cx="40" cy="40" r="27" />
             <g transform={`rotate(${angle} 40 40)`}><path className="tempo-dial-indicator" d="M40 8v5" /></g>
           </svg>
         </div>
-        <div className="bpm-value"><input id="bpm-number" aria-label="Tempo v BPM" type="number"
+        <div className="bpm-value"><input ref={numberInput} id="bpm-number" aria-label="Tempo v BPM" type="number"
           inputMode="numeric" min="1" max={limit} step="1" value={entry ?? value}
           onChange={event => {
             setEntry(event.target.value);
@@ -62,8 +69,6 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
             if (event.key === 'Enter') event.currentTarget.blur();
           }} /><span>BPM</span></div>
       </div>
-      <button type="button" className="tempo-step" aria-label="Zrýchliť o 1 BPM"
-        disabled={value >= limit} onClick={() => change(value + 1)}>+</button>
     </div>
   </div>;
 }

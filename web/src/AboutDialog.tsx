@@ -13,7 +13,10 @@ export function AboutDialog({ updateDisabled, beforeUpdateReload }: {
       if (event.target === event.currentTarget) dialog.current?.close();
     }}>
       <div className="about-content">
-        <h2 id="about-title">JavAfro</h2>
+        <h2 id="about-title" className="brand">
+          <img src={`${import.meta.env.BASE_URL}generated/icons/djembe.svg`} alt="" />
+          JavAfro
+        </h2>
         <div className="about-release">
           <p className="about-version">Verzia {appInfo.version}</p>
           <UpdateButton disabled={updateDisabled} beforeReload={beforeUpdateReload} />

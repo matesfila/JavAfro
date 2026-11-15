@@ -166,10 +166,10 @@ it('preserves typed work across clean starts until explicitly restored', async (
 it('saves the controls of both rhythms after switching selection and restoring the draft', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
-  await click('Zrýchliť o 1 BPM');
+  await act(() => document.querySelector('[role="slider"][aria-label="Tempo"]')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })));
   await act(() => editor().dispatch({ selection: { anchor: yaml.indexOf('Two:') } }));
   await act(() => { vi.advanceTimersByTime(160); });
-  await click('Zrýchliť o 1 BPM');
+  await act(() => document.querySelector('[role="slider"][aria-label="Tempo"]')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })));
   await act(() => root.render(null));
   await act(() => root.render(createElement(App)));
   await click('Súbor');

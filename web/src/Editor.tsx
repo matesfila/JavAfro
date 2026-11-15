@@ -13,7 +13,7 @@ import type { Instrument } from './rhythm';
 
 const theme = EditorView.theme({
   '&': { height: '100%', backgroundColor: '#fffcf8', color: '#443429', fontSize: `${config.editorFontSize}px` },
-  '.cm-scroller': { overflow: 'auto', fontFamily: '"Cascadia Code", "SFMono-Regular", Consolas, monospace', lineHeight: '1.8' },
+  '.cm-scroller': { overflow: 'auto', touchAction: 'pan-x pan-y', fontFamily: '"Cascadia Code", "SFMono-Regular", Consolas, monospace', lineHeight: '1.8' },
   '.cm-content': { padding: '20px 0', caretColor: '#745137' },
   '.cm-line': { padding: '0 20px' },
   '.cm-gutters': { background: '#f7f0e5', color: '#a39179', border: 'none', paddingRight: '8px' },
@@ -34,18 +34,46 @@ export interface YamlEditorHandle {
   setInputMode: (mode: EditorInputMode) => void;
 }
 
-export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, onOverwriteChange, wrapLines = false, inputMode = 'keyboard', readOnly = false }: {
+function enablePinchZoom(editor: EditorView) {
+  const scroller = editor.scrollDOM;
+  let pinch: { distance: number; fontSize: number } | null = null;
+
+  function handleTouch(event: TouchEvent) {
+    if (event.touches.length !== 2 || event.type === 'touchcancel') {
+      pinch = null;
+      return;
+    }
+    const [a, b] = Array.from(event.touches);
+    if (!scroller.contains(a.target as Node) || !scroller.contains(b.target as Node)) return;
+    event.preventDefault();
+    const distance = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+    if (!distance) return;
+    if (!pinch || event.type !== 'touchmove') {
+      pinch = { distance, fontSize: parseFloat(getComputedStyle(editor.contentDOM).fontSize) };
+      return;
+    }
+    const size = Math.min(72, Math.max(8, pinch.fontSize * distance / pinch.distance));
+    editor.contentDOM.style.fontSize = size + 'px';
+    editor.requestMeasure();
+  }
+
+  const events = ['touchstart', 'touchmove', 'touchend', 'touchcancel'] as const;
+  for (const event of events) scroller.addEventListener(event, handleTouch, { passive: false });
+  return () => {
+    for (const event of events) scroller.removeEventListener(event, handleTouch);
+  };
+}
+
+export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, onOverwriteChange, inputMode = 'keyboard', readOnly = false }: {
   ref?: Ref<YamlEditorHandle>;
   value: string; onChange: (value: string) => void; onCaretChange: (offset: number) => void; caretOffset: number;
   foldRhythms?: boolean;
   overwrite?: boolean; onOverwriteChange: (overwrite: boolean) => void;
-  wrapLines?: boolean;
   inputMode?: EditorInputMode;
   readOnly?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
-  const wrapping = useRef(new Compartment());
   const inputAttributes = useRef(new Compartment());
   const editing = useRef(new Compartment());
   const change = useRef(onChange); change.current = onChange;
@@ -88,7 +116,6 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
       parent: host.current!, doc: value, selection: { anchor: Math.min(caretOffset, value.length) },
       extensions: [overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), theme,
         editing.current.of([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]),
-        wrapping.current.of(wrapLines ? EditorView.lineWrapping : []),
         inputAttributes.current.of(EditorView.contentAttributes.of({ inputmode: inputMode === 'keyboard' ? 'text' : 'none' })),
         EditorView.contentAttributes.of({ 'aria-label': 'YAML editor rytmu', spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),
         EditorView.updateListener.of(update => {
@@ -101,9 +128,10 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
         })],
     });
     view.current = editor;
+    const removePinchZoom = enablePinchZoom(editor);
     updateInstrument(editor.state);
     if (foldRhythms) editor.dispatch({ effects: rhythmFoldEffects(editor.state) });
-    return () => { editor.destroy(); view.current = null; };
+    return () => { removePinchZoom(); editor.destroy(); view.current = null; };
     // The editor instance is retained while documents change.
   }, []);
   useEffect(() => {
@@ -126,9 +154,6 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
       editor.focus();
     }
   }, [overwrite]);
-  useEffect(() => {
-    view.current?.dispatch({ effects: wrapping.current.reconfigure(wrapLines ? EditorView.lineWrapping : []) });
-  }, [wrapLines]);
   useEffect(() => {
     view.current?.dispatch({ effects: editing.current.reconfigure([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]) });
   }, [readOnly]);
