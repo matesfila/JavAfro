@@ -1,6 +1,7 @@
 package picosoft.javafro.sequencer;
 
 import org.junit.Test;
+import org.yaml.snakeyaml.Yaml;
 import picosoft.javafro.base.*;
 import picosoft.javafro.instruments.sample.matesamples.DjembeInstrument;
 import picosoft.javafro.io.RhythmLoader;
@@ -48,11 +49,19 @@ public class DjembeInstrumentTest {
             assertEquals(bank.getValue().intValue(), fingerprints.size());
         }
     }
-    @Test public void accentsAndHumanizationChangeDynamicsAndPitchWithoutMutatingVoices() {
+    @Test public void accentsAndHumanizationChangeDynamicsAndPitchWithoutMutatingVoices() throws Exception {
+        Map<?, ?> notes;
+        try (var input = getClass().getResourceAsStream("/samples/afroplayer-samples.yaml")) {
+            Map<?, ?> manifest = new Yaml().load(input);
+            Map<?, ?> djembe = (Map<?, ?>) ((Map<?, ?>) manifest.get("instruments")).get("djembe");
+            notes = (Map<?, ?>) djembe.get("notes");
+        }
         for (char note : new char[]{'b', 't', 's'}) {
             var normal = new DjembeInstrument(new FixedRandom(0, .5)).voice(note, 0);
             var accent = new DjembeInstrument(new FixedRandom(0, .5)).voice(Character.toUpperCase(note), 0);
-            assertEquals(.49, energy(normal) / energy(accent), 1e-10);
+            double normalGain = ((Number) ((Map<?, ?>) notes.get(String.valueOf(note))).get("gain")).doubleValue();
+            double accentGain = ((Number) ((Map<?, ?>) notes.get(String.valueOf(Character.toUpperCase(note)))).get("gain")).doubleValue();
+            assertEquals(Math.pow(normalGain / accentGain, 2), energy(normal) / energy(accent), 1e-10);
         }
         var instrument = new DjembeInstrument(new FixedRandom(0, 0));
         var straight = instrument.voice('B', 0);

@@ -14,7 +14,7 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class AfroSampleInstrumentTest {
-    @Test public void drumLettersBelongOnlyToTheirTrackAndXIsExactlyOneBell() {
+    @Test public void drumLettersBelongOnlyToTheirTrackAndXIsExactlyOneBell() throws Exception {
         List<Instrument> drums = List.of(new DundunInstrument(fixed()), new SangbanInstrument(fixed()), new KensereniInstrument(fixed()));
         String[] strokes = {"Dd", "Ss", "Kk"};
         List<Instrument> bells = List.of(new DundunBellInstrument(fixed()), new SangbanBellInstrument(fixed()), new KensereniBellInstrument(fixed()));
@@ -29,8 +29,12 @@ public class AfroSampleInstrumentTest {
             Instrument standalone = bells.get(index).voice('x', 0);
             assertEquals(standalone.lengthSamples(1), bell.lengthSamples(1));
             for (int sample = 0; sample < bell.lengthSamples(1); sample++) assertEquals(standalone.sample(sample), bell.sample(sample), 0);
-            assertEquals(drums.get(index).voice(strokes[index].charAt(0), 0).sample(500),
-                    drums.get(index).voice(strokes[index].charAt(1), 0).sample(500), 0);
+            String instrument = List.of("dundun", "sangban", "kensereni").get(index);
+            double ratio = configuredNoteGain(instrument, strokes[index].charAt(0))
+                    / configuredNoteGain(instrument, strokes[index].charAt(1));
+            double normalDrum = drum.voice(strokes[index].charAt(1), 0).sample(500) - bell.sample(500);
+            assertEquals(normalDrum * ratio + bell.sample(500),
+                    drum.voice(strokes[index].charAt(0), 0).sample(500), 1e-12);
         }
         for (Instrument djembe : List.of(new DjembeInstrument(fixed()), new Djembe2Instrument(fixed()))) {
             for (char removed : "Ddx".toCharArray()) assertFalse(djembe.supportsNote(removed));
@@ -62,6 +66,15 @@ public class AfroSampleInstrumentTest {
             Map<?, ?> manifest = new Yaml().load(input);
             Map<?, ?> definition = (Map<?, ?>) ((Map<?, ?>) manifest.get("banks")).get(bank);
             return ((Number) definition.get("gain")).doubleValue();
+        }
+    }
+
+    private double configuredNoteGain(String instrument, char note) throws Exception {
+        try (var input = getClass().getResourceAsStream("/samples/afroplayer-samples.yaml")) {
+            Map<?, ?> manifest = new Yaml().load(input);
+            Map<?, ?> definition = (Map<?, ?>) ((Map<?, ?>) manifest.get("instruments")).get(instrument);
+            Map<?, ?> stroke = (Map<?, ?>) ((Map<?, ?>) definition.get("notes")).get(String.valueOf(note));
+            return ((Number) stroke.get("gain")).doubleValue();
         }
     }
 
@@ -127,8 +140,8 @@ public class AfroSampleInstrumentTest {
         for (long i : new long[]{0, 127, 500, 1001, 8000}) {
             double expectedBell = value(bellSample, i, .8, configuredGain("bell_dun"));
             assertEquals(expectedBell, bell.sample(i), 1e-12);
-            assertEquals(value(openSample, i, .74, configuredGain("dundun_open")) + expectedBell, open.sample(i), 1e-12);
-            assertEquals(value(closedSample, i, .9, configuredGain("dundun_closed")) + expectedBell, closed.sample(i), 1e-12);
+            assertEquals(value(openSample, i, .74, configuredGain("dundun_open") * configuredNoteGain("dundun", 'D')) + expectedBell, open.sample(i), 1e-12);
+            assertEquals(value(closedSample, i, .9, configuredGain("dundun_closed") * configuredNoteGain("dundun", 'i')) + expectedBell, closed.sample(i), 1e-12);
         }
         assertEquals(Math.max((long) Math.ceil(openSample.lengthSamples(1) / .74),
                 (long) Math.ceil(bellSample.lengthSamples(1) / .8)), open.lengthSamples(1));
