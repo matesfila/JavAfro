@@ -1,6 +1,13 @@
 import { expect, it } from 'vitest';
-import { exportRhythm } from './rhythm-export';
+import { exportRhythm, writeDialect } from './rhythm-export';
 import { parseDocument } from 'yaml';
+
+it('inserts and adjusts dialect in the selected rhythm without reformatting its neighbors', () => {
+  const source = 'One: {dialect: [0, 0]}\nTwo:\n  tracks: {djembe: "bt"} # pattern\n';
+  const first = writeDialect(source, 'Two', [0, -0.1]);
+  expect(first).toBe(source.replace('  tracks:', '  dialect: [0, -0.1]\n  tracks:'));
+  expect(writeDialect(first, 'Two', [0, 0])).toBe(first.replace('-0.1', '0'));
+});
 
 it('exports invalid, unsupported and empty work without changing a character', () => {
   for (const source of ['Broken: [', 'Test:\n  tracks: {unknown: "...."}\n', '']) {

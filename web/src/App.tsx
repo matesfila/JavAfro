@@ -6,10 +6,10 @@ import { TempoControl } from './TempoControl';
 import { useViewport } from './useViewport';
 import { appInfo } from './app-info';
 import { AudioEngine, defaultTrackMix, type TrackMix } from './audio';
-import { parseRhythmAtCaret, type Rhythm } from './rhythm';
+import { parseRhythmAtCaret, parseRhythmEntries, type Rhythm } from './rhythm';
 import { readRhythmDocument } from './rhythm-document';
 import { DraftStore, hasUnsavedChanges, pendingControls, type Draft } from './draft';
-import { exportRhythm } from './rhythm-export';
+import { exportRhythm, writeDialect } from './rhythm-export';
 import blankRhythmSource from '../../rhythms/blankRhythm.yaml?raw';
 import { type Controls } from './timing';
 import { config } from './config';
@@ -88,6 +88,7 @@ export function App() {
   }
 
   function editSource(text: string) {
+    if (text === activeDraft.current?.source) return;
     setSource(text);
     const draft = activeDraft.current ?? { fileName, savedSource: '' };
     persistDraft({ ...draft, source: text,
@@ -103,6 +104,33 @@ export function App() {
       edits.push({ rhythmId: displayedRhythm.id, bpm: next.bpm, dialect: [...next.dialect] });
     }
     persistDraft({ ...draft, controls: edits });
+  }
+
+  function editDialect(dialect: number[]) {
+    const draft = activeDraft.current;
+    const next = { ...controls, dialect };
+    if (busy) updateControls(next);
+    if (!displayedRhythm || !draft) return;
+    const synced = draft.source === syncedSource.current;
+    if (!synced) {
+      if (!busy) return;
+      // Keep playback adjustable even while the editor contains an unfinished change.
+      try {
+        const entry = parseRhythmEntries(draft.source).find(entry => entry.rhythm.id === displayedRhythm.id);
+        if (entry?.rhythm.stepsPerBeat !== dialect.length) return;
+      } catch { return; }
+    }
+    const target = busy ? displayedRhythm : parseRhythmAtCaret(draft.source, caretRef.current);
+    if (target.id !== displayedRhythm.id) return;
+    const text = writeDialect(draft.source, target.id, dialect);
+    if (synced) editControls(next);
+    if (text === draft.source) return;
+    if (playingSource.current === draft.source) playingSource.current = text;
+    if (synced) syncedSource.current = text;
+    setSource(text);
+    const edits = pendingControls(activeDraft.current).filter(edit =>
+      edit.rhythmId !== target.id || edit.bpm !== target.bpm || busy);
+    persistDraft({ ...draft, source: text, controls: edits });
   }
 
   function controlsFor(rhythm: Rhythm, draft: Draft | null): Controls {
@@ -377,11 +405,11 @@ export function App() {
             </> : <p>Otvor rytmus pre nastavenie mixera.</p>}
           </SettingsPanel>
           <SettingsPanel title="Dialect" compact={viewport.compact} className="dialect-options">
-            <div className="dialect-toolbar"><button className="text-button" onClick={() => editControls({ ...controls, dialect: controls.dialect.map(() => 0) })}>Vynulovať</button></div>
+            <div className="dialect-toolbar"><button className="text-button" onClick={() => editDialect(controls.dialect.map(() => 0))}>Vynulovať</button></div>
             <div className="dialect-grid">
               {controls.dialect.map((offset, i) => <div className="pulse-control" key={controls.dialect.length + '-' + i}><div><label htmlFor={'dialect-' + i}>Pulz {i + 1}</label><output htmlFor={'dialect-' + i}>{offset > 0 ? '+' : ''}{offset.toFixed(2)}</output></div>
                 <input id={'dialect-' + i} aria-label={'Dialect pulz ' + (i + 1)} type="range" min="-1" max="1" step="0.01" value={offset} onChange={event => {
-                  const dialect = [...controls.dialect]; dialect[i] = Number(event.target.value); editControls({ ...controls, dialect });
+                  const dialect = [...controls.dialect]; dialect[i] = Number(event.target.value); editDialect(dialect);
                 }} /></div>)}
             </div>
           </SettingsPanel>

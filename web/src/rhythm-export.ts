@@ -1,6 +1,28 @@
-import { isSeq, parseDocument } from 'yaml';
+import { isMap, isScalar, isSeq, parseDocument } from 'yaml';
 import { parseRhythmAtCaret, parseRhythmEntries } from './rhythm';
 import type { Controls } from './timing';
+
+export function writeDialect(source: string, rhythmId: string, dialect: number[]) {
+  const document = parseDocument(source, { version: '1.1' });
+  const rhythm = document.get(rhythmId, true);
+  if (document.errors.length || !isMap(rhythm)) return source;
+  const existing = rhythm.get('dialect', true);
+  if (isSeq(existing) && existing.items.length === dialect.length) {
+    // Work backwards so each scalar's original source range stays valid.
+    for (let i = dialect.length - 1; i >= 0; i--) {
+      const item = existing.items[i];
+      if (!isScalar(item) || !item.range || item.value === dialect[i]) continue;
+      source = source.slice(0, item.range[0]) + dialect[i] + source.slice(item.range[1]);
+    }
+  } else if (!existing && rhythm.range && dialect.some(value => value !== 0)) {
+    const field = 'dialect: [' + dialect.join(', ') + ']';
+    const start = rhythm.range[0];
+    if (rhythm.flow) return source.slice(0, start + 1) + field + ', ' + source.slice(start + 1);
+    const indent = source.slice(source.lastIndexOf('\n', start - 1) + 1, start);
+    return source.slice(0, start) + field + '\n' + indent + source.slice(start);
+  }
+  return source;
+}
 
 /** Invalid work can always be downloaded verbatim; controls only touch a valid document. */
 export function exportRhythm(source: string, caret: number,

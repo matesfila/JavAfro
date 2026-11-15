@@ -100,9 +100,12 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   useEffect(() => {
     const editor = view.current;
     if (editor && editor.state.doc.toString() !== value) {
-      editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: value },
-        selection: { anchor: Math.min(caretOffset, value.length) } });
-      if (foldRhythms) editor.dispatch({ effects: rhythmFoldEffects(editor.state) });
+      const previous = editor.state.doc.toString();
+      let from = 0;
+      while (from < previous.length && previous[from] === value[from]) from++;
+      let to = previous.length, end = value.length;
+      while (to > from && end > from && previous[to - 1] === value[end - 1]) { to--; end--; }
+      editor.dispatch({ changes: { from, to, insert: value.slice(from, end) } });
     }
   }, [value, caretOffset, foldRhythms]);
   useEffect(() => {
