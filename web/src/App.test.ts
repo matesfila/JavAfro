@@ -96,6 +96,34 @@ it('uses the configured tempo limits for dial accessibility and keyboard input',
   }
 });
 
+it.each(['"b.tt..s."', '@'])('retains a tempo drag while the editor validates track %s', async pattern => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const view = editor();
+  await act(() => view.dispatch({ changes: { from: 0, to: view.state.doc.length,
+    insert: 'One:\n  bpm: 90\n  tracks:\n    djembe: ' + pattern + '\n' } }));
+  const dial = document.querySelector<HTMLElement>('.tempo-knob')!;
+  const slider = dial.querySelector('[role="slider"]')!;
+  const label = dial.querySelector('input')!;
+  dial.setPointerCapture = vi.fn();
+  dial.releasePointerCapture = vi.fn();
+  async function touch(type: string, y: number) {
+    const event = new MouseEvent(type, { bubbles: true, clientY: y, button: 0 });
+    Object.assign(event, { pointerType: 'touch', pointerId: 1, isPrimary: true });
+    await act(() => label.dispatchEvent(event));
+  }
+  await touch('pointerdown', 100);
+  await touch('pointermove', 60);
+  expect(slider.getAttribute('aria-valuenow')).toBe('100');
+  expect(label.value).toBe('100');
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  expect(label.value).toBe('100');
+  await touch('pointermove', 40);
+  await touch('pointerup', 40);
+  expect(slider.getAttribute('aria-valuenow')).toBe('105');
+  expect(label.value).toBe('105');
+});
+
 it('collapses rhythms when the default document finishes loading', async () => {
   const source = basicRhythms.replace(/\r?\n/g, '\r\n');
   const count = Object.keys(parse(source)).length;

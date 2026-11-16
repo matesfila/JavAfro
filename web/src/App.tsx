@@ -99,15 +99,26 @@ export function App() {
       caretOffset: Math.min(caretRef.current, text.length), controls: undefined });
   }
 
-  function editControls(next: Controls) {
+  function editControls(next: Controls, target = displayedRhythm) {
     updateControls(next);
     const draft = activeDraft.current;
-    if (!draft || !displayedRhythm || draft.source !== syncedSource.current) return;
-    const edits = pendingControls(draft).filter(edit => edit.rhythmId !== displayedRhythm.id);
-    if (busy || next.bpm !== displayedRhythm.bpm || next.dialect.some((n, i) => n !== displayedRhythm.dialect[i])) {
-      edits.push({ rhythmId: displayedRhythm.id, bpm: next.bpm, dialect: [...next.dialect] });
+    if (!draft || !target || (busy && draft.source !== syncedSource.current)) return;
+    const edits = pendingControls(draft).filter(edit => edit.rhythmId !== target.id);
+    if (busy || next.bpm !== target.bpm || next.dialect.some((n, i) => n !== target.dialect[i])) {
+      edits.push({ rhythmId: target.id, bpm: next.bpm, dialect: [...next.dialect] });
     }
     persistDraft({ ...draft, controls: edits });
+  }
+
+  function editTempo(bpm: number) {
+    const draft = activeDraft.current;
+    if (!busy && draft && draft.source !== syncedSource.current) {
+      // Validation is debounced. Apply the gesture to the rhythm in the edited text.
+      const target = rhythmContextAtCaret(draft.source, caretRef.current);
+      editControls({ ...(target ? controlsFor(target, draft) : controls), bpm }, target);
+      return;
+    }
+    editControls({ ...controls, bpm });
   }
 
   function editDialect(dialect: number[]) {
@@ -408,7 +419,7 @@ export function App() {
           {message && <p className="playback-message" role="status">{message}</p>}
           <TempoControl value={controls.bpm} minimum={config.minimumTempo} maximum={config.maximumTempo}
             limit={Math.max(1000, config.maximumTempo, displayedRhythm?.bpm ?? 0)}
-            onChange={bpm => editControls({ ...controls, bpm })} />
+            onChange={editTempo} />
           <div className="settings-launchers">
           <SettingsPanel title="Mixer" compact={viewport.compact} className="mixer">
             {displayedRhythm ? <>
