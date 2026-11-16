@@ -6,6 +6,7 @@ import { EditorView } from 'codemirror';
 import { foldedRanges, unfoldAll } from '@codemirror/language';
 import { parse } from 'yaml';
 import { App } from './App';
+import { AudioEngine } from './audio';
 import basicRhythms from '../../rhythms/basicRhythms.yaml?raw';
 import { config } from './config';
 
@@ -112,6 +113,22 @@ it('collapses rhythms when the default document finishes loading', async () => {
     resolve({ ok: true, text: async () => source });
   });
   expect(foldedRanges(editor().state).size).toBe(count);
+});
+
+it('uses the focused folded rhythm for the heading and playback with Windows line endings', async () => {
+  const source = yaml.replace(/\n/g, '\r\n');
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => source }));
+  const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(false);
+  await act(() => root.render(createElement(App)));
+  const view = editor();
+  for (const name of ['Two', 'One', 'Two']) {
+    const anchor = view.state.doc.toString().indexOf(name + ':');
+    await act(() => view.dispatch({ selection: { anchor } }));
+    await act(async () => document.querySelector<HTMLButtonElement>('button.play')!.click());
+    expect(start.mock.lastCall?.[0].id).toBe(name);
+    await act(() => vi.advanceTimersByTimeAsync(200));
+    expect(document.querySelector('h1')?.textContent).toBe(name);
+  }
 });
 
 it('follows the editor caret between tracks in a Windows-line-ending file on mobile', async () => {

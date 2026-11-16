@@ -52,11 +52,21 @@ export function parseRhythm(source: string, defaultBpm = config.initialTempo): R
   return parseRhythmEntries(source, defaultBpm)[0].rhythm;
 }
 
+// CodeMirror counts a CRLF as one character. YAML ranges index the original string.
+function sourceOffsetAtCaret(source: string, caretOffset: number) {
+  let offset = caretOffset;
+  for (let cr = source.indexOf('\r\n'); cr >= 0 && cr < offset; cr = source.indexOf('\r\n', cr + 2)) {
+    offset++;
+  }
+  return offset;
+}
+
 export function parseRhythmAtCaret(source: string, caretOffset: number, defaultBpm = config.initialTempo): Rhythm {
   const entries = parseRhythmEntries(source, defaultBpm);
+  const offset = sourceOffsetAtCaret(source, caretOffset);
   let selected = entries[0].rhythm;
   for (const entry of entries) {
-    if (entry.offset > caretOffset) break;
+    if (entry.offset > offset) break;
     selected = entry.rhythm;
   }
   return selected;
@@ -100,9 +110,10 @@ export function rhythmContextAtCaret(source: string, caretOffset: number): Rhyth
   const document = parseDocument(source, { version: '1.1', uniqueKeys: true });
   if (!isMap(document.contents)) return null;
   const entries = document.contents.items.filter(pair => isScalar(pair.key) && typeof pair.key.value === 'string');
+  const offset = sourceOffsetAtCaret(source, caretOffset);
   let selected = entries[0];
   for (const entry of entries) {
-    if ((entry.key.range?.[0] ?? 0) > caretOffset) break;
+    if ((entry.key.range?.[0] ?? 0) > offset) break;
     selected = entry;
   }
   if (!selected || !isScalar(selected.key)) return null;
