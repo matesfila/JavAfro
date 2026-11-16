@@ -392,7 +392,7 @@ export function App() {
             <span className="file-name" title={editorCaption}>{editorCaption}</span>
             <div className="editor-actions">{inputModeButton}{modeButton}</div>
           </div>
-          <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} foldRhythms={editorDocument.foldRhythms} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
+          <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} foldRhythms={editorDocument.foldRhythms} overwriteButton={modeButton} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);
             if (activeDraft.current) {
               const draft = { ...activeDraft.current, caretOffset: Math.min(offset, activeDraft.current.source.length) };

@@ -63,6 +63,7 @@
 .note-left{grid-area:3 / 1}.note-down{grid-area:3 / 2}.note-right{grid-area:3 / 3}
 .note-pad button{min-width:0;min-height:var(--note-key-height);padding:2px;font-size:22px;font-weight:600;line-height:1}
 .note-pad button:active{background:#dfc8aa}
+.note-navigation .mode-button{grid-area:1 / 1 / 2 / 3;font-size:12px}
 
 .settings-launchers { display: contents; }
 .settings-button { min-height: 44px; padding: 8px 12px; border-color: var(--border); background: #f2eadf; }

@@ -58,6 +58,27 @@ it.each([false, true])('offers the software keyboard when primary input is touch
   expect(editor().contentDOM.getAttribute('inputmode')).toBe('none');
 });
 
+it('shares overwrite mode between the Noty keyboard and the editor toolbar', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  await click('Plocha');
+  const view = editor();
+  await act(() => { unfoldAll(view); });
+  const anchor = view.state.doc.toString().indexOf('b.tt');
+  await act(() => view.dispatch({ selection: { anchor } }));
+  const toolbar = document.querySelector<HTMLButtonElement>('.editor-actions button[aria-pressed]')!;
+  const pad = document.querySelector<HTMLButtonElement>('.note-navigation .mode-button')!;
+  expect(pad.nextElementSibling?.className).toBe('note-backspace');
+  await act(() => pad.click());
+  expect(toolbar.getAttribute('aria-pressed')).toBe('true');
+  await click('Pauza (.)');
+  expect(view.state.doc.sliceString(anchor, anchor + 4)).toBe('..tt');
+  await act(() => toolbar.click());
+  expect(pad.getAttribute('aria-pressed')).toBe('false');
+  await click('Pauza (.)');
+  expect(view.state.doc.sliceString(anchor, anchor + 5)).toBe('...tt');
+});
+
 it('updates rhythm context across invalid patterns and YAML syntax errors', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));

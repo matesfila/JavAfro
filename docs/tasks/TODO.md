@@ -1,5 +1,7 @@
 # TODO
 
+### Dokumentácia TODO
+- Prepisovanie button vedla backspacu v Sheets klávesnici
 
 
 ### Otvorené úlohy
@@ -29,9 +31,7 @@
 - [x] Dokumentácia v aplikácii - textová aj obrázková
 - [x] Štvrté číslo verzie je git commit number, nie umelo počítaný build number
 - [x] Zoomovanie textu v editore by malo zväčšovať/zmenšovať font
-- [] Po aktualizovaní verzie nezatvárať About dialóg
-  - rejected: toto asi nemá zmysel, lebo zákonite sa musí appka znovu otvoriť ako celok po update, takže do aboutu by sa muselo preklikať od začiatku...
-```
+- [x] Button Prepisovanie bude aj v custom klávesnici Noty vedla backspace
 
 ### v0.5.3 (current)
 - [x] Dá sa JavAfro zverejniť cez github pages ??
@@ -87,3 +87,8 @@
 - [x] Pridať offline PWA s ukladaním rytmov a zvukov a oznamovaním novej verzie.
 - [x] Pripraviť lokálny HTTPS server a návod na inštaláciu offline aplikácie na iPhone.
 - [x] Doplniť automatické testy webového načítania rytmov, časovania, zvuku a offline cache.
+
+### Rejected
+
+- [] Po aktualizovaní verzie nezatvárať About dialóg
+  - rejected: toto asi nemá zmysel, lebo zákonite sa musí appka znovu otvoriť ako celok po update, takže do aboutu by sa muselo preklikať od začiatku...

@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
+import { useEffect, useImperativeHandle, useRef, useState, type ReactNode, type Ref } from 'react';
 import { EditorView } from 'codemirror';
 import { Compartment, EditorState } from '@codemirror/state';
 import { editorSetup } from './editor-setup';
@@ -64,11 +64,12 @@ function enablePinchZoom(editor: EditorView) {
   };
 }
 
-export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, onOverwriteChange, inputMode = 'keyboard', readOnly = false }: {
+export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, overwriteButton, onOverwriteChange, inputMode = 'keyboard', readOnly = false }: {
   ref?: Ref<YamlEditorHandle>;
   value: string; onChange: (value: string) => void; onCaretChange: (offset: number) => void; caretOffset: number;
   foldRhythms?: boolean;
   overwrite?: boolean; onOverwriteChange: (overwrite: boolean) => void;
+  overwriteButton: ReactNode;
   inputMode?: EditorInputMode;
   readOnly?: boolean;
 }) {
@@ -172,7 +173,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   }
   return <div className="editor-surface">
     <div className="editor-host" ref={host} />
-    {inputMode === 'notes' && <NotePad instrument={activeInstrument} insert={text => {
+    {inputMode === 'notes' && <NotePad instrument={activeInstrument} overwriteButton={overwriteButton} insert={text => {
       if (view.current && !readOnly) { insertNote(view.current, text); view.current.focus(); }
     }} command={runCommand} />}
   </div>;

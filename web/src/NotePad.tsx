@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react';
 import type { NoteCommand } from './note-input';
 import type { Instrument } from './rhythm';
 import { notesForInstrument } from './sounds';
 
-export function NotePad({ instrument, insert, command }: {
+export function NotePad({ instrument, overwriteButton, insert, command }: {
   instrument: Instrument | null;
+  overwriteButton: ReactNode;
   insert: (text: string) => void; command: (command: NoteCommand) => void;
 }) {
   const notes = notesForInstrument(instrument);
@@ -19,6 +21,7 @@ export function NotePad({ instrument, insert, command }: {
       </div>
     </div>
     <div className="note-navigation">
+      {overwriteButton}
       {action('⌫', 'Vymazať pred kurzorom', 'backspace')}
       {key('.', 'Pauza (.)', () => insert('.'), 'note-rest')}
       {action('↑', 'Kurzor hore', 'up')}
