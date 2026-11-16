@@ -21,11 +21,16 @@
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
   - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
 
-### v0.5.4 (current)
+### v0.6.1 (current)
 - [x] Aktualizovať rytmy, nedokončené odstrániť z basicRhythms.```yaml
 - [x] Fix tempo potenciometra
 - [x] Info hláška o dokončenej aktualizácii
 - [x] Preusporiadanie nôt na klávesnici Noty - najpoužívanejšie nech sú ako prvé
+- [x] Dokumentácia v aplikácii - textová aj obrázková
+- [x] Štvrté číslo verzie je git commit number, nie umelo počítaný build number
+- [x] Zoomovanie textu v editore by malo zväčšovať/zmenšovať font
+- [] Po aktualizovaní verzie nezatvárať About dialóg
+  - rejected: toto asi nemá zmysel, lebo zákonite sa musí appka znovu otvoriť ako celok po update, takže do aboutu by sa muselo preklikať od začiatku...
 ```
 
 ### v0.5.3 (current)

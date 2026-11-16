@@ -6,7 +6,7 @@
 
     <groupId>com.picosoft</groupId>
     <artifactId>JavAfro</artifactId>
-    <version>0.5.4</version>
+    <version>0.6.1</version>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>

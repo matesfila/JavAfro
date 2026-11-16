@@ -43,7 +43,7 @@ Produkčným výstupom je `dist/`: statické HTML, JS, CSS, fonty, YAML a zvuky.
 Na neskoršie nasadenie stačí statický hosting s HTTPS. `base: './'` umožňuje
 aj hosting v podadresári. `dist/index.html` otváraj cez HTTP server.
 
-Verzia webovej aplikácie má tvar `0.5.4.69`. Prvé tri čísla pochádzajú z `pom.xml`.
+Verzia webovej aplikácie má tvar `0.6.1.69`. Prvé tri čísla pochádzajú z `pom.xml`.
 Štvrté číslo udáva počet commitov dostupných z práve zostavovaného commitu
 (`git rev-list --count HEAD`). Opakované zostavenie toho istého commitu má rovnakú verziu.
 Verzia sa vypíše pri zostavení a zobrazí sa v **O aplikácii**. Java používa tri čísla z `pom.xml`.
