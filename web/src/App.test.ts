@@ -242,7 +242,7 @@ it.each([
   await click('Zrušiť');
   await act(() => root.render(null));
   await act(() => root.render(createElement(App)));
-  expect(document.querySelector('.file-name')?.textContent).toBe(filename);
+  expect(document.querySelector('.file-name')?.textContent).toBe(text.trim() ? '*' + filename : filename);
   expect(editor().state.doc.toString()).toBe(contents);
 });
 
@@ -250,6 +250,7 @@ it('saves the controls of both rhythms after switching selection and restoring t
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
   await act(() => document.querySelector('[role="slider"][aria-label="Tempo"]')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })));
+  expect(document.querySelector('.file-name strong')?.textContent).toBe('*basicRhythms.yaml');
   await act(() => editor().dispatch({ selection: { anchor: yaml.indexOf('Two:') } }));
   await act(() => { vi.advanceTimersByTime(160); });
   await act(() => document.querySelector('[role="slider"][aria-label="Tempo"]')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })));
@@ -263,6 +264,8 @@ it('saves the controls of both rhythms after switching selection and restoring t
   await click('Súbor');
   await click('Uložiť');
   expect(download).toHaveBeenCalledOnce();
+  expect(document.querySelector('.file-name')?.textContent).toBe('basicRhythms.yaml');
+  expect(document.querySelector('.file-name strong')).toBeNull();
   const saved = parse(editor().state.doc.toString());
   expect([saved.One.bpm, saved.Two.bpm]).toEqual([91, 96]);
 });

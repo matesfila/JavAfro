@@ -40,7 +40,7 @@ export function App() {
   const [restorableDraft, setRestorableDraft] = useState<Draft | null>(null);
   const updateReload = useRef(false);
   const [draftError, setDraftError] = useState('');
-  const editorCaption = fileName;
+  const [isModified, setModified] = useState(false);
   const [replacement, setReplacement] = useState<{ text: string; name: string; fold: boolean; restored?: Draft } | null>(null);
   const replacementDialog = useRef<HTMLDialogElement>(null);
   const [parsedDocument, setParsedDocument] = useState<{ source: string; rhythm: Rhythm | null }>({ source: '', rhythm: null });
@@ -80,6 +80,7 @@ export function App() {
 
   function persistDraft(draft: Draft, replace = false) {
     activeDraft.current = draft;
+    setModified(hasUnsavedChanges(draft));
     saveActiveDraft.current = true;
     try {
       if (!draftStore.current) throw new Error('Úložisko prehliadača nie je dostupné.');
@@ -170,7 +171,10 @@ export function App() {
     if (parsed) updateControls(controlsFor(parsed, restored ?? null));
     const draft = restored ?? { source: text, fileName: filename, caretOffset: offset, savedSource: text };
     if (persist) persistDraft(draft, !!activeDraft.current);
-    else activeDraft.current = draft;
+    else {
+      activeDraft.current = draft;
+      setModified(hasUnsavedChanges(draft));
+    }
     setMessage('');
   }
 
@@ -393,7 +397,9 @@ export function App() {
             const file = event.target.files?.[0]; if (file) void openFile(file); event.target.value = '';
           }} />
           <div className="editor-toolbar">
-            <span className="file-name" title={editorCaption}>{editorCaption}</span>
+            <span className="file-name" title={fileName}>
+              {isModified ? <strong>*{fileName}</strong> : fileName}
+            </span>
             <div className="editor-actions">{inputModeButton}{modeButton}</div>
           </div>
           <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} foldRhythms={editorDocument.foldRhythms} overwriteButton={modeButton} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
