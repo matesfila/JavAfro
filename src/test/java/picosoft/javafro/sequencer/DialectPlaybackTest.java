@@ -110,7 +110,7 @@ public class DialectPlaybackTest {
     }
     private Rhythm load(String dialect) {
         String yaml = "Test:\n  bpm: 120\n  stepsPerBeat: 4\n  dialect: " + dialect
-                + "\n  tracks:\n    dundun: x...............\n";
+                + "\n  tracks:\n    dundun_withBell: x...............\n";
         return RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8))).get("Test");
     }
     @Test

@@ -165,8 +165,8 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 ## Časovanie a formát
 
 Formát zodpovedá Java triede Rhythm: `timeSignature`, `stepsPerBeat`, `dialect`,
-tracky `dundun`, `sangban`, `kensereni` (alias `kenken`), `djembe`, `djembe2`
-a samostatné `dundun_bell`, `sangban_bell`, `kensereni_bell`; string alebo objekt `base`/`variations`.
+tracky `dundun_withBell`, `sangban_withBell`, `kensereni_withBell`, `djembe`, `djembe2`
+a samostatné `dundunBell`, `sangbanBell`, `kensereniBell`; string alebo objekt `base`/`variations`.
 Znak `x` hrá iba zvonček; `D/d` úder dundunu, `S/s` sangbanu a `K/k` kensereni, vždy iba na príslušnom tracku. `.` je ticho, `|` oddeľuje celé takty bez pridaného času.
 Variácie a pôvodné `legacy` dáta zostávajú zachované, automaticky sa nehrajú.
 
@@ -302,3 +302,7 @@ Testy v prehliadači na počítači nenahrádzajú overenie na fyzickom iPhone.
 
 Automatické testy kontrolujú všetky zdieľané YAML, pravidlá taktu, dialect,
 humanizáciu, nepretržité časovanie a zastavenie zvuku počas načítavania/prerušenia.
+
+Tracky `dundun`, `sangban` a `kensereni` hrajú iba bubon: rovnaké údery a pravdepodobnosti ako `*_withBell`, bez automatického zvonca a bez podpory `x`.
+
+Samostatné zvonce `dundunBell`, `sangbanBell`, `kensereniBell` podporujú iba `x` (bežný úder) a `X` (hlasnejší úder, 1,5× hlasitosť).

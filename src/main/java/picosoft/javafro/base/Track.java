@@ -24,6 +24,9 @@ public interface Track {
 
     Instrument instrument();
 
+    /** Exact YAML key when loaded from a song. */
+    default String instrumentId() { return instrument().getClass().getSimpleName().replace("Instrument", ""); }
+
     /** Optional alternative patterns; normal playback uses pattern(). */
     default List<String> variations() {
         return List.of();

@@ -14,8 +14,8 @@ describe('AfroPlayer djembe', () => {
     const samples = samplesForInstrument('djembe');
     expect(new Set(samples).size).toBe(29);
     for (const sample of samples) expect(existsSync(fileURLToPath(new URL(`../../src/main/resources/samples/${sample}`, import.meta.url)))).toBe(true);
-    expect(samplesForInstrument('dundun')).toHaveLength(15);
-    expect(samplesForInstrument('dundun_freesound')).toEqual(['jimmyjames/dundun.wav', ...samplesForInstrument('dundun_bell')]);
+    expect(samplesForInstrument('dundun_withBell')).toHaveLength(15);
+    expect(samplesForInstrument('dundun_freesound')).toEqual(['jimmyjames/dundun.wav', ...samplesForInstrument('dundunBell')]);
     expect(selectSound('djembe', 't', 0, () => 0)?.sample).not.toBe(selectSound('djembe', 't', 0, () => .99)?.sample);
   });
   it('keeps accents, independent dynamics, pitch and original probability notes', () => {
@@ -43,12 +43,12 @@ describe('AfroPlayer djembe', () => {
     try {
       config.humanizeDynamic = .2;
       config.humanizePitch = .05;
-      const toneGain = manifest.banks.dj_tone.gain;
+      const toneGain = manifest.banks.dj_tone.gain * manifest.instruments.djembe.notes.T.gain;
       expect(selectSound('djembe', 'T', 100, () => 0)).toMatchObject({ gain: toneGain - .2, rate: .95 });
       expect(selectSound('djembe', 'T', 50, () => 0)).toMatchObject({ gain: toneGain - .1, rate: .975 });
       expect(selectSound('djembe', 'T', 0, () => 0)).toMatchObject({ gain: toneGain, rate: 1 });
-      expect(selectSound('dundun', 'D', 100, () => 0)?.gain).toBeCloseTo(manifest.banks.dundun_open.gain * manifest.instruments.dundun.notes.D.gain - .2);
-      expect(selectSound('dundun', 'D', 100, () => 0)?.rate).toBeCloseTo(.69);
+      expect(selectSound('dundun_withBell', 'D', 100, () => 0)?.gain).toBeCloseTo(manifest.banks.dundun_open.gain * manifest.instruments.dundun_withBell.notes.D.gain - .2);
+      expect(selectSound('dundun_withBell', 'D', 100, () => 0)?.rate).toBeCloseTo(.69);
     } finally {
       config.humanizeDynamic = saved.dynamic;
       config.humanizePitch = saved.pitch;
@@ -60,7 +60,7 @@ describe('AfroPlayer djembe', () => {
     const plan = planBeat(rhythm, { bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }, 0, 0, () => 0);
     expect(plan.hits.map(hit => hit.time)).toEqual([0, .125, .25]);
     expect(plan.hits.map(hit => hit.sample)).toEqual(['djembe/dj_tm_bass.wav', 'djembe/dj_tm_ton_v1.wav', 'djembe/dj_tm_slap_v1.wav']);
-    expect(() => parseRhythm(yaml.replace('djembe:', 'dundun:'))).toThrow();
+    expect(() => parseRhythm(yaml.replace('djembe:', 'dundun_withBell:'))).toThrow();
     expect(() => parseRhythm(yaml.replace('bts.', 'btx.'))).toThrow();
   });
 });

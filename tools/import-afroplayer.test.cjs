@@ -16,12 +16,12 @@ for (const check of [
     const rhythm = Object.values(parse(fs.readFileSync(path.join(root, file), 'utf8')))[0];
     const original = rhythm.legacy.definition;
     const barBeats = original.TIME_SIGNATURE[0] / ([6, 12].includes(original.TIME_SIGNATURE[0]) ? 3 : 4);
-    for (const [oldId, id] of Object.entries({ dundun: 'dundun', sangban: 'sangban', kenken: 'kensereni', djembe: 'djembe', djembe2: 'djembe2' })) {
+    for (const [oldId, id] of Object.entries({ dundun: 'dundun_withBell', sangban: 'sangban_withBell', kenken: 'kensereni_withBell', djembe: 'djembe', djembe2: 'djembe2' })) {
       if (check.label === 'standalone bell' && id.startsWith('djembe')) continue;
       const source = original.patterns[oldId];
       if (!source) continue;
       let bases = source.base?.length ? source.base : source.echauff ?? [];
-      if (check.label === 'standalone bell' && file === 'Kuku.yaml' && id === 'dundun') {
+      if (check.label === 'standalone bell' && file === 'Kuku.yaml' && id === 'dundun_withBell') {
         // Preserve the edited four-bar arrangement: three regular bars and the ending.
         bases = [...bases.slice(0, 3), bases.at(-1)];
       }
@@ -71,7 +71,7 @@ test('imports archived Ruby data without losing original note types, probabiliti
     const rhythm = Object.values(parse(result.yaml))[0];
     assert.deepEqual(rhythm.legacy.definition, data);
     const originalBarBeats = data.TIME_SIGNATURE[0] / ([6, 12].includes(data.TIME_SIGNATURE[0]) ? 3 : 4);
-    for (const [oldId, id] of Object.entries({ dundun: 'dundun', sangban: 'sangban', kenken: 'kensereni', djembe: 'djembe', djembe2: 'djembe2' })) {
+    for (const [oldId, id] of Object.entries({ dundun: 'dundun_withBell', sangban: 'sangban_withBell', kenken: 'kensereni_withBell', djembe: 'djembe', djembe2: 'djembe2' })) {
       const source = data.patterns[oldId];
       if (!source) continue;
       const track = rhythm.tracks[id];

@@ -2,8 +2,8 @@ import { isMap, isScalar, parseDocument } from 'yaml';
 import { supportsNote } from './sounds';
 import { config } from './config';
 
-export const instruments = ['dundun', 'sangban', 'kensereni', 'kenken', 'djembe', 'djembe2',
-  'dundun_bell', 'sangban_bell', 'kensereni_bell', 'kenken_bell',
+export const instruments = ['dundun', 'sangban', 'kensereni', 'dundun_withBell', 'sangban_withBell', 'kensereni_withBell', 'djembe', 'djembe2',
+  'dundunBell', 'sangbanBell', 'kensereniBell',
   'dundun_freesound', 'sangban_freesound', 'kensereni_freesound'] as const;
 export type Instrument = typeof instruments[number];
 export interface Track { instrument: Instrument; base: string; notes: string; variations: string[] }

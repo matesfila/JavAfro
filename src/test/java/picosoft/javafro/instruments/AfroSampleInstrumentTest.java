@@ -17,7 +17,7 @@ public class AfroSampleInstrumentTest {
     @Test public void drumLettersBelongOnlyToTheirTrackAndXIsExactlyOneBell() throws Exception {
         List<Instrument> drums = List.of(new DundunInstrument(fixed()), new SangbanInstrument(fixed()), new KensereniInstrument(fixed()));
         String[] strokes = {"Dd", "Ss", "Kk"};
-        List<Instrument> bells = List.of(new DundunBellInstrument(fixed()), new SangbanBellInstrument(fixed()), new KensereniBellInstrument(fixed()));
+        List<Instrument> bells = List.of(new DundunAccentBellInstrument(fixed()), new SangbanAccentBellInstrument(fixed()), new KensereniAccentBellInstrument(fixed()));
         for (int index = 0; index < drums.size(); index++) {
             Instrument drum = drums.get(index);
             for (char note : "DdSsKk".toCharArray()) {
@@ -29,7 +29,7 @@ public class AfroSampleInstrumentTest {
             Instrument standalone = bells.get(index).voice('x', 0);
             assertEquals(standalone.lengthSamples(1), bell.lengthSamples(1));
             for (int sample = 0; sample < bell.lengthSamples(1); sample++) assertEquals(standalone.sample(sample), bell.sample(sample), 0);
-            String instrument = List.of("dundun", "sangban", "kensereni").get(index);
+            String instrument = List.of("dundun_withBell", "sangban_withBell", "kensereni_withBell").get(index);
             double ratio = configuredNoteGain(instrument, strokes[index].charAt(0))
                     / configuredNoteGain(instrument, strokes[index].charAt(1));
             double normalDrum = drum.voice(strokes[index].charAt(1), 0).sample(500) - bell.sample(500);
@@ -40,6 +40,63 @@ public class AfroSampleInstrumentTest {
             for (char removed : "Ddx".toCharArray()) assertFalse(djembe.supportsNote(removed));
             assertNotNull(djembe.voice('B', 0));
             assertNotNull(djembe.voice('b', 0));
+        }
+    }
+
+    @Test public void drumOnlyVariantsKeepDrumVoicesAndProbabilitiesWithoutBells() throws Exception {
+        String[] ids = {"dundun", "sangban", "kensereni"};
+        String[] strokes = {"Dd", "Ss", "Kk"};
+        for (int index = 0; index < ids.length; index++) {
+            String id = ids[index];
+            for (double probability : new double[]{0, .12, .4, .8, .99}) {
+                Instrument drum = new AfroSampleInstrument(id, new FixedRandom(0, probability)) {};
+                Instrument combined = new AfroSampleInstrument(id + "_withBell", new FixedRandom(0, probability)) {};
+                Instrument bell = combined.voice('x', 0);
+                for (char note : (strokes[index] + "iIABC").toCharArray()) {
+                    assertTrue(drum.supportsNote(note));
+                    Instrument dry = drum.voice(note, 0);
+                    Instrument wet = combined.voice(note, 0);
+                    assertEquals(wet == null, dry == null);
+                    if (dry != null) {
+                        for (int sample = 0; sample < wet.lengthSamples(1); sample += 97) {
+                            assertEquals(wet.sample(sample), dry.sample(sample) + bell.sample(sample), 1e-12);
+                        }
+                    }
+                }
+                assertFalse(drum.supportsNote('x'));
+                assertThrows(IllegalArgumentException.class, () -> drum.voice('x', 0));
+            }
+            String yaml = "Test:\n  tracks: {" + id + ": 'i...'}";
+            var loaded = RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            assertFalse(loaded.get("Test").tracks().get(0).instrument().supportsNote('x'));
+            String invalid = yaml.replace("i...", "x...");
+            assertThrows(IllegalArgumentException.class, () -> RhythmLoader.load(
+                    new ByteArrayInputStream(invalid.getBytes(StandardCharsets.UTF_8))));
+        }
+    }
+
+    @Test public void accentedBellInstrumentsSupportOnlyXAndLouderCapitalX() throws Exception {
+        for (String id : List.of("dundun", "sangban", "kensereni")) {
+            Instrument bell = new AfroSampleInstrument(id + "Bell", fixed()) {};
+            Instrument legacy = new AfroSampleInstrument(id + "_withBell", fixed()) {};
+            Instrument normal = bell.voice('x', 0);
+            Instrument accent = bell.voice('X', 0);
+            Instrument original = legacy.voice('x', 0);
+            assertEquals(original.lengthSamples(1), normal.lengthSamples(1));
+            assertEquals(normal.lengthSamples(1), accent.lengthSamples(1));
+            for (int sample = 0; sample < normal.lengthSamples(1); sample += 97) {
+                assertEquals(original.sample(sample), normal.sample(sample), 0);
+                assertEquals(normal.sample(sample) * 1.5, accent.sample(sample), 1e-12);
+            }
+            for (char note : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()) {
+                assertEquals(note == 'x' || note == 'X', bell.supportsNote(note));
+            }
+            String yaml = "Test:\n  tracks: {" + id + "Bell: 'X...x...'}";
+            var loaded = RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+            assertTrue(loaded.get("Test").tracks().get(0).instrument().supportsNote('X'));
+            String invalid = yaml.replace("X...x...", "D.......");
+            assertThrows(IllegalArgumentException.class, () -> RhythmLoader.load(
+                    new ByteArrayInputStream(invalid.getBytes(StandardCharsets.UTF_8))));
         }
     }
 
@@ -81,7 +138,7 @@ public class AfroSampleInstrumentTest {
     @Test public void sampleInstrumentsRequireAnExplicitNoteBeforeRenderingOrPlaying() {
         for (Instrument instrument : List.of(new DjembeInstrument(fixed()), new Djembe2Instrument(fixed()),
                 new DundunInstrument(fixed()), new SangbanInstrument(fixed()), new KensereniInstrument(fixed()),
-                new DundunBellInstrument(fixed()), new SangbanBellInstrument(fixed()), new KensereniBellInstrument(fixed()))) {
+                new DundunAccentBellInstrument(fixed()), new SangbanAccentBellInstrument(fixed()), new KensereniAccentBellInstrument(fixed()))) {
             assertThrows(UnsupportedOperationException.class, () -> instrument.sample(0));
             assertThrows(UnsupportedOperationException.class, () -> instrument.lengthSamples(1));
             // Reject before opening an audio line, even if audio hardware is unavailable.
@@ -121,7 +178,7 @@ public class AfroSampleInstrumentTest {
                 "playback: {humanizeDynamic: 0.2, humanizePitch: 0.05}".getBytes(StandardCharsets.UTF_8)), java.nio.file.Path.of("."));
         var instrument = new AfroSampleInstrument("djembe", new FixedRandom(0, 0), config) {};
         WavInstrument tone = wav("djembe/dj_tm_ton_v1.wav");
-        double toneGain = configuredGain("dj_tone");
+        double toneGain = configuredGain("dj_tone") * configuredNoteGain("djembe", 'T');
         for (int humanize : new int[]{0, 50, 100}) {
             double amount = humanize / 100.0;
             var voice = instrument.voice('T', humanize);
@@ -140,8 +197,8 @@ public class AfroSampleInstrumentTest {
         for (long i : new long[]{0, 127, 500, 1001, 8000}) {
             double expectedBell = value(bellSample, i, .8, configuredGain("bell_dun"));
             assertEquals(expectedBell, bell.sample(i), 1e-12);
-            assertEquals(value(openSample, i, .74, configuredGain("dundun_open") * configuredNoteGain("dundun", 'D')) + expectedBell, open.sample(i), 1e-12);
-            assertEquals(value(closedSample, i, .9, configuredGain("dundun_closed") * configuredNoteGain("dundun", 'i')) + expectedBell, closed.sample(i), 1e-12);
+            assertEquals(value(openSample, i, .74, configuredGain("dundun_open") * configuredNoteGain("dundun_withBell", 'D')) + expectedBell, open.sample(i), 1e-12);
+            assertEquals(value(closedSample, i, .9, configuredGain("dundun_closed") * configuredNoteGain("dundun_withBell", 'i')) + expectedBell, closed.sample(i), 1e-12);
         }
         assertEquals(Math.max((long) Math.ceil(openSample.lengthSamples(1) / .74),
                 (long) Math.ceil(bellSample.lengthSamples(1) / .8)), open.lengthSamples(1));
@@ -192,14 +249,14 @@ public class AfroSampleInstrumentTest {
 
     @Test public void yamlAcceptsAllNewInstrumentsAliasesAndOriginalSymbols() {
         String source = "Test:\n  stepsPerBeat: 4\n  tracks:\n"
-                + "    dundun: 'D...i...x...A.BC'\n    sangban: 'S...I...x.......'\n"
-                + "    kenken: 'K...i...x.......'\n    djembe2: 'B.o.S.i.EpyFqz..'\n"
-                + "    dundun_bell: 'x...x...'\n    sangban_bell: 'x...x...'\n    kensereni_bell: 'x...x...'\n";
+                + "    dundun_withBell: 'D...i...x...A.BC'\n    sangban_withBell: 'S...I...x.......'\n"
+                + "    kensereni_withBell: 'K...i...x.......'\n    djembe2: 'B.o.S.i.EpyFqz..'\n"
+                + "    dundunBell: 'x...x...'\n    sangbanBell: 'x...x...'\n    kensereniBell: 'x...x...'\n";
         var rhythm = RhythmLoader.load(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8))).get("Test");
         assertEquals(7, rhythm.tracks().size());
         assertTrue(rhythm.tracks().get(0).instrument() instanceof DundunInstrument);
         assertTrue(rhythm.tracks().get(2).instrument() instanceof KensereniInstrument);
         assertTrue(rhythm.tracks().get(3).instrument() instanceof Djembe2Instrument);
-        assertTrue(rhythm.tracks().get(4).instrument() instanceof DundunBellInstrument);
+        assertTrue(rhythm.tracks().get(4).instrument() instanceof DundunAccentBellInstrument);
     }
 }

@@ -6,5 +6,5 @@ import java.util.random.RandomGenerator;
 /** Original AfroPlayer sangban multisamples and note mapping. */
 public final class SangbanInstrument extends AfroSampleInstrument {
     public SangbanInstrument() { this(ThreadLocalRandom.current()); }
-    public SangbanInstrument(RandomGenerator random) { super("sangban", random); }
+    public SangbanInstrument(RandomGenerator random) { super("sangban_withBell", random); }
 }

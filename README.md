@@ -207,12 +207,13 @@ po Stop/Play. Dialect je zatiaľ spoločný pre všetky tracky.
 
 | Track | Všetky podporované noty a ich význam | Samostatný zvonček |
 | --- | --- | --- |
-| `dundun` | `D/d` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
-| `sangban` | `S/s` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
-| `kensereni` / `kenken` | `K/k` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
+| `dundun`, `sangban`, `kensereni` | Rovnaké údery a pravdepodobnosti ako varianty `*_withBell`, ale iba bubon bez zvonca; `x` nie je podporované | nepodporuje |
+| `dundun_withBell` | `D/d` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
+| `sangban_withBell` | `S/s` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
+| `kensereni_withBell` | `K/k` otvorený úder; `i/I` uzavretý úder; `A`, `B`, `C` otvorený úder s pravdepodobnosťou 12 %, 40 %, 80 % | `x` |
 | `djembe` | `B/b` bas; `T/t` a `o` tón; `S/s` slap; `i/I` tlmený tón; `c/C` tlmený slap; `a/A` alternatívny slap; `E/p/y` bas/tón/slap s pravdepodobnosťou 60 %; `F/q/z` bas/tón/slap s pravdepodobnosťou 12 % | nepodporuje |
 | `djembe2` | `B/b` bas; `T/t` a `o` tón; `S/s` slap; `i/I` uzavretý zvuk; `E/p/y` bas/tón/slap s pravdepodobnosťou 60 %; `F/q/z` bas/tón/slap s pravdepodobnosťou 12 % | nepodporuje |
-| `dundun_bell`, `sangban_bell`, `kensereni_bell` / `kenken_bell` | — | `x` |
+| `dundunBell`, `sangbanBell`, `kensereniBell` | Iba zvonec: `x` bežný úder, `X` hlasnejší úder (1,5× hlasitosť) | `x`, `X` |
 
 Zápis `D/d` znamená dva povolené znaky `D` a `d`; veľkosť písmen je významná
 a povolené sú iba uvedené varianty. Písmená bubnov platia iba pre príslušný
@@ -220,7 +221,7 @@ track; `D/d` nie je všeobecný úder. Pri basových bubnoch sú uvedené veľk�
 a malé varianty rovnocenné. Pri `djembe` a `djembe2` majú `b/t/s` 70 %
 hlasitosti akcentov `B/T/S`; pri `djembe` to platí aj pre `c/a` voči `C/A`.
 `i` a `I` majú rovnakú hlasitosť, `o` je rovnocenné `T`. Každý úspešný úder
-`dundun`, `sangban` a `kensereni` / `kenken` pridá aj zvonec; varianty
+`dundun_withBell`, `sangban_withBell` a `kensereni_withBell` pridá aj zvonec; varianty
 `*_freesound` ho k úderu automaticky nepridávajú. `x` hrá vždy iba zvonec.
 `.` je pauza a `|` hranica taktu pre všetky tracky.
 
@@ -274,13 +275,12 @@ Triedy pôvodných nástrojov sú v `picosoft.javafro.instruments.sample.matesam
 
 | YAML nástroj | Java trieda |
 | --- | --- |
-| `dundun` | `DundunInstrument` |
-| `sangban` | `SangbanInstrument` |
-| `kensereni` alebo `kenken` | `KensereniInstrument` |
+| `dundun` / `sangban` / `kensereni` | `DundunDrumInstrument` / `SangbanDrumInstrument` / `KensereniDrumInstrument` |
+| `dundun_withBell` | `DundunInstrument` |
+| `sangban_withBell` | `SangbanInstrument` |
+| `kensereni_withBell` | `KensereniInstrument` |
 | `djembe2` | `Djembe2Instrument` |
-| `dundun_bell` | `DundunBellInstrument` |
-| `sangban_bell` | `SangbanBellInstrument` |
-| `kensereni_bell` alebo `kenken_bell` | `KensereniBellInstrument` |
+| `dundunBell` / `sangbanBell` / `kensereniBell` | `DundunAccentBellInstrument` / `SangbanAccentBellInstrument` / `KensereniAccentBellInstrument` |
 
 Basové bubny používajú pôvodné multisample: `D/d` je otvorený úder dundunu,
 `S/s` sangbanu a `K/k` kensereni. `i/I` je uzavretý úder a `x` samotný zvonec. Každý úspešný úder bubna automaticky
@@ -340,9 +340,9 @@ Djole:
   timeSignature: "4/4"
   stepsPerBeat: 4
   tracks:
-    dundun:    "D.......D.D....."
-    sangban:   "....S.......S..."
-    kensereni: "..KK..KK..KK..KK"
+    dundun_withBell:    "D.......D.D....."
+    sangban_withBell:   "....S.......S..."
+    kensereni_withBell: "..KK..KK..KK..KK"
 ```
 
 `RhythmLoader.load(Path)` alebo `RhythmLoader.load(InputStream)` v balíku
@@ -353,7 +353,7 @@ Názov rytmu je jeho hlavný YAML kľúč; samostatné pole `name` sa nepoužív
 Z polí definície je povinné iba `tracks`. Vynechané `bpm` prevezme globálne tempo
 z `playback.tempo.initial` v `javafro.yaml`. Vynechaný `dialect` použije samé nuly
 (jednu pre každý krok na dobu). Explicitne zadané neplatné hodnoty sa odmietnu;
-podporované nástroje zahŕňajú `dundun`, `sangban`, `kensereni`/`kenken`, `djembe`,
+podporované nástroje zahŕňajú `dundun_withBell`, `sangban_withBell`, `kensereni_withBell`, `djembe`,
 `djembe2` a ich samostatné zvonce podľa tabuľky vyššie.
 `timeSignature` je voliteľné, predvolene `"4/4"`. Podporované sú kladné metrá
 s menovateľom 4 alebo 8. Bez `stepsPerBeat` každý znak noty alebo `.` predstavuje osminu;
@@ -390,12 +390,12 @@ Track môže zostať reťazec alebo obsahovať základ a zoznam variácií:
 
 ```yaml
 tracks:
-  dundun:
+  dundun_withBell:
     base: "D.......|D.D....."
     variations:
       - "DD.DDD.D|DD.DD.D."
-  sangban: "....S...|....S..."
-  kensereni: "..KK..KK|..KK..KK"
+  sangban_withBell: "....S...|....S..."
+  kensereni_withBell: "..KK..KK|..KK..KK"
 ```
 
 Bežné prehrávanie používa iba `base`. Alternatívy sú dostupné cez
@@ -417,7 +417,7 @@ try (var input = AfroJavaPlayer.class.getResourceAsStream("/rhythms/imported/Djo
 ```
 
 Aktuálny importér prevádza noty podľa tracku na nový zápis a zachováva ich zvuk, zvonce, pravdepodobnosti aj `djembe2`.
-Starý `kenken` sa pri importe pomenuje `kensereni`; obidva názvy možno načítať.
+Starý `kenken` sa pri importe pomenuje `kensereni_withBell`.
 Ručne upravené existujúce rytmy sa pri implementácii nástrojov neprepisovali.
 Staršie importy môžu stále obsahovať zjednodušené `x`; úplné pôvodné dáta sú
 v `legacy.definition`. Načítavač `legacy` akceptuje ako archív; neovplyvňuje prehrávanie.

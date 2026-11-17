@@ -5,31 +5,49 @@ DjoleOriginal:
   tracks:
     djembe: "Byoo..SyB.oopyS."
     djembe2: "B.SSB.ooB.SSB.oo"
-    dundun: "D.x.x.x.D.D.x.x."
-    sangban: "S.x.S.x.S.x.S.x."
-    kenken: "x.KKx.KKx.KKx.KK"
+    dundun_withBell: "D.x.x.x.D.D.x.x."
+    sangban_withBell: "S.x.S.x.S.x.S.x."
+    kensereni_withBell: "x.KKx.KKx.KKx.KK"
 
 # D/d (dundun), S/s (sangban), K/k (kensereni) = open drum + bell; i/I = closed drum + bell; x = bell only.
 OpenClosedAndBell:
   bpm: 100
   stepsPerBeat: 4
   tracks:
-    dundun: "D...i...x...I..."
-    sangban: "S...i...x...I..."
-    kensereni: "K...i...x...I..."
+    dundun_withBell: "D...i...x...I..."
+    sangban_withBell: "S...i...x...I..."
+    kensereni_withBell: "K...i...x...I..."
 
 SeparateBells:
   bpm: 100
   stepsPerBeat: 4
   tracks:
-    dundun_bell: "x...x...x...x..."
-    sangban_bell: "..x...x...x...x."
-    kensereni_bell: ".x...x...x...x.."
+    dundunBell: "x...x...x...x..."
+    sangbanBell: "..x...x...x...x."
+    kensereniBell: ".x...x...x...x.."
 
 # A/B/C = open drum + bell with probabilities 12/40/80 percent.
 Probabilities:
   bpm: 100
   stepsPerBeat: 4
   tracks:
-    dundun: "D...A...B...C..."
+    dundun_withBell: "D...A...B...C..."
     djembe2: "B.E.F.o.p.q.S.yz"
+
+# Drum-only variants: the same strokes and probabilities, without bells or x.
+DrumsOnly:
+  bpm: 100
+  stepsPerBeat: 4
+  tracks:
+    dundun: "D...i...A...C..."
+    sangban: "S...i...B...I..."
+    kensereni: "K...i...k...I..."
+
+# Bell-only instruments: x = normal, X = accented (1.5x gain).
+AccentedBells:
+  bpm: 100
+  stepsPerBeat: 4
+  tracks:
+    dundunBell: "X...x...X...x..."
+    sangbanBell: "..x...X...x...X."
+    kensereniBell: "x.X.x.X.x.X.x.X."

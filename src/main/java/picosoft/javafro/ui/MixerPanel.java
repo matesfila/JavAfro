@@ -53,7 +53,7 @@ final class MixerPanel extends JPanel {
     void setRhythm(Rhythm rhythm) {
         List<String> next = new ArrayList<>();
         next.add(rhythm.name());
-        rhythm.tracks().forEach(track -> next.add(track.instrument().getClass().getName()));
+        rhythm.tracks().forEach(track -> next.add(track.instrumentId()));
         if (signature.equals(next)) return;
         signature = List.copyOf(next);
         settings = null;
@@ -61,7 +61,7 @@ final class MixerPanel extends JPanel {
         add(masterRow);
         for (int i = 0; i < rhythm.tracks().size(); i++) {
             final int index = i;
-            String instrument = rhythm.tracks().get(i).instrument().getClass().getSimpleName().replace("Instrument", "");
+            String instrument = rhythm.tracks().get(i).instrumentId();
             String name = (i + 1) + " · " + instrument;
             JSlider volume = new JSlider(0, 200, initialVolume);
             TouchSliders.install(volume);
@@ -70,13 +70,22 @@ final class MixerPanel extends JPanel {
             JToggleButton mute = new JToggleButton("Mute");
             mute.setName("trackMute-" + i);
             mute.getAccessibleContext().setAccessibleName("Mute " + name);
+            JButton solo = new JButton("Solo");
+            solo.setName("trackSolo-" + i);
+            solo.getAccessibleContext().setAccessibleName("Solo " + name);
+            solo.addActionListener(event -> {
+                for (int track = 0; track < mutes.size(); track++) {
+                    mutes.get(track).setSelected(track != index);
+                    update(track);
+                }
+            });
             JLabel value = new JLabel(trackVolumeText(initialVolume), SwingConstants.RIGHT);
             value.setPreferredSize(new Dimension(50, 24));
             JLabel label = new JLabel(instrument);
             label.setLabelFor(volume);
             label.setPreferredSize(new Dimension(150, 24));
             JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-            right.add(value); right.add(mute);
+            right.add(value); right.add(mute); right.add(solo);
             JPanel row = new JPanel(new BorderLayout(10, 0));
             row.add(label, BorderLayout.WEST); row.add(volume, BorderLayout.CENTER); row.add(right, BorderLayout.EAST);
             volumes.add(volume); mutes.add(mute); add(row);
@@ -96,7 +105,7 @@ final class MixerPanel extends JPanel {
     void configure(PlaybackSettings target, Rhythm rhythm) {
         List<String> next = new ArrayList<>();
         next.add(rhythm.name());
-        rhythm.tracks().forEach(track -> next.add(track.instrument().getClass().getName()));
+        rhythm.tracks().forEach(track -> next.add(track.instrumentId()));
         target.setMasterVolume(master.getValue());
         boolean same = signature.equals(next);
         for (int i = 0; i < rhythm.tracks().size(); i++) {

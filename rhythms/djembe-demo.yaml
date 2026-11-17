@@ -5,9 +5,9 @@ djembe-demo:
   dialect: [0, 0, 0, 0]
 
   tracks:
-    dundun:    "D.......D......."
-    sangban:   "....S.......S..."
-    kensereni: "..K...K...K...K."
+    dundun_withBell:    "D.......D......."
+    sangban_withBell:   "....S.......S..."
+    kensereni_withBell: "..K...K...K...K."
     djembe:
       # b = bas, t = tón, s = slap; veľké písmená sú akcenty.
       base: "b..t.s..B.tt.S.."

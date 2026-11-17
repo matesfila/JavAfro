@@ -6,15 +6,15 @@
   tracks:
     djembe:
       base: "b.tt..s.b.tt..s."
-    dundun:
+    dundun_withBell:
       base: "D.x.D.x.D.x.D.x."
       variations:
         - "D.D.D.D.D.D.D...|D.x.D.x.D.x.D.x.|D.D.D.D.D.D.D...|D.x.D.x.D.x.D.x.|D.D.D.D.D.D.D...|...DD...D.x.D.x.|DD.xx.x.D.DDD..."
-    sangban:
+    sangban_withBell:
       base: "S.xS.xx.S.S.i.x."
       variations:
         - "S.S.S.S.S.S.S...|S.xS.xx.S.S.i.x.|S.S.S.S.S.S.S...|S.xS.xx.S.S.i.x.|S.S.S.S.S.S.S...|...SS...S.x.S.x.|SS.xx.x.S.SSS..."
-    kensereni:
+    kensereni_withBell:
       base: "x.KK.xi.x.KK.xi."
       variations:
         - "K.K.K.K.K.K.K...|x.KK.xi.x.KK.xi.|K.K.K.K.K.K.K...|x.KK.xi.x.KK.xi.|K.K.K.K.K.K.K...|...KK...K.x.K.x.|KK.xx.x.K.KKK..."

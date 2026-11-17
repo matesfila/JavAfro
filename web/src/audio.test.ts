@@ -255,7 +255,7 @@ describe('audio lifecycle', () => {
 
   it('applies the master to the full mix live and preserves it across Stop/Play', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun: "DDDDDDDDDDDDDDDD", sangban: "SSSSSSSSSSSSSSSS"}');
+    const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun_withBell: "DDDDDDDDDDDDDDDD", sangban_withBell: "SSSSSSSSSSSSSSSS"}');
     await engine.start(duet);
     const [master, first, second] = context.gains;
     expect(master.gain.value).toBe(.25 / 2);
@@ -278,7 +278,7 @@ describe('audio lifecycle', () => {
 
   it('routes tracks independently and changes live gains without restarting scheduled notes', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun: "DDDDDDDDDDDDDDDD", sangban: "SSSSSSSSSSSSSSSS"}');
+    const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun_withBell: "DDDDDDDDDDDDDDDD", sangban_withBell: "SSSSSSSSSSSSSSSS"}');
     engine.setTrackMix([{ volume: 35, muted: true }, { volume: 60, muted: false }]);
     await engine.start(duet);
     const [master, first, second] = context.gains;
@@ -306,7 +306,7 @@ describe('audio lifecycle', () => {
 
   it('loads only an AfroPlayer drum and its bell banks and applies their original stereo pan', async () => {
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    const drum = parseRhythm('drum:\n  stepsPerBeat: 4\n  tracks: {dundun: "DDDDDDDDDDDDDDDD"}');
+    const drum = parseRhythm('drum:\n  stepsPerBeat: 4\n  tracks: {dundun_withBell: "DDDDDDDDDDDDDDDD"}');
     expect(await engine.start(drum)).toBe(true);
     expect(context.decodeAudioData).toHaveBeenCalledTimes(15);
     expect(context.sources).toHaveLength(8);

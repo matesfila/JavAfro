@@ -2,11 +2,11 @@ package picosoft.javafro.instruments.sample.jimmijames;
 
 import picosoft.javafro.instruments.DrumInstrument;
 import picosoft.javafro.instruments.sample.WavSampleInstrument;
-import picosoft.javafro.instruments.sample.matesamples.SangbanBellInstrument;
+import picosoft.javafro.instruments.sample.matesamples.SangbanAccentBellInstrument;
 
 /** Recorded wooden sangban, JIMMYJAMES112 / Freesound, CC0. */
 public final class SangbanInstrument extends DrumInstrument {
     public SangbanInstrument() {
-        super(new WavSampleInstrument("/samples/jimmyjames/sangban.wav") {}, new SangbanBellInstrument(), 'S');
+        super(new WavSampleInstrument("/samples/jimmyjames/sangban.wav") {}, new SangbanAccentBellInstrument(), 'S');
     }
 }

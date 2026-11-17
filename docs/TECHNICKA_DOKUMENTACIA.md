@@ -334,7 +334,7 @@ Ukazka:
       base: "b...t...s...t..."
       variations:
         - "b...t...s...tt.."
-    sangban: "....S.......S..."
+    sangban_withBell: "....S.......S..."
 ```
 
 Hlavný kľúč je názov/identifikátor rytmu. Súbor môže obsahovať viac definícií.

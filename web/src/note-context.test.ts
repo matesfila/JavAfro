@@ -11,7 +11,7 @@ function at(source: string) {
 }
 
 describe('note keyboard context', () => {
-  it('follows the active track, including aliases, quoted keys and empty values', () => {
+  it('follows the active track, in manifest order, quoted keys and empty values', () => {
     for (const instrument of instruments) {
       expect(at(`demo:\n  tracks:\n    '${instrument}': "..¦.."\n    djembe: "...."`)).toBe(instrument);
       expect(at(`demo:\n  tracks:\n  ¦  ${instrument}:`)).toBe(instrument);
@@ -20,21 +20,21 @@ describe('note keyboard context', () => {
 
   it('keeps track context in nested base, variations and multiline patterns', () => {
     for (const pattern of ['base: "..¦.."', 'variations:\n        - "..¦.."', 'base: |\n        ..¦..']) {
-      expect(at(`demo:\n  tracks:\n    dundun:\n      ${pattern}\n    sangban: "...."`)).toBe('dundun');
+      expect(at(`demo:\n  tracks:\n    dundun_withBell:\n      ${pattern}\n    sangban_withBell: "...."`)).toBe('dundun_withBell');
     }
   });
 
   it('works during invalid pattern edits and distinguishes tracks on a flow-map line', () => {
-    expect(at('demo:\n  tracks:\n    dundun: "D?¦"')).toBe('dundun');
-    expect(at('demo:\n  tracks: {dundun: "DD", sangban: "S¦S"}')).toBe('sangban');
-    expect(at('demo:\n  tracks:\n    dundun: "DD"  ¦ # comment')).toBe('dundun');
+    expect(at('demo:\n  tracks:\n    dundun_withBell: "D?¦"')).toBe('dundun_withBell');
+    expect(at('demo:\n  tracks: {dundun_withBell: "DD", sangban_withBell: "S¦S"}')).toBe('sangban_withBell');
+    expect(at('demo:\n  tracks:\n    dundun_withBell: "DD"  ¦ # comment')).toBe('dundun_withBell');
   });
 
   it('hides notes in metadata, unknown tracks, archived data and outside track blocks', () => {
-    for (const source of ['demo:\n  bpm: 1¦00\n  tracks:\n    dundun: "DD"',
+    for (const source of ['demo:\n  bpm: 1¦00\n  tracks:\n    dundun_withBell: "DD"',
       'demo:\n  tracks:\n    unknown: "¦DD"',
-      'demo:\n  legacy:\n    dundun: "¦DD"',
-      'demo:\n  tracks:\n    dundun: "DD"\n  bpm: ¦100']) {
+      'demo:\n  legacy:\n    dundun_withBell: "¦DD"',
+      'demo:\n  tracks:\n    dundun_withBell: "DD"\n  bpm: ¦100']) {
       expect(at(source)).toBeNull();
     }
     expect(notesForInstrument(null)).toEqual([]);
@@ -43,7 +43,7 @@ describe('note keyboard context', () => {
   it('lays out each instrument in manifest order, including aliases', () => {
     const { instruments: definitions } = parse(manifestSource);
     for (const instrument of instruments) {
-      const definition = definitions[instrument.replace('kenken', 'kensereni')];
+      const definition = definitions[instrument];
       if (definition) expect(notesForInstrument(instrument)).toEqual(Object.keys(definition.notes));
     }
   });

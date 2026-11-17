@@ -161,7 +161,7 @@ public final class RhythmLoader {
                 }
                 String base = text(patternValue, "Pattern");
                 timeSignature.validatePattern(base, stepsPerBeat);
-                tracks.add(new BeepTrack(base, instrument(instrument), variations));
+                tracks.add(new BeepTrack(base, instrument(instrument), variations, instrument));
             } catch (IllegalArgumentException exception) {
                 throw new IllegalArgumentException("Track '" + instrument + "': " + exception.getMessage(), exception);
             }
@@ -171,12 +171,15 @@ public final class RhythmLoader {
 
     private static Instrument instrument(String id) {
         return switch (id) {
-            case "dundun" -> new DundunInstrument();
-            case "sangban" -> new SangbanInstrument();
-            case "kensereni", "kenken" -> new KensereniInstrument();
-            case "dundun_bell" -> new DundunBellInstrument();
-            case "sangban_bell" -> new SangbanBellInstrument();
-            case "kensereni_bell", "kenken_bell" -> new KensereniBellInstrument();
+            case "dundun" -> new DundunDrumInstrument();
+            case "sangban" -> new SangbanDrumInstrument();
+            case "kensereni" -> new KensereniDrumInstrument();
+            case "dundun_withBell" -> new DundunInstrument();
+            case "sangban_withBell" -> new SangbanInstrument();
+            case "kensereni_withBell" -> new KensereniInstrument();
+            case "dundunBell" -> new DundunAccentBellInstrument();
+            case "sangbanBell" -> new SangbanAccentBellInstrument();
+            case "kensereniBell" -> new KensereniAccentBellInstrument();
             case "djembe2" -> new Djembe2Instrument();
             case "dundun_freesound" -> new picosoft.javafro.instruments.sample.jimmijames.DundunInstrument();
             case "sangban_freesound" -> new picosoft.javafro.instruments.sample.jimmijames.SangbanInstrument();

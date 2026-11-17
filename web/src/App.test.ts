@@ -83,8 +83,8 @@ it('updates rhythm context across invalid patterns and YAML syntax errors', asyn
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
   for (const invalidPattern of ['"?"', '@']) {
-    const source = 'One:\n  bpm: 90\n  tracks:\n    dundun: ' + invalidPattern
-      + '\nTwo:\n  bpm: 95\n  tracks:\n    sangban: "S......."\n';
+    const source = 'One:\n  bpm: 90\n  tracks:\n    dundun_withBell: ' + invalidPattern
+      + '\nTwo:\n  bpm: 95\n  tracks:\n    sangban_withBell: "S......."\n';
     await act(() => editor().dispatch({
       changes: { from: 0, to: editor().state.doc.length, insert: source },
       selection: { anchor: source.indexOf('Two:') },
@@ -92,12 +92,12 @@ it('updates rhythm context across invalid patterns and YAML syntax errors', asyn
     await act(() => vi.advanceTimersByTimeAsync(200));
     expect(document.querySelector('h1')?.textContent).toBe('Two');
     expect(document.querySelector('[aria-label="Tempo"]')?.getAttribute('aria-valuenow')).toBe('95');
-    expect(document.querySelector('label[for="volume-0"]')?.textContent).toBe('sangban');
-    await act(() => editor().dispatch({ selection: { anchor: source.indexOf('dundun:') } }));
+    expect(document.querySelector('label[for="volume-0"]')?.textContent).toBe('sangban_withBell');
+    await act(() => editor().dispatch({ selection: { anchor: source.indexOf('dundun_withBell:') } }));
     await act(() => vi.advanceTimersByTimeAsync(200));
     expect(document.querySelector('h1')?.textContent).toBe('One');
     expect(document.querySelector('[aria-label="Tempo"]')?.getAttribute('aria-valuenow')).toBe('90');
-    expect(document.querySelector('label[for="volume-0"]')?.textContent).toBe('dundun');
+    expect(document.querySelector('label[for="volume-0"]')?.textContent).toBe('dundun_withBell');
   }
 });
 
@@ -182,14 +182,14 @@ it('uses the focused folded rhythm for the heading and playback with Windows lin
 
 it('follows the editor caret between tracks in a Windows-line-ending file on mobile', async () => {
   vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
-  const source = '# rhythm\r\n'.repeat(22) + 'One:\r\n  tracks:\r\n    dundun: "D......."\r\n    djembe: "b.tt..s."\r\n';
+  const source = '# rhythm\r\n'.repeat(22) + 'One:\r\n  tracks:\r\n    dundun_withBell: "D......."\r\n    djembe: "b.tt..s."\r\n';
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => source }));
   await act(() => root.render(createElement(App)));
   const view = editor();
   await click('Plocha');
   await act(() => { unfoldAll(view); });
   const text = view.state.doc.toString();
-  for (const instrument of ['djembe', 'dundun', 'djembe']) {
+  for (const instrument of ['djembe', 'dundun_withBell', 'djembe']) {
     const anchor = text.indexOf('"', text.indexOf(instrument)) + 1;
     await act(() => view.dispatch({ selection: { anchor } }));
     expect(document.querySelector('.note-instrument')?.textContent).toBe(instrument);
@@ -268,4 +268,38 @@ it('saves the controls of both rhythms after switching selection and restoring t
   expect(document.querySelector('.file-name strong')).toBeNull();
   const saved = parse(editor().state.doc.toString());
   expect([saved.One.bpm, saved.Two.bpm]).toEqual([91, 96]);
+});
+
+
+it('solos a track by unmuting it and muting every other track without changing volumes', async () => {
+  const source = 'Solo test:\n  tracks: {dundun: "D.......", sangban: "S.......", kensereni: "K......."}';
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => source }));
+  await act(() => root.render(createElement(App)));
+  const mutes = () => Array.from(document.querySelectorAll('button[aria-label^="Mute track"]')).map(button => button.getAttribute('aria-pressed'));
+  const volumes = () => Array.from(document.querySelectorAll<HTMLInputElement>('.mixer-volume input')).map(input => input.value);
+  const before = volumes();
+  await click('Mute track 2 sangban');
+  await click('Solo track 2 sangban');
+  expect(mutes()).toEqual(['true', 'false', 'true']);
+  expect(volumes()).toEqual(before);
+  await click('Solo track 1 dundun');
+  expect(mutes()).toEqual(['false', 'true', 'true']);
+  await click('Solo track 1 dundun');
+  expect(mutes()).toEqual(['false', 'true', 'true']);
+  await click('Mute track 3 kensereni');
+  expect(mutes()).toEqual(['false', 'true', 'false']);
+});
+
+
+it('lists only the selected song tracks using exact YAML instrument names', async () => {
+  const source = 'First:\n  tracks: {dundun: "D.......", dundun_withBell: "D.......", sangbanBell: "x......."}\nSecond:\n  tracks: {kensereni_withBell: "K......."}\n';
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => source }));
+  await act(() => root.render(createElement(App)));
+  const labels = () => Array.from(document.querySelectorAll('label[for^="volume-"]')).map(label => label.textContent);
+  expect(labels()).toEqual(['dundun', 'dundun_withBell', 'sangbanBell']);
+  await click('Solo track 1 dundun');
+  expect(Array.from(document.querySelectorAll('button[aria-label^="Mute track"]')).map(button => button.getAttribute('aria-pressed'))).toEqual(['false', 'true', 'true']);
+  await act(() => editor().dispatch({ selection: { anchor: source.indexOf('Second:') } }));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  expect(labels()).toEqual(['kensereni_withBell']);
 });

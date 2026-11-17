@@ -6,15 +6,15 @@
   tracks:
     djembe:
       base: "s.ts..s.ts.."
-    dundun:
+    dundun_withBell:
       base: ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|.D.D.D.DD.DD|.D.D.D.DD.DD"
       variations:
         - ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|DD.DDD.DD.DD|DD.DDD.DD.DD"
         - ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|DD.DDD.DD.DD|DDDDDD.DD.DD"
         - ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.D.|x.xD.x.Dx.DD|.xx.xx.DD.xx"
         - ".DD.xx.xx.DD|.DD.xx.DD.DD|.DD.xx.xx.DD|.D.D.x.Dx.DD|.x.DDD.DD.xx"
-    sangban:
+    sangban_withBell:
       base: "i.i.x.x.x.S.|i.i.x.S.S.S.|i.i.x.i.i.x.|S.x.S.x.S.xx|.S.S.S.xx.S."
-    kensereni:
+    kensereni_withBell:
       base: ".xK.KK.xK.KK"
   legacy: {"source":"Takosaba.rb","symbol":"TAKOSABA","notes":[],"definition":{"BPM":120,"TIME_SIGNATURE":[12,8],"SWING":[-0.03,0.04,-0.01],"patterns":{"dundun":{"base":[".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|.X.X.X.XX.XX|.X.X.X.XX.XX"],"variations":[".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|XX.XXX.XX.XX|XX.XXX.XX.XX",".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|XX.XXX.XX.XX|XXXXXX.XX.XX",".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.X.|b.bX.b.Xb.XX|.bb.bb.XX.bb",".XX.bb.bb.XX|.XX.bb.XX.XX|.XX.bb.bb.XX|.X.X.b.Xb.XX|.b.XXX.XX.bb"]},"sangban":{"base":["I.I.b.b.b.X.|I.I.b.X.X.X.|I.I.b.I.I.b.|X.b.X.b.X.bb|.X.X.X.bb.X."],"variations":[]},"kenken":{"base":[".bX.XX.bX.XX"],"variations":[]},"djembe":{"base":["x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..","x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..|x.ox..x.ox..","x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|x..xoox..xoo|x..xoox..xoo","............|............|............|............|............","............|............|............|............|............"],"variations":[]}},"dependencies":{}}}

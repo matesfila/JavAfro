@@ -7,7 +7,7 @@
     # Preserve the existing 12-step djembe cycle across three complete 4/4 bars.
     djembe:
       base: "tt.s..s."
-    dundun:
+    dundun_withBell:
       base: "x.xD.xx.x.x...x.|x.xD.xx.x.x.D.x.|x.xD.xx.x.x...x.|xD.D.xx.x.x...x."
       variations:
         - "x.xD.xx.D.xD.xD."
@@ -34,10 +34,10 @@
         - "D.DD.DD.D.DD.DD."
         - "D.xD.xD.DD.D.DD.|D.DD.DD.DD.DDDD."
         - "D.xD.xD.DD.D.DD.|D.DD.DD.DD.DDDD."
-    sangban:
+    sangban_withBell:
       base: "S.x.x.S.S.x.x.S."
       variations:
         - "S.xS.xS.xS.xS.S."
-    kensereni:
+    kensereni_withBell:
       base: "KK..KK..KK..KK.."
   legacy: {"source":"Kuku.rb","symbol":"KUKU","notes":["Original 8/4 sections were imported as 2/4, then paired into 4/4 bars; BPM and hit timing unchanged."],"definition":{"BPM":110,"TIME_SIGNATURE":[8,4],"SWING":[0.1,-0.1,0.1,-0.1],"patterns":{"dundun":{"base":["b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","b.bX.bb.|b.b.B.b.","bX.X.bb.|b.b.B.b."],"variations":["b.bX.bb.|X.bX.bX.","b.bX.bb.|X.bX.bX.","b.bX.bb.|X.bX.bX.","b.bX.bb.|X.bX.bX.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.AX.AX.|AX.AX.X.","b.bX.bb.|X.XX.XX.","b.bX.bb.|X.XX.XX.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","B.BB.BB.|C.CC.CC.","X.bX.bB.|XX.X.XX.|X.XX.XX.|XX.XXXX.","X.bX.bB.|XX.X.XX.|X.XX.XX.|XX.XXXX."]},"sangban":{"base":["X.b.b.X.|X.b.b.X."],"variations":["X.bX.bX.|bX.bX.X."]},"kenken":{"base":["XX..XX..|XX..XX.."],"variations":[]},"djembe":{"base":["x.oo..x.|x.oo..x."],"variations":["x.oxoox.|ox.xoox.","x.oo..x.|ooxxooxx|x.oxoox.|ox.xoox."]},"djembe2":{"base":["x.D.oo..|x.D.oo.."],"variations":[]}}}}

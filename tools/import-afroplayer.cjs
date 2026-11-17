@@ -114,12 +114,12 @@ class Reader {
 const gcd = (a, b) => b ? gcd(b, a % b) : a;
 const lcm = (a, b) => a / gcd(a, b) * b;
 const quote = value => JSON.stringify(value);
-const instruments = { dundun: 'dundun', sangban: 'sangban', kenken: 'kensereni', djembe: 'djembe', djembe2: 'djembe2' };
+const instruments = { dundun: 'dundun_withBell', sangban: 'sangban_withBell', kenken: 'kensereni_withBell', djembe: 'djembe', djembe2: 'djembe2' };
 
 // Source files and legacy.definition keep Ruby notation; only playable patterns change.
 function convertNote(instrument, note) {
   if (instrument.startsWith('djembe')) return ({ D: 'B', d: 'b', x: 'S' })[note] ?? note;
-  const stroke = { dundun: 'D', sangban: 'S', kensereni: 'K' }[instrument];
+  const stroke = { dundun_withBell: 'D', sangban_withBell: 'S', kensereni_withBell: 'K' }[instrument];
   return ({ X: stroke, x: stroke, b: 'x' })[note] ?? note;
 }
 

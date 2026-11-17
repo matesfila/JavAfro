@@ -78,7 +78,7 @@ public class YamlFileTransferHandlerTest {
     @Test
     public void emptyEditorAcceptsDroppedYamlWithSpacesAndKeepsTextPaste() throws Exception {
         var yaml = temporary.newFile("Môj rytmus.YML");
-        String source = "Test:\n  bpm: 123\n  tracks:\n    dundun: x.......\n";
+        String source = "Test:\n  bpm: 123\n  tracks:\n    dundun_withBell: x.......\n";
         Files.writeString(yaml.toPath(), source);
         SwingUtilities.invokeAndWait(() -> {
             var panel = new RhythmPlayerPanel("");

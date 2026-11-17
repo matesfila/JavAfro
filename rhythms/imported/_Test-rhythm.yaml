@@ -4,19 +4,19 @@
   stepsPerBeat: 4
   dialect: [0, 0, 0, 0]
   tracks:
-    dundun:
+    dundun_withBell:
       base: "D.......D......."
       variations:
         - "D..D..D..D..D..D"
         - "DD....DD....DD.."
         - "DDD......DDD...."
-    sangban:
+    sangban_withBell:
       base: "....S.......S..."
       variations:
         - ".S..S..S..S..S.."
         - "..SS....SS....SS"
         - "...SSS......SSS."
-    kensereni:
+    kensereni_withBell:
       base: "..K...K...K...K."
       variations:
         - "..K..K..K..K..K."

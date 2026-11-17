@@ -1,0 +1,29 @@
+"New rhythm - all instruments":
+  bpm: 116
+  timeSignature: "4/4"
+  stepsPerBeat: 4
+  tracks:
+    # Djembe
+    djembe:             "................"
+    djembe2:            "................"
+
+    # Drums only
+    dundun:             "................"
+    sangban:            "................"
+    kensereni:          "................"
+
+    # Drums with automatic bells
+    dundun_withBell:    "................"
+    sangban_withBell:   "................"
+    kensereni_withBell: "................"
+
+    # Bells only: x = normal, X = louder
+    dundunBell:         "................"
+    sangbanBell:        "................"
+    kensereniBell:      "................"
+
+
+    # Freesound drum variants
+    dundun_freesound:   "................"
+    sangban_freesound:  "................"
+    kensereni_freesound: "................"

@@ -12,10 +12,10 @@
         - "................|S.o...o...o.o...|S.o...o...o.o...|S.o.....S.o.....|S.o...o...o.o...|S.o...o...o.o...|S.S.....S.S.....|S.S.....S.S.....|S.o...o...o.o...|S.o...o...o.o...|S.S.............|So.ooo.oS...S..."
         - "S.S...ooS..S....|S.S...ooS..S....|oo.ooo.ooo.ooo.o|oo.ooo.oS......."
         - "..............S.|o.o.S.o.o.S.o.o.|S.o.o.S.o.o.S.o.|o.S.o.o.S.......|................|....oo.oS..S....|....oo.oS..S....|S.......oo.ooo.o"
-    dundun:
+    dundun_withBell:
       base: "x.......x......."
-    sangban:
+    sangban_withBell:
       base: "................"
-    kensereni:
+    kensereni_withBell:
       base: "................"
   legacy: {"source":"Gambia.rb","symbol":"GAMBIA","notes":["Reimported directly from Ruby including djembe base and all four variations; original D/o/x symbols retained.","Pairs of original two-beat sections form 4/4 bars; BPM, section durations, note order and note counts are unchanged.","Four steps per beat: off-grid solo hits are rounded to the nearest step; the base groove timing is unchanged.","Standalone bells b are retained; silent drum sections do not affect grid resolution.","Echauff remains archived and is not played automatically."],"definition":{"BPM":240,"TIME_SIGNATURE":[8,4],"SWING":[0,0,0,0],"patterns":{"dundun":{"base":["b|b"]},"sangban":{"base":["........|........."]},"kenken":{"base":["........|........."]},"djembe":{"base":["D.oo|.x..|..oo|.x..|D.oo|.x..|..oo|.x..|"],"variations":["..xx|.o.o|....|....|...x|.x.x|....|....|..xx|.D.D|....|....|..xx|....|.x.x|....|..xx|.D.D|....|....|...x|.x.x|....|....|..xx|.D.D|....|....|xx..|xx..|xx..|x.x.|","....|....|xo.o|.oo.|xo.o|.oo.|xo..|xo..|xo.o|.oo.|xo.o|.oo.|xx..|xx..|xx..|xx..|xo.o|.oo.|xo.o|.oo.|xx..|....|xooooo|x.x.|","x.x..oo|x.x...|x.x..oo|x.x...|oooooo|oooooo|oooooo|x...|","....|...x|ooxo|oxoo|xoox|ooxo|oxoo|x...|....|....|...ooo|x.x...|...ooo|x.x...|x.....|oooooo|"],"echauff":["oxxx|xxxx"]}}}}

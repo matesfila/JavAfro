@@ -19,7 +19,7 @@ describe('sample clock scheduling', () => {
   });
 
   it('gates timing, dynamics and pitch together for a drum and its automatic bell', () => {
-    const drum = parseRhythm('test:\n  stepsPerBeat: 4\n  tracks: {dundun: "D..............."}');
+    const drum = parseRhythm('test:\n  stepsPerBeat: 4\n  tracks: {dundun_withBell: "D..............."}');
     const controls = { ...straight, humanize: 100, dialect: [-.4, 0, 0, 0] };
     const baseline = planBeat(drum, { ...controls, humanize: 0 }, 1, 0, () => .75, 10);
     expect(baseline.hits).toHaveLength(2);

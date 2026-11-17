@@ -5,12 +5,13 @@
 
 
 ### Otvorené úlohy
-- [] Vytvoriť stable release a netlify presmerovať na ňu
+- [] Nezávislé stopy pre duny a zvonce
+- [] Balafon !
+- [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
 - [] Dununba dialekty, dialekt má byť medzi druhý a tretím pulzom, ale má byť aj medzi prvým a druhým ?? Na djembe asi ano, ale na dunoch ??
 - [] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
 - [] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...
 - [] Podpora MIDI
-- [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
 - [] Djembe so sese ???
 - [] Prihlasovanie/licencie ???
 - [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
@@ -33,6 +34,7 @@
 - [x] Štvrté číslo verzie je git commit number, nie umelo počítaný build number
 - [x] Zoomovanie textu v editore by malo zväčšovať/zmenšovať font
 - [x] Button Prepisovanie bude aj v custom klávesnici Noty vedla backspace
+- [x] Vytvoriť stable release a netlify presmerovať na ňu
 
 ### v0.5.3 (current)
 - [x] Dá sa JavAfro zverejniť cez github pages ??

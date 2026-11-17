@@ -6,5 +6,5 @@ import java.util.random.RandomGenerator;
 /** Original AfroPlayer dundun multisamples and note mapping. */
 public final class DundunInstrument extends AfroSampleInstrument {
     public DundunInstrument() { this(ThreadLocalRandom.current()); }
-    public DundunInstrument(RandomGenerator random) { super("dundun", random); }
+    public DundunInstrument(RandomGenerator random) { super("dundun_withBell", random); }
 }

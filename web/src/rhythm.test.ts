@@ -11,8 +11,8 @@ const source = `Test:
   stepsPerBeat: 4
   dialect: [0, -0.4, 0, 0]
   tracks:
-    dundun: "D.......D.D....."
-    sangban:
+    dundun_withBell: "D.......D.D....."
+    sangban_withBell:
       base: "....S.......S..."
       variations: ["S..............."]
 `;
@@ -28,7 +28,7 @@ describe('YAML compatibility with Java', () => {
     expect(parseRhythmAtCaret(source, source.indexOf('# medzi')).id).toBe('Prvý rytmus');
     expect(parseRhythmAtCaret(source, source.indexOf('"Druhý')).id).toBe('Druhý: rytmus');
     expect(parseRhythmAtCaret(source, source.length)).toMatchObject({ bpm: 140, dialect: [0, 0, 0] });
-    const flow = '{First: {tracks: {dundun: "D......."}}, Second: {tracks: {dundun: "....D..."}}}';
+    const flow = '{First: {tracks: {dundun_withBell: "D......."}}, Second: {tracks: {dundun_withBell: "....D..."}}}';
     expect(parseRhythmAtCaret(flow, flow.indexOf('Second')).id).toBe('Second');
     expect(() => parseRhythm(source + first)).toThrow();
   });
@@ -99,7 +99,7 @@ describe('YAML compatibility with Java', () => {
     source.replace('bpm: 120', 'bpm: 0'),
     source.replace('bpm: 120', 'bpm: 120.5'),
     source.replace('bpm: 120', 'bpm: 120\n  bpm: 100'),
-    source.replace('dundun:', 'unknown:'),
+    source.replace('dundun_withBell:', 'unknown:'),
     source.replace('D.......D.D.....', 'D......|D.D......'),
     source.replace('[0, -0.4, 0, 0]', '[0, 0, 0]'),
     source.replace('[0, -0.4, 0, 0]', '[0, -1.1, 0, 0]'),
@@ -109,4 +109,25 @@ describe('YAML compatibility with Java', () => {
     source.replace('timeSignature: "4/4"', 'timeSignature: "4/3"'),
     source + source,
   ])('rejects invalid definitions', yaml => { expect(() => parseRhythm(yaml)).toThrow(); });
+});
+
+
+it('loads the all-instruments blank template and schedules a silent bar', async () => {
+  const { instruments } = await import('./rhythm');
+  const { planBeat } = await import('./timing');
+  const yaml = readFileSync(new URL('../../rhythms/blankAllInstruments.yaml', import.meta.url), 'utf8');
+  const rhythm = parseRhythm(yaml);
+  expect(rhythm.tracks.map(track => track.instrument).sort()).toEqual([...instruments].sort());
+  expect(rhythm.tracks.every(track => track.notes === '.'.repeat(16))).toBe(true);
+  const controls = { bpm: rhythm.bpm, humanize: 0, dialect: rhythm.dialect };
+  for (let step = 0; step < 16; step += rhythm.stepsPerBeat) {
+    expect(planBeat(rhythm, controls, 0, step).hits).toEqual([]);
+  }
+});
+
+
+it('rejects removed underscore bell instrument names', () => {
+  for (const id of ['dundun_bell', 'sangban_bell', 'kensereni_bell', 'kenken', 'kenken_bell']) {
+    expect(() => parseRhythm('Test:\n  tracks: {' + id + ': "x......."}')).toThrow();
+  }
 });

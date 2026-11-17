@@ -4,13 +4,13 @@
   stepsPerBeat: 3
   dialect: [0, 0, 0]
   tracks:
-    dundun:
+    dundun_withBell:
       base: "D.x.x.x.x.x.|x.x.x.DDD.D."
       variations:
         - "D.x.x.x.x.x.|x.x.x.D.xD.x"
-    sangban:
+    sangban_withBell:
       base: "x.S.S.x.S.S.|x.S.S.x.S.S."
-    kensereni:
+    kensereni_withBell:
       base: "K.xx.KK.xx.K|K.xx.KK.xx.K"
     djembe2:
       base: "S.o.SS.So...|i.o.SS.So..B"

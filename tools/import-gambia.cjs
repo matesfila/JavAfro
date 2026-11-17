@@ -36,7 +36,7 @@ const convert = pattern => {
 const tracks = {};
 // Convert Ruby D/o/x to playable B/o/S; the legacy archive stays unchanged.
 tracks.djembe = { base: djembe.base.map(convert).join('|'), variations: djembe.variations.map(convert) };
-for (const [oldId, id] of Object.entries({ dundun: 'dundun', sangban: 'sangban', kenken: 'kensereni' })) {
+for (const [oldId, id] of Object.entries({ dundun: 'dundun_withBell', sangban: 'sangban_withBell', kenken: 'kensereni_withBell' })) {
   const base = original.patterns[oldId].base;
   assert(base.every(pattern => /^[.b|]+$/.test(pattern)), 'Unexpected audible drum notes');
   assert(base.flatMap(bars).length === 2);

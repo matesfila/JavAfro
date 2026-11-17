@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 public class RhythmExportTest {
     private static final DesktopDraftStore.Controls CONTROLS = new DesktopDraftStore.Controls("First", 143, List.of(0., .2, 0., -.2));
     @Test public void exportsLiveControlsAndPreservesCommentsOtherRhythmsAndLegacy() {
-        String source = "# My rhythms\nFirst:\n  bpm: 90 # keep tempo comment\n  stepsPerBeat: 4\n  tracks: {djembe: 'b.tt..s.'}\n  legacy: {marker: keep}\nSecond:\n  bpm: 120\n  tracks: {dundun: 'D.......'}\n";
+        String source = "# My rhythms\nFirst:\n  bpm: 90 # keep tempo comment\n  stepsPerBeat: 4\n  tracks: {djembe: 'b.tt..s.'}\n  legacy: {marker: keep}\nSecond:\n  bpm: 120\n  tracks: {dundun_withBell: 'D.......'}\n";
         String exported = RhythmExport.export(source, CONTROLS, 116);
         var rhythms = RhythmLoader.load(new ByteArrayInputStream(exported.getBytes(StandardCharsets.UTF_8)), 116);
         assertEquals(143, rhythms.get("First").bpm());

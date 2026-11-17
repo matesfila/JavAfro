@@ -16,26 +16,24 @@ const freesound: Partial<Record<Instrument, string>> = {
 const freesoundNotes: Partial<Record<Instrument, string>> = {
   dundun_freesound: 'Dd', sangban_freesound: 'Ss', kensereni_freesound: 'Kk',
 };
-const freesoundBell = (instrument: Instrument) => instrument.replace('_freesound', '_bell') as Instrument;
-const canonical = (instrument: Instrument) => instrument === 'kenken' ? 'kensereni'
-  : instrument === 'kenken_bell' ? 'kensereni_bell' : instrument;
+const freesoundBell = (instrument: Instrument) => instrument.replace('_freesound', 'Bell') as Instrument;
 export interface Sound { sample: string; gain: number; rate: number; pan?: number }
 
 export function notesForInstrument(instrument: Instrument | null): string[] {
   if (!instrument) return [];
-  const definition = afro.instruments[canonical(instrument)];
+  const definition = afro.instruments[instrument];
   if (definition) return Object.keys(definition.notes);
   const strokes = freesoundNotes[instrument];
   return strokes ? [...strokes, 'x'] : [];
 }
 
 export function supportsNote(instrument: Instrument, note: string): boolean {
-  const definition = afro.instruments[canonical(instrument)];
+  const definition = afro.instruments[instrument];
   return definition ? Object.hasOwn(definition.notes, note)
     : note.length === 1 && !!freesound[instrument] && (note === 'x' || !!freesoundNotes[instrument]?.includes(note));
 }
 export function samplesForInstrument(instrument: Instrument): string[] {
-  const definition = afro.instruments[canonical(instrument)];
+  const definition = afro.instruments[instrument];
   if (!definition) return freesound[instrument]
     ? [freesound[instrument]!, ...samplesForInstrument(freesoundBell(instrument))] : [];
   const bankIds = new Set(Object.values(definition.notes).map(note => note.bank));
@@ -57,7 +55,7 @@ export function selectSounds(instrument: Instrument, symbol: string, humanize: n
   const amount = humanize / HUMANIZE_PERCENT_MAX;
   const variation = (limit: number) => amount ? (random() * 2 - 1) * limit * amount : 0;
   const choose = (files: string[]) => files[Math.min(files.length - 1, Math.floor(random() * files.length))];
-  const definition = afro.instruments[canonical(instrument)];
+  const definition = afro.instruments[instrument];
   if (!definition) return symbol === 'x'
     ? selectSounds(freesoundBell(instrument), 'x', humanize, random)
     : [{ sample: freesound[instrument]!, gain: 1, rate: 1 }];

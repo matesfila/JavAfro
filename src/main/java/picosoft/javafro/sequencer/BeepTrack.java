@@ -5,7 +5,11 @@ import picosoft.javafro.base.Track;
 
 import java.util.List;
 
-public record BeepTrack(String pattern, Instrument instrument, List<String> variations) implements Track {
+public record BeepTrack(String pattern, Instrument instrument, List<String> variations, String instrumentId) implements Track {
+    public BeepTrack(String pattern, Instrument instrument, List<String> variations) {
+        this(pattern, instrument, variations, instrument == null ? null : instrument.getClass().getSimpleName().replace("Instrument", ""));
+    }
+
     public BeepTrack(String pattern, Instrument instrument) {
         this(pattern, instrument, List.of());
     }
@@ -35,6 +39,6 @@ public record BeepTrack(String pattern, Instrument instrument, List<String> vari
 
     /** Explicit selection; the sequencer never chooses variations automatically. */
     public BeepTrack withVariation(int index) {
-        return new BeepTrack(variations.get(index), instrument, variations);
+        return new BeepTrack(variations.get(index), instrument, variations, instrumentId);
     }
 }

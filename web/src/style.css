@@ -303,3 +303,5 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .sample-credits { margin-bottom: 24px; }
 .sample-credits h3 { margin: 0 0 10px; font-size: 15px; }
 .sample-credits p { margin: 8px 0; font-size: 14px; line-height: 1.6; }
+
+.mixer-actions{display:flex;gap:8px;flex-shrink:0}
