@@ -31,7 +31,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - run: npm test
-      - run: npm run build   # or: npm run build:obfuscated
+      - run: npm run build:obfuscated
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web/dist
