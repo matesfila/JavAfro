@@ -223,7 +223,11 @@ export function App() {
     } catch {
       setDraftError('Koncept sa nedá obnoviť z úložiska prehliadača. Pôvodné uložené dáta neprepisujeme. Prácu si ukladaj cez Súbor → Uložiť.');
     }
-    void loadDefaultFile();
+    const draft = draftStore.current?.current;
+    if (draft?.source.trim()) {
+      applySource(draft.source, draft.fileName, false, draft, false);
+      saveActiveDraft.current = true;
+    } else void loadDefaultFile();
     return () => { loadRequest.current++; playRequest.current++; engine.current?.dispose(); };
   }, []);
 

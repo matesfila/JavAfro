@@ -75,9 +75,9 @@ Bežné `npm run build`, `npm run phone` a vývoj cez `npm run dev` používajú
 
 Web priebežne ukladá koncept do úložiska tohto prehliadača: celý text (aj prázdny
 alebo neplatný YAML), názov súboru, polohu kurzora a rozpracované tempo/dialect
-aktuálneho rytmu. Po otvorení sa načíta predvolený súbor so zbalenými rytmami.
-Uložený koncept načítaš cez **Súbor → Obnoviť naposledy otvorený súbor**.
-Samotné otvorenie aplikácie uložený koncept neprepíše.
+aktuálneho rytmu. Pri ďalšom spustení sa uložený koncept automaticky otvorí pod
+pôvodným názvom. Ak koncept chýba, je prázdny alebo obsahuje iba biele znaky,
+načíta sa predvolený súbor so zbalenými rytmami.
 Koncept sa neposiela na server; patrí konkrétnej adrese a prehliadaču.
 
 Pri nahradení upraveného dokumentu cez **Nový rytmus**, **Otvoriť**,

@@ -5,6 +5,7 @@
 
 
 ### Otvorené úlohy
+- [] Vytvoriť stable release a netlify presmerovať na ňu
 - [] Dununba dialekty, dialekt má byť medzi druhý a tretím pulzom, ale má byť aj medzi prvým a druhým ?? Na djembe asi ano, ale na dunoch ??
 - [] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
 - [] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...

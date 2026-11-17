@@ -224,25 +224,26 @@ it('starts native text input on the mode tap and returns focus to the existing s
   expect(document.activeElement).not.toBe(view.contentDOM);
 });
 
-it('preserves typed work across clean starts until explicitly restored', async () => {
-  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
+it.each([
+  { text: 'unfinished: [', filename: 'practice.yml', contents: 'unfinished: [' },
+  { text: '', filename: 'basicRhythms.yaml', contents: yaml },
+  { text: '  \n\t', filename: 'basicRhythms.yaml', contents: yaml },
+])('opens $filename on startup after leaving $text in the editor', async ({ text, filename, contents }) => {
+  const fetchDefault = vi.fn().mockResolvedValue({ ok: true, text: async () => yaml });
+  vi.stubGlobal('fetch', fetchDefault);
   await act(() => root.render(createElement(App)));
-  await act(() => editor().dispatch({ changes: { from: 0, insert: 'first draft' } }));
+  const input = document.querySelector<HTMLInputElement>('input[type=file]')!;
+  Object.defineProperty(input, 'files', { value: [{ name: 'practice.yml', text: async () => yaml }] });
+  await act(() => input.dispatchEvent(new Event('change', { bubbles: true })));
+  await act(() => editor().dispatch({ changes: { from: 0, to: editor().state.doc.length, insert: text } }));
   await click('Súbor');
   await click('Nový rytmus');
   expect(document.querySelector<HTMLDialogElement>('[aria-labelledby="replace-title"]')?.open).toBe(true);
   await click('Zrušiť');
   await act(() => root.render(null));
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
-  expect(editor().state.doc.toString()).toBe(yaml);
-  expect(document.body.textContent).not.toContain('Obnovený stav editora');
-  await act(() => window.dispatchEvent(new Event('pagehide')));
-  await act(() => root.render(null));
-  await act(() => root.render(createElement(App)));
-  await click('Súbor');
-  await click('Obnoviť naposledy otvorený súbor');
-  expect(editor().state.doc.toString()).toBe('first draft');
+  expect(document.querySelector('.file-name')?.textContent).toBe(filename);
+  expect(editor().state.doc.toString()).toBe(contents);
 });
 
 it('saves the controls of both rhythms after switching selection and restoring the draft', async () => {
@@ -254,8 +255,6 @@ it('saves the controls of both rhythms after switching selection and restoring t
   await act(() => document.querySelector('[role="slider"][aria-label="Tempo"]')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })));
   await act(() => root.render(null));
   await act(() => root.render(createElement(App)));
-  await click('Súbor');
-  await click('Obnoviť naposledy otvorený súbor');
   expect(document.querySelector<HTMLInputElement>('#bpm-number')?.value).toBe('96');
   const download = vi.fn(() => 'blob:download');
   URL.createObjectURL = download;
