@@ -52,18 +52,23 @@ public record TimeSignature(int numerator, int denominator) {
         if (!Track.isValidPattern(pattern)) {
             throw new IllegalArgumentException("Pattern must contain non-empty bars of note letters and '.', separated by '|'.");
         }
-        var bars = pattern.split("\\|", -1);
-        for (int i = 0; i < bars.length; i++) {
-            String bar = bars[i];
-            if ((long) bar.length() * 2 == expected) {
-                bars[i] = bar.repeat(2);
-            } else if (bar.length() != expected) {
+        var bars = NotePattern.bars(pattern);
+        boolean spaced = NotePattern.isSpaced(pattern);
+        var expanded = new java.util.ArrayList<String>();
+        for (var notes : bars) {
+            var pulses = new java.util.ArrayList<>(notes);
+            if ((long) notes.size() * 2 == expected) {
+                pulses.addAll(notes);
+            } else if (notes.size() != expected) {
                 throw new IllegalArgumentException("Each bar in " + this + " must contain " + expected
-                        + " steps or exactly half as many (repeated twice); found " + bar.length()
+                        + " steps or exactly half as many (repeated twice); found " + notes.size()
                         + ". Separate bars with '|'.");
             }
+            expanded.add(String.join(spaced ? " " : "", pulses));
         }
-        return String.join("|", bars);
+        String result = String.join("|", expanded);
+        // Keep token mode even for a single multi-symbol note in a one-pulse bar.
+        return spaced ? " " + result + " " : result;
     }
 
     @Override

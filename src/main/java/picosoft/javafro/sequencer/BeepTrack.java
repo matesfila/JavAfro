@@ -30,8 +30,8 @@ public record BeepTrack(String pattern, Instrument instrument, List<String> vari
     }
 
     private static void validateNotes(String pattern, Instrument instrument) {
-        for (char note : pattern.toCharArray()) {
-            if (note != '.' && note != '|' && !instrument.supportsNote(note)) {
+        for (String note : picosoft.javafro.base.NotePattern.notes(pattern)) {
+            if (!note.equals(".") && !instrument.supportsNote(note)) {
                 throw new IllegalArgumentException("Unsupported note '" + note + "' for " + instrument.getClass().getSimpleName());
             }
         }

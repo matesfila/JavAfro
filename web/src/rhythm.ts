@@ -1,12 +1,13 @@
 import { isMap, isScalar, parseDocument } from 'yaml';
 import { supportsNote } from './sounds';
 import { config } from './config';
+import { patternBars } from './pattern';
 
 export const instruments = ['dundun', 'sangban', 'kensereni', 'dundun_withBell', 'sangban_withBell', 'kensereni_withBell', 'djembe', 'djembe2',
   'dundunBell', 'sangbanBell', 'kensereniBell',
   'dundun_freesound', 'sangban_freesound', 'kensereni_freesound'] as const;
 export type Instrument = typeof instruments[number];
-export interface Track { instrument: Instrument; base: string; notes: string; variations: string[] }
+export interface Track { instrument: Instrument; base: string; notes: string[]; variations: string[] }
 export interface Rhythm {
   id: string; name: string; bpm: number; timeSignature: string;
   stepsPerBeat: number; stepsPerBar: number; dialect: number[]; tracks: Track[]; length: number;
@@ -34,17 +35,18 @@ function keys(value: Record<string, unknown>, allowed: string[], field: string) 
 }
 function pattern(value: unknown, stepsPerBar: number, instrument: Instrument): string {
   const source = text(value, 'Pattern');
-  if (!/^[a-zA-Z.]+(\|[a-zA-Z.]+)*$/.test(source)) throw new Error('Pattern: očakávajú sa znaky úderov, . a oddeľovač taktov |.');
-  for (const note of source) if (note !== '.' && note !== '|' && !supportsNote(instrument, note)) {
-    throw new Error(`Neznámy úder „${note}“ pre ${instrument}.`);
-  }
-  return source.split('|').map(bar => {
-    if (bar.length * 2 === stepsPerBar) return bar.repeat(2);
-    if (bar.length !== stepsPerBar) {
-      throw new Error(`Takt má ${bar.length} krokov, očakáva sa ${stepsPerBar} alebo presná polovica (zahrá sa dvakrát). Skontroluj metrum a stepsPerBeat.`);
+  const spaced = /\s/.test(source);
+  const bars = patternBars(source).map(notes => {
+    for (const note of notes) if (note !== '.' && !supportsNote(instrument, note)) {
+      throw new Error(`Neznámy úder „${note}“ pre ${instrument}.`);
     }
-    return bar;
+    if (notes.length * 2 === stepsPerBar) notes = [...notes, ...notes];
+    else if (notes.length !== stepsPerBar) {
+      throw new Error(`Takt má ${notes.length} krokov, očakáva sa ${stepsPerBar} alebo presná polovica (zahrá sa dvakrát). Skontroluj metrum a stepsPerBeat.`);
+    }
+    return notes.join(spaced ? ' ' : '');
   }).join('|');
+  return spaced ? ' ' + bars + ' ' : bars;
 }
 
 /** Same meter, subdivision and validation rules as the Java RhythmLoader. */
@@ -136,7 +138,7 @@ export function rhythmContextAtCaret(source: string, caretOffset: number): Rhyth
       try {
         tracks.push(...parseDefinition(id, { ...accepted, tracks: { [name]: definition } }, config.initialTempo).tracks);
       } catch {
-        tracks.push({ instrument: name as Instrument, base: '', notes: '', variations: [] });
+        tracks.push({ instrument: name as Instrument, base: '', notes: [], variations: [] });
       }
     }
   }
@@ -165,7 +167,7 @@ function parseDefinition(id: string, definition: unknown, defaultBpm: number): R
         }
       }
       const expanded = pattern(base, stepsPerBar, instrument as Instrument);
-      return { instrument: instrument as Instrument, base: expanded, notes: expanded.replaceAll('|', ''), variations };
+      return { instrument: instrument as Instrument, base: expanded, notes: patternBars(expanded).flat(), variations };
     } catch (error) { throw new Error(`${instrument}: ${(error as Error).message}`); }
   });
   return { id, name: id, ...metadata, tracks,

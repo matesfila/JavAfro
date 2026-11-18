@@ -5,7 +5,9 @@
 
 
 ### Otvorené úlohy
-- [] Nezávislé stopy pre duny a zvonce
+- [] Alternatívne názvy pre nástroje, povoliť aj menej presné názvy, využiť nejaký word distance algoritmus ?
+  - cieľom je možnosť mať kenken, kensereni, kensedeni, kenken bell, kenken_withBell, kenken with bell, 
+- [x] Nezávislé stopy pre duny a zvonce
 - [] Balafon !
 - [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
 - [] Dununba dialekty, dialekt má byť medzi druhý a tretím pulzom, ale má byť aj medzi prvým a druhým ?? Na djembe asi ano, ale na dunoch ??

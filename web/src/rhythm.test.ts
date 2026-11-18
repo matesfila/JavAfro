@@ -118,7 +118,7 @@ it('loads the all-instruments blank template and schedules a silent bar', async 
   const yaml = readFileSync(new URL('../../rhythms/blankAllInstruments.yaml', import.meta.url), 'utf8');
   const rhythm = parseRhythm(yaml);
   expect(rhythm.tracks.map(track => track.instrument).sort()).toEqual([...instruments].sort());
-  expect(rhythm.tracks.every(track => track.notes === '.'.repeat(16))).toBe(true);
+  expect(rhythm.tracks.every(track => track.notes.join('') === '.'.repeat(16))).toBe(true);
   const controls = { bpm: rhythm.bpm, humanize: 0, dialect: rhythm.dialect };
   for (let step = 0; step < 16; step += rhythm.stepsPerBeat) {
     expect(planBeat(rhythm, controls, 0, step).hits).toEqual([]);

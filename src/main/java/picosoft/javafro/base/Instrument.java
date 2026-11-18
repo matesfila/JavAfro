@@ -19,6 +19,16 @@ public interface Instrument {
         return this;
     }
 
+    /** Multi-symbol tokens reach instruments intact; existing character instruments remain compatible. */
+    default boolean supportsNote(String note) {
+        return note != null && note.length() == 1 && supportsNote(note.charAt(0));
+    }
+
+    default Instrument voice(String note, int humanize) {
+        if (note == null || note.length() != 1) throw new IllegalArgumentException("Unsupported note: " + note);
+        return voice(note.charAt(0), humanize);
+    }
+
     /** Vráti normalizovanú vzorku v intervale [-1, 1] {@code sampleIndex} vzoriek po začiatku úderu. */
     double sample(long sampleIndex);
 

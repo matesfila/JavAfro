@@ -355,6 +355,18 @@ z `playback.tempo.initial` v `javafro.yaml`. Vynechaný `dialect` použije samé
 (jednu pre každý krok na dobu). Explicitne zadané neplatné hodnoty sa odmietnu;
 podporované nástroje zahŕňajú `dundun_withBell`, `sangban_withBell`, `kensereni_withBell`, `djembe`,
 `djembe2` a ich samostatné zvonce podľa tabuľky vyššie.
+Pattern bez medzier používa jeden znak na krok, napr. `"B.T."`.
+Ak pattern obsahuje medzeru, jednotlivé noty oddeľujú medzery: `"B . T ."`
+má rovnaké štyri kroky. Viac medzier za sebou ani medzery na začiatku či konci
+nepridávajú pulzy. Tabulátory a nové riadky fungujú rovnako ako medzery.
+Celý token sa odovzdá nástroju ako jedna nota; napr. `"g0 c1 . h0"` má štyri
+kroky, ale vyžaduje nástroj podporujúci tieto názvy nôt. Samotný tento zápis
+nepridáva balafon. `.` je jedna pauza, `|` zostáva hranicou taktu.
+V režime s medzerami preto treba oddeliť aj každú pauzu a každú jednoznakovú
+notu: `"BT ."` znamená notu `BT` a pauzu, nie dva údery `B`, `T`.
+Počítanie krokov aj opakovanie polovice taktu platí rovnako pre oba zápisy
+a pre variácie, v Java aj webovej verzii.
+
 `timeSignature` je voliteľné, predvolene `"4/4"`. Podporované sú kladné metrá
 s menovateľom 4 alebo 8. Bez `stepsPerBeat` každý znak noty alebo `.` predstavuje osminu;
 `|` oddeľuje takty, nezaberá čas a nespúšťa zvuk. Každý takt musí byť úplný:

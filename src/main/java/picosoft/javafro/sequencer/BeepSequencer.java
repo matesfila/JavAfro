@@ -112,7 +112,9 @@ public final class BeepSequencer implements Sequencer {
     private SourceDataLine activeLine;
     private PendingRhythm pendingRhythm;
 
-    private record PendingRhythm(List<BeepTrack> tracks, PlaybackSettings settings,
+    private record PlaybackTrack(List<String> notes, Instrument instrument) {}
+
+    private record PendingRhythm(List<PlaybackTrack> tracks, PlaybackSettings settings,
                                  int steps, Dialect dialect, Runnable onStarted) {}
     private record Transition(long position, Runnable onStarted) {}
 
@@ -121,7 +123,7 @@ public final class BeepSequencer implements Sequencer {
         Objects.requireNonNull(rhythm);
         Objects.requireNonNull(settings);
         Objects.requireNonNull(onStarted);
-        List<BeepTrack> tracks = validatedTracks(expandedTracks(rhythm));
+        List<PlaybackTrack> tracks = validatedTracks(expandedTracks(rhythm));
         Dialect dialect = settings.snapshot().dialect() == null ? rhythm.dialect() : settings.snapshot().dialect();
         if (dialect.offsets().size() != rhythm.stepsPerBeat()) throw new IllegalArgumentException("Dialect does not match steps per beat.");
         validateTempo(settings.snapshot().bpm(), rhythm.stepsPerBeat());
@@ -222,12 +224,12 @@ public final class BeepSequencer implements Sequencer {
 
     private void play(List<? extends Track> tracks, int repetitions, PlaybackSettings settings,
                       int stepsPerBeat, Dialect dialect) throws LineUnavailableException {
-        List<BeepTrack> validatedTracks = validatedTracks(tracks);
+        List<PlaybackTrack> validatedTracks = validatedTracks(tracks);
         Dialect activeDialect = settings.snapshot().dialect() == null ? dialect : settings.snapshot().dialect();
         if (activeDialect.offsets().size() != stepsPerBeat) throw new IllegalArgumentException("Dialect does not match steps per beat.");
         double shortestGap = activeDialect.minimumGap();
         validateTempo(settings.snapshot().bpm(), stepsPerBeat);
-        int patternLength = validatedTracks.stream().mapToInt(track -> track.pattern().length()).max().orElseThrow();
+        int patternLength = validatedTracks.stream().mapToInt(track -> track.notes().size()).max().orElseThrow();
 
         // A fixed lookbehind also accommodates a sudden increase in humanization or decrease in tempo.
         long humanizeLimit = Math.round(AudioConstants.SAMPLE_RATE * ((double) humanizeMaxOffsetMs / AudioConstants.MILLISECONDS_PER_SECOND));
@@ -260,7 +262,7 @@ public final class BeepSequencer implements Sequencer {
                     dialect = next.dialect();
                     activeDialect = settings.snapshot().dialect() == null ? dialect : settings.snapshot().dialect();
                     shortestGap = activeDialect.minimumGap();
-                    patternLength = validatedTracks.stream().mapToInt(track -> track.pattern().length()).max().orElseThrow();
+                    patternLength = validatedTracks.stream().mapToInt(track -> track.notes().size()).max().orElseThrow();
                     dialectStep = 0;
                     rhythmStart = position;
                     lookbehind = Math.max(lookbehind, lookbehind(settings, stepsPerBeat, humanizeLimit));
@@ -286,9 +288,9 @@ public final class BeepSequencer implements Sequencer {
                             * controls.humanize() / (double) AudioConstants.HUMANIZE_PERCENT_MAX);
 
                     for (int trackIndex = 0; trackIndex < validatedTracks.size(); trackIndex++) {
-                        BeepTrack track = validatedTracks.get(trackIndex);
-                        char note = track.pattern().charAt(pulse % track.pattern().length());
-                        if (note != '.') {
+                        PlaybackTrack track = validatedTracks.get(trackIndex);
+                        String note = track.notes().get(pulse % track.notes().size());
+                        if (!note.equals(".")) {
                             int noteHumanize = noteHumanize(controls.humanize(), settings.humanizeApplianceProbability(),
                                     () -> ThreadLocalRandom.current().nextDouble());
                             Instrument voice = track.instrument().voice(note, noteHumanize);
@@ -324,13 +326,13 @@ public final class BeepSequencer implements Sequencer {
                 / (Math.min(LOOKBEHIND_MINIMUM_TEMPO_BPM, settings.snapshot().bpm()) * (long) stepsPerBeat));
     }
 
-    private List<BeepTrack> validatedTracks(List<? extends Track> tracks) {
+    private List<PlaybackTrack> validatedTracks(List<? extends Track> tracks) {
         if (tracks == null || tracks.isEmpty() || tracks.stream().anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException("At least one non-null track is required; tracks must not contain null.");
         }
         return tracks.stream()
                 .map(track -> new BeepTrack(track.pattern(), track.instrument()))
-                .map(track -> new BeepTrack(track.pattern().replace("|", ""), track.instrument()))
+                .map(track -> new PlaybackTrack(NotePattern.notes(track.pattern()), track.instrument()))
                 .toList();
     }
     /** Vyrenderuje {@code count} vzoriek od pozície {@code from}, zapíše ich do linky a vráti novú pozíciu. */
