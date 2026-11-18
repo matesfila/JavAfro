@@ -183,6 +183,63 @@ banks:
     rate: 1
     pan: 0
 
+  balafon_g0:
+    samples:
+      - balafon/balafamer_g0_dyn2_ver1.wav
+      - balafon/balafamer_g0_dyn2_ver2.wav
+      - balafon/balafamer_g0_dyn2_ver3.wav
+    gain: 1
+    rate: 1
+    pan: 0
+  balafon_a0:
+    samples:
+      - balafon/balafamer_a0_dyn2_ver1.wav
+      - balafon/balafamer_a0_dyn2_ver2.wav
+      - balafon/balafamer_a0_dyn2_ver3.wav
+    gain: 1
+    rate: 1
+    pan: 0
+  balafon_h0:
+    samples:
+      - balafon/balafamer_h0_dyn2_ver1.wav
+      - balafon/balafamer_h0_dyn2_ver2.wav
+      - balafon/balafamer_h0_dyn2_ver3.wav
+    gain: 1
+    rate: 1
+    pan: 0
+  balafon_c1:
+    samples:
+      - balafon/balafamer_c1_dyn2_ver1.wav
+      - balafon/balafamer_c1_dyn2_ver2.wav
+      - balafon/balafamer_c1_dyn2_ver3.wav
+    gain: 1
+    rate: 1
+    pan: 0
+  balafon_d1:
+    samples:
+      - balafon/balafamer_d1_dyn2_ver1.wav
+      - balafon/balafamer_d1_dyn2_ver2.wav
+      - balafon/balafamer_d1_dyn2_ver3.wav
+    gain: 1
+    rate: 1
+    pan: 0
+  balafon_e1:
+    samples:
+      - balafon/balafamer_e1_dyn2_ver1.wav
+      - balafon/balafamer_e1_dyn2_ver2.wav
+      - balafon/balafamer_e1_dyn2_ver3.wav
+    gain: 1
+    rate: 1
+    pan: 0
+  balafon_f1:
+    samples:
+      - balafon/balafamer_f1_dyn2_ver1.wav
+      - balafon/balafamer_f1_dyn2_ver2.wav
+      - balafon/balafamer_f1_dyn2_ver3.wav
+    gain: 1
+    rate: 1
+    pan: 0
+
 instruments:
   djembe:
     notes:
@@ -294,3 +351,13 @@ instruments:
       "o": { bank: dj2_tone, probability: 1, gain: 1 }
       "p": { bank: dj2_tone, probability: 0.6, gain: 1 }
       "q": { bank: dj2_tone, probability: 0.12, gain: 1 }
+
+  balafon:
+    notes:
+      "g0": {bank: balafon_g0, probability: 1, gain: 1}
+      "a0": {bank: balafon_a0, probability: 1, gain: 1}
+      "h0": {bank: balafon_h0, probability: 1, gain: 1}
+      "c1": {bank: balafon_c1, probability: 1, gain: 1}
+      "d1": {bank: balafon_d1, probability: 1, gain: 1}
+      "e1": {bank: balafon_e1, probability: 1, gain: 1}
+      "f1": {bank: balafon_f1, probability: 1, gain: 1}

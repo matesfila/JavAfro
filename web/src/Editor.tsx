@@ -174,7 +174,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   return <div className="editor-surface">
     <div className="editor-host" ref={host} />
     {inputMode === 'notes' && <NotePad instrument={activeInstrument} overwriteButton={overwriteButton} insert={text => {
-      if (view.current && !readOnly) { insertNote(view.current, text); view.current.focus(); }
+      if (view.current && !readOnly) { insertNote(view.current, text, activeInstrument === 'balafon'); view.current.focus(); }
     }} command={runCommand} />}
   </div>;
 }

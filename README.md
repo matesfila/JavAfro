@@ -360,8 +360,7 @@ Ak pattern obsahuje medzeru, jednotlivé noty oddeľujú medzery: `"B . T ."`
 má rovnaké štyri kroky. Viac medzier za sebou ani medzery na začiatku či konci
 nepridávajú pulzy. Tabulátory a nové riadky fungujú rovnako ako medzery.
 Celý token sa odovzdá nástroju ako jedna nota; napr. `"g0 c1 . h0"` má štyri
-kroky, ale vyžaduje nástroj podporujúci tieto názvy nôt. Samotný tento zápis
-nepridáva balafon. `.` je jedna pauza, `|` zostáva hranicou taktu.
+kroky, ale vyžaduje nástroj podporujúci tieto názvy nôt. Balafon podporuje tieto viacznakové názvy nôt. `.` je jedna pauza, `|` zostáva hranicou taktu.
 V režime s medzerami preto treba oddeliť aj každú pauzu a každú jednoznakovú
 notu: `"BT ."` znamená notu `BT` a pauzu, nie dva údery `B`, `T`.
 Počítanie krokov aj opakovanie polovice taktu platí rovnako pre oba zápisy
@@ -547,3 +546,21 @@ Podrobnosti k baleniu: [oficiálna dokumentácia jpackage](https://docs.oracle.c
 
 Opakovaný build nahradí vygenerovaný priečinok aplikácie. Pred buildom ju zatvor.
 `mvn clean` odstráni všetky výstupy v `target`, vrátane Windows aplikácie.
+
+## Balafon
+
+Track `balafon` používa pôvodné noty AfroPlayera `g0 a0 h0 c1 d1 e1 f1`.
+Noty oddeľuj medzerami; každá nota je jeden pulz. `.` aj pôvodná samostatná
+`..` sú v zápise s medzerami jedna pauza. Každá výška má tri pôvodné dyn2
+samply; gain aj rate sú 1, pan je 0. Humanize funguje rovnako ako pri bubnoch.
+
+```yaml
+Balafon:
+  bpm: 115
+  timeSignature: "12/8"
+  tracks:
+    balafon: "c1 e1 g0 c1 g0 c1 c1 e1 a0 d1 a0 d1"
+```
+
+Melódiu nájdeš v knižnici ako **Balafon - Maane** a ako súčasť **Maane**.
+Webová klávesnica nôt ponúka všetkých sedem výšok a automaticky vkladá medzery.

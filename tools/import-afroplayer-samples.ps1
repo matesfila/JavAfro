@@ -12,14 +12,14 @@ try {
 const fs = require('node:fs');
 const { parse } = require('./web/node_modules/yaml');
 const manifest = parse(fs.readFileSync('src/main/resources/samples/afroplayer-samples.yaml', 'utf8'));
-// The 29 Tomas Marek djembe samples were imported separately; this converts the other 54.
+// The 29 Tomas Marek djembe samples were imported separately; this converts the other banks, including balafon.
 process.stdout.write(JSON.stringify([...new Set(Object.values(manifest.banks).flatMap(bank => bank.samples))].filter(file => !file.startsWith('djembe/'))));
 '@
     $sampleJson = $readManifest | & node
     if ($LASTEXITCODE -ne 0) { throw 'Cannot read the sample manifest. Run npm ci in web/ first.' }
     $files = $sampleJson | ConvertFrom-Json
     foreach ($file in $files) {
-        $sourceFolder = if ($file.StartsWith('djembe2/')) { 'djembe_kontakt' } else { 'dunduns_rudo' }
+        $sourceFolder = if ($file.StartsWith('djembe2/')) { 'djembe_kontakt' } elseif ($file.StartsWith('balafon/')) { 'balafon_ameriken' } else { 'dunduns_rudo' }
         $sourceFile = Join-Path (Join-Path $sampleSourceRoot $sourceFolder) ([IO.Path]::GetFileNameWithoutExtension($file) + '.flac')
         $outputFile = [IO.Path]::GetFullPath((Join-Path $projectRoot ('src/main/resources/samples/' + $file)))
         $outputRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot 'src/main/resources/samples'))

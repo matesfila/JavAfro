@@ -5,6 +5,15 @@ const path = require('node:path');
 const { parse } = require('../web/node_modules/yaml');
 const { convert, convertNote } = require('./import-afroplayer.cjs');
 
+test('imports Maane balafon pitches without changing their order or pulse grid', () => {
+  const current = parse(fs.readFileSync(path.join(__dirname, '../rhythms/imported/Maane.yaml'), 'utf8')).Maane;
+  const archive = current.legacy;
+  const imported = parse(convert({ data: archive.definition, symbol: archive.symbol }, archive.source, 'Maane').yaml).Maane;
+  assert.equal(imported.tracks.balafon.base, 'c1 e1 g0 c1 g0 c1 c1 e1 a0 d1 a0 d1');
+  assert.equal(imported.stepsPerBeat, 3);
+  assert.deepEqual(imported.tracks.balafon, current.tracks.balafon);
+});
+
 for (const check of [
   { label: 'closed stroke', source: /[iI]/, target: /^[iI]$/, count: 107 },
   { label: 'standalone bell', source: /b/, target: /^x$/, count: 857 },

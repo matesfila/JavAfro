@@ -3,7 +3,7 @@ import { supportsNote } from './sounds';
 import { config } from './config';
 import { patternBars } from './pattern';
 
-export const instruments = ['dundun', 'sangban', 'kensereni', 'dundun_withBell', 'sangban_withBell', 'kensereni_withBell', 'djembe', 'djembe2',
+export const instruments = ['dundun', 'sangban', 'kensereni', 'dundun_withBell', 'sangban_withBell', 'kensereni_withBell', 'djembe', 'djembe2', 'balafon',
   'dundunBell', 'sangbanBell', 'kensereniBell',
   'dundun_freesound', 'sangban_freesound', 'kensereni_freesound'] as const;
 export type Instrument = typeof instruments[number];

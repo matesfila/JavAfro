@@ -17,7 +17,7 @@ import java.util.random.RandomGenerator;
 public abstract class AfroSampleInstrument implements Instrument {
     private record Bank(List<String> files, double gain, double rate) {}
     private record Note(String bank, double probability, double gain) {}
-    private record Definition(String bell, Map<Character, Note> notes) {}
+    private record Definition(String bell, Map<String, Note> notes) {}
     private record Manifest(Map<String, Bank> banks, Map<String, Definition> instruments) {}
     private static final class Resources { static final Manifest MANIFEST = load(); }
     private static final Map<String, List<WavInstrument>> DECODED = new ConcurrentHashMap<>();
@@ -55,14 +55,14 @@ public abstract class AfroSampleInstrument implements Instrument {
             Map<String, Definition> instruments = new LinkedHashMap<>();
             for (var entry : ((Map<?, ?>) root.get("instruments")).entrySet()) {
                 Map<?, ?> instrument = (Map<?, ?>) entry.getValue();
-                Map<Character, Note> notes = new LinkedHashMap<>();
+                Map<String, Note> notes = new LinkedHashMap<>();
                 for (var n : ((Map<?, ?>) instrument.get("notes")).entrySet()) {
                     String symbol = (String) n.getKey();
-                    if (symbol.length() != 1) throw new IllegalArgumentException("Expected one note symbol: " + symbol);
+                    if (!symbol.matches("[a-zA-Z][a-zA-Z0-9]*")) throw new IllegalArgumentException("Invalid note token: " + symbol);
                     Map<?, ?> note = (Map<?, ?>) n.getValue();
                     String bank = (String) note.get("bank");
                     if (!banks.containsKey(bank)) throw new IllegalArgumentException("Unknown sample bank: " + bank);
-                    notes.put(symbol.charAt(0), new Note(bank, number(note, "probability", 0, 1), number(note, "gain", 0, Double.MAX_VALUE)));
+                    notes.put(symbol, new Note(bank, number(note, "probability", 0, 1), number(note, "gain", 0, Double.MAX_VALUE)));
                 }
                 String bell = (String) instrument.get("bell");
                 if (notes.isEmpty() || (bell != null && !banks.containsKey(bell))) {
@@ -97,9 +97,13 @@ public abstract class AfroSampleInstrument implements Instrument {
                 .map(file -> WavSampleInstrument.loadSample("/samples/" + file)).toList());
     }
 
-    @Override public final boolean supportsNote(char note) { return definition.notes().containsKey(note); }
+    @Override public final boolean supportsNote(char note) { return supportsNote(String.valueOf(note)); }
 
-    @Override public final Instrument voice(char symbol, int humanize) {
+    @Override public final boolean supportsNote(String note) { return definition.notes().containsKey(note); }
+
+    @Override public final Instrument voice(char symbol, int humanize) { return voice(String.valueOf(symbol), humanize); }
+
+    @Override public final Instrument voice(String symbol, int humanize) {
         if (humanize < 0 || humanize > AudioConstants.HUMANIZE_PERCENT_MAX) throw new IllegalArgumentException("Humanize must be 0–100.");
         Note note = definition.notes().get(symbol);
         if (note == null) throw new IllegalArgumentException("Unsupported AfroPlayer note: " + symbol);
@@ -107,10 +111,10 @@ public abstract class AfroSampleInstrument implements Instrument {
         return makeVoice(symbol, humanize);
     }
 
-    private Instrument makeVoice(char symbol, int humanize) {
+    private Instrument makeVoice(String symbol, int humanize) {
         Note note = definition.notes().get(symbol);
         Instrument main = bankVoice(note.bank(), note.gain(), humanize);
-        if (definition.bell() == null || symbol == 'x') return main;
+        if (definition.bell() == null || symbol.equals("x")) return main;
         Instrument bell = bankVoice(definition.bell(), 1, humanize);
         return new Instrument() {
             public double sample(long index) { return main.sample(index) + bell.sample(index); }

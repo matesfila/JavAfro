@@ -180,6 +180,7 @@ public final class RhythmLoader {
             case "dundunBell" -> new DundunAccentBellInstrument();
             case "sangbanBell" -> new SangbanAccentBellInstrument();
             case "kensereniBell" -> new KensereniAccentBellInstrument();
+            case "balafon" -> new BalafonInstrument();
             case "djembe2" -> new Djembe2Instrument();
             case "dundun_freesound" -> new picosoft.javafro.instruments.sample.jimmijames.DundunInstrument();
             case "sangban_freesound" -> new picosoft.javafro.instruments.sample.jimmijames.SangbanInstrument();

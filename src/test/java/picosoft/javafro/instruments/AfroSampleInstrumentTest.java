@@ -146,7 +146,7 @@ public class AfroSampleInstrumentTest {
         }
     }
 
-    @Test public void allEightyThreeOriginalSamplesAreBundledAudibleAndKeepTheirTails() throws Exception {
+    @Test public void allOriginalSamplesAreBundledAudibleAndKeepTheirTails() throws Exception {
         Map<?, ?> manifest;
         try (var input = getClass().getResourceAsStream("/samples/afroplayer-samples.yaml")) {
             manifest = new Yaml().load(input);
@@ -170,7 +170,7 @@ public class AfroSampleInstrumentTest {
                 assertEquals(0, sample.sample(length), 0);
             }
         }
-        assertEquals(83, files.size());
+        assertEquals(104, files.size());
     }
 
     @Test public void globalConfiguredOffsetsApplyToBankGainAndRateAndScaleWithHumanize() throws Exception {

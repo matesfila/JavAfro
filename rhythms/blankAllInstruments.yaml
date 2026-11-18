@@ -27,3 +27,6 @@
     dundun_freesound:   "................"
     sangban_freesound:  "................"
     kensereni_freesound: "................"
+
+    # Balafon: g0 a0 h0 c1 d1 e1 f1 (space-separated notes)
+    balafon:           ". . . . . . . . . . . . . . . ."

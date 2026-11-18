@@ -15,6 +15,18 @@ function editor(doc: string, anchor: number, head = anchor, overwrite = false) {
 }
 
 describe('note pad editing', () => {
+  it('inserts separated balafon notes and overwrites one whole pitch', () => {
+    const view = editor('""', 1);
+    insertNote(view, 'g0', true); insertNote(view, 'c1', true); insertNote(view, '.', true);
+    expect(view.state.doc.toString()).toBe('"g0 c1 . "');
+    undo(view);
+    expect(view.state.doc.toString()).toBe('"g0 c1 "');
+    const overwrite = editor('"g0 c1 ."', 2, 2, true);
+    insertNote(overwrite, 'f1', true);
+    expect(overwrite.state.doc.toString()).toBe('"f1 c1 ."');
+    undo(overwrite);
+    expect(overwrite.state.doc.toString()).toBe('"g0 c1 ."');
+  });
   it('inserts at the caret and undoes individual taps, even when entered quickly', () => {
     const view = editor('"...."', 1);
     insertNote(view, 'b'); insertNote(view, 't');

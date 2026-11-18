@@ -2,13 +2,11 @@
 
 ### Dokumentácia TODO
 - Prepisovanie button vedla backspacu v Sheets klávesnici
-
+- Medzery v patternoch
 
 ### Otvorené úlohy
 - [] Alternatívne názvy pre nástroje, povoliť aj menej presné názvy, využiť nejaký word distance algoritmus ?
   - cieľom je možnosť mať kenken, kensereni, kensedeni, kenken bell, kenken_withBell, kenken with bell, 
-- [x] Nezávislé stopy pre duny a zvonce
-- [] Balafon !
 - [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
 - [] Dununba dialekty, dialekt má byť medzi druhý a tretím pulzom, ale má byť aj medzi prvým a druhým ?? Na djembe asi ano, ale na dunoch ??
 - [] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
@@ -26,6 +24,10 @@
 - [] Zaviesť rodinu rytmov (meniť sa im bude zrejme dialekt)
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
   - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
+
+### v0.6.2 (beta)
+- [x] Nezávislé stopy pre duny a zvonce
+- [x] Balafon
 
 ### v0.6.1 (current)
 - [x] Aktualizovať rytmy, nedokončené odstrániť z basicRhythms.```yaml

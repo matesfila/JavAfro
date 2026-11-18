@@ -25,12 +25,12 @@ public class RhythmLoaderTest {
         }
     }
 
-    @Test public void loadsBlankTemplateWithAllFourteenInstruments() throws Exception {
+    @Test public void loadsBlankTemplateWithAllFifteenInstruments() throws Exception {
         var definitions = RhythmLoader.load(Path.of("rhythms/blankAllInstruments.yaml"));
         assertEquals(1, definitions.size());
         var rhythm = definitions.values().iterator().next();
-        assertEquals(14, rhythm.tracks().size());
-        for (Track track : rhythm.tracks()) assertEquals("................", track.pattern());
+        assertEquals(15, rhythm.tracks().size());
+        for (Track track : rhythm.tracks()) assertEquals(java.util.Collections.nCopies(16, "."), picosoft.javafro.base.NotePattern.notes(track.pattern()));
     }
 
     private static final String YAML = """

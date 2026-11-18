@@ -5,13 +5,14 @@ files in `C:/Projects/AfroPlayer/resources/samples/`.
 
 `afroplayer-samples.yaml` is shared by Java and Web Audio. It contains all original
 bank gains, rates, pan positions and note probabilities for the migrated instruments.
-It references 83 recordings:
+It references 104 recordings:
 
 | Source directory | Used banks | Recordings |
 | --- | --- | ---: |
 | `djembe_tomasmarek` | Djembe bass/tone/slap/closed tone/closed slap/alternate slap | 29 |
 | `dunduns_rudo` | Dundun open/closed, sangban open/closed, kenkeni open/closed, their three open bells | 47 |
 | `djembe_kontakt` | DJEMBEBASS2, DJEMBE2/3, DJEMBESLAP2/3/4, DJEMBESLAP1 | 7 |
+| `balafon_ameriken` | g0, a0, h0, c1, d1, e1, f1; dyn2, variants 1–3 | 21 |
 
 Conversion: mono signed PCM WAV, 44,100 Hz, 16 bits; no normalization, trimming,
 compression or baked-in speed changes. The original rate values are applied during playback.
@@ -69,7 +70,7 @@ files remain in the application and its distribution/offline bundle.
 The separate JIMMYJAMES112 Freesound recordings retain their documented CC0
 status in [README.md](README.md).
 
-To repeat conversion of the 54 dundun/sangban/kensereni/bell/djembe2 recordings
+To repeat conversion of the 75 dundun/sangban/kensereni/bell/djembe2/balafon recordings
 (the 29 Tomáš Marek djembe recordings were imported separately; requires local FFmpeg and `npm ci` in `web/`):
 
 ```powershell
@@ -79,3 +80,14 @@ To repeat conversion of the 54 dundun/sangban/kensereni/bell/djembe2 recordings
 The old `DundunInstrument`, `SangbanInstrument`, `KensereniInstrument` and their
 CC0 WAV audio is unchanged, exposed in YAML as `dundun_freesound`, `sangban_freesound`,
 and `kensereni_freesound`.
+
+## Balafon
+
+The original `afp-sampler.rb` maps `g0 a0 h0 c1 d1 e1 f1` to three dyn2
+recordings each, with gain 1, rate 1, pan 0 and probability 1. Only those
+21 recordings are imported; other pitches and dyn3 files in the source folder
+are not part of the original instrument mapping. Notes are space-separated.
+`.` is a rest; the original spaced `..` rest is also accepted as one pulse.
+The original Maane melody is available in `rhythms/balafon-demo.yaml` and
+in the imported Maane rhythm. Recording credits and reuse license for the
+`balafon_ameriken` source set have not been established by this project.

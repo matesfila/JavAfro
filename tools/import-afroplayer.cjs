@@ -114,7 +114,7 @@ class Reader {
 const gcd = (a, b) => b ? gcd(b, a % b) : a;
 const lcm = (a, b) => a / gcd(a, b) * b;
 const quote = value => JSON.stringify(value);
-const instruments = { dundun: 'dundun_withBell', sangban: 'sangban_withBell', kenken: 'kensereni_withBell', djembe: 'djembe', djembe2: 'djembe2' };
+const instruments = { dundun: 'dundun_withBell', sangban: 'sangban_withBell', kenken: 'kensereni_withBell', djembe: 'djembe', djembe2: 'djembe2', balafon: 'balafon' };
 
 // Source files and legacy.definition keep Ruby notation; only playable patterns change.
 function convertNote(instrument, note) {
@@ -138,7 +138,7 @@ function convert(definition, sourceFile, id) {
     for (const patterns of Object.values(data.patterns[id] || {})) {
       for (const pattern of patterns) {
         for (const bar of pattern.split('|').filter(Boolean)) {
-          if (/[^.]/.test(bar)) stepsPerBar = lcm(stepsPerBar, bar.length);
+          if (/[^.]/.test(bar)) stepsPerBar = lcm(stepsPerBar, (id === 'balafon' ? bar.trim().split(/\s+/).length : bar.length));
         }
       }
     }
@@ -147,6 +147,18 @@ function convert(definition, sourceFile, id) {
   const stepsPerBeat = stepsPerBar / beatsPerBar;
   assert(Number.isInteger(stepsPerBeat));
   const normalize = (pattern, context, instrument) => {
+    if (instrument === 'balafon') {
+      const pitches = ['g0', 'a0', 'h0', 'c1', 'd1', 'e1', 'f1'];
+      return (pattern || '.').split('|').map(bar => {
+        const tokens = bar.trim().split(/\s+/);
+        const spacing = stepsPerBar / tokens.length;
+        assert(Number.isInteger(spacing));
+        return tokens.flatMap(token => {
+          assert(token === '.' || token === '..' || pitches.includes(token), 'Unknown balafon note: ' + token);
+          return [token === '..' ? '.' : token, ...Array(spacing - 1).fill('.')];
+        }).join(' ');
+      }).join('|');
+    }
     if (!pattern) return '.'.repeat(stepsPerBar);
     const bars = pattern.split('|');
     if (bars.at(-1) === '') { bars.pop(); notes.push(`${context}: removed trailing bar separator.`); }

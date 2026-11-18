@@ -49,7 +49,7 @@ describe('note keyboard context', () => {
   });
 
   it('offers every supported letter exactly once and excludes unsupported letters', () => {
-    const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'];
+    const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 'g0', 'a0', 'h0', 'c1', 'd1', 'e1', 'f1'];
     for (const instrument of instruments) {
       const notes = notesForInstrument(instrument);
       expect(notes.length).toBe(new Set(notes).size);
