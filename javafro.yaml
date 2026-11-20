@@ -21,6 +21,12 @@ library:
 
 editor:
   fontSize: 18
+  fontFamily: Consolas # neproporcionálne písmo; ak nie je nainštalované, použije sa systémové neproporcionálne písmo
+  lineHeight: 2 # výška riadka ako násobok veľkosti písma, 1–3
+  strings: # reťazce v úvodzovkách, t. j. patterny rytmov
+    color: "#6B3A1E" # farba #RRGGBB; úvodzovky sú povinné, inak YAML berie # ako komentár
+    bold: true
+    letterSpacing: 0.1 # medzera za každým písmenom ako násobok veľkosti písma, 0–0,5
 
 window: # iba Java aplikácia; na malej obrazovke sa veľkosť prispôsobí
   width: 1200

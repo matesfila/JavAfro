@@ -27,6 +27,25 @@ describe('application configuration', () => {
       .toMatchObject({ initialTempo: 90, minimumTempo: 40, maximumTempo: 100, editorFontSize: 19 });
   });
 
+  it('configures the editor style with defaults matching Java', () => {
+    expect(parseConfig('').editorStyle).toEqual({
+      fontFamily: 'Consolas', lineHeight: 2, stringColor: '#6B3A1E', stringBold: true, stringLetterSpacing: 0.1,
+    });
+    expect(parseConfig("editor:\n  fontFamily: Courier New\n  lineHeight: 1.5\n  strings: {color: '#a0b1C2', bold: false, letterSpacing: 0}\n").editorStyle)
+      .toEqual({ fontFamily: 'Courier New', lineHeight: 1.5, stringColor: '#a0b1C2', stringBold: false, stringLetterSpacing: 0 });
+    expect(parseConfig("editor: {strings: {color: '#123456'}}").editorStyle)
+      .toMatchObject({ fontFamily: 'Consolas', stringColor: '#123456', stringBold: true });
+  });
+
+  it.each(["editor: {fontFamily: ''}", "editor: {fontFamily: 'Consolas; color: red'}",
+    `editor: {fontFamily: '"Consolas"'}`, 'editor: {fontFamily: 12}', 'editor: {lineHeight: 0.9}',
+    'editor: {lineHeight: 3.1}', "editor: {lineHeight: '2'}", 'editor: {strings: {color: 6B3A1E}}',
+    "editor: {strings: {color: '#6B3A1'}}", "editor: {strings: {color: '#6B3A1EFF'}}",
+    'editor:\n  strings:\n    color: #6B3A1E\n', "editor: {strings: {bold: 'true'}}",
+    'editor: {strings: {bold: 1}}', 'editor: {strings: {letterSpacing: -0.1}}',
+    'editor: {strings: {letterSpacing: 0.6}}', 'editor: {strings: {italic: true}}', 'editor: {strings: null}'])
+  ('rejects invalid editor style: %s', source => { expect(() => parseConfig(source)).toThrow(); });
+
   it.each(['playback: {humanizeApplianceProbability: -1}', 'playback: {humanizeApplianceProbability: 101}',
     'playback: {humanizeApplianceProbability: 50.5}', "playback: {humanizeApplianceProbability: '50'}",
     'playback: {defaultTrackVolume: -1}', 'playback: {defaultTrackVolume: 101}',

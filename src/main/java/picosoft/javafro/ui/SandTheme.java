@@ -1,5 +1,6 @@
 package picosoft.javafro.ui;
 
+import picosoft.javafro.config.AppConfig;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ColorUIResource;
@@ -19,31 +20,27 @@ public final class SandTheme {
     public static final Color GUTTER = new Color(0xF3EBDD);
     public static final Color BORDER = new Color(0xCBB79A);
     public static final Color MUTED = new Color(0x89745C);
-    /** Quoted strings (rhythm patterns) in the YAML editor; keep in sync with web Editor.tsx. */
-    public static final Color EDITOR_STRING = new Color(0x6B3A1E);
-    /** Extra space between editor lines, as a fraction of the font size. */
-    public static final float EDITOR_LINE_SPACING = 0.3f;
-    /** Letter spacing in quoted strings, in em; keep in sync with web editor-setup.ts. */
-    private static final float EDITOR_STRING_TRACKING = 0.1f;
-    private static final String EDITOR_FONT_FAMILY = "Consolas";
 
     private SandTheme() { }
 
-    /** Bold, letter-spaced variant of the editor font for quoted strings (rhythm patterns). */
-    public static Font editorStringFont(Font editorFont) {
-        return editorFont.deriveFont(Font.BOLD).deriveFont(Map.of(TextAttribute.TRACKING, EDITOR_STRING_TRACKING));
+    /** Editor font variant for quoted strings (rhythm patterns), as configured in {@code editor.strings}. */
+    public static Font editorStringFont(Font editorFont, AppConfig.EditorStyle style) {
+        Font font = editorFont.deriveFont(style.stringBold() ? Font.BOLD : Font.PLAIN);
+        // Tracking is in em, like CSS letter-spacing; RSTA measures and draws it consistently.
+        return style.stringLetterSpacing() == 0 ? font
+                : font.deriveFont(Map.of(TextAttribute.TRACKING, (float) style.stringLetterSpacing()));
     }
 
-    /** Consolas when installed; otherwise Java's logical monospaced font, never a proportional fallback. */
-    public static Font editorFont(int size) {
+    /** The configured family when installed; otherwise Java's logical monospaced font, never a proportional fallback. */
+    public static Font editorFont(String family, int size) {
         boolean installed = false;
         try {
             installed = Arrays.asList(GraphicsEnvironment.getLocalGraphicsEnvironment()
-                    .getAvailableFontFamilyNames()).contains(EDITOR_FONT_FAMILY);
+                    .getAvailableFontFamilyNames()).contains(family);
         } catch (RuntimeException ignored) {
             // Font enumeration unavailable; use the logical font below.
         }
-        return new Font(installed ? EDITOR_FONT_FAMILY : Font.MONOSPACED, Font.PLAIN, size);
+        return new Font(installed ? family : Font.MONOSPACED, Font.PLAIN, size);
     }
 
     public static void install() throws UnsupportedLookAndFeelException {

@@ -11,15 +11,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /** Application defaults, separate from each rhythm's musical settings. */
 public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDynamic, double humanizePitch,
                         int initialTempo, int minimumTempo, int maximumTempo,
                         Path rhythmsDirectory, String initialRhythm, int editorFontSize,
-                        int windowWidth, int windowHeight, int defaultTrackVolume, int humanizeApplianceProbability) {
+                        int windowWidth, int windowHeight, int defaultTrackVolume, int humanizeApplianceProbability,
+                        EditorStyle editorStyle) {
+    /**
+     * Look of the YAML editor (section {@code editor}); keep defaults in sync with web config-schema.ts.
+     *
+     * @param lineHeight line height as a multiple of the font size, like CSS {@code line-height}
+     * @param stringColor RGB of quoted strings (rhythm patterns)
+     * @param stringLetterSpacing extra space after each letter of a string, in em
+     */
+    public record EditorStyle(String fontFamily, double lineHeight, int stringColor, boolean stringBold,
+                              double stringLetterSpacing) {
+        public static EditorStyle defaults() {
+            return new EditorStyle("Consolas", 2, 0x6B3A1E, true, 0.1);
+        }
+    }
+
     public static AppConfig defaults() {
         return new AppConfig(21, AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS, 0.07, 0.005,
-                116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900, 40, 100);
+                116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900, 40, 100, EditorStyle.defaults());
     }
 
     public static AppConfig load() throws IOException {
@@ -67,9 +83,18 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDy
         Map<?, ?> playback = section(root, "playback", "humanize", "humanizeMaxOffsetMs", "humanizeDynamic", "humanizePitch", "tempo", "defaultTrackVolume", "humanizeApplianceProbability");
         Map<?, ?> tempo = section(playback, "tempo", "initial", "minimum", "maximum");
         Map<?, ?> library = section(root, "library", "directory", "initialRhythm");
-        Map<?, ?> editor = section(root, "editor", "fontSize");
+        Map<?, ?> editor = section(root, "editor", "fontSize", "fontFamily", "lineHeight", "strings");
+        Map<?, ?> strings = section(editor, "strings", "color", "bold", "letterSpacing");
         Map<?, ?> window = section(root, "window", "width", "height");
         AppConfig defaults = defaults();
+        EditorStyle style = defaults.editorStyle;
+        EditorStyle editorStyle = new EditorStyle(
+                matching(editor, "fontFamily", style.fontFamily(), FONT_FAMILY, "názov písma (písmená, číslice, medzera, - a _)"),
+                decimal(editor, "lineHeight", style.lineHeight(), 1, 3),
+                Integer.parseInt(matching(strings, "color", String.format("#%06X", style.stringColor()), COLOR,
+                        "farba v tvare \"#RRGGBB\" (v úvodzovkách)").substring(1), 16),
+                bool(strings, "bold", style.stringBold()),
+                decimal(strings, "letterSpacing", style.stringLetterSpacing(), 0, 0.5));
         int minimum = number(tempo, "minimum", defaults.minimumTempo, 1, 10000);
         int maximum = number(tempo, "maximum", defaults.maximumTempo, 1, 10000);
         int initial = number(tempo, "initial", defaults.initialTempo, 1, 10000);
@@ -86,8 +111,13 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDy
                 number(window, "width", defaults.windowWidth, 760, 10000),
                 number(window, "height", defaults.windowHeight, 560, 10000),
                 number(playback, "defaultTrackVolume", defaults.defaultTrackVolume, 0, 100),
-                number(playback, "humanizeApplianceProbability", defaults.humanizeApplianceProbability, 0, 100));
+                number(playback, "humanizeApplianceProbability", defaults.humanizeApplianceProbability, 0, 100),
+                editorStyle);
     }
+
+    // The web parser uses the same patterns; the font name is also inserted into CSS there.
+    private static final Pattern FONT_FAMILY = Pattern.compile("[\\p{L}\\p{N} _-]+");
+    private static final Pattern COLOR = Pattern.compile("#[0-9A-Fa-f]{6}");
 
     private static Map<?, ?> mapping(Object value, String name) {
         if (!(value instanceof Map<?, ?> map)) throw new IllegalArgumentException(name + ": očakáva sa YAML mapa.");
@@ -123,6 +153,22 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDy
             throw new IllegalArgumentException(key + ": očakáva sa číslo " + min + "–" + max + ".");
         }
         return value.doubleValue();
+    }
+
+    private static boolean bool(Map<?, ?> map, String key, boolean fallback) {
+        if (!map.containsKey(key)) return fallback;
+        if (!(map.get(key) instanceof Boolean value)) {
+            throw new IllegalArgumentException(key + ": očakáva sa true alebo false.");
+        }
+        return value;
+    }
+
+    private static String matching(Map<?, ?> map, String key, String fallback, Pattern pattern, String expected) {
+        if (!map.containsKey(key)) return fallback;
+        if (!(map.get(key) instanceof String value) || !pattern.matcher(value).matches()) {
+            throw new IllegalArgumentException(key + ": očakáva sa " + expected + ".");
+        }
+        return value;
     }
 
     private static String text(Map<?, ?> map, String key, String fallback) {

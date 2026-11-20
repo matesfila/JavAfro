@@ -12,15 +12,15 @@ import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search';
 import { closeBrackets, autocompletion, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { lintKeymap } from '@codemirror/lint';
+import { config } from './config';
 
-/** Quoted strings (rhythm patterns); keep in sync with Java SandTheme.EDITOR_STRING. */
-export const editorStringColor = '#6b3a1e';
+const { stringColor, stringBold, stringLetterSpacing } = config.editorStyle;
 
-// The default palette with bold, letter-spaced dark brown strings; the later spec overrides the default red.
-// Letter spacing: keep in sync with Java SandTheme.EDITOR_STRING_TRACKING.
+// The default palette with quoted strings (rhythm patterns) styled from javafro.yaml editor.strings;
+// the later spec overrides the default red.
 const editorHighlightStyle = HighlightStyle.define([
   ...defaultHighlightStyle.specs,
-  { tag: tags.string, color: editorStringColor, fontWeight: 'bold', letterSpacing: '0.1em' },
+  { tag: tags.string, color: stringColor, fontWeight: stringBold ? 'bold' : 'normal', letterSpacing: `${stringLetterSpacing}em` },
 ]);
 
 // Preserve basicSetup's editing features while omitting line numbers.

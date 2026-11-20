@@ -39,7 +39,7 @@ public final class RhythmPlayerPanel extends JPanel {
 
     private record PlaybackRequest(Rhythm rhythm, PlaybackSettings settings, String source) {}
     private final java.util.function.IntFunction<PlaybackSession> sessionFactory;
-    private final RSyntaxTextArea editor = new SpacedSyntaxTextArea(30, 100, SandTheme.EDITOR_LINE_SPACING);
+    private final SpacedSyntaxTextArea editor = new SpacedSyntaxTextArea(30, 100);
     private final JButton play = new JButton("Play");
     private final JButton stop = new JButton("Stop");
     private final JButton open = new JButton("Otvoriť YAML…");
@@ -140,7 +140,9 @@ public final class RhythmPlayerPanel extends JPanel {
         header.add(headerActions, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
         editor.setName("yamlEditor");
-        editor.setFont(SandTheme.editorFont(config.editorFontSize()));
+        AppConfig.EditorStyle editorStyle = config.editorStyle();
+        editor.setFont(SandTheme.editorFont(editorStyle.fontFamily(), config.editorFontSize()));
+        editor.setLineHeight(editorStyle.lineHeight());
         editor.setTabSize(2);
         editor.setTabsEmulated(true);
         org.fife.ui.rsyntaxtextarea.folding.FoldParserManager.get()
@@ -154,9 +156,10 @@ public final class RhythmPlayerPanel extends JPanel {
         editor.setSelectionColor(SandTheme.SELECTION);
         editor.setSelectedTextColor(SandTheme.INK);
         SyntaxScheme scheme = editor.getSyntaxScheme();
-        Font stringFont = SandTheme.editorStringFont(editor.getFont());
+        Font stringFont = SandTheme.editorStringFont(editor.getFont(), editorStyle);
+        Color stringColor = new Color(editorStyle.stringColor());
         for (int type : new int[] {Token.LITERAL_STRING_DOUBLE_QUOTE, Token.LITERAL_CHAR, Token.LITERAL_BACKQUOTE}) {
-            scheme.getStyle(type).foreground = SandTheme.EDITOR_STRING;
+            scheme.getStyle(type).foreground = stringColor;
             scheme.getStyle(type).font = stringFont;
         }
         editor.setMargin(new Insets(14, 14, 14, 14));

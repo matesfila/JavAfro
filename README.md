@@ -23,6 +23,11 @@ Predvolené nastavenia sú v [javafro.yaml](javafro.yaml):
 | `library.directory` | Priečinok rytmov pre Java výber súborov a zostavenie webovej knižnice. |
 | `library.initialRhythm` | Relatívna cesta prvého rytmu webovej verzie, napr. `imported/Djole.yaml`. |
 | `editor.fontSize` | Veľkosť písma YAML editora v Java aj webovej verzii. |
+| `editor.fontFamily` | Písmo editora, predvolene `Consolas`. Ak nie je nainštalované, použije sa systémové neproporcionálne písmo (na iPhone a Macu napr. SF Mono). Názov smie obsahovať písmená, číslice, medzery, `-` a `_`. |
+| `editor.lineHeight` | Výška riadka ako násobok veľkosti písma, 1–3, predvolene 2. |
+| `editor.strings.color` | Farba reťazcov v úvodzovkách (patternov) v tvare `"#RRGGBB"`, predvolene `"#6B3A1E"` (tmavohnedá). Úvodzovky sú povinné, inak YAML berie `#` ako začiatok komentára. |
+| `editor.strings.bold` | Tučné reťazce, `true` alebo `false`, predvolene `true`. |
+| `editor.strings.letterSpacing` | Medzera za každým písmenom reťazca ako násobok veľkosti písma, 0–0,5, predvolene 0,1. |
 | `window.width`, `height` | Počiatočná veľkosť Java okna. |
 
 Java načíta konfiguráciu pri štarte: najprv `javafro.yaml` v pracovnom priečinku,

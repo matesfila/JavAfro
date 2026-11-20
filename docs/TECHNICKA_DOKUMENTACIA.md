@@ -175,8 +175,8 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 | `RhythmFoldParser` | Určuje zbaliteľné bloky hlavných YAML definícií pre RSyntaxTextArea podľa YAML uzlov. Rozpracovaný chybný text necháva editovateľný. |
 | `EditorFoldIcon` | Vykresľuje vlastnú ikonu rozbalenia/zbalenia v editore. |
 | `YamlFileTransferHandler` | Prijíma presunutie jedného YAML súboru; kontroluje typ vstupu a dostupnosť otvorenia. Bežné textové operácie deleguje pôvodnému transfer handleru. |
-| `SandTheme` | Nastavuje Swing vzhľad a spoločné farby UI/editora. Určuje aj písmo editora (Consolas) a vzhľad reťazcov (tmavohnedé, tučné, s rozostupom písmen); hodnoty treba držať v súlade s webovým `editor-setup.ts`. |
-| `SpacedSyntaxTextArea` | RSyntaxTextArea s väčším riadkovaním. RSTA nemá nastavenie riadkovania, preto trieda pripočíta medzeru k výške riadka a text vycentruje. |
+| `SandTheme` | Nastavuje Swing vzhľad a spoločné farby UI/editora. Z `AppConfig.EditorStyle` (sekcia `editor` v `javafro.yaml`) vytvára písmo editora a písmo reťazcov (tučné, rozostup písmen cez `TextAttribute.TRACKING`). |
+| `SpacedSyntaxTextArea` | RSyntaxTextArea s nastaviteľnou výškou riadka (`editor.lineHeight`). RSTA nemá nastavenie riadkovania, preto trieda pripočíta medzeru k výške riadka a text vycentruje. |
 | `TempoDial` | Kruhové vykreslenie nad modelom `JSlider`, relatívne ťahanie, klávesnicové ovládanie, tlačidlá ±1 BPM a synchronizovaný číselný vstup. |
 | `TouchSliders` | Spoločné väčšie úchyty bežných sliderov pre humanize, dialect a mixer. |
 | `DocumentGuard` | Rozhodnutie zrušiť/uložiť/zahodiť pred výmenou alebo zatvorením neuloženej práce; neúspešné uloženie výmenu nepovolí. |

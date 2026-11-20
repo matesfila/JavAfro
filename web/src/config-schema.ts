@@ -27,6 +27,18 @@ export function parseConfig(source: string) {
     if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) throw new Error(`${key}: očakáva sa číslo ${min}–${max}.`);
     return value;
   };
+  const bool = (map: Record<string, unknown>, key: string, fallback: boolean) => {
+    if (!(key in map)) return fallback;
+    const value = map[key];
+    if (typeof value !== 'boolean') throw new Error(`${key}: očakáva sa true alebo false.`);
+    return value;
+  };
+  const matching = (map: Record<string, unknown>, key: string, fallback: string, pattern: RegExp, expected: string) => {
+    if (!(key in map)) return fallback;
+    const value = map[key];
+    if (typeof value !== 'string' || !pattern.test(value)) throw new Error(`${key}: očakáva sa ${expected}.`);
+    return value;
+  };
   const text = (map: Record<string, unknown>, key: string, fallback: string) => {
     if (!(key in map)) return fallback;
     const value = map[key];
@@ -39,7 +51,8 @@ export function parseConfig(source: string) {
   const playback = section(root, 'playback', ['humanize', 'humanizeMaxOffsetMs', 'humanizeDynamic', 'humanizePitch', 'tempo', 'defaultTrackVolume', 'humanizeApplianceProbability']);
   const tempo = section(playback, 'tempo', ['initial', 'minimum', 'maximum']);
   const library = section(root, 'library', ['directory', 'initialRhythm']);
-  const editor = section(root, 'editor', ['fontSize']);
+  const editor = section(root, 'editor', ['fontSize', 'fontFamily', 'lineHeight', 'strings']);
+  const strings = section(editor, 'strings', ['color', 'bold', 'letterSpacing']);
   const window = section(root, 'window', ['width', 'height']);
   const minimumTempo = number(tempo, 'minimum', 20, 1, 10000);
   const maximumTempo = number(tempo, 'maximum', 300, 1, 10000);
@@ -56,6 +69,15 @@ export function parseConfig(source: string) {
     humanizePitch: decimal(playback, 'humanizePitch', 0.005, 0, 0.5),
     rhythmsDirectory: text(library, 'directory', 'rhythms'), initialRhythm: text(library, 'initialRhythm', 'basicRhythms.yaml'),
     editorFontSize: number(editor, 'fontSize', 16, 8, 72),
+    // Keep defaults and patterns in sync with Java AppConfig.EditorStyle.
+    editorStyle: {
+      // Restricted characters: the name is inserted into a CSS font-family list.
+      fontFamily: matching(editor, 'fontFamily', 'Consolas', /^[\p{L}\p{N} _-]+$/u, 'názov písma (písmená, číslice, medzera, - a _)'),
+      lineHeight: decimal(editor, 'lineHeight', 2, 1, 3),
+      stringColor: matching(strings, 'color', '#6B3A1E', /^#[0-9A-Fa-f]{6}$/, 'farba v tvare "#RRGGBB" (v úvodzovkách)'),
+      stringBold: bool(strings, 'bold', true),
+      stringLetterSpacing: decimal(strings, 'letterSpacing', 0.1, 0, 0.5),
+    },
     windowWidth: number(window, 'width', 1200, 760, 10000), windowHeight: number(window, 'height', 900, 560, 10000),
   };
 }
