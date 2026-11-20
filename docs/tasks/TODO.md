@@ -3,13 +3,13 @@
 ## Úlohy a nápady
 
 ### Otvorené úlohy
-- [] Doladiť fonty: farbu, typ fontu, vzdialenosti riadkov/písmen, ... 
+- [x] Doladiť fonty: farbu, typ fontu, vzdialenosti riadkov/písmen, ... 
+- [] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
 - [] Zoznam stôp dať ako list, nie mapu. Umožniť tak dať ten istý nástroj viackrát.
 - [] Alternatívne názvy pre nástroje, povoliť aj menej presné názvy, využiť nejaký word distance algoritmus ?
   - cieľom je možnosť mať kenken, kensereni, kensedeni, kenken bell, kenken_withBell, kenken with bell, 
 - [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
 - [] Dununba dialekty, dialekt má byť medzi druhý a tretím pulzom, ale má byť aj medzi prvým a druhým ?? Na djembe asi ano, ale na dunoch ??
-- [] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
 - [] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...
 - [] Podpora MIDI
 - [] Djembe so sese ???

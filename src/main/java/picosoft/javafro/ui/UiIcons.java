@@ -14,7 +14,7 @@ import java.io.InputStream;
  * They paint in the component's foreground, so they follow enabled, hover and accent colors.
  */
 final class UiIcons {
-    enum Shape { PLAY, STOP, FOLDER, DOWNLOAD, NEW, DOCUMENT, INFO }
+    enum Shape { PLAY, STOP, FOLDER, DOWNLOAD, NEW, DOCUMENT, INFO, ARROW_UP, ARROW_DOWN }
 
     private UiIcons() { }
 
@@ -65,6 +65,8 @@ final class UiIcons {
                         g.draw(open(3, 13, 3, 17, 17, 17, 17, 13));
                     }
                     case NEW -> { g.drawLine(10, 3, 10, 17); g.drawLine(3, 10, 17, 10); }
+                    case ARROW_UP -> g.draw(open(5, 12, 10, 7, 15, 12));
+                    case ARROW_DOWN -> g.draw(open(5, 8, 10, 13, 15, 8));
                     case DOCUMENT -> {
                         g.draw(path(4, 2, 12, 2, 16, 6, 16, 18, 4, 18));
                         g.drawLine(7, 10, 13, 10); g.drawLine(7, 13, 13, 13);

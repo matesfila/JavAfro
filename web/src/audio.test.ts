@@ -258,7 +258,7 @@ describe('audio lifecycle', () => {
     const duet = parseRhythm('duet:\n  stepsPerBeat: 4\n  tracks: {dundun_withBell: "DDDDDDDDDDDDDDDD", sangban_withBell: "SSSSSSSSSSSSSSSS"}');
     await engine.start(duet);
     const [master, first, second] = context.gains;
-    expect(master.gain.value).toBe(.25 / 2);
+    expect(master.gain.value).toBe(config.defaultMasterVolume / 100 / 2);
     const count = context.sources.length;
     engine.setMasterVolume(100);
     expect(master.gain.setTargetAtTime).toHaveBeenLastCalledWith(1 / 2, 0, .01);

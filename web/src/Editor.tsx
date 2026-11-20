@@ -5,6 +5,8 @@ import { editorSetup } from './editor-setup';
 import { yaml } from '@codemirror/lang-yaml';
 import { config } from './config';
 import { rhythmFoldEffects } from './rhythm-folding';
+import { foldedRanges } from '@codemirror/language';
+import { moveRhythm, type MoveDirection } from './rhythm-move';
 import { overwriteExtension, overwriteState, setOverwrite } from './overwrite';
 import { NotePad } from './NotePad';
 import { insertNote, noteCommands, type NoteCommand } from './note-input';
@@ -32,6 +34,8 @@ export type EditorInputMode = 'notes' | 'keyboard' | 'surface';
 
 export interface YamlEditorHandle {
   setInputMode: (mode: EditorInputMode) => void;
+  /** Swap the rhythm under the caret with the previous (-1) or next (1) one. */
+  moveRhythm: (direction: MoveDirection) => void;
 }
 
 function enablePinchZoom(editor: EditorView) {
@@ -82,6 +86,22 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   const modeChange = useRef(onOverwriteChange); modeChange.current = onOverwriteChange;
   const [activeInstrument, setActiveInstrument] = useState<Instrument | null>(null);
   useImperativeHandle(ref, () => ({
+    moveRhythm(direction) {
+      const editor = view.current;
+      if (!editor || editor.state.readOnly) return;
+      const { state } = editor;
+      const move = moveRhythm(state.doc.toString(), state.selection.main.head, direction);
+      if (!move) return;
+      // Replacing the text drops its folds: collapse the swapped rhythms again if they were.
+      const folded = new Set<number>();
+      foldedRanges(state).between(move.from, move.to, from => { folded.add(state.doc.lineAt(from).from); });
+      editor.dispatch({ changes: { from: move.from, to: move.to, insert: move.insert }, selection: { anchor: move.caret },
+        scrollIntoView: true, userEvent: 'move.rhythm' });
+      const headers = move.blocks.filter(block => folded.has(block.start)).map(block => editor.state.doc.lineAt(block.moved).to);
+      const effects = rhythmFoldEffects(editor.state).filter(effect => headers.includes(effect.value.from));
+      if (effects.length) editor.dispatch({ effects });
+      editor.focus();
+    },
     setInputMode(nextMode) {
       const editor = view.current;
       if (!editor) return;

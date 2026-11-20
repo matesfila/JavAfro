@@ -32,6 +32,7 @@
 .editor-mode-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)}
 .mode-button{min-height:26px;padding:2px 9px;font-size:12px;border-color:var(--border);background:transparent;color:#705840}
 .mode-button[aria-pressed=true]{background:#805638;border-color:#805638;color:#fffaf4}
+.move-button{min-width:26px;padding:2px 3px}.move-button svg{width:16px;height:16px}
 .input-mode-button{min-width:94px;background:#805638;border-color:#805638;color:#fffaf4}
 .header-controls{display:flex;align-items:center;gap:10px;min-width:0}
 

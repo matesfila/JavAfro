@@ -20,6 +20,7 @@ const mixerKey = (rhythm: Rhythm) => JSON.stringify([rhythm.id, rhythm.tracks.ma
 function PlayIcon() { return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6 3.5v13l11-6.5z" /></svg>; }
 function FolderIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M2 6V4h6l2 2h8v10H2V6Z" /><path d="M2 8h16" /></svg>; }
 function DownloadIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M10 2v10m-4-4 4 4 4-4M3 13v4h14v-4" /></svg>; }
+function ArrowIcon({ up }: { up: boolean }) { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={up ? 'M5 12l5-5 5 5' : 'M5 8l5 5 5-5'} /></svg>; }
 function NewIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M10 3v14M3 10h14" /></svg>; }
 
 export function App() {
@@ -374,6 +375,10 @@ export function App() {
     surface: { label: 'Plocha', next: 'notes' },
   } as const;
   const currentInputMode = inputModes[inputMode];
+  const moveButtons = <>
+    <button type="button" className="button mode-button move-button" aria-label="Posunúť rytmus vyššie" title="Posunúť rytmus pod kurzorom nad predchádzajúci" disabled={isLoading || !source.trim()} onMouseDown={event => event.preventDefault()} onClick={() => editor.current?.moveRhythm(-1)}><ArrowIcon up /></button>
+    <button type="button" className="button mode-button move-button" aria-label="Posunúť rytmus nižšie" title="Posunúť rytmus pod kurzorom pod nasledujúci" disabled={isLoading || !source.trim()} onMouseDown={event => event.preventDefault()} onClick={() => editor.current?.moveRhythm(1)}><ArrowIcon up={false} /></button>
+  </>;
   const inputModeButton = <button type="button" className="button mode-button input-mode-button" title={`Režim: ${currentInputMode.label}. Prepnúť na ${inputModes[currentInputMode.next].label}.`} onMouseDown={event => event.preventDefault()} onClick={() => changeInputMode(currentInputMode.next)}>{currentInputMode.label}</button>;
 
   return <div className={'app' + (viewport.keyboard ? ' keyboard-open' : '') + (inputMode === 'notes' ? ' notes-mode' : inputMode === 'surface' ? ' surface-mode' : '')} style={{ height: viewport.compact ? viewport.height : undefined, '--viewport-height': `${viewport.height}px` } as CSSProperties} onDragOver={event => {
@@ -411,7 +416,7 @@ export function App() {
             <span className="file-name" title={fileName}>
               {isModified ? <strong>*{fileName}</strong> : fileName}
             </span>
-            <div className="editor-actions">{inputModeButton}{modeButton}</div>
+            <div className="editor-actions">{inputModeButton}{modeButton}{moveButtons}</div>
           </div>
           <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} foldRhythms={editorDocument.foldRhythms} overwriteButton={modeButton} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);

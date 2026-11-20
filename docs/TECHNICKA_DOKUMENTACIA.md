@@ -166,7 +166,7 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 
 | Trieda alebo vnorený typ | Zodpovednosť |
 | --- | --- |
-| `RhythmPlayerPanel` | Hlavný panel a koordinátor desktopu, rozložený ako web: hlavička (logo, Otvoriť, menu Súbor), vľavo karta editora (názov súboru s `*` pri neuložených zmenách, prepínače Noty/Prepisovanie, YAML editor, klávesnica nôt, stavový riadok s chybami YAML a stav konceptu), vpravo karta prehrávania (názov rytmu, Play/Stop, tempo, rozbaľovacie sekcie Mixer, Dialect a Humanize). Rieši aj výber rytmu pod kurzorom, synchronizáciu ovládania a chyby. |
+| `RhythmPlayerPanel` | Hlavný panel a koordinátor desktopu, rozložený ako web: hlavička (logo, Otvoriť, menu Súbor), vľavo karta editora (názov súboru s `*` pri neuložených zmenách, prepínače Noty/Prepisovanie, šípky presunu rytmu, YAML editor, klávesnica nôt, stavový riadok s chybami YAML a stav konceptu), vpravo karta prehrávania (názov rytmu, Play/Stop, tempo, rozbaľovacie sekcie Mixer, Dialect a Humanize). Rieši aj výber rytmu pod kurzorom, synchronizáciu ovládania a chyby. |
 | `RhythmPlayerPanel.PlaybackSession` | Balíková abstrakcia životného cyklu prehrávania (`play`, `queue`, `cancelQueued`, `stop`, `isStopped`). Produkčne obaluje sekvencer, testy môžu vložiť vlastnú session cez factory. |
 | `RhythmPlayerPanel.PlaybackRequest` | Súkromný record rytmu a nastavení pre konkrétne spustenie. Pri reštartoch sa uchováva iba posledná čakajúca požiadavka. |
 | `MixerPanel` | Zostavuje ovládanie hlasitosti, Mute a Solo podľa trackov (Solo = jediný nestlmený track), uchováva master a prepája hodnoty s aktuálnym `PlaybackSettings` cez `bind()`. `reset()` obnovuje tracky pri načítaní súboru. Je priamo v karte prehrávania, nie v samostatnom okne. |
@@ -175,8 +175,9 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 | `NotePad` | Klávesnica nôt (prepínač Noty): noty nástroja pod kurzorom (`RhythmLoader.instrumentAtCaret()` a `notesFor()`), `.`, `|`, medzera, Enter, Backspace a šípky. Tlačidlá neberú fokus; každé stlačenie je samostatný krok späť. Rešpektuje prepisovanie; balafon vkladá tokeny oddelené medzerou. Port webových `NotePad.tsx` a `note-input.ts`. |
 | `AboutDialog` | Okno O aplikácii (logo, verzia, autor, pomocník pri vývoji, pôvod sample) podľa webového `AboutDialog.tsx`, bez tlačidla aktualizácie. |
 | `HelpDocuments` | Súbor → Dokumentácia / Obrázkový návod: PDF pribalené z `web/public` (cez `pom.xml` do `docs/`) skopíruje do dočasného súboru a otvorí systémovým prehliadačom. Otvárač sa dá v testoch nahradiť. |
-| `UiIcons` | Malé vektorové ikony (Play, Stop, priečinok, uloženie, nový, dokument, info) kreslené ako webové SVG, vo farbe popredia tlačidla; logo djembe pre hlavičku a O aplikácii. |
+| `UiIcons` | Malé vektorové ikony (Play, Stop, priečinok, uloženie, nový, dokument, info, šípky hore/dole) kreslené ako webové SVG, vo farbe popredia tlačidla; logo djembe pre hlavičku a O aplikácii. |
 | `RhythmFoldParser` | Určuje zbaliteľné bloky hlavných YAML definícií pre RSyntaxTextArea podľa YAML uzlov. Rozpracovaný chybný text necháva editovateľný. |
+| `RhythmMove` | Vymení hlavnú YAML definíciu pod kurzorom so susednou (port web `rhythm-move.ts`). Rytmus siaha od riadka svojho kľúča po ďalší kľúč, takže komentáre pod ním sa presúvajú s ním. Panel ho volá šípkami ↑/↓ ako jednu úpravu pre krok späť a znovu zbalí zbalené rytmy. |
 | `EditorFoldIcon` | Vykresľuje vlastnú ikonu rozbalenia/zbalenia v editore. |
 | `YamlFileTransferHandler` | Prijíma presunutie jedného YAML súboru; kontroluje typ vstupu a dostupnosť otvorenia. Bežné textové operácie deleguje pôvodnému transfer handleru. |
 | `SandTheme` | Nastavuje vzhľad FlatLaf Light s paletou webu (`web/src/style.css`): pozadie, papierové karty, hnedý akcent, zaoblenia. Pomocníci `card()`, `accent()`, `key()` a `heading()` štýlujú karty a tlačidlá; fungujú aj bez nainštalovaného FlatLaf (testy). Z `AppConfig.EditorStyle` (sekcia `editor` v `javafro.yaml`) vytvára písmo editora a písmo reťazcov (tučné, rozostup písmen cez `TextAttribute.TRACKING`). |
@@ -266,6 +267,7 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `editor-setup.ts` | Spoločná konfigurácia rozšírení a klávesových skratiek editora. |
 | `overwrite.ts` | CodeMirror stav, efekt a vstupná logika Insert/Overwrite. |
 | `rhythm-folding.ts` | Vytvára efekty zbalenia hlavných YAML definícií. |
+| `rhythm-move.ts` | Vymení hlavnú YAML definíciu pod kurzorom so susednou; `YamlEditorHandle.moveRhythm()` to použije pre šípky ↑/↓ v lište editora a zachová zbalenie. |
 | `rhythm-document.ts` / `readRhythmDocument()` | Otvorí dokument aj pri chybe validácie: vráti pôvodný text, `rhythm: null` a správu. Používateľ môže chybný YAML opraviť v editore. |
 | `rhythm.ts` | Typy `Rhythm`, `Track`, `Instrument`, `CatalogEntry`, validácia a parsovanie definícií. `parseRhythm()` vyberá prvý rytmus, `parseRhythmAtCaret()` podľa kurzora a `parseRhythmEntries()` vracia aj pozície definícií. |
 | `timing.ts` | Typy `Controls` a `Hit`, validácia živých hodnôt, `minimumGap()` a `planBeat()`. Vypočíta údery doby, ďalšiu pozíciu a koniec doby; náhodu možno vložiť cez parameter na testovanie. |
@@ -421,7 +423,7 @@ a spustí lokálny HTTPS server cez `scripts/phone-server.mjs`.
 | Konfigurácia a YAML | Java `AppConfigTest`, `RhythmLoaderTest`, `ImportedRhythmsTest`; web `config.test.ts`, `rhythm.test.ts`, `rhythm-document.test.ts`. |
 | Časovanie a živé ovládanie | Java `LivePlaybackTest`, `DialectPlaybackTest`, `MixerPlaybackTest`; web `timing.test.ts`, `audio.test.ts`. |
 | Nástroje, multisample a hlasitosť | Java `WavSampleInstrumentTest`, `DjembeInstrumentTest`, `AfroSampleInstrumentTest`, `AudioHeadroomTest`; web `sounds.test.ts`, `afro-instruments.test.ts`. |
-| Editor a životný cyklus UI | Java `PlaybackRestartTest`, `YamlFileTransferHandlerTest`, `YamlFoldingTest`, `DialectControlsTest`, `MixerPanelTest`, `EditorModeTest`, `DesktopLayoutTest`, `AfroJavaPlayerTest`; web `rhythm-folding.test.ts`, `overwrite.test.ts`. |
+| Editor a životný cyklus UI | Java `PlaybackRestartTest`, `YamlFileTransferHandlerTest`, `YamlFoldingTest`, `DialectControlsTest`, `MixerPanelTest`, `EditorModeTest`, `DesktopLayoutTest`, `AfroJavaPlayerTest`, `RhythmMoveTest`; web `rhythm-folding.test.ts`, `rhythm-move.test.ts`, `overwrite.test.ts`. |
 | Klávesnica nôt | Java `NoteContextTest` (nástroj pod kurzorom, zoznam nôt), `NotePadTest`; web `note-context.test.ts`, `note-input.test.ts`. |
 | Distribúcia a offline | Web `offline-worker.test.ts`, `obfuscation.test.ts`; importný nástroj `tools/import-afroplayer.test.cjs`. |
 
@@ -439,7 +441,7 @@ manuálnym spustením príslušnej aplikácie.
 | Nový samplový nástroj | Manifest a WAV resources, konkrétna trieda `matesamples`, Java mapovanie v `RhythmLoader.instrument()`, webový zoznam `instruments` v `rhythm.ts`, testy a synchronizácia assetov. |
 | Zmena časovania/humanizácie | Java `BeepSequencer`, `Dialect`, `PlaybackSettings`; web `timing.ts`, `audio.ts`, prípadne `sounds.ts`; príslušné audio konštanty. |
 | Zmena hlasitosti/mute | Java `MixerPanel`, `PlaybackSettings`, renderer a `AudioConstants`; web `App.tsx` a `AudioEngine`. Zachovať prevod medzi UI a internou stupnicou. |
-| Zmena editora | Java `RhythmPlayerPanel`, `RhythmFoldParser`, `EditorFoldIcon`, `SandTheme`, `SpacedSyntaxTextArea`, `EditorZoom`; web `Editor.tsx`, `editor-setup.ts`, `overwrite.ts`, `rhythm-folding.ts`. |
+| Zmena editora | Java `RhythmPlayerPanel`, `RhythmFoldParser`, `RhythmMove`, `EditorFoldIcon`, `SandTheme`, `SpacedSyntaxTextArea`, `EditorZoom`; web `Editor.tsx`, `editor-setup.ts`, `overwrite.ts`, `rhythm-folding.ts`, `rhythm-move.ts`. |
 | Vzhľad desktopu | `SandTheme` (FlatLaf kľúče a paleta), `UiIcons`, kreslenie `TempoDial`/`TouchSliders`/`DisclosurePanel`; webová predloha je `web/src/style.css`. FlatLaf potrebuje v `proguard.pro` pravidlo `-keep class com.formdev.flatlaf.**` a natívny prístup (`Enable-Native-Access` v manifeste, `--enable-native-access` v `build-windows.ps1`). |
 | Klávesnica nôt | Java `NotePad`, `RhythmLoader.instrumentAtCaret()`/`notesFor()`, `Instrument.notes()`; web `NotePad.tsx`, `note-input.ts`, `note-context.ts`, `sounds.ts`. Poradie nôt je poradie v manifeste na oboch stranách. |
 | Nové alebo vymenené nahrávky | `src/main/resources/samples`, manifest, dokumentácia pôvodu a konverzné nástroje; potom nový webový build a overenie offline cache. |

@@ -101,7 +101,7 @@ a ponuka **Súbor**.
 
 Okno je rozložené ako webová verzia (vzhľad FlatLaf v teplých papierových farbách):
 vľavo editor s názvom súboru (`*` pri neuložených zmenách textu, tempa alebo dialectu),
-prepínačmi **Noty** a **Prepisovanie** a stavovým riadkom pre chyby YAML; vpravo názov
+prepínačmi **Noty** a **Prepisovanie**, šípkami **↑/↓** a stavovým riadkom pre chyby YAML; vpravo názov
 rytmu pod kurzorom, **Play/Stop**, tempo a rozbaľovacie panely **Mixer**, **Dialect**
 (s tlačidlom **Vynulovať**) a **Humanize**. Okno má najmenej 900 × 600 px.
 Jeden súbor `.yaml` alebo `.yml` možno tiež presunúť z Prieskumníka priamo do okna
@@ -139,6 +139,12 @@ Tempo sa nastavuje okrúhlym ovládačom: relatívne ťahanie hore/dole mení BP
 bez skoku pri prvom dotyku (4 px na 1 BPM). Tlačidlá **−/+** menia hodnotu
 presne o 1 BPM, číslo nad ovládačom umožňuje priamy zápis. Ostatné posuvníky
 majú 20 px úchyt a 44 px záchytnú plochu aj pre dotykové displeje.
+
+Šípky **↑/↓** vpravo hore nad editorom presunú rytmus, v ktorom je kurzor, nad predchádzajúci
+alebo pod nasledujúci rytmus. Rytmus sa presúva s komentármi a prázdnymi riadkami pod ním,
+komentár pred prvým rytmom zostáva na začiatku súboru. Kurzor zostane v presunutom rytme,
+zbalené rytmy zostanú zbalené a presun sa vráti jedným krokom späť (Ctrl+Z). Pri prvom
+rytme (šípka hore), poslednom rytme (šípka dole) alebo neplatnom YAML sa nič nezmení.
 
 Desktop používa fyzickú klávesnicu na úpravu YAML. **Prepisovanie** má stály názov;
 zapnutý stav alebo kláves Insert zapne prepisovanie.

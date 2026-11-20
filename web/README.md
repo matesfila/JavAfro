@@ -141,6 +141,9 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   systémovú klávesnicu; editor využije uvoľnenú výšku nad kompaktným prehrávačom.
   Dotyk editora v režime Plocha systémovú klávesnicu nevyvoláva.
   Prepnutie zachová dokument, výber aj históriu úprav. Posúva sa iba obsah dokumentu.
+- Šípky **↑/↓** vpravo v lište editora presunú rytmus pod kurzorom nad predchádzajúci
+  alebo pod nasledujúci rytmus (s komentármi pod ním). Kurzor zostane v presunutom rytme,
+  zbalené rytmy zostanú zbalené a presun sa vráti jedným krokom späť.
 - **Noty**, **Prepisovanie** a **Súbor** sú v spoločnej hornej
   lište. Ponuka **Súbor** obsahuje nový rytmus, otvorenie, uloženie a **O aplikácii**.
   Názov otvoreného súboru sa nezobrazuje, pri ukladaní zostáva zachovaný.

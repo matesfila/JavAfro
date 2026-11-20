@@ -285,6 +285,8 @@ public final class RhythmPlayerPanel extends JPanel {
         JPanel modes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         modes.setOpaque(false);
         modes.add(notesMode); modes.add(editMode);
+        modes.add(moveButton(UiIcons.Shape.ARROW_UP, "moveRhythmUpButton", "Posunúť rytmus pod kurzorom nad predchádzajúci", -1));
+        modes.add(moveButton(UiIcons.Shape.ARROW_DOWN, "moveRhythmDownButton", "Posunúť rytmus pod kurzorom pod nasledujúci", 1));
         JPanel toolbar = new JPanel(new BorderLayout(12, 0));
         toolbar.setOpaque(false);
         toolbar.setBorder(BorderFactory.createCompoundBorder(
@@ -316,6 +318,57 @@ public final class RhythmPlayerPanel extends JPanel {
         card.add(surface, BorderLayout.CENTER);
         card.add(statusBar, BorderLayout.SOUTH);
         return card;
+    }
+
+    private JButton moveButton(UiIcons.Shape icon, String name, String tooltip, int direction) {
+        JButton button = new JButton(UiIcons.icon(icon, 16));
+        button.setName(name);
+        button.setToolTipText(tooltip);
+        button.getAccessibleContext().setAccessibleName(direction < 0 ? "Posunúť rytmus vyššie" : "Posunúť rytmus nižšie");
+        button.setFocusable(false);
+        button.setMargin(new Insets(2, 3, 2, 3));
+        button.addActionListener(event -> moveRhythm(direction));
+        return button;
+    }
+
+    /** Swaps the rhythm under the caret with its neighbour as one undoable edit, keeping collapsed rhythms collapsed. */
+    void moveRhythm(int direction) {
+        var move = RhythmMove.move(editor.getText(), editor.getCaretPosition(), direction);
+        if (move != null && editor.isEditable()) {
+            // The edit ends exactly where the next rhythm starts, so RSyntaxTextArea would expand
+            // that neighbour. Remember every collapsed rhythm by its header line and restore them all.
+            var folds = editor.getFoldManager();
+            int fromLine = lineOf(move.from());
+            int toLine = move.to() >= editor.getDocument().getLength() ? Integer.MAX_VALUE : lineOf(move.to());
+            var collapsedLines = new java.util.HashSet<Integer>();
+            var collapsedMoved = new java.util.ArrayList<Integer>();
+            for (int i = 0; i < folds.getFoldCount(); i++) {
+                var fold = folds.getFold(i);
+                int line = fold.getStartLine();
+                if (fold.isCollapsed() && (line < fromLine || line >= toLine)) collapsedLines.add(line);
+            }
+            for (var block : move.blocks()) {
+                var fold = folds.getFoldForLine(lineOf(block.start()));
+                if (fold != null && fold.isCollapsed()) collapsedMoved.add(block.moved());
+            }
+            editor.beginAtomicEdit();
+            try {
+                editor.replaceRange(move.insert(), move.from(), move.to());
+                editor.setCaretPosition(move.caret());
+            } finally { editor.endAtomicEdit(); }
+            for (int start : collapsedMoved) collapsedLines.add(lineOf(start));
+            folds.reparse();
+            for (int i = 0; i < folds.getFoldCount(); i++) {
+                var fold = folds.getFold(i);
+                fold.setCollapsed(collapsedLines.contains(fold.getStartLine()));
+            }
+        }
+        editor.requestFocusInWindow();
+    }
+
+    private int lineOf(int offset) {
+        try { return editor.getLineOfOffset(offset); }
+        catch (javax.swing.text.BadLocationException exception) { return -1; }
     }
 
     private static JToggleButton toolbarToggle(String text, String name, String tooltip) {
