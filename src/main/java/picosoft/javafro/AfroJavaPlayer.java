@@ -60,7 +60,7 @@ public class AfroJavaPlayer {
                 frame.setIconImages(loadIcons());
                 frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
                 frame.setContentPane(player);
-                frame.setMinimumSize(new Dimension(760, 560));
+                frame.setMinimumSize(new Dimension(900, 600));
                 frame.pack();
                 Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
                 frame.setSize(Math.min(config.windowWidth(), screen.width - 80), Math.min(config.windowHeight(), screen.height - 100));
@@ -72,6 +72,7 @@ public class AfroJavaPlayer {
                     }
                 });
                 frame.setVisible(true);
+                player.focusEditor();
             } catch (Exception exception) {
                 JOptionPane.showMessageDialog(null, exception.getMessage(), "JavAfro", JOptionPane.ERROR_MESSAGE);
                 System.exit(1);

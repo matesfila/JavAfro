@@ -8,7 +8,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Mixer state survives Stop/Play and belongs to the selected rhythm's tracks. */
+/**
+ * Mixer state survives Stop/Play and belongs to the selected rhythm's tracks.
+ * Each row is narrow like the web {@code .mixer-track}: name with Mute/Solo, then the volume slider with its value.
+ */
 final class MixerPanel extends JPanel {
     private final List<JSlider> volumes = new ArrayList<>();
     private final List<JToggleButton> mutes = new ArrayList<>();
@@ -17,28 +20,23 @@ final class MixerPanel extends JPanel {
     private PlaybackSettings settings;
     private final int initialVolume;
     private final JSlider master;
-    private final JPanel masterRow = new JPanel(new BorderLayout(10, 0));
+    private final JPanel masterRow = new JPanel(new GridBagLayout());
 
     MixerPanel(int initialVolume) { this(initialVolume, (int) (AudioConstants.OUTPUT_GAIN * 100)); }
 
     MixerPanel(int initialVolume, int initialMaster) {
-        super(new GridLayout(0, 1, 0, 4));
+        super(new GridLayout(0, 1, 0, 0));
+        setOpaque(false);
         this.initialVolume = initialVolume * 2;
         master = new JSlider(0, 100, initialMaster);
-        setBorder(BorderFactory.createTitledBorder("Mixer"));
         master.setName("masterVolume");
         TouchSliders.install(master);
         master.getAccessibleContext().setAccessibleName("Master hlasitosť");
         JLabel label = new JLabel("Master");
         label.setFont(label.getFont().deriveFont(Font.BOLD));
         label.setLabelFor(master);
-        label.setPreferredSize(new Dimension(150, 24));
-        JLabel value = new JLabel(master.getValue() + " %", SwingConstants.RIGHT);
-        value.setPreferredSize(new Dimension(130, 24));
-        masterRow.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-        masterRow.add(label, BorderLayout.WEST);
-        masterRow.add(master, BorderLayout.CENTER);
-        masterRow.add(value, BorderLayout.EAST);
+        JLabel value = valueLabel(master.getValue() + " %");
+        layoutRow(masterRow, label, null, master, value, false);
         master.addChangeListener(event -> {
             value.setText(master.getValue() + " %");
             if (settings != null) settings.setMasterVolume(master.getValue());
@@ -49,7 +47,7 @@ final class MixerPanel extends JPanel {
     void reset() {
         settings = null;
         signature = List.of();
-        volumes.clear(); mutes.clear(); removeAll();
+        volumes.clear(); mutes.clear(); solos.clear(); removeAll();
         add(masterRow);
         revalidate(); repaint();
     }
@@ -71,12 +69,8 @@ final class MixerPanel extends JPanel {
             TouchSliders.install(volume);
             volume.setName("trackVolume-" + i);
             volume.getAccessibleContext().setAccessibleName("Hlasitosť " + name);
-            JToggleButton mute = new JToggleButton("Mute");
-            mute.setName("trackMute-" + i);
-            mute.getAccessibleContext().setAccessibleName("Mute " + name);
-            JToggleButton solo = new JToggleButton("Solo");
-            solo.setName("trackSolo-" + i);
-            solo.getAccessibleContext().setAccessibleName("Solo " + name);
+            JToggleButton mute = smallToggle("Mute", "trackMute-" + i, "Mute " + name);
+            JToggleButton solo = smallToggle("Solo", "trackSolo-" + i, "Solo " + name);
             solo.addActionListener(event -> {
                 boolean unsolo = isSoloed(index);
                 for (int track = 0; track < mutes.size(); track++) {
@@ -84,15 +78,15 @@ final class MixerPanel extends JPanel {
                     update(track);
                 }
             });
-            JLabel value = new JLabel(trackVolumeText(initialVolume), SwingConstants.RIGHT);
-            value.setPreferredSize(new Dimension(50, 24));
+            JLabel value = valueLabel(trackVolumeText(initialVolume));
             JLabel label = new JLabel(instrument);
+            label.setToolTipText(name);
             label.setLabelFor(volume);
-            label.setPreferredSize(new Dimension(150, 24));
-            JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-            right.add(value); right.add(mute); right.add(solo);
-            JPanel row = new JPanel(new BorderLayout(10, 0));
-            row.add(label, BorderLayout.WEST); row.add(volume, BorderLayout.CENTER); row.add(right, BorderLayout.EAST);
+            JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+            actions.setOpaque(false);
+            actions.add(mute); actions.add(solo);
+            JPanel row = new JPanel(new GridBagLayout());
+            layoutRow(row, label, actions, volume, value, true);
             volumes.add(volume); mutes.add(mute); solos.add(solo); add(row);
             volume.addChangeListener(event -> { value.setText(trackVolumeText(volume.getValue())); update(index); });
             mute.addActionListener(event -> update(index));
@@ -117,6 +111,50 @@ final class MixerPanel extends JPanel {
             target.setTrackMix(i, same ? volumes.get(i).getValue() : initialVolume,
                     same && mutes.get(i).isSelected());
         }
+    }
+
+    /** The label is the row's first child; the slider and its value share the second line. */
+    private static void layoutRow(JPanel row, JLabel label, JComponent actions, JSlider slider, JLabel value, boolean separated) {
+        row.setOpaque(false);
+        row.setBorder(separated
+                ? BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, SandTheme.BORDER),
+                        BorderFactory.createEmptyBorder(8, 0, 2, 0))
+                : BorderFactory.createEmptyBorder(4, 0, 6, 0));
+        // Columns: 0 = name (grows), 1 = rest of the buttons, 2 = value. The buttons span 1–2, the slider spans 0–1,
+        // so the slider gets the full width except the value column.
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0; c.gridy = 0; c.weightx = 1; c.anchor = GridBagConstraints.WEST; c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = actions == null ? 3 : 1;
+        row.add(label, c);
+        if (actions != null) {
+            c.gridx = 1; c.gridwidth = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE; c.anchor = GridBagConstraints.EAST;
+            row.add(actions, c);
+        }
+        c.gridx = 0; c.gridy = 1; c.gridwidth = 2; c.weightx = 0; c.fill = GridBagConstraints.HORIZONTAL; c.anchor = GridBagConstraints.WEST;
+        row.add(slider, c);
+        c.gridx = 2; c.gridwidth = 1; c.fill = GridBagConstraints.NONE; c.anchor = GridBagConstraints.EAST;
+        c.insets = new Insets(0, 6, 0, 0);
+        row.add(value, c);
+        // GridBag gives a spanning component's extra width to its last column; reserve it in column 1 instead.
+        int valueWidth = value.getPreferredSize().width + c.insets.left;
+        int actionsWidth = actions == null ? 0 : actions.getPreferredSize().width;
+        ((GridBagLayout) row.getLayout()).columnWidths = new int[]{0, Math.max(0, actionsWidth - valueWidth), valueWidth};
+    }
+
+    private static JLabel valueLabel(String text) {
+        JLabel value = new JLabel(text, SwingConstants.RIGHT);
+        value.setForeground(SandTheme.MUTED);
+        value.setPreferredSize(new Dimension(52, 24));
+        return value;
+    }
+
+    private static JToggleButton smallToggle(String text, String name, String accessibleName) {
+        JToggleButton button = new JToggleButton(text);
+        button.setName(name);
+        button.setMargin(new Insets(2, 8, 2, 8));
+        button.setFont(button.getFont().deriveFont(button.getFont().getSize2D() - 1f));
+        button.getAccessibleContext().setAccessibleName(accessibleName);
+        return button;
     }
 
     /** A track is soloed when it is the only unmuted one (and there is more than one track). */

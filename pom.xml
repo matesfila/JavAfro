@@ -23,6 +23,11 @@
             <version>4.0.1</version>
         </dependency>
         <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.8</version>
+        </dependency>
+        <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>2.6</version>
@@ -51,6 +56,15 @@
                 <directory>${project.basedir}</directory>
                 <includes><include>javafro.yaml</include></includes>
             </resource>
+            <!-- Help PDFs shared with the web app (Súbor → Dokumentácia / Obrázkový návod). -->
+            <resource>
+                <directory>${project.basedir}/web/public</directory>
+                <targetPath>docs</targetPath>
+                <includes>
+                    <include>navod-pre-zaciatocnikov.pdf</include>
+                    <include>obrazovy-navod.pdf</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
@@ -63,6 +77,16 @@
                         <goals><goal>shade</goal></goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <!-- FlatLaf ships Java 9+ classes in META-INF/versions; keep them active in the shaded JAR.
+                                     Its Windows helper (window frame) loads a native library: allow it without a JDK 25 warning. -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Multi-Release>true</Multi-Release>
+                                        <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

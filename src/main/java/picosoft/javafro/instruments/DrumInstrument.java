@@ -18,6 +18,10 @@ public abstract class DrumInstrument implements Instrument {
         return note == 'x' || note == stroke || note == Character.toLowerCase(stroke);
     }
 
+    @Override public final java.util.List<String> notes() {
+        return java.util.List.of(String.valueOf(stroke), String.valueOf(Character.toLowerCase(stroke)), "x");
+    }
+
     @Override public final Instrument voice(char note, int humanize) {
         if (!supportsNote(note)) throw new IllegalArgumentException("Unsupported drum note: " + note);
         if (humanize < 0 || humanize > 100) throw new IllegalArgumentException("Humanize must be 0–100.");

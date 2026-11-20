@@ -58,10 +58,9 @@ Tempo, metrum, delenie doby a dialect konkrétneho rytmu naďalej patria do jeho
 
 ## Webová verzia
 
-Java aj webový prehrávač majú **Mixer** so zobrazením hlasitosti 0–100 % a prepínačom
-**Mute** pre každý track. V desktopovej verzii tlačidlo **Mixer…** otvorí samostatné
-okno; na webe rozbalíš panel **Mixer**. Zatvorenie okna alebo zbalenie panela
-zachová nastavený mix a prehrávanie pokračuje. Zmeny fungujú aj počas hrania; vypnutie mute obnoví
+Java aj webový prehrávač majú **Mixer** so zobrazením hlasitosti 0–100 % a prepínačmi
+**Mute** a **Solo** pre každý track. V oboch verziách ho rozbalíš ako panel **Mixer**
+v pravom stĺpci prehrávania. Zbalenie panela zachová nastavený mix a prehrávanie pokračuje. Zmeny fungujú aj počas hrania; vypnutie mute obnoví
 nastavenú hlasitosť. Stlmenie tracku nemení hlasitosť ostatných trackov.
 Stop/Play zachová mix aktuálneho rytmu. Nastavenia mixera sa neukladajú do YAML;
 otvorenie súboru ich obnoví na `playback.defaultTrackVolume` (predvolene 40 %) bez mute.
@@ -97,7 +96,14 @@ Voliteľný argument je cesta k jednému YAML súboru na disku (UTF-8).
 Bez argumentu sa obnoví posledný koncept; ak neexistuje, otvorí sa prázdny editor.
 Predvolený rytmus z resources sa nenačítava. Explicitný súbor má prednosť pred
 konceptom; predchádzajúci koncept zostane dostupný ako jedna obnoviteľná záloha.
-Relatívna cesta sa vyhodnocuje voči pracovnému priečinku. V okne je aj tlačidlo **Otvoriť YAML…**.
+Relatívna cesta sa vyhodnocuje voči pracovnému priečinku. V hlavičke okna je tlačidlo **Otvoriť**
+a ponuka **Súbor**.
+
+Okno je rozložené ako webová verzia (vzhľad FlatLaf v teplých papierových farbách):
+vľavo editor s názvom súboru (`*` pri neuložených zmenách textu, tempa alebo dialectu),
+prepínačmi **Noty** a **Prepisovanie** a stavovým riadkom pre chyby YAML; vpravo názov
+rytmu pod kurzorom, **Play/Stop**, tempo a rozbaľovacie panely **Mixer**, **Dialect**
+(s tlačidlom **Vynulovať**) a **Humanize**. Okno má najmenej 900 × 600 px.
 Jeden súbor `.yaml` alebo `.yml` možno tiež presunúť z Prieskumníka priamo do okna
 alebo editora. Načíta sa jeho obsah, tempo a dialect. Počas prehrávania treba najprv
 stlačiť Stop. Viac súborov, priečinky a iné prípony sa odmietnu.
@@ -131,14 +137,22 @@ pri otvorení súboru sa ovládač inicializuje jeho BPM. Zmeny YAML sa použij�
 
 Tempo sa nastavuje okrúhlym ovládačom: relatívne ťahanie hore/dole mení BPM
 bez skoku pri prvom dotyku (4 px na 1 BPM). Tlačidlá **−/+** menia hodnotu
-presne o 1 BPM, číslo vedľa ovládača umožňuje priamy zápis. Ostatné posuvníky
-majú 32 px úchyt a 44 px záchytnú plochu aj pre dotykové displeje.
+presne o 1 BPM, číslo nad ovládačom umožňuje priamy zápis. Ostatné posuvníky
+majú 20 px úchyt a 44 px záchytnú plochu aj pre dotykové displeje.
 
 Desktop používa fyzickú klávesnicu na úpravu YAML. **Prepisovanie** má stály názov;
 zapnutý stav alebo kláves Insert zapne prepisovanie.
 
-Ponuka **Súbor** poskytuje nový rytmus, **Uložiť**, **Uložiť ako…** a obnovu
-predchádzajúceho dokumentu. Skratky: Ctrl+N, Ctrl+O, Ctrl+S a Ctrl+Shift+S.
+Prepínač **Noty** zobrazí pod editorom klávesnicu nôt ako na webe: noty nástroja,
+v ktorého riadku je kurzor (v poradí podľa manifestu sample), a klávesy `.`, `|`,
+medzera, Enter, Backspace a šípky. Mimo riadku nástroja ukáže „Vyber riadok nástroja“.
+Každé stlačenie je samostatný krok späť (Ctrl+Z), prepisovanie platí aj pre klávesnicu
+nôt a balafónové noty sa vkladajú ako tokeny oddelené medzerou.
+
+Ponuka **Súbor** poskytuje nový rytmus, otvorenie súboru, **Uložiť**, **Uložiť ako…**,
+obnovu predchádzajúceho dokumentu, PDF **Dokumentácia** a **Obrázkový návod** (rovnaké
+ako na webe, otvoria sa v systémovom prehliadači PDF) a okno **O aplikácii**.
+Skratky: Ctrl+N, Ctrl+O, Ctrl+S a Ctrl+Shift+S.
 Uložiť funguje aj pre prázdny alebo neplatný YAML, ktorý zapíše presne tak,
 ako je v editore. Pri platnom nezmenenom zápise zahrnie upravené BPM/dialect
 aktuálneho rytmu a zachová komentáre aj ostatné definície. Zmenený súbor na disku

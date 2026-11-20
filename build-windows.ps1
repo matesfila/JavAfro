@@ -63,6 +63,8 @@ try {
         '--dest', $outputDirectory,
         '--main-jar', 'JavAfro.jar',
         '--main-class', 'picosoft.javafro.AfroJavaPlayer',
+        # FlatLaf's native window helper; the launcher uses the class path, so the JAR manifest entry does not apply.
+        '--java-options', '--enable-native-access=ALL-UNNAMED',
         '--add-modules', $runtimeModules,
         # Retain java.exe so the generated runtime can be verified and diagnosed.
         '--jlink-options', '--strip-debug --no-man-pages --no-header-files'

@@ -44,6 +44,7 @@ nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u ni
 - [x] Nezávislé stopy pre duny a zvonce
 - [x] Balafon
 - [x] Nové rozloženie klávesnice Noty: namiesto bodky medzera, namiesto `|` Enter; `|` a `.` v dolnom rade vľavo od šípky doľava
+- [x] [Desktop: vzhľad a funkcie ako webová verzia](desktop-vzhlad-ako-web.md) – FlatLaf, dve karty, mixer v okne, klávesnica nôt, PDF návody (zostáva ručné overenie)
 
 ### v0.6.1 (current)
 - [x] Aktualizovať rytmy, nedokončené odstrániť z basicRhythms.```yaml

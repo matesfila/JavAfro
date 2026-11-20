@@ -109,7 +109,10 @@ public class ObfuscationSmokeCheck {
 
     private static Component findEditor(Container parent) {
         for (Component child : parent.getComponents()) {
-            if (child.getClass().getName().equals("org.fife.ui.rsyntaxtextarea.RSyntaxTextArea")) return child;
+            // The editor is an obfuscated subclass (SpacedSyntaxTextArea), so match the library superclass.
+            for (Class<?> type = child.getClass(); type != null; type = type.getSuperclass()) {
+                if (type.getName().equals("org.fife.ui.rsyntaxtextarea.RSyntaxTextArea")) return child;
+            }
             if (child instanceof Container container) {
                 Component editor = findEditor(container);
                 if (editor != null) return editor;

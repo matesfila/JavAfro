@@ -68,7 +68,8 @@ public abstract class AfroSampleInstrument implements Instrument {
                 if (notes.isEmpty() || (bell != null && !banks.containsKey(bell))) {
                     throw new IllegalArgumentException("Missing notes or invalid bell bank: " + entry.getKey());
                 }
-                instruments.put((String) entry.getKey(), new Definition(bell, Map.copyOf(notes)));
+                // Keep manifest order: the note keyboard shows the notes in this order.
+                instruments.put((String) entry.getKey(), new Definition(bell, Collections.unmodifiableMap(notes)));
             }
             return new Manifest(Map.copyOf(banks), Map.copyOf(instruments));
         } catch (java.io.IOException exception) {
@@ -100,6 +101,14 @@ public abstract class AfroSampleInstrument implements Instrument {
     @Override public final boolean supportsNote(char note) { return supportsNote(String.valueOf(note)); }
 
     @Override public final boolean supportsNote(String note) { return definition.notes().containsKey(note); }
+
+    @Override public final List<String> notes() { return List.copyOf(definition.notes().keySet()); }
+
+    /** Notes of a manifest instrument without decoding its samples; empty when the id is not in the manifest. */
+    public static List<String> manifestNotes(String id) {
+        Definition definition = Resources.MANIFEST.instruments().get(id);
+        return definition == null ? List.of() : List.copyOf(definition.notes().keySet());
+    }
 
     @Override public final Instrument voice(char symbol, int humanize) { return voice(String.valueOf(symbol), humanize); }
 

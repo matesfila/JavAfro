@@ -44,6 +44,67 @@ public final class RhythmLoader {
         return rhythms.get(selected);
     }
 
+    /** Track names that {@link #instrument(String)} accepts, in the order of the web {@code instruments} list. */
+    public static final List<String> INSTRUMENTS = List.of(
+            "dundun", "sangban", "kensereni", "dundun_withBell", "sangban_withBell", "kensereni_withBell",
+            "dundunBell", "sangbanBell", "kensereniBell", "balafon", "djembe", "djembe2",
+            "dundun_freesound", "sangban_freesound", "kensereni_freesound");
+    private static final Map<String, List<String>> NOTES = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.regex.Pattern TRACK_LINE_TAIL = java.util.regex.Pattern.compile("^(?:\\s*(?:#.*)?|:\\s*(?:#.*)?)$");
+
+    /**
+     * Track (instrument) whose key or pattern line contains the caret, or {@code null}.
+     * Uses only the YAML structure, so it also works while a pattern is invalid (port of web note-context.ts).
+     */
+    public static String instrumentAtCaret(String source, int caretOffset) {
+        org.yaml.snakeyaml.nodes.Node root;
+        try {
+            LoaderOptions options = new LoaderOptions();
+            options.setAllowDuplicateKeys(true);
+            root = new Yaml(new SafeConstructor(options)).compose(new java.io.StringReader(source));
+        } catch (RuntimeException exception) {
+            return null;
+        }
+        if (!(root instanceof org.yaml.snakeyaml.nodes.MappingNode rhythms)) return null;
+        for (var rhythm : rhythms.getValue()) {
+            if (!(rhythm.getValueNode() instanceof org.yaml.snakeyaml.nodes.MappingNode fields)) continue;
+            for (var field : fields.getValue()) {
+                if (!(field.getKeyNode() instanceof org.yaml.snakeyaml.nodes.ScalarNode key) || !"tracks".equals(key.getValue())
+                        || !(field.getValueNode() instanceof org.yaml.snakeyaml.nodes.MappingNode tracks)) continue;
+                for (var track : tracks.getValue()) {
+                    if (!(track.getKeyNode() instanceof org.yaml.snakeyaml.nodes.ScalarNode name)
+                            || !INSTRUMENTS.contains(name.getValue())) continue;
+                    // SnakeYAML marks count code points; the caret is a UTF-16 offset.
+                    int keyStart = offset(source, name.getStartMark().getIndex());
+                    int lineStart = source.lastIndexOf('\n', keyStart - 1) + 1;
+                    int start = source.substring(lineStart, keyStart).isBlank() ? lineStart : keyStart;
+                    int end = offset(source, track.getValueNode().getEndMark().getIndex());
+                    int lineEnd = source.indexOf('\n', Math.max(start, end - 1));
+                    int endOfLine = lineEnd < 0 ? source.length() : lineEnd;
+                    // Include the rest of the last pattern line, but never the following track.
+                    String tail = endOfLine > end ? source.substring(end, endOfLine) : "";
+                    int stop = TRACK_LINE_TAIL.matcher(tail).matches() ? endOfLine : end;
+                    if (caretOffset >= start && caretOffset <= stop) return name.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Note symbols of a track name for the note keyboard; empty for an unknown or missing instrument. */
+    public static List<String> notesFor(String instrumentId) {
+        if (instrumentId == null || !INSTRUMENTS.contains(instrumentId)) return List.of();
+        return NOTES.computeIfAbsent(instrumentId, id -> {
+            List<String> manifest = AfroSampleInstrument.manifestNotes(id);
+            return manifest.isEmpty() ? instrument(id).notes() : manifest;
+        });
+    }
+
+    private static int offset(String source, int codePoints) {
+        int length = source.codePointCount(0, source.length());
+        return source.offsetByCodePoints(0, Math.max(0, Math.min(codePoints, length)));
+    }
+
     public static Map<String, Rhythm> load(Path path) throws IOException {
         try (InputStream input = Files.newInputStream(path)) {
             return load(input);

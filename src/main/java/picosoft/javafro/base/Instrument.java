@@ -24,6 +24,9 @@ public interface Instrument {
         return note != null && note.length() == 1 && supportsNote(note.charAt(0));
     }
 
+    /** Every note symbol accepted by {@link #supportsNote(String)}, in display order (desktop note keyboard). */
+    default java.util.List<String> notes() { return java.util.List.of("x"); }
+
     default Instrument voice(String note, int humanize) {
         if (note == null || note.length() != 1) throw new IllegalArgumentException("Unsupported note: " + note);
         return voice(note.charAt(0), humanize);

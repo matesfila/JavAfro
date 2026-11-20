@@ -11,6 +11,9 @@
 # Third-party libraries use reflection, resource lookup and Swing bean conventions.
 -keep class org.fife.** { *; }
 -keep class org.yaml.snakeyaml.** { *; }
+# FlatLaf creates UI delegates by class name and loads its .properties and native window helpers as resources.
+-keep class com.formdev.flatlaf.** { *; }
+-dontwarn com.formdev.flatlaf.**
 
 # Preserve runtime metadata; source names and local-variable debug data are omitted.
 -keepattributes Exceptions,InnerClasses,EnclosingMethod,Signature,*Annotation*,Record,PermittedSubclasses
