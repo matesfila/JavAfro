@@ -140,9 +140,7 @@ public final class RhythmPlayerPanel extends JPanel {
         header.add(headerActions, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
         editor.setName("yamlEditor");
-        AppConfig.EditorStyle editorStyle = config.editorStyle();
-        editor.setFont(SandTheme.editorFont(editorStyle.fontFamily(), config.editorFontSize()));
-        editor.setLineHeight(editorStyle.lineHeight());
+        editor.setLineHeight(config.editorStyle().lineHeight());
         editor.setTabSize(2);
         editor.setTabsEmulated(true);
         org.fife.ui.rsyntaxtextarea.folding.FoldParserManager.get()
@@ -155,13 +153,7 @@ public final class RhythmPlayerPanel extends JPanel {
         editor.setCurrentLineHighlightColor(SandTheme.CURRENT_LINE);
         editor.setSelectionColor(SandTheme.SELECTION);
         editor.setSelectedTextColor(SandTheme.INK);
-        SyntaxScheme scheme = editor.getSyntaxScheme();
-        Font stringFont = SandTheme.editorStringFont(editor.getFont(), editorStyle);
-        Color stringColor = new Color(editorStyle.stringColor());
-        for (int type : new int[] {Token.LITERAL_STRING_DOUBLE_QUOTE, Token.LITERAL_CHAR, Token.LITERAL_BACKQUOTE}) {
-            scheme.getStyle(type).foreground = stringColor;
-            scheme.getStyle(type).font = stringFont;
-        }
+        setEditorFont(SandTheme.editorFont(config.editorStyle().fontFamily(), config.editorFontSize()));
         editor.setMargin(new Insets(14, 14, 14, 14));
         editor.setLineWrap(false);
         JToggleButton editMode = new JToggleButton("Prepisovanie");
@@ -181,8 +173,15 @@ public final class RhythmPlayerPanel extends JPanel {
         RTextScrollPane scroll = new RTextScrollPane(editor);
         scroll.setFoldIndicatorEnabled(true);
         scroll.setLineNumbersEnabled(false);
-        int foldIconSize = Math.max(10, Math.min(20, editor.getLineHeight() - 2));
-        scroll.getGutter().setFoldIcons(new EditorFoldIcon(true, foldIconSize), new EditorFoldIcon(false, foldIconSize));
+        Runnable updateFoldIcons = () -> {
+            int foldIconSize = Math.max(10, Math.min(20, editor.getLineHeight() - 2));
+            scroll.getGutter().setFoldIcons(new EditorFoldIcon(true, foldIconSize), new EditorFoldIcon(false, foldIconSize));
+        };
+        updateFoldIcons.run();
+        EditorZoom.install(scroll, editor, size -> {
+            setEditorFont(editor.getFont().deriveFont((float) size));
+            updateFoldIcons.run();
+        });
         // The library also uses this color for separators below collapsed folds.
         // Our chevrons paint their own color, so keep only the separators transparent.
         scroll.getGutter().setFoldIndicatorForeground(new Color(0, 0, 0, 0));
@@ -278,6 +277,22 @@ public final class RhythmPlayerPanel extends JPanel {
         shortcut("control shift S", "saveDocumentAs", () -> saveDocument(true));
         shortcut("control O", "openDocument", this::openYaml);
         shortcut("control N", "newDocument", () -> newDocument.doClick());
+    }
+
+    /** Editor font and the matching string style (javafro.yaml editor section); used at start and by Ctrl + wheel. */
+    private void setEditorFont(Font font) {
+        AppConfig.EditorStyle style = config.editorStyle();
+        editor.setFont(font);
+        // Set the string style after setFont(): RSTA re-derives styled fonts there and drops the letter spacing.
+        // The line height stays correct, because letter spacing does not change a font's height.
+        Font stringFont = SandTheme.editorStringFont(font, style);
+        Color stringColor = new Color(style.stringColor());
+        SyntaxScheme scheme = editor.getSyntaxScheme();
+        for (int type : new int[] {Token.LITERAL_STRING_DOUBLE_QUOTE, Token.LITERAL_CHAR, Token.LITERAL_BACKQUOTE}) {
+            scheme.getStyle(type).foreground = stringColor;
+            scheme.getStyle(type).font = stringFont;
+        }
+        editor.repaint();
     }
 
     private void showMixer() {

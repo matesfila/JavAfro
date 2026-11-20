@@ -106,7 +106,9 @@ Bežné kopírovanie a vkladanie textu funguje naďalej.
 Editor RSyntaxTextArea zvýrazňuje YAML syntax,
 skrýva čísla riadkov a pri stlačení Tab odsádza dvoma medzerami.
 Má veľkú plochu s neproporcionálnym
-písmom a posuvníkmi pre dlhšie zápisy. Jeden súbor môže obsahovať viac rytmov
+písmom a posuvníkmi pre dlhšie zápisy. **Ctrl + koliesko myši** zväčšuje a zmenšuje
+písmo editora (8–72; riadok pod myšou zostane na mieste). Zmena platí do zatvorenia
+okna, pri ďalšom spustení sa použije `editor.fontSize` z konfigurácie. Jeden súbor môže obsahovať viac rytmov
 ako samostatné hlavné YAML kľúče. Play prehrá rytmus, v ktorého definícii je kurzor.
 Text pred prvým kľúčom vyberá prvý rytmus; medzera alebo komentár medzi definíciami
 patrí predchádzajúcemu rytmu. Presun kurzora počas hrania neprepína zvuk.
