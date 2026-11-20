@@ -161,7 +161,7 @@ Pôvodné metódy s počtom opakovaní zostávajú dostupné.
 ### Spustenie aktuálneho YAML v IntelliJ IDEA
 
 Zdieľaná run konfigurácia **AfroJavaPlayer - Current YAML** je v
-`.run/AfroJavaPlayer_Current_YAML.run.xml`. Otvor a ulož YAML súbor, nechaj ho
+`.run/AfroJavaPlayer - Current YAML.run.xml`. Otvor a ulož YAML súbor, nechaj ho
 aktívny v editore a spusti túto konfiguráciu. Makro `"$FilePath$"` odovzdá
 absolútnu cestu k aktuálne zvolenému súboru vrátane prípadných medzier.
 Konfigurácia používa modul `JavAfro`, hlavný vstup `picosoft.javafro.AfroJavaPlayer`
@@ -413,7 +413,7 @@ Bežné prehrávanie používa iba `base`. Alternatívy sú dostupné cez
 `track.variations()`; `BeepTrack.withVariation(index)` vytvorí track s vybranou
 variáciou (index od nuly), ktorý možno vložiť do nového `Rhythm`.
 
-V `src/main/resources/rhythms/imported` je 23 YAML súborov z 20 pôvodných Ruby
+V `rhythms/imported` je 23 YAML súborov z 20 pôvodných Ruby
 súborov. Kon Masi, Kon Maja a Soli Masi majú samostatné súbory
 `Kon_Masi.yaml`, `Kon_Maja.yaml` a `Soli_Masi.yaml`.
 Ručné definície Djole a Soko sú spolu v `rhythms/basicRhythms.yaml`

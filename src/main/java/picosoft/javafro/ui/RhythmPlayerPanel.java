@@ -2,6 +2,8 @@ package picosoft.javafro.ui;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
+import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.TextMode;
 import picosoft.javafro.AppInfo;
@@ -37,7 +39,7 @@ public final class RhythmPlayerPanel extends JPanel {
 
     private record PlaybackRequest(Rhythm rhythm, PlaybackSettings settings, String source) {}
     private final java.util.function.IntFunction<PlaybackSession> sessionFactory;
-    private final RSyntaxTextArea editor = new RSyntaxTextArea(30, 100);
+    private final RSyntaxTextArea editor = new SpacedSyntaxTextArea(30, 100, SandTheme.EDITOR_LINE_SPACING);
     private final JButton play = new JButton("Play");
     private final JButton stop = new JButton("Stop");
     private final JButton open = new JButton("Otvoriť YAML…");
@@ -138,7 +140,7 @@ public final class RhythmPlayerPanel extends JPanel {
         header.add(headerActions, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
         editor.setName("yamlEditor");
-        editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, config.editorFontSize()));
+        editor.setFont(SandTheme.editorFont(config.editorFontSize()));
         editor.setTabSize(2);
         editor.setTabsEmulated(true);
         org.fife.ui.rsyntaxtextarea.folding.FoldParserManager.get()
@@ -151,6 +153,12 @@ public final class RhythmPlayerPanel extends JPanel {
         editor.setCurrentLineHighlightColor(SandTheme.CURRENT_LINE);
         editor.setSelectionColor(SandTheme.SELECTION);
         editor.setSelectedTextColor(SandTheme.INK);
+        SyntaxScheme scheme = editor.getSyntaxScheme();
+        Font stringFont = SandTheme.editorStringFont(editor.getFont());
+        for (int type : new int[] {Token.LITERAL_STRING_DOUBLE_QUOTE, Token.LITERAL_CHAR, Token.LITERAL_BACKQUOTE}) {
+            scheme.getStyle(type).foreground = SandTheme.EDITOR_STRING;
+            scheme.getStyle(type).font = stringFont;
+        }
         editor.setMargin(new Insets(14, 14, 14, 14));
         editor.setLineWrap(false);
         JToggleButton editMode = new JToggleButton("Prepisovanie");

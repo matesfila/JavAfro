@@ -175,7 +175,8 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 | `RhythmFoldParser` | Určuje zbaliteľné bloky hlavných YAML definícií pre RSyntaxTextArea podľa YAML uzlov. Rozpracovaný chybný text necháva editovateľný. |
 | `EditorFoldIcon` | Vykresľuje vlastnú ikonu rozbalenia/zbalenia v editore. |
 | `YamlFileTransferHandler` | Prijíma presunutie jedného YAML súboru; kontroluje typ vstupu a dostupnosť otvorenia. Bežné textové operácie deleguje pôvodnému transfer handleru. |
-| `SandTheme` | Nastavuje Swing vzhľad a spoločné farby UI/editora. |
+| `SandTheme` | Nastavuje Swing vzhľad a spoločné farby UI/editora. Určuje aj písmo editora (Consolas) a vzhľad reťazcov (tmavohnedé, tučné, s rozostupom písmen); hodnoty treba držať v súlade s webovým `editor-setup.ts`. |
+| `SpacedSyntaxTextArea` | RSyntaxTextArea s väčším riadkovaním. RSTA nemá nastavenie riadkovania, preto trieda pripočíta medzeru k výške riadka a text vycentruje. |
 | `TempoDial` | Kruhové vykreslenie nad modelom `JSlider`, relatívne ťahanie, klávesnicové ovládanie, tlačidlá ±1 BPM a synchronizovaný číselný vstup. |
 | `TouchSliders` | Spoločné väčšie úchyty bežných sliderov pre humanize, dialect a mixer. |
 | `DocumentGuard` | Rozhodnutie zrušiť/uložiť/zahodiť pred výmenou alebo zatvorením neuloženej práce; neúspešné uloženie výmenu nepovolí. |
@@ -432,7 +433,7 @@ manuálnym spustením príslušnej aplikácie.
 | Nový samplový nástroj | Manifest a WAV resources, konkrétna trieda `matesamples`, Java mapovanie v `RhythmLoader.instrument()`, webový zoznam `instruments` v `rhythm.ts`, testy a synchronizácia assetov. |
 | Zmena časovania/humanizácie | Java `BeepSequencer`, `Dialect`, `PlaybackSettings`; web `timing.ts`, `audio.ts`, prípadne `sounds.ts`; príslušné audio konštanty. |
 | Zmena hlasitosti/mute | Java `MixerPanel`, `PlaybackSettings`, renderer a `AudioConstants`; web `App.tsx` a `AudioEngine`. Zachovať prevod medzi UI a internou stupnicou. |
-| Zmena editora | Java `RhythmPlayerPanel`, `RhythmFoldParser`, `EditorFoldIcon`; web `Editor.tsx`, `editor-setup.ts`, `overwrite.ts`, `rhythm-folding.ts`. |
+| Zmena editora | Java `RhythmPlayerPanel`, `RhythmFoldParser`, `EditorFoldIcon`, `SandTheme`, `SpacedSyntaxTextArea`; web `Editor.tsx`, `editor-setup.ts`, `overwrite.ts`, `rhythm-folding.ts`. |
 | Nové alebo vymenené nahrávky | `src/main/resources/samples`, manifest, dokumentácia pôvodu a konverzné nástroje; potom nový webový build a overenie offline cache. |
 
 Pri aktualizácii architektúry udržuj tento dokument spolu s kódom, predovšetkým

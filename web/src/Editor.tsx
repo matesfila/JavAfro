@@ -13,7 +13,7 @@ import type { Instrument } from './rhythm';
 
 const theme = EditorView.theme({
   '&': { height: '100%', backgroundColor: '#fffcf8', color: '#443429', fontSize: `${config.editorFontSize}px` },
-  '.cm-scroller': { overflow: 'auto', touchAction: 'pan-x pan-y', fontFamily: '"Cascadia Code", "SFMono-Regular", Consolas, monospace', lineHeight: '1.8' },
+  '.cm-scroller': { overflow: 'auto', touchAction: 'pan-x pan-y', fontFamily: 'Consolas, ui-monospace, "SFMono-Regular", Menlo, monospace', lineHeight: '2' },
   '.cm-content': { padding: '20px 0', caretColor: '#745137' },
   '.cm-line': { padding: '0 20px' },
   '.cm-gutters': { background: '#f7f0e5', color: '#a39179', border: 'none', paddingRight: '8px' },

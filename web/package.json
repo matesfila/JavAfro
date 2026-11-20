@@ -26,6 +26,7 @@
     "@codemirror/view": "6.43.15",
     "@fontsource-variable/dm-sans": "5.3.0",
     "@fontsource-variable/manrope": "5.3.0",
+    "@lezer/highlight": "1.2.5",
     "codemirror": "^6.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -3,6 +3,7 @@
 ## Úlohy a nápady
 
 ### Otvorené úlohy
+- [] Doladiť fonty: farbu, typ fontu, vzdialenosti riadkov/písmen, ... 
 - [] Zoznam stôp dať ako list, nie mapu. Umožniť tak dať ten istý nástroj viackrát.
 - [] Alternatívne názvy pre nástroje, povoliť aj menej presné názvy, využiť nejaký word distance algoritmus ?
   - cieľom je možnosť mať kenken, kensereni, kensedeni, kenken bell, kenken_withBell, kenken with bell, 
