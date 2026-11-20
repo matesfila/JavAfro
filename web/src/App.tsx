@@ -13,15 +13,24 @@ import { exportRhythm, writeDialect } from './rhythm-export';
 import blankRhythmSource from '../../rhythms/blankRhythm.yaml?raw';
 import { type Controls } from './timing';
 import { config } from './config';
+import { ArrowIcon, DownloadIcon, FolderIcon, FullscreenIcon, NewIcon, NextIcon, PlayIcon } from './icons';
+import { LiveView } from './LiveView';
+import { caretAtSourceOffset, entryAtCaret, rhythmNeighbors, type RhythmEntry } from './rhythm-navigation';
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}generated/${path}`;
 const mixerKey = (rhythm: Rhythm) => JSON.stringify([rhythm.id, rhythm.tracks.map(track => track.instrument)]);
+/** Two Next taps closer together than this play the previous rhythm instead. */
+export const DOUBLE_TAP_MS = 350;
+type ParsedDocument = { source: string; rhythm: Rhythm | null; entries: RhythmEntry[] };
+const entryOf = ({ rhythm, offset }: { rhythm: Rhythm; offset: number }): RhythmEntry => ({ id: rhythm.id, name: rhythm.name, offset });
 
-function PlayIcon() { return <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6 3.5v13l11-6.5z" /></svg>; }
-function FolderIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M2 6V4h6l2 2h8v10H2V6Z" /><path d="M2 8h16" /></svg>; }
-function DownloadIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M10 2v10m-4-4 4 4 4-4M3 13v4h14v-4" /></svg>; }
-function ArrowIcon({ up }: { up: boolean }) { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={up ? 'M5 12l5-5 5 5' : 'M5 8l5 5 5-5'} /></svg>; }
-function NewIcon() { return <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M10 3v14M3 10h14" /></svg>; }
+/** The rhythm under the caret plus the ordered list of all rhythms; throws on invalid YAML. */
+function parseAtCaret(source: string, caretOffset: number): ParsedDocument {
+  const parsed = parseRhythmEntries(source);
+  const entries = parsed.map(entryOf);
+  const selected = entries.indexOf(entryAtCaret(entries, source, caretOffset)!);
+  return { source, rhythm: parsed[selected].rhythm, entries };
+}
 
 export function App() {
   const viewport = useViewport();
@@ -43,9 +52,14 @@ export function App() {
   const [isModified, setModified] = useState(false);
   const [replacement, setReplacement] = useState<{ text: string; name: string; fold: boolean; restored?: Draft } | null>(null);
   const replacementDialog = useRef<HTMLDialogElement>(null);
-  const [parsedDocument, setParsedDocument] = useState<{ source: string; rhythm: Rhythm | null }>({ source: '', rhythm: null });
+  const [parsedDocument, setParsedDocument] = useState<ParsedDocument>({ source: '', rhythm: null, entries: [] });
   const { rhythm } = parsedDocument;
   const [playingRhythm, setPlayingRhythm] = useState<Rhythm | null>(null);
+  /** The rhythm whose start was requested (loading, or queued until the end of the pattern). */
+  const [pendingRhythm, setPendingRhythm] = useState<Rhythm | null>(null);
+  const lastNextTap = useRef<{ time: number; anchorId: string } | null>(null);
+  const stoppedAt = useRef(0);
+  const [isLiveOpen, setLiveOpen] = useState(false);
   const [validation, setValidation] = useState('');
   const [message, setMessage] = useState('');
   const [isPlaying, setPlaying] = useState(false);
@@ -64,6 +78,14 @@ export function App() {
   const busy = isPlaying || isStarting;
   const displayedRhythm = playingRhythm ?? rhythm;
   const editorStatus = validation || (busy && source !== playingSource.current ? 'Upravené · stlač Play' : '');
+  // Play turns into Next while the caret stays in the playing (or queued) rhythm of the unchanged text.
+  // Moving the caret elsewhere or editing brings Play back, which queues the caret rhythm or the edit.
+  const caretRhythmId = parsedDocument.source === source ? entryAtCaret(parsedDocument.entries, source, caretOffset)?.id : undefined;
+  const nextMode = isPlaying && !!playingRhythm && source === playingSource.current
+    && (caretRhythmId === playingRhythm.id || caretRhythmId === pendingRhythm?.id);
+  const primaryDisabled = !source.trim() || isLoading;
+  const primaryContent = nextMode ? <><NextIcon />Next</> : <><PlayIcon />Play</>;
+  const primaryTitle = nextMode ? 'Ďalší rytmus · dvojklik: predchádzajúci' : 'Prehrať rytmus pod kurzorom';
   const [mixes, setMixes] = useState<Record<string, TrackMix[]>>({});
   const [masterVolume, setMasterVolume] = useState(config.defaultMasterVolume);
   const [humanizeProbability, setHumanizeProbability] = useState(config.humanizeApplianceProbability);
@@ -172,10 +194,11 @@ export function App() {
     const document = readRhythmDocument(text);
     const offset = restored?.caretOffset ?? 0;
     let parsed = document.rhythm;
-    try { parsed = parseRhythmAtCaret(text, offset); } catch { parsed = rhythmContextAtCaret(text, offset); }
+    let entries: RhythmEntry[] = [];
+    try { ({ rhythm: parsed, entries } = parseAtCaret(text, offset)); } catch { parsed = rhythmContextAtCaret(text, offset); }
     setMixes({});
     caretRef.current = offset; setCaretOffset(offset);
-    setSource(document.source); setFileName(filename); setParsedDocument({ source: text, rhythm: parsed }); setValidation(document.validation);
+    setSource(document.source); setFileName(filename); setParsedDocument({ source: text, rhythm: parsed, entries }); setValidation(document.validation);
     // A different file starts a fresh editor session, including selection and undo history.
     setEditorDocument(previous => ({ revision: previous.revision + 1, foldRhythms }));
     syncedSource.current = text;
@@ -231,7 +254,7 @@ export function App() {
   useEffect(() => {
     engine.current = new AudioEngine(() => controlsRef.current, message => {
       playRequest.current++;
-      setMessage(message); setPlaying(false); setStarting(false); setPlayingRhythm(null);
+      setMessage(message); setPlaying(false); setStarting(false); setPlayingRhythm(null); setPendingRhythm(null);
     }, undefined, config.humanizeMaxOffsetMs, config.humanizeApplianceProbability);
     try {
       draftStore.current = new DraftStore(window.localStorage, `javafro:draft:v1:${import.meta.env.BASE_URL}`);
@@ -268,11 +291,10 @@ export function App() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       try {
-        const parsed = source.trim() ? parseRhythmAtCaret(source, caretOffset) : null;
-        setParsedDocument({ source, rhythm: parsed });
+        setParsedDocument(source.trim() ? parseAtCaret(source, caretOffset) : { source, rhythm: null, entries: [] });
         setValidation('');
       } catch (error) {
-        setParsedDocument({ source, rhythm: rhythmContextAtCaret(source, caretOffset) });
+        setParsedDocument({ source, rhythm: rhythmContextAtCaret(source, caretOffset), entries: [] });
         setValidation((error as Error).message);
       }
     }, 150);
@@ -303,14 +325,34 @@ export function App() {
 
   async function play() {
     if (isLoading || !source.trim()) return;
+    await startRhythm(() => parseRhythmAtCaret(source, caretRef.current));
+  }
+
+  /** Queue the rhythm before (-1) or after (1) `anchorId` in file order, wrapping around both ends. */
+  async function playNeighbor(direction: 1 | -1, anchorId: string) {
+    if (isLoading || !source.trim()) return;
+    await startRhythm(() => {
+      const entries = parseRhythmEntries(source);
+      const index = entries.findIndex(entry => entry.rhythm.id === anchorId);
+      if (index < 0) return parseRhythmAtCaret(source, caretRef.current);
+      const target = entries[(index + direction + entries.length) % entries.length];
+      // Follow with the caret so the editor, heading and the Next button stay on the queued rhythm.
+      const caret = caretAtSourceOffset(source, target.offset);
+      caretRef.current = caret;
+      editor.current?.setCaret(caret);
+      return target.rhythm;
+    });
+  }
+
+  async function startRhythm(select: () => Rhythm) {
     const request = ++playRequest.current;
     engine.current?.cancelPendingStart();
     try {
-      const parsed = parseRhythmAtCaret(source, caretRef.current);
+      const parsed = select();
       const nextControls = syncedSource.current !== source || syncedRhythmId.current !== parsed.id
         ? controlsFor(parsed, activeDraft.current)
         : controlsRef.current;
-      setStarting(true); setMessage(isPlaying ? `Po skončení patternu: ${parsed.name}` : '');
+      setStarting(true); setPendingRhythm(parsed); setMessage(isPlaying ? `Po skončení patternu: ${parsed.name}` : '');
       const started = await engine.current!.start(parsed, nextControls, mixes[mixerKey(parsed)] ?? []);
       if (request !== playRequest.current) return;
       if (started) {
@@ -323,12 +365,51 @@ export function App() {
     } catch (error) {
       if (request !== playRequest.current) return;
       setMessage(`Prehrávanie sa nepodarilo: ${(error as Error).message}`);
-    } finally { if (request === playRequest.current) setStarting(false); }
+    } finally { if (request === playRequest.current) { setStarting(false); setPendingRhythm(null); } }
+  }
+
+  /**
+   * A Next tap moves forward; a second tap within DOUBLE_TAP_MS moves back instead, relative to the
+   * rhythm of the first tap (while playing, the first Next may already have started).
+   */
+  function neighborTap(anchorId: string): { direction: 1 | -1; anchorId: string } {
+    const now = Date.now();
+    const last = lastNextTap.current;
+    if (last && now - last.time < DOUBLE_TAP_MS) {
+      lastNextTap.current = null;
+      return { direction: -1, anchorId: last.anchorId };
+    }
+    lastNextTap.current = { time: now, anchorId };
+    return { direction: 1, anchorId };
+  }
+
+  /** Play, or while playing Next; a double tap plays the previous rhythm instead. */
+  function pressPrimary() {
+    if (!nextMode || !playingRhythm) { lastNextTap.current = null; void play(); return; }
+    const tap = neighborTap(playingRhythm.id);
+    void playNeighbor(tap.direction, tap.anchorId);
+  }
+
+  /** Živé hranie while stopped: select the next (double tap: previous) rhythm without playing it. */
+  function cueNeighbor() {
+    // A quick second press on Stop must not already pick another rhythm.
+    if (busy || isLoading || Date.now() - stoppedAt.current < DOUBLE_TAP_MS || parsedDocument.source !== source) return;
+    const anchor = entryAtCaret(parsedDocument.entries, source, caretRef.current);
+    if (!anchor) return;
+    const tap = neighborTap(anchor.id);
+    const neighbors = rhythmNeighbors(parsedDocument.entries, tap.anchorId);
+    if (!neighbors) return;
+    const target = tap.direction === 1 ? neighbors.next : neighbors.previous;
+    const caret = caretAtSourceOffset(source, target.offset);
+    caretRef.current = caret;
+    editor.current?.setCaret(caret);
   }
 
   function stop() {
     playRequest.current++;
-    engine.current?.stop(); setPlaying(false); setStarting(false); setPlayingRhythm(null);
+    lastNextTap.current = null;
+    stoppedAt.current = Date.now();
+    engine.current?.stop(); setPlaying(false); setStarting(false); setPlayingRhythm(null); setPendingRhythm(null);
     setMessage('');
   }
 
@@ -362,6 +443,7 @@ export function App() {
     <button className="button subtle" onClick={() => fileInput.current?.click()} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Otvoriť YAML súbor'}><FolderIcon /><span>Otvoriť</span></button>
     <button className="button subtle" onClick={restoreLastFile} disabled={busy || isLoading || !restorableDraft}><FolderIcon /><span>Obnoviť naposledy otvorený súbor</span></button>
     <button className="button subtle" onClick={save} disabled={isLoading}><DownloadIcon /><span>Uložiť</span></button>
+    <button className="button subtle" onClick={() => setLiveOpen(true)} title="Celá obrazovka s veľkými tlačidlami Play/Next a Stop"><FullscreenIcon /><span>Živé hranie</span></button>
   </>;
   const modeButton = <button className="button mode-button" aria-pressed={overwrite} title="Zapnuté: prepisovanie. Vypnuté: vkladanie. (Insert)" onMouseDown={event => event.preventDefault()} onClick={() => setOverwriteMode(previous => !previous)}>Prepisovanie</button>;
   function changeInputMode(nextMode: EditorInputMode) {
@@ -439,7 +521,7 @@ export function App() {
           <div className="rhythm-heading"><h1 title={displayedRhythm?.name}>{displayedRhythm?.name ?? 'Rytmus'}</h1></div>
           <div className="playback-controls">
           <div className="transport">
-            <button className="button play" aria-pressed={busy} onClick={() => void play()} disabled={!source.trim() || isLoading}><PlayIcon />Play</button>
+            <button className="button play" aria-pressed={busy} onClick={pressPrimary} disabled={primaryDisabled} title={primaryTitle}>{primaryContent}</button>
             <button className="button stop" onClick={stop} disabled={!busy}><span className="stop-square" />Stop</button>
           </div>
           {message && <p className="playback-message" role="status">{message}</p>}
@@ -507,6 +589,11 @@ export function App() {
         </div>
       </div>
     </dialog>
+    <LiveView open={isLiveOpen} onClose={() => setLiveOpen(false)}
+      next={nextMode} onPrimary={pressPrimary} primaryDisabled={primaryDisabled}
+      playing={busy} onStop={stop}
+      onCue={cueNeighbor} cueDisabled={isLoading || parsedDocument.source !== source || parsedDocument.entries.length < 2}
+      rhythmName={displayedRhythm?.name} neighbors={rhythmNeighbors(parsedDocument.entries, playingRhythm?.id ?? caretRhythmId ?? displayedRhythm?.id)} message={message} />
   </div>;
 }
 

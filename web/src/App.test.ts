@@ -19,6 +19,9 @@ beforeEach(() => {
   vi.stubGlobal('matchMedia', () => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
   HTMLDialogElement.prototype.showModal = function () { this.open = true; };
   HTMLDialogElement.prototype.close = function () { this.open = false; };
+  // jsdom has no layout; CodeMirror measures ranges when it scrolls the caret into view.
+  Range.prototype.getClientRects = () => [] as unknown as DOMRectList;
+  Range.prototype.getBoundingClientRect = () => new DOMRect();
   localStorage.clear();
   root = createRoot(document.body.appendChild(document.createElement('div')));
 });
@@ -321,4 +324,141 @@ it('lists only the selected song tracks using exact YAML instrument names', asyn
   await act(() => editor().dispatch({ selection: { anchor: source.indexOf('Second:') } }));
   await act(() => vi.advanceTimersByTimeAsync(200));
   expect(labels()).toEqual(['kensereni_withBell']);
+});
+
+const three = 'One:\n  tracks: {djembe: "b.tt..s."}\nTwo:\n  tracks: {djembe: "b.tt..s."}\nThree:\n  tracks: {djembe: "b.tt..s."}\n';
+
+async function renderPlaying(source = three, at = 'One') {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => source }));
+  const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
+  vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
+  await act(() => root.render(createElement(App)));
+  await act(() => editor().dispatch({ selection: { anchor: editor().state.doc.toString().indexOf(at + ':') } }));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  await act(async () => mainButton().click());
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  return start;
+}
+
+const mainButton = () => document.querySelector<HTMLButtonElement>('.transport button.play')!;
+const startedIds = (start: { mock: { calls: unknown[][] } }) => start.mock.calls.map(call => (call[0] as { id: string }).id);
+async function pressMain(wait = 400) {
+  await act(async () => mainButton().click());
+  await act(() => vi.advanceTimersByTimeAsync(wait));
+}
+
+it('turns Play into Next and plays the following rhythms in file order, wrapping at the end', async () => {
+  const start = await renderPlaying();
+  expect(startedIds(start)).toEqual(['One']);
+  expect(mainButton().textContent).toBe('Next');
+  await pressMain();
+  await pressMain();
+  await pressMain();
+  expect(startedIds(start)).toEqual(['One', 'Two', 'Three', 'One']);
+  expect(document.querySelector('h1')?.textContent).toBe('One');
+  // The caret follows the queued rhythm, so the button stays Next.
+  expect(editor().state.selection.main.head).toBe(0);
+  expect(mainButton().textContent).toBe('Next');
+});
+
+it('plays the previous rhythm on a double tap of Next, relative to the rhythm playing at the first tap', async () => {
+  const start = await renderPlaying(three.replace(/\n/g, '\r\n'), 'Two');
+  await act(async () => mainButton().click());
+  await act(() => vi.advanceTimersByTimeAsync(100));
+  await act(async () => mainButton().click());
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  expect(startedIds(start)).toEqual(['Two', 'Three', 'One']);
+  expect(editor().state.doc.toString().slice(editor().state.selection.main.head).startsWith('One:')).toBe(true);
+  await act(async () => mainButton().click());
+  await act(() => vi.advanceTimersByTimeAsync(100));
+  await act(async () => mainButton().click());
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  expect(startedIds(start)).toEqual(['Two', 'Three', 'One', 'Two', 'Three']);
+});
+
+it('goes back to Play after an edit or when the caret moves to another rhythm', async () => {
+  const start = await renderPlaying();
+  const view = editor();
+  await act(() => view.dispatch({ selection: { anchor: three.indexOf('Three:') } }));
+  expect(mainButton().textContent).toBe('Play');
+  await pressMain();
+  expect(startedIds(start)).toEqual(['One', 'Three']);
+  expect(mainButton().textContent).toBe('Next');
+  await act(() => view.dispatch({ changes: { from: view.state.doc.length, insert: '# edit\n' } }));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  expect(mainButton().textContent).toBe('Play');
+  await pressMain();
+  expect(startedIds(start)).toEqual(['One', 'Three', 'Three']);
+  expect(mainButton().textContent).toBe('Next');
+});
+
+it('opens Živé hranie from Súbor with big Play/Next and Stop buttons and the rhythm order', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
+  const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
+  const stop = vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
+  await act(() => root.render(createElement(App)));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  await click('Súbor');
+  await click('Živé hranie');
+  const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
+  expect(live.open).toBe(true);
+  const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
+  const primary = live.querySelector<HTMLButtonElement>('.live-primary')!;
+  expect(rhythms()).toBe('Three←One→Two');
+  expect(primary.textContent).toBe('Play');
+  expect(live.querySelector('.live-stop')).toBeNull();
+  expect(live.querySelector('.live-cue')?.textContent).toContain('Next');
+  await act(async () => primary.click());
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  expect(primary.textContent).toContain('Next');
+  await act(async () => primary.click());
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  expect(startedIds(start)).toEqual(['One', 'Two']);
+  expect(rhythms()).toBe('One←Two→Three');
+  await act(async () => live.querySelector<HTMLButtonElement>('.live-stop')!.click());
+  expect(stop).toHaveBeenCalled();
+  expect(primary.textContent).toBe('Play');
+  expect(live.querySelector('.live-stop')).toBeNull();
+  await click('Zavrieť živé hranie');
+  expect(live.open).toBe(false);
+});
+
+it('selects the next or previous rhythm after Stop in Živé hranie without playing it', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
+  const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
+  vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
+  await act(() => root.render(createElement(App)));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  await click('Súbor');
+  await click('Živé hranie');
+  const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
+  const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
+  const primary = live.querySelector<HTMLButtonElement>('.live-primary')!;
+  const second = () => live.querySelector<HTMLButtonElement>('.live-stop, .live-cue')!;
+  const press = async (button: HTMLButtonElement, wait = 400) => {
+    await act(async () => button.click());
+    await act(() => vi.advanceTimersByTimeAsync(wait));
+  };
+  await press(primary);
+  await press(second(), 0);
+  // The Stop button turned into Next in place; a press right after Stop is ignored.
+  expect(second().className).toContain('live-cue');
+  await press(second());
+  expect(rhythms()).toBe('Three←One→Two');
+  // Later presses select the following rhythm, wrapping at the end.
+  await press(second());
+  expect(rhythms()).toBe('One←Two→Three');
+  // Double tap: previous of the rhythm selected at the first tap (Two → One).
+  await press(second(), 100);
+  await press(second());
+  expect(rhythms()).toBe('Three←One→Two');
+  await press(second());
+  await press(second());
+  await press(second());
+  expect(rhythms()).toBe('Three←One→Two');
+  await press(second());
+  expect(startedIds(start)).toEqual(['One']);
+  await press(primary);
+  expect(startedIds(start)).toEqual(['One', 'Two']);
+  expect(second().className).toContain('live-stop');
 });

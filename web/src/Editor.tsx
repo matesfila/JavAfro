@@ -36,6 +36,8 @@ export interface YamlEditorHandle {
   setInputMode: (mode: EditorInputMode) => void;
   /** Swap the rhythm under the caret with the previous (-1) or next (1) one. */
   moveRhythm: (direction: MoveDirection) => void;
+  /** Move the caret without focusing the editor, so no software keyboard opens. */
+  setCaret: (offset: number) => void;
 }
 
 function enablePinchZoom(editor: EditorView) {
@@ -101,6 +103,12 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
       const effects = rhythmFoldEffects(editor.state).filter(effect => headers.includes(effect.value.from));
       if (effects.length) editor.dispatch({ effects });
       editor.focus();
+    },
+    setCaret(offset) {
+      const editor = view.current;
+      if (!editor) return;
+      const anchor = Math.max(0, Math.min(offset, editor.state.doc.length));
+      editor.dispatch({ selection: { anchor }, scrollIntoView: true, userEvent: 'select.rhythm' });
     },
     setInputMode(nextMode) {
       const editor = view.current;

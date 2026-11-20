@@ -55,7 +55,7 @@ export function parseRhythm(source: string, defaultBpm = config.initialTempo): R
 }
 
 // CodeMirror counts a CRLF as one character. YAML ranges index the original string.
-function sourceOffsetAtCaret(source: string, caretOffset: number) {
+export function sourceOffsetAtCaret(source: string, caretOffset: number) {
   let offset = caretOffset;
   for (let cr = source.indexOf('\r\n'); cr >= 0 && cr < offset; cr = source.indexOf('\r\n', cr + 2)) {
     offset++;

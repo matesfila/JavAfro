@@ -268,6 +268,9 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `overwrite.ts` | CodeMirror stav, efekt a vstupná logika Insert/Overwrite. |
 | `rhythm-folding.ts` | Vytvára efekty zbalenia hlavných YAML definícií. |
 | `rhythm-move.ts` | Vymení hlavnú YAML definíciu pod kurzorom so susednou; `YamlEditorHandle.moveRhythm()` to použije pre šípky ↑/↓ v lište editora a zachová zbalenie. |
+| `rhythm-navigation.ts` | Poradie rytmov pre Next/predchádzajúci: `RhythmEntry` (id, názov, offset v zdroji), `neighborIndex()` a `rhythmNeighbors()` s obtáčaním na koncoch, `entryAtCaret()` (synchrónny rytmus pod kurzorom) a `caretAtSourceOffset()` (prevod YAML offsetu na kurzor CodeMirror pri CRLF). |
+| `LiveView.tsx` / `LiveView` | Pohľad **Živé hranie**: natívny celoobrazovkový `dialog` s veľkými tlačidlami Play/Next a Stop (po zastavení Next na výber ďalšieho rytmu), riadkom `predchádzajúci ← aktuálny → nasledujúci` a tlačidlom ×. Nemá vlastný stav prehrávania; obsluhu dostáva z `App`. |
+| `icons.tsx` | Spoločné inline SVG ikony (Play, Next, priečinok, uloženie, šípky, nový, celá obrazovka, zavrieť). |
 | `rhythm-document.ts` / `readRhythmDocument()` | Otvorí dokument aj pri chybe validácie: vráti pôvodný text, `rhythm: null` a správu. Používateľ môže chybný YAML opraviť v editore. |
 | `rhythm.ts` | Typy `Rhythm`, `Track`, `Instrument`, `CatalogEntry`, validácia a parsovanie definícií. `parseRhythm()` vyberá prvý rytmus, `parseRhythmAtCaret()` podľa kurzora a `parseRhythmEntries()` vracia aj pozície definícií. |
 | `timing.ts` | Typy `Controls` a `Hit`, validácia živých hodnôt, `minimumGap()` a `planBeat()`. Vypočíta údery doby, ďalšiu pozíciu a koniec doby; náhodu možno vložiť cez parameter na testovanie. |
@@ -309,6 +312,24 @@ rozpracované požiadavky. Chyba parsovania alebo načítania nového rytmu
 zachová pôvodné prehrávanie.
 Timer pravidelne dopĺňa plán dopredu cez `planBeat()`, presný začiatok zvuku
 určuje `AudioBufferSourceNode.start()` podľa hodín `AudioContext`, nie UI timer.
+
+**Next a predchádzajúci rytmus.** `App` drží `playingRhythm` (hraný) a `pendingRhythm`
+(požadovaný, kým sa nenačíta alebo nezačne na hranici patternu). `nextMode` platí,
+keď hrá rytmus, text sa rovná `playingSource` a kurzor (`entryAtCaret()` nad
+`parsedDocument.entries`) je v hranom alebo čakajúcom rytme. Vtedy hlavné tlačidlo
+zobrazí Next a `pressPrimary()` volá `playNeighbor(±1, anchorId)`; inak volá `play()`.
+Obe cesty končia v `startRhythm()`, takže zaradenie, synchronizácia tempa/dialectu
+a ochrana počítadlom `playRequest` sú rovnaké ako pri Play. `playNeighbor()` presunie
+kurzor cez `YamlEditorHandle.setCaret()` (bez fokusu, aby sa na mobile neotvorila
+klávesnica). Dvojťuk sa zisťuje časom (`DOUBLE_TAP_MS`, `Date.now()`), nie udalosťou
+`dblclick`, ktorú iOS Safari spoľahlivo neposiela. Druhé ťuknutie počíta predchádzajúci
+rytmus voči rytmu hranému pri prvom ťuknutí (`lastNextTap.anchorId`), lebo engine môže
+prvý Next aktivovať hneď, ak už má naplánovaný ďalší cyklus; v engine vyhráva posledná
+požiadavka. Tlačidlá majú `touch-action: manipulation`, aby dvojťuk nezoomoval.
+Rozpoznanie dvojťuku je v `neighborTap()`, ktoré používa aj `cueNeighbor()`: v Živom
+hraní po Stop druhé tlačidlo iba presunie kurzor na susedný rytmus (bez audia)
+a Play potom spustí rytmus pod kurzorom. `stoppedAt` ignoruje stlačenie do
+`DOUBLE_TAP_MS` po Stop, keďže ide o to isté miesto na obrazovke.
 
 Signál ide cez gain konkrétneho úderu, voliteľný stereo panner, gain tracku
 a spoločný master do výstupu. Každý úder má vlastný source node; dekódované
@@ -423,7 +444,7 @@ a spustí lokálny HTTPS server cez `scripts/phone-server.mjs`.
 | Konfigurácia a YAML | Java `AppConfigTest`, `RhythmLoaderTest`, `ImportedRhythmsTest`; web `config.test.ts`, `rhythm.test.ts`, `rhythm-document.test.ts`. |
 | Časovanie a živé ovládanie | Java `LivePlaybackTest`, `DialectPlaybackTest`, `MixerPlaybackTest`; web `timing.test.ts`, `audio.test.ts`. |
 | Nástroje, multisample a hlasitosť | Java `WavSampleInstrumentTest`, `DjembeInstrumentTest`, `AfroSampleInstrumentTest`, `AudioHeadroomTest`; web `sounds.test.ts`, `afro-instruments.test.ts`. |
-| Editor a životný cyklus UI | Java `PlaybackRestartTest`, `YamlFileTransferHandlerTest`, `YamlFoldingTest`, `DialectControlsTest`, `MixerPanelTest`, `EditorModeTest`, `DesktopLayoutTest`, `AfroJavaPlayerTest`, `RhythmMoveTest`; web `rhythm-folding.test.ts`, `rhythm-move.test.ts`, `overwrite.test.ts`. |
+| Editor a životný cyklus UI | Java `PlaybackRestartTest`, `YamlFileTransferHandlerTest`, `YamlFoldingTest`, `DialectControlsTest`, `MixerPanelTest`, `EditorModeTest`, `DesktopLayoutTest`, `AfroJavaPlayerTest`, `RhythmMoveTest`; web `rhythm-folding.test.ts`, `rhythm-move.test.ts`, `rhythm-navigation.test.ts`, `overwrite.test.ts`, `App.test.ts` (aj Next/predchádzajúci a Živé hranie). |
 | Klávesnica nôt | Java `NoteContextTest` (nástroj pod kurzorom, zoznam nôt), `NotePadTest`; web `note-context.test.ts`, `note-input.test.ts`. |
 | Distribúcia a offline | Web `offline-worker.test.ts`, `obfuscation.test.ts`; importný nástroj `tools/import-afroplayer.test.cjs`. |
 
@@ -443,6 +464,7 @@ manuálnym spustením príslušnej aplikácie.
 | Zmena hlasitosti/mute | Java `MixerPanel`, `PlaybackSettings`, renderer a `AudioConstants`; web `App.tsx` a `AudioEngine`. Zachovať prevod medzi UI a internou stupnicou. |
 | Zmena editora | Java `RhythmPlayerPanel`, `RhythmFoldParser`, `RhythmMove`, `EditorFoldIcon`, `SandTheme`, `SpacedSyntaxTextArea`, `EditorZoom`; web `Editor.tsx`, `editor-setup.ts`, `overwrite.ts`, `rhythm-folding.ts`, `rhythm-move.ts`. |
 | Vzhľad desktopu | `SandTheme` (FlatLaf kľúče a paleta), `UiIcons`, kreslenie `TempoDial`/`TouchSliders`/`DisclosurePanel`; webová predloha je `web/src/style.css`. FlatLaf potrebuje v `proguard.pro` pravidlo `-keep class com.formdev.flatlaf.**` a natívny prístup (`Enable-Native-Access` v manifeste, `--enable-native-access` v `build-windows.ps1`). |
+| Prepínanie rytmov počas hrania (Next, dvojťuk, Živé hranie) | Web `App.tsx` (`nextMode`, `pressPrimary()`, `playNeighbor()`, `startRhythm()`, `DOUBLE_TAP_MS`), `rhythm-navigation.ts`, `LiveView.tsx`, `Editor.tsx` (`setCaret()`), štýly `.live-*` v `style.css`. Desktop to zatiaľ nemá. |
 | Klávesnica nôt | Java `NotePad`, `RhythmLoader.instrumentAtCaret()`/`notesFor()`, `Instrument.notes()`; web `NotePad.tsx`, `note-input.ts`, `note-context.ts`, `sounds.ts`. Poradie nôt je poradie v manifeste na oboch stranách. |
 | Nové alebo vymenené nahrávky | `src/main/resources/samples`, manifest, dokumentácia pôvodu a konverzné nástroje; potom nový webový build a overenie offline cache. |
 
