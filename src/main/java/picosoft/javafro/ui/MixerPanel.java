@@ -12,6 +12,7 @@ import java.util.List;
 final class MixerPanel extends JPanel {
     private final List<JSlider> volumes = new ArrayList<>();
     private final List<JToggleButton> mutes = new ArrayList<>();
+    private final List<JToggleButton> solos = new ArrayList<>();
     private List<String> signature = List.of();
     private PlaybackSettings settings;
     private final int initialVolume;
@@ -57,7 +58,7 @@ final class MixerPanel extends JPanel {
         if (signature.equals(next)) return;
         signature = List.copyOf(next);
         settings = null;
-        volumes.clear(); mutes.clear(); removeAll();
+        volumes.clear(); mutes.clear(); solos.clear(); removeAll();
         add(masterRow);
         for (int i = 0; i < rhythm.tracks().size(); i++) {
             final int index = i;
@@ -70,12 +71,13 @@ final class MixerPanel extends JPanel {
             JToggleButton mute = new JToggleButton("Mute");
             mute.setName("trackMute-" + i);
             mute.getAccessibleContext().setAccessibleName("Mute " + name);
-            JButton solo = new JButton("Solo");
+            JToggleButton solo = new JToggleButton("Solo");
             solo.setName("trackSolo-" + i);
             solo.getAccessibleContext().setAccessibleName("Solo " + name);
             solo.addActionListener(event -> {
+                boolean unsolo = isSoloed(index);
                 for (int track = 0; track < mutes.size(); track++) {
-                    mutes.get(track).setSelected(track != index);
+                    mutes.get(track).setSelected(!unsolo && track != index);
                     update(track);
                 }
             });
@@ -88,7 +90,7 @@ final class MixerPanel extends JPanel {
             right.add(value); right.add(mute); right.add(solo);
             JPanel row = new JPanel(new BorderLayout(10, 0));
             row.add(label, BorderLayout.WEST); row.add(volume, BorderLayout.CENTER); row.add(right, BorderLayout.EAST);
-            volumes.add(volume); mutes.add(mute); add(row);
+            volumes.add(volume); mutes.add(mute); solos.add(solo); add(row);
             volume.addChangeListener(event -> { value.setText(trackVolumeText(volume.getValue())); update(index); });
             mute.addActionListener(event -> update(index));
         }
@@ -114,7 +116,15 @@ final class MixerPanel extends JPanel {
         }
     }
 
+    /** A track is soloed when it is the only unmuted one (and there is more than one track). */
+    private boolean isSoloed(int index) {
+        if (mutes.size() < 2 || mutes.get(index).isSelected()) return false;
+        for (int i = 0; i < mutes.size(); i++) if (i != index && !mutes.get(i).isSelected()) return false;
+        return true;
+    }
+
     private void update(int index) {
+        for (int i = 0; i < solos.size(); i++) solos.get(i).setSelected(isSoloed(i));
         if (settings != null) settings.setTrackMix(index, volumes.get(index).getValue(), mutes.get(index).isSelected());
     }
 

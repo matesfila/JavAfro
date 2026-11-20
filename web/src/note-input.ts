@@ -2,21 +2,22 @@ import { EditorSelection } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 import {
   cursorCharLeft, cursorCharRight, cursorLineUp, cursorLineDown,
-  deleteCharBackward,
+  deleteCharBackward, insertNewlineAndIndent,
 } from '@codemirror/commands';
 import { isolateHistory } from '@codemirror/commands';
 import { overwriteInput, overwriteState } from './overwrite';
 
 export const noteCommands = {
   left: cursorCharLeft, right: cursorCharRight, up: cursorLineUp, down: cursorLineDown,
-  backspace: deleteCharBackward,
+  backspace: deleteCharBackward, enter: insertNewlineAndIndent,
 };
 export type NoteCommand = keyof typeof noteCommands;
 
 /** Use editor transactions so selection, overwrite mode and undo history stay intact. */
 export function insertNote(view: EditorView, text: string, tokenMode = false) {
   if (view.state.readOnly) return;
-  if (tokenMode) {
+  // A space separates tokens; it is never a token, so it gets no automatic padding.
+  if (tokenMode && text.trim()) {
     view.dispatch({
       ...view.state.changeByRange(range => {
         const doc = view.state.doc.toString();

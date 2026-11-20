@@ -60,4 +60,11 @@ describe('note pad editing', () => {
       expect(view.state.selection.main.to).toBe(4);
     }
   });
+
+  it('inserts a plain space even between balafon tokens', () => {
+    const view = editor('"g0c1"', 3);
+    insertNote(view, ' ', true);
+    expect(view.state.doc.toString()).toBe('"g0 c1"');
+    expect(view.state.selection.main.head).toBe(4);
+  });
 });

@@ -31,12 +31,16 @@ public class MixerPanelTest {
                 assertEquals(i != 1, button(mixer, "trackMute-" + i).isSelected());
             }
             button(mixer, "trackSolo-0").doClick();
+            assertTrue(button(mixer, "trackSolo-0").isSelected());
             button(mixer, "trackSolo-0").doClick();
             var restarted = new PlaybackSettings(120, 0);
             mixer.bind(restarted);
-            for (int i = 0; i < 3; i++) assertEquals(new PlaybackSettings.TrackMix(130, i != 0), restarted.trackMix(i));
+            for (int i = 0; i < 3; i++) {
+                assertEquals(new PlaybackSettings.TrackMix(130, false), restarted.trackMix(i));
+                assertFalse(button(mixer, "trackSolo-" + i).isSelected());
+            }
             button(mixer, "trackMute-2").doClick();
-            assertFalse(restarted.trackMix(2).muted());
+            assertTrue(restarted.trackMix(2).muted());
         });
     }
 

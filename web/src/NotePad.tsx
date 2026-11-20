@@ -23,8 +23,10 @@ export function NotePad({ instrument, overwriteButton, insert, command }: {
     <div className="note-navigation">
       {overwriteButton}
       {action('⌫', 'Vymazať pred kurzorom', 'backspace')}
-      {key('.', 'Pauza (.)', () => insert('.'), 'note-rest')}
+      {key('␣', 'Medzera', () => insert(' '), 'note-space')}
       {action('↑', 'Kurzor hore', 'up')}
+      {action('↵', 'Nový riadok (Enter)', 'enter')}
+      {key('.', 'Pauza (.)', () => insert('.'), 'note-rest')}
       {key('|', 'Oddeľovač taktov (|)', () => insert('|'), 'note-bar')}
       {action('←', 'Kurzor doľava', 'left')}
       {action('↓', 'Kurzor dole', 'down')}

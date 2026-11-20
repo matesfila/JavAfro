@@ -132,7 +132,8 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   noty nástroja na aktuálnom riadku kurzora vrátane akcentov a pravdepodobnostných
   úderov; funguje aj v jeho `base` a `variations`. Mimo tracku sa noty skryjú.
   Vpravo dole sú šípky v tvare obráteného T (`← ↓ →`, nad `↓` je `↑`), nad `←`
-  je pauza `.`, nad `→` oddeľovač taktov `|` a vpravo hore Backspace.
+  je medzera `␣`, nad `→` nový riadok `↵` (Enter, zachová odsadenie) a vpravo hore
+  Backspace. Dolný rad pokračuje vľavo od `←` oddeľovačom taktov `|` a pred ním pauzou `.`.
   Pri ovládaní myšou alebo touchpadom tlačidlo prepína medzi **Plocha** a **Noty**.
   Na primárne dotykových zariadeniach cyklicky prepína **Plocha → Noty → Klávesnica → Plocha** a zobrazuje
   aktuálny režim. **Klávesnica** priamo pri kliknutí zameria editor a vyvolá

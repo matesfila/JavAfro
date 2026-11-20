@@ -43,6 +43,7 @@ nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u ni
 ### v0.6.2 (beta)
 - [x] Nezávislé stopy pre duny a zvonce
 - [x] Balafon
+- [x] Nové rozloženie klávesnice Noty: namiesto bodky medzera, namiesto `|` Enter; `|` a `.` v dolnom rade vľavo od šípky doľava
 
 ### v0.6.1 (current)
 - [x] Aktualizovať rytmy, nedokončené odstrániť z basicRhythms.```yaml

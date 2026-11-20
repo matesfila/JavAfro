@@ -76,9 +76,14 @@ export function App() {
     engine.current?.setTrackMix(next);
   }
 
+  function isSoloed(index: number) {
+    return mix.length > 1 && mix.every((track, i) => track.muted === (i !== index));
+  }
+
   function soloTrack(index: number) {
     if (!displayedRhythm) return;
-    const next = mix.map((track, i) => ({ ...track, muted: i !== index }));
+    const unsolo = isSoloed(index);
+    const next = mix.map((track, i) => ({ ...track, muted: !unsolo && i !== index }));
     setMixes(previous => ({ ...previous, [mixerKey(displayedRhythm)]: next }));
     engine.current?.setTrackMix(next);
   }
@@ -450,7 +455,7 @@ export function App() {
             {displayedRhythm.tracks.map((track, index) => <div className={'mixer-track' + (mix[index].muted ? ' muted' : '')} key={index + '-' + track.instrument}>
               <div className="mixer-heading"><label htmlFor={'volume-' + index}>{track.instrument}</label>
                 <div className="mixer-actions"><button className="button mute-button" aria-label={'Mute track ' + (index + 1) + ' ' + track.instrument} aria-pressed={mix[index].muted} onClick={() => updateMix(index, { ...mix[index], muted: !mix[index].muted })}>Mute</button>
-                <button className="button mute-button" aria-label={'Solo track ' + (index + 1) + ' ' + track.instrument} onClick={() => soloTrack(index)}>Solo</button></div>
+                <button className="button mute-button" aria-label={'Solo track ' + (index + 1) + ' ' + track.instrument} aria-pressed={isSoloed(index)} onClick={() => soloTrack(index)}>Solo</button></div>
               </div>
               <div className="mixer-volume"><input id={'volume-' + index} aria-label={'Hlasitosť tracku ' + (index + 1) + ' ' + track.instrument} type="range" min="0" max="100" step="0.5" value={mix[index].volume / 2} onChange={event => updateMix(index, { ...mix[index], volume: Number(event.target.value) * 2 })} /><output htmlFor={'volume-' + index}>{mix[index].volume / 2} %</output></div>
             </div>)}

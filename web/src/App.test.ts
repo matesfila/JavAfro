@@ -79,6 +79,25 @@ it('shares overwrite mode between the Noty keyboard and the editor toolbar', asy
   expect(view.state.doc.sliceString(anchor, anchor + 5)).toBe('...tt');
 });
 
+it('inserts a space and a new line from the Noty keyboard', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  await click('Plocha');
+  const view = editor();
+  await act(() => { unfoldAll(view); });
+  const anchor = view.state.doc.toString().indexOf('b.tt');
+  await act(() => view.dispatch({ selection: { anchor } }));
+  const keys = Array.from(document.querySelectorAll('.note-navigation button'), button => button.className);
+  expect(keys.slice(1)).toEqual(['note-backspace', 'note-space', 'note-up', 'note-enter',
+    'note-rest', 'note-bar', 'note-left', 'note-down', 'note-right']);
+  await click('Medzera');
+  expect(view.state.doc.sliceString(anchor, anchor + 5)).toBe(' b.tt');
+  await click('Nový riadok (Enter)');
+  const line = view.state.doc.lineAt(view.state.selection.main.head);
+  expect(view.state.doc.line(line.number - 1).text).toMatch(/djembe: " $/);
+  expect(line.text.trimStart().startsWith('b.tt')).toBe(true);
+});
+
 it('updates rhythm context across invalid patterns and YAML syntax errors', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
@@ -285,9 +304,9 @@ it('solos a track by unmuting it and muting every other track without changing v
   await click('Solo track 1 dundun');
   expect(mutes()).toEqual(['false', 'true', 'true']);
   await click('Solo track 1 dundun');
-  expect(mutes()).toEqual(['false', 'true', 'true']);
+  expect(mutes()).toEqual(['false', 'false', 'false']);
   await click('Mute track 3 kensereni');
-  expect(mutes()).toEqual(['false', 'true', 'false']);
+  expect(mutes()).toEqual(['false', 'false', 'true']);
 });
 
 
