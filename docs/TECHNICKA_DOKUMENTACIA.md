@@ -22,7 +22,7 @@ nie spustené Java objekty ani spoločný sekvencer.
 | `rhythms` | Knižnica YAML rytmov vrátane importov a šablóny nového rytmu. |
 | `javafro.yaml` | Spoločné predvolené nastavenia aplikácie. |
 | `web/src` | Webové UI, parser, plánovanie úderov a audio engine. |
-| `web/scripts`, `web/build` | Synchronizácia dát, offline build, lokálny HTTPS server a obfuskácia. |
+| `web/scripts` | Synchronizácia dát, offline build, lokálny HTTPS server a obfuskácia. |
 | `src/test/java`, `web/src/*.test.ts` | Automatické testy oboch implementácií. |
 | `tools` | Importy rytmov, príprava samplov a kontrola obfuskovaného JAR. |
 | `docs/tasks` | Evidencia úloh; neobsahuje aplikačný kód. |

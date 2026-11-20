@@ -1,10 +1,9 @@
 # TODO
 
-### Dokumentácia TODO
-- Prepisovanie button vedla backspacu v Sheets klávesnici
-- Medzery v patternoch
+## Úlohy a nápady
 
 ### Otvorené úlohy
+- [] Zoznam stôp dať ako list, nie mapu. Umožniť tak dať ten istý nástroj viackrát.
 - [] Alternatívne názvy pre nástroje, povoliť aj menej presné názvy, využiť nejaký word distance algoritmus ?
   - cieľom je možnosť mať kenken, kensereni, kensedeni, kenken bell, kenken_withBell, kenken with bell, 
 - [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
@@ -24,6 +23,21 @@
 - [] Zaviesť rodinu rytmov (meniť sa im bude zrejme dialekt)
   - názvy rodín by možno mohli byť jednoducho: Djole, Soko, Soli, Kon
   - možno by sa názov rodiny mohol dať nastaviť do parametra dialect, ktorý by tak podporoval aj ručný dialect aj odvodený
+- [] Java CI workflow - GitHub Actions spúšťa iba webové testy, Java testy (`mvn test`) sa automaticky nespúšťajú
+  - pridať `.github/workflows/java.yml` (JDK 25 temurin, `mvn -B test`)
+  - najprv lokálne overiť, či Swing UI testy prejdú bez obrazovky (`-Djava.awt.headless=true`), inak použiť `xvfb-run`
+
+### Dokumentácia TODO
+- Prepisovanie button vedla backspacu v Sheets klávesnici
+- Medzery v patternoch
+
+### Nápady, inšpirácie
+
+#### Offline verzia aplikácie
+Offline verzia aplikácie môže byť výhoda oproti ostatným "appkám" pre telefóny. Človek bude mať svoje rytmy u seba,
+nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u nich.
+
+## Changelist
 
 ### v0.6.2 (beta)
 - [x] Nezávislé stopy pre duny a zvonce
