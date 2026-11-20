@@ -9,6 +9,9 @@ describe('application configuration', () => {
     expect(shared.humanize).toBeLessThanOrEqual(100);
     expect(shared.rhythmsDirectory.length).toBeGreaterThan(0);
     expect(parseConfig('').defaultTrackVolume).toBe(40);
+    expect(parseConfig('').defaultMasterVolume).toBe(25);
+    expect(parseConfig('playback: {defaultMasterVolume: 60}').defaultMasterVolume).toBe(60);
+    expect(() => parseConfig('playback: {defaultMasterVolume: 101}')).toThrow();
     expect(parseConfig('').humanizeApplianceProbability).toBe(100);
     for (const probability of [0, 50, 100]) {
       expect(parseConfig(`playback: {humanizeApplianceProbability: ${probability}}`).humanizeApplianceProbability).toBe(probability);

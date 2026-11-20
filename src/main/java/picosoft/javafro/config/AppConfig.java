@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDynamic, double humanizePitch,
                         int initialTempo, int minimumTempo, int maximumTempo,
                         Path rhythmsDirectory, String initialRhythm, int editorFontSize,
-                        int windowWidth, int windowHeight, int defaultTrackVolume, int humanizeApplianceProbability,
+                        int windowWidth, int windowHeight, int defaultTrackVolume, int humanizeApplianceProbability, int defaultMasterVolume,
                         EditorStyle editorStyle) {
     /**
      * Look of the YAML editor (section {@code editor}); keep defaults in sync with web config-schema.ts.
@@ -35,7 +35,7 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDy
 
     public static AppConfig defaults() {
         return new AppConfig(21, AudioConstants.DEFAULT_HUMANIZE_MAX_OFFSET_MS, 0.07, 0.005,
-                116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900, 40, 100, EditorStyle.defaults());
+                116, 20, 300, Path.of("rhythms"), "basicRhythms.yaml", 16, 1200, 900, 40, 100, 25, EditorStyle.defaults());
     }
 
     public static AppConfig load() throws IOException {
@@ -80,7 +80,7 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDy
         }
         Map<?, ?> root = document == null ? Map.of() : mapping(document, "konfigurácia");
         keys(root, "konfigurácia", "playback", "library", "editor", "window");
-        Map<?, ?> playback = section(root, "playback", "humanize", "humanizeMaxOffsetMs", "humanizeDynamic", "humanizePitch", "tempo", "defaultTrackVolume", "humanizeApplianceProbability");
+        Map<?, ?> playback = section(root, "playback", "humanize", "humanizeMaxOffsetMs", "humanizeDynamic", "humanizePitch", "tempo", "defaultTrackVolume", "defaultMasterVolume", "humanizeApplianceProbability");
         Map<?, ?> tempo = section(playback, "tempo", "initial", "minimum", "maximum");
         Map<?, ?> library = section(root, "library", "directory", "initialRhythm");
         Map<?, ?> editor = section(root, "editor", "fontSize", "fontFamily", "lineHeight", "strings");
@@ -112,6 +112,7 @@ public record AppConfig(int humanize, int humanizeMaxOffsetMs, double humanizeDy
                 number(window, "height", defaults.windowHeight, 560, 10000),
                 number(playback, "defaultTrackVolume", defaults.defaultTrackVolume, 0, 100),
                 number(playback, "humanizeApplianceProbability", defaults.humanizeApplianceProbability, 0, 100),
+                number(playback, "defaultMasterVolume", defaults.defaultMasterVolume, 0, 100),
                 editorStyle);
     }
 

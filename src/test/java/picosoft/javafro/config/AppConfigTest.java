@@ -27,6 +27,8 @@ public class AppConfigTest {
         AppConfig config = parse("playback:\n  humanize: 37\nlibrary:\n  directory: moje-rytmy\n");
         assertEquals(37, config.humanize());
         assertEquals(40, config.defaultTrackVolume());
+        assertEquals(25, config.defaultMasterVolume());
+        assertEquals(60, parse("playback: {defaultMasterVolume: 60}").defaultMasterVolume());
         assertEquals(100, config.humanizeApplianceProbability());
         for (int probability : new int[]{0, 50, 100}) {
             assertEquals(probability, parse("playback: {humanizeApplianceProbability: " + probability + "}").humanizeApplianceProbability());

@@ -16,12 +16,15 @@ final class MixerPanel extends JPanel {
     private List<String> signature = List.of();
     private PlaybackSettings settings;
     private final int initialVolume;
-    private final JSlider master = new JSlider(0, 100, (int) (AudioConstants.OUTPUT_GAIN * 100));
+    private final JSlider master;
     private final JPanel masterRow = new JPanel(new BorderLayout(10, 0));
 
-    MixerPanel(int initialVolume) {
+    MixerPanel(int initialVolume) { this(initialVolume, (int) (AudioConstants.OUTPUT_GAIN * 100)); }
+
+    MixerPanel(int initialVolume, int initialMaster) {
         super(new GridLayout(0, 1, 0, 4));
         this.initialVolume = initialVolume * 2;
+        master = new JSlider(0, 100, initialMaster);
         setBorder(BorderFactory.createTitledBorder("Mixer"));
         master.setName("masterVolume");
         TouchSliders.install(master);

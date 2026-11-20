@@ -2,7 +2,8 @@
 # Webová verzia ich prevezme pri npm run dev alebo npm run build.
 playback:
   humanizeApplianceProbability: 100 # pravdepodobnosť použitia humanizácie na notu, 0–100 %
-  defaultTrackVolume: 70 # predvolená hlasitosť každého tracku v mixeri, 0–100 %
+  defaultTrackVolume: 70 # predvolená hlasitosť každého nástroja v mixeri, 0–100 %
+  defaultMasterVolume: 50 # predvolená master hlasitosť v mixeri, 0–100 %
   humanize: 21 # 0–100; po štarte sa dá meniť posuvníkom
   humanizeMaxOffsetMs: 30 # maximálny posun ±ms pri humanize 100; 0 vypne časové odchýlky
   # Pôvodné globálne HUMANIZE_DYNAMIC a HUMANIZE_PITCH z AfroPlayera.

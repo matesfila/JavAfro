@@ -96,7 +96,7 @@ public final class RhythmPlayerPanel extends JPanel {
     RhythmPlayerPanel(String yaml, AppConfig config, java.util.function.IntFunction<PlaybackSession> sessionFactory) {
         super(new BorderLayout(0, 10));
         this.config = config;
-        mixer = new MixerPanel(config.defaultTrackVolume());
+        mixer = new MixerPanel(config.defaultTrackVolume(), config.defaultMasterVolume());
         this.sessionFactory = sessionFactory;
         tempo = new TempoDial(config.minimumTempo(), config.maximumTempo(), config.initialTempo());
         humanize = new JSlider(0, 100, config.humanize());

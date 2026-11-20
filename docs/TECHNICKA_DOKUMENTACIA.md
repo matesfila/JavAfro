@@ -363,7 +363,7 @@ samostatné aj pri intenzite humanizácie 0.
 Pozor na stupnicu mixera: **UI a konfigurácia tracku používajú 0–100,
 interný engine 0–200**. UI hodnota sa násobí dvoma; zobrazených 50 % znamená
 gain 1, 100 % gain 2. Master používa priamo 0–100, gain `master / 100`
-a predvolene 25 %. Mix sa delí celkovým počtom trackov, aj stlmených;
+a predvolene 25 % (`playback.defaultMasterVolume`; predvolená hlasitosť trackov je `playback.defaultTrackVolume`). Mix sa delí celkovým počtom trackov, aj stlmených;
 mute teda nezosilňuje ostatné stopy.
 
 Manifest [afroplayer-samples.yaml](../src/main/resources/samples/afroplayer-samples.yaml)

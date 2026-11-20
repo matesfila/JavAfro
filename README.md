@@ -12,7 +12,8 @@ Predvolené nastavenia sú v [javafro.yaml](javafro.yaml):
 
 | Nastavenie | Význam |
 | --- | --- |
-| `playback.defaultTrackVolume` | Predvolená hlasitosť každého tracku v mixeri, celé číslo 0–100 %, predvolene 40. Hodnota zodpovedá percentám v UI. |
+| `playback.defaultTrackVolume` | Predvolená hlasitosť každého nástroja (spoločná pre všetky) v mixeri, celé číslo 0–100 %, predvolene 40. Hodnota zodpovedá percentám v UI. |
+| `playback.defaultMasterVolume` | Predvolená master hlasitosť v mixeri, celé číslo 0–100 %, predvolene 25. |
 | `playback.humanize` | Počiatočná humanizácia 0–100; posuvník ju môže zmeniť počas hrania. |
 | `playback.humanizeApplianceProbability` | Pravdepodobnosť použitia humanizácie na každú notu, celé číslo 0–100, predvolene 100. Pri 50 sa pre každú notu nezávisle rozhodne s pravdepodobnosťou 50 %. |
 | `playback.humanizeMaxOffsetMs` | Maximálny časový posun ±ms pri humanizácii 100 % (0–1000, predvolene 30). Hodnota 0 vypne časové odchýlky. |
@@ -68,7 +69,7 @@ Zobrazená hlasitosť je lineárna: 50 % = 1× amplitúda, 100 % = 2× (približ
 Konfigurácia `playback.defaultTrackVolume` používa rovnakú stupnicu 0–100 ako UI;
 hodnota 35 sa zobrazí ako 35 %. Pri prechode zo starej stupnice 0–200 vydeľ
 konfiguračnú hodnotu dvoma, aby sa zachovala zvuková úroveň.
-Posuvník **Master** ovláda celý výstup v rozsahu 0–100 %, predvolene 25 %
+Posuvník **Master** ovláda celý výstup v rozsahu 0–100 %, predvolene 25 % (nastaviteľné cez `playback.defaultMasterVolume`)
 (pôvodný násobok 0,25). Master 100 % je štvornásobná amplitúda oproti 25 %,
 približne +12 dB. Mix sa naďalej delí počtom trackov; pri hlasných samploch
 a prekrývaní úderov môže vzniknúť clipping. Master funguje aj počas hrania,

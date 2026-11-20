@@ -30,7 +30,7 @@ export class AudioEngine {
   private generation = 0;
   private active = false;
   private mix: TrackMix[] = [];
-  private masterVolume = AudioConstants.OUTPUT_GAIN * 100;
+  private masterVolume = config.defaultMasterVolume;
 
   setHumanizeApplianceProbability(probability: number) {
     validateHumanizeApplianceProbability(probability);

@@ -13,7 +13,6 @@ import { exportRhythm, writeDialect } from './rhythm-export';
 import blankRhythmSource from '../../rhythms/blankRhythm.yaml?raw';
 import { type Controls } from './timing';
 import { config } from './config';
-import { OUTPUT_GAIN } from './audio-constants';
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}generated/${path}`;
 const mixerKey = (rhythm: Rhythm) => JSON.stringify([rhythm.id, rhythm.tracks.map(track => track.instrument)]);
@@ -65,7 +64,7 @@ export function App() {
   const displayedRhythm = playingRhythm ?? rhythm;
   const editorStatus = validation || (busy && source !== playingSource.current ? 'Upravené · stlač Play' : '');
   const [mixes, setMixes] = useState<Record<string, TrackMix[]>>({});
-  const [masterVolume, setMasterVolume] = useState(OUTPUT_GAIN * 100);
+  const [masterVolume, setMasterVolume] = useState(config.defaultMasterVolume);
   const [humanizeProbability, setHumanizeProbability] = useState(config.humanizeApplianceProbability);
   const mix = displayedRhythm ? mixes[mixerKey(displayedRhythm)] ?? displayedRhythm.tracks.map(() => defaultTrackMix) : [];
 
