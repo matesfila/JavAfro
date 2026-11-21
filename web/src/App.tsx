@@ -89,7 +89,7 @@ export function App() {
   const primaryDisabled = !source.trim() || isLoading;
   const primaryContent = nextMode ? <><NextIcon />Next</> : <><PlayIcon />Play</>;
   const primaryTitle = (nextMode ? 'Ďalší rytmus · dvojklik: predchádzajúci' : 'Prehrať rytmus pod kurzorom')
-    + ' · potiahni → ďalší, ← predchádzajúci';
+    + ' · potiahni ⇒ ďalší, ⇐ predchádzajúci';
   const [mixes, setMixes] = useState<Record<string, TrackMix[]>>({});
   const [masterVolume, setMasterVolume] = useState(config.defaultMasterVolume);
   const [humanizeProbability, setHumanizeProbability] = useState(config.humanizeApplianceProbability);

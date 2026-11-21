@@ -336,4 +336,4 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .live-buttons .button svg { width: clamp(64px, 26vmin, 220px); height: clamp(64px, 26vmin, 220px); }
 .live-buttons .stop-square { width: clamp(48px, 19vmin, 160px); height: clamp(48px, 19vmin, 160px); border-radius: 8px; }
 .live-label { display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
-.live-label small { margin-top: 0.35em; font: 500 clamp(13px, 2.8vmin, 20px) 'DM Sans Variable', sans-serif; opacity: .85; }
+.live-label small { margin-top: 0.4em; font: 600 clamp(18px, 4.4vmin, 32px) 'DM Sans Variable', sans-serif; opacity: .9; }

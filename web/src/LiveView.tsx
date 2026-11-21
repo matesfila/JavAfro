@@ -37,9 +37,9 @@ export function LiveView({ open, onClose, playing, buttonProps, playDisabled, rh
     <div className="live-buttons">
       <button type="button" className={'button live-primary ' + (playing ? 'stop' : 'play')} {...buttonProps}
         disabled={!playing && playDisabled} aria-pressed={playing}
-        title={(playing ? 'Zastaviť' : 'Prehrať rytmus') + ' · potiahni → ďalší, ← predchádzajúci'}>
+        title={(playing ? 'Zastaviť' : 'Prehrať rytmus') + ' · potiahni ⇒ ďalší, ⇐ predchádzajúci'}>
         {playing ? <span className="stop-square" /> : <PlayIcon />}
-        <span className="live-label">{playing ? 'Stop' : 'Play'}<small>potiahni → ďalší · ← predchádzajúci</small></span>
+        <span className="live-label">{playing ? 'Stop' : 'Play'}<small>potiahni ⇒ ďalší · ⇐ predchádzajúci</small></span>
       </button>
     </div>
   </dialog>;
