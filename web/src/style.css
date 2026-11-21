@@ -250,8 +250,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     max-width: 100%;
     justify-self: center;
   }
-  .play { grid-area: 1 / 1; }
-  .stop { grid-area: 2 / 1; }
+  .transport .play { grid-area: 1 / 1; }
+  .transport .stop { grid-area: 2 / 1; }
   .tempo-control { grid-area: 3 / 1; }
   .settings-launchers { grid-area: 4 / 1; }
   .playback-message { grid-row: 5; }
@@ -329,7 +329,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .live-close:hover { background: #f1e8da; }
 .live-message { flex: 0 0 auto; margin: 0; text-align: center; font-size: 14px; color: #8d4e35; overflow-wrap: anywhere; }
 /* One button fills the screen: Play while stopped, Stop while playing; swipe → / ← switches rhythms. */
-.live-buttons { flex: 1; min-height: 0; display: grid; }
+.live-buttons { flex: 1; min-height: 0; display: grid; grid-template: 1fr / 1fr; }
+/* The big button is .play or .stop; it must keep the one cell in every layout (e.g. landscape phone rules). */
+.live-buttons .live-primary { grid-area: 1 / 1; }
 .live-buttons .button { min-height: 0; border-radius: 18px; gap: 0.5em; flex-direction: column; font: 700 clamp(2.5rem, 12vmin, 6rem) 'Manrope Variable', sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
 .live-buttons .button svg { width: clamp(64px, 26vmin, 220px); height: clamp(64px, 26vmin, 220px); }
 .live-buttons .stop-square { width: clamp(48px, 19vmin, 160px); height: clamp(48px, 19vmin, 160px); border-radius: 8px; }
