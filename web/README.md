@@ -83,7 +83,7 @@ Koncept sa neposiela na server; patrí konkrétnej adrese a prehliadaču.
 Pri nahradení upraveného dokumentu cez **Nový rytmus**, **Otvoriť**,
 **Obnoviť posledný súbor** alebo presunutím súboru
 sa ponúkne **Zrušiť**, **Uložiť a pokračovať** alebo **Zrušiť zmeny**.
-Zrušenie zachová editor aj undo. **Uložiť** umožňuje stiahnuť aj neplatný YAML bez zmeny textu.
+Zrušenie zachová editor aj undo. **Uložiť ako…** umožňuje stiahnuť aj neplatný YAML bez zmeny textu.
 Pri platnom dokumente naďalej zohľadňuje tempo a dialect vybraného rytmu.
 
 Ak ukladanie zlyhá (napríklad plné alebo blokované úložisko), zobrazí sa upozornenie.
@@ -91,7 +91,7 @@ Pri zistenej zmene konceptu v inom okne sa novšia uložená verzia neprepíše;
 prácu z konfliktného okna treba stiahnuť pred jeho obnovením. Prehliadač môže
 pri odchode s nestiahnutými zmenami zobraziť aj vlastné varovanie.
 Vymazanie dát stránky alebo ukončenie súkromného prehliadania môže koncept
-odstrániť. Dôležité rytmy si preto naďalej ukladaj do súborov. Príkaz Uložiť
+odstrániť. Dôležité rytmy si preto naďalej ukladaj do súborov. Príkaz Uložiť ako…
 vyvoláva sťahovanie; aplikácia nevie potvrdiť jeho dokončenie na disku.
 
 Pri otvorení sa priamo načíta `basicRhythms.yaml` (alebo súbor z
@@ -146,7 +146,7 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   zbalené rytmy zostanú zbalené a presun sa vráti jedným krokom späť.
 - **Noty** a **Prepisovanie** sú v lište editora, **Súbor** a **Úpravy** v hlavičke.
   Ponuka **Súbor** má tri skupiny: **Súbory** (**Nový rytmus**, **Otvoriť…**,
-  **Obnoviť posledný súbor**, **Uložiť**), **Hranie** (**Živé hranie**) a **Pomoc**
+  **Obnoviť posledný súbor**, **Uložiť ako…**), **Hranie** (**Živé hranie**) a **Pomoc**
   (**Dokumentácia**, **Obrázkový návod**, **O aplikácii**).
   Ponuka **Úpravy** obsahuje **Zbaliť všetko** a **Rozbaliť všetko**. Zbaľujú sa iba celé
   rytmy, rovnako ako pri otvorení súboru.
@@ -167,7 +167,7 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Tempo, humanize a nezávislé posuvníky dialectu fungujú za behu. Zmena sa prejaví
   pri ďalšom plánovanom beate; už naplánovaný zvuk má krátky predstih.
 - Úpravy zdrojového YAML sa použijú pri ďalšom Play. Pred otvorením iného súboru
-  zastav prehrávanie. Uložiť stiahne YAML vrátane aktuálneho BPM a dialectu,
+  zastav prehrávanie. Uložiť ako… stiahne YAML vrátane aktuálneho BPM a dialectu,
   pričom zachová aj dáta `legacy` a komentáre. Humanize je nastavenie prehrávača.
 
 ## Časovanie a formát
@@ -278,7 +278,7 @@ Každý produkčný build vytvorí manifest a service worker `dist/sw.js`. Ten u
 všetky JS/CSS/fonty, ikony, všetky YAML a všetky WAV vrátane 29 djembe samplov.
 Offline dáta sa pripravujú automaticky na pozadí bez stavového panelu alebo ponuky Inštalácia.
 Neúplná nová verzia nenahradí funkčnú starú verziu.
-Úpravy vlastného YAML si naďalej ulož tlačidlom **Uložiť** do Súborov.
+Úpravy vlastného YAML si naďalej ulož tlačidlom **Uložiť ako…** do Súborov.
 
 Na Netlify použi **Súbor → O aplikácii → Aktualizovať aplikáciu** vedľa čísla verzie. Tlačidlo skontroluje server,
 počká na úplné stiahnutie novej verzie a obnoví aplikáciu. Ak už je verzia

@@ -126,7 +126,7 @@ export function App() {
       setRestorableDraft(draft);
       setDraftError('');
     } catch (error) {
-      setDraftError(`Koncept sa nepodarilo uložiť v prehliadači. Stiahni si súbor cez Súbor → Uložiť. ${(error as Error).message}`);
+      setDraftError(`Koncept sa nepodarilo uložiť v prehliadači. Stiahni si súbor cez Súbor → Uložiť ako… ${(error as Error).message}`);
     }
   }
 
@@ -264,7 +264,7 @@ export function App() {
       draftStore.current = new DraftStore(window.localStorage, `javafro:draft:v1:${import.meta.env.BASE_URL}`);
       setRestorableDraft(draftStore.current.current ?? null);
     } catch {
-      setDraftError('Koncept sa nedá obnoviť z úložiska prehliadača. Pôvodné uložené dáta neprepisujeme. Prácu si ukladaj cez Súbor → Uložiť.');
+      setDraftError('Koncept sa nedá obnoviť z úložiska prehliadača. Pôvodné uložené dáta neprepisujeme. Prácu si ukladaj cez Súbor → Uložiť ako…');
     }
     const draft = draftStore.current?.current;
     if (draft?.source.trim()) {
@@ -483,7 +483,7 @@ export function App() {
     <button className="button subtle" onClick={newRhythm} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Nový rytmus z prázdnej šablóny'}><NewIcon /><span>Nový rytmus</span></button>
     <button className="button subtle" onClick={() => fileInput.current?.click()} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Otvoriť YAML súbor'}><FolderIcon /><span>Otvoriť…</span></button>
     <button className="button subtle" onClick={restoreLastFile} disabled={busy || isLoading || !restorableDraft} title={busy ? 'Najprv stlač Stop' : 'Znova otvoriť predchádzajúci súbor'}><RestoreIcon /><span>Obnoviť posledný súbor</span></button>
-    <button className="button subtle" onClick={save} disabled={isLoading}><DownloadIcon /><span>Uložiť</span></button>
+    <button className="button subtle" onClick={save} disabled={isLoading}><DownloadIcon /><span>Uložiť ako…</span></button>
   </>;
   const editActions = <>
     <button className="button subtle" onClick={() => editor.current?.foldAll()} disabled={isLoading || !source.trim()} title="Zbaliť všetky rytmy v editore"><CollapseIcon /><span>Zbaliť všetko</span></button>
@@ -527,7 +527,7 @@ export function App() {
             <a className="button subtle" href={`${import.meta.env.BASE_URL}navod-pre-zaciatocnikov.pdf`} target="_blank" rel="noopener"><DocumentIcon /><span>Dokumentácia</span></a>
             <a className="button subtle" href={`${import.meta.env.BASE_URL}obrazovy-navod.pdf`} target="_blank" rel="noopener"><DocumentIcon /><span>Obrázkový návod</span></a>
             <AboutDialog updateDisabled={busy || isLoading} beforeUpdateReload={reloading => {
-              if (!draftStore.current || !activeDraft.current) throw new Error('Pred aktualizáciou ulož rytmus cez Súbor → Uložiť. Úložisko konceptov nie je dostupné.');
+              if (!draftStore.current || !activeDraft.current) throw new Error('Pred aktualizáciou ulož rytmus cez Súbor → Uložiť ako… Úložisko konceptov nie je dostupné.');
               draftStore.current.save(activeDraft.current);
               updateReload.current = reloading;
             }} />

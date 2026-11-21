@@ -284,7 +284,7 @@ it('saves the controls of both rhythms after switching selection and restoring t
   URL.revokeObjectURL = vi.fn();
   vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
   await click('Súbor');
-  await click('Uložiť');
+  await click('Uložiť ako…');
   expect(download).toHaveBeenCalledOnce();
   expect(document.querySelector('.file-name')?.textContent).toBe('basicRhythms.yaml');
   expect(document.querySelector('.file-name strong')).toBeNull();
@@ -504,7 +504,7 @@ it('groups the Súbor menu into Súbory, Hranie and Pomoc without status message
   const menu = document.querySelector<HTMLDialogElement>('dialog.file-options')!;
   expect(Array.from(menu.querySelectorAll('.menu-group-title'), title => title.textContent)).toEqual(['Súbory', 'Hranie', 'Pomoc']);
   expect(Array.from(menu.querySelectorAll('.dialog-body .button'), button => button.closest('.about-dialog') ? null : button.textContent).filter(Boolean)).toEqual([
-    'Nový rytmus', 'Otvoriť…', 'Obnoviť posledný súbor', 'Uložiť', 'Živé hranie',
+    'Nový rytmus', 'Otvoriť…', 'Obnoviť posledný súbor', 'Uložiť ako…', 'Živé hranie',
     'Dokumentácia', 'Obrázkový návod', 'O aplikácii']);
   expect(menu.querySelector('.dialog-body > [role="status"]')).toBeNull();
 });

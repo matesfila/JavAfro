@@ -22,7 +22,7 @@ Na telefóne roztiahni dva prsty v editore, ak chceš zväčšiť písmo. Pribl�
 
 ## Uloženie a návrat k práci
 
-- Cez **Súbor → Uložiť** si stiahneš vlastnú kópiu rytmov ako súbor YAML. Keď ju chceš znova otvoriť, vyber **Súbor → Otvoriť**. V ponuke **Súbor** môžeš vytvoriť aj nový rytmus. Cez **Úpravy → Zbaliť všetko** alebo **Rozbaliť všetko** naraz zbalíš alebo rozbalíš všetky rytmy v editore.
+- Cez **Súbor → Uložiť ako…** si stiahneš vlastnú kópiu rytmov ako súbor YAML. Keď ju chceš znova otvoriť, vyber **Súbor → Otvoriť**. V ponuke **Súbor** môžeš vytvoriť aj nový rytmus. Cez **Úpravy → Zbaliť všetko** alebo **Rozbaliť všetko** naraz zbalíš alebo rozbalíš všetky rytmy v editore.
 - Ak chceš po ďalšom otvorení aplikácie pokračovať tam, kde si skončil, v tom istom prehliadači vyber **Súbor → Obnoviť posledný súbor**. Pri otázke **Uložiť rozpracované zmeny?** vyber **Áno**, ak si chceš pred výmenou súboru stiahnuť kópiu. **Nie** pokračuje bez uloženia a **Zrušiť** ťa vráti k úpravám.
 - Ak chceš aplikáciu aktualizovať, zastav prehrávanie a pri pripojení na internet otvor **Súbor → O aplikácii → Aktualizovať aplikáciu**. O výsledku ťa informuje hlásenie. Rozpracovaný rytmus zostane uložený.
 
