@@ -322,14 +322,25 @@ Obe cesty končia v `startRhythm()`, takže zaradenie, synchronizácia tempa/dia
 a ochrana počítadlom `playRequest` sú rovnaké ako pri Play. `playNeighbor()` presunie
 kurzor cez `YamlEditorHandle.setCaret()` (bez fokusu, aby sa na mobile neotvorila
 klávesnica). Dvojťuk sa zisťuje časom (`DOUBLE_TAP_MS`, `Date.now()`), nie udalosťou
-`dblclick`, ktorú iOS Safari spoľahlivo neposiela. Druhé ťuknutie počíta predchádzajúci
-rytmus voči rytmu hranému pri prvom ťuknutí (`lastNextTap.anchorId`), lebo engine môže
-prvý Next aktivovať hneď, ak už má naplánovaný ďalší cyklus; v engine vyhráva posledná
-požiadavka. Tlačidlá majú `touch-action: manipulation`, aby dvojťuk nezoomoval.
-Rozpoznanie dvojťuku je v `neighborTap()`, ktoré používa aj `cueNeighbor()`: v Živom
+`dblclick`, ktorú iOS Safari spoľahlivo neposiela. `neighborTap()` jedno ťuknutie
+odloží časovačom (`pendingTap`) o `DOUBLE_TAP_MS`; druhé ťuknutie v tom čase časovač
+zruší a vykoná iba „predchádzajúci“ voči rytmu z prvého ťuknutia. Obrazovka, kurzor
+aj zaradenie sa tak zmenia len raz. Časovač volá akcie cez `tapActions` (ref s funkciami
+z posledného renderu), aby videl aktuálny stav; Stop a odpojenie ho zrušia.
+Tlačidlá majú `touch-action: manipulation`, aby dvojťuk nezoomoval.
+`neighborTap()` používa aj `cueNeighbor()`: v Živom
 hraní po Stop druhé tlačidlo iba presunie kurzor na susedný rytmus (bez audia)
 a Play potom spustí rytmus pod kurzorom. `stoppedAt` ignoruje stlačenie do
 `DOUBLE_TAP_MS` po Stop, keďže ide o to isté miesto na obrazovke.
+
+**Potiahnutie po Play.** `useSwipe.ts` rozpozná vodorovné potiahnutie (aspoň
+`SWIPE_MIN_PX`, prevažne vodorovne) cez pointer udalosti s `setPointerCapture`
+a potlačí klik, ktorý prehliadač pošle na konci potiahnutia (`consumeClick()`).
+`swipeRhythm()` v `App` počas hrania volá `playNeighbor()` hneď, bez čakania na dvojťuk,
+relatívne k `pendingRhythm ?? playingRhythm`; v pokoji iba presunie kurzor (`cueTo()`).
+Tie isté obslužné funkcie (`primaryProps`) dostáva hlavné tlačidlo aj `LiveView`.
+Aby prehliadač vodorovné gesto neprevzal na posun, má `.transport .play`
+`touch-action: pan-y` a `.live-primary` `touch-action: none`.
 
 Signál ide cez gain konkrétneho úderu, voliteľný stereo panner, gain tracku
 a spoločný master do výstupu. Každý úder má vlastný source node; dekódované
@@ -464,7 +475,7 @@ manuálnym spustením príslušnej aplikácie.
 | Zmena hlasitosti/mute | Java `MixerPanel`, `PlaybackSettings`, renderer a `AudioConstants`; web `App.tsx` a `AudioEngine`. Zachovať prevod medzi UI a internou stupnicou. |
 | Zmena editora | Java `RhythmPlayerPanel`, `RhythmFoldParser`, `RhythmMove`, `EditorFoldIcon`, `SandTheme`, `SpacedSyntaxTextArea`, `EditorZoom`; web `Editor.tsx`, `editor-setup.ts`, `overwrite.ts`, `rhythm-folding.ts`, `rhythm-move.ts`. |
 | Vzhľad desktopu | `SandTheme` (FlatLaf kľúče a paleta), `UiIcons`, kreslenie `TempoDial`/`TouchSliders`/`DisclosurePanel`; webová predloha je `web/src/style.css`. FlatLaf potrebuje v `proguard.pro` pravidlo `-keep class com.formdev.flatlaf.**` a natívny prístup (`Enable-Native-Access` v manifeste, `--enable-native-access` v `build-windows.ps1`). |
-| Prepínanie rytmov počas hrania (Next, dvojťuk, Živé hranie) | Web `App.tsx` (`nextMode`, `pressPrimary()`, `playNeighbor()`, `startRhythm()`, `DOUBLE_TAP_MS`), `rhythm-navigation.ts`, `LiveView.tsx`, `Editor.tsx` (`setCaret()`), štýly `.live-*` v `style.css`. Desktop to zatiaľ nemá. |
+| Prepínanie rytmov počas hrania (Next, dvojťuk, Živé hranie) | Web `App.tsx` (`nextMode`, `pressPrimary()`, `playNeighbor()`, `startRhythm()`, `DOUBLE_TAP_MS`), `rhythm-navigation.ts`, `LiveView.tsx`, `useSwipe.ts` (potiahnutie), `Editor.tsx` (`setCaret()`), štýly `.live-*` v `style.css`. Desktop to zatiaľ nemá. |
 | Klávesnica nôt | Java `NotePad`, `RhythmLoader.instrumentAtCaret()`/`notesFor()`, `Instrument.notes()`; web `NotePad.tsx`, `note-input.ts`, `note-context.ts`, `sounds.ts`. Poradie nôt je poradie v manifeste na oboch stranách. |
 | Nové alebo vymenené nahrávky | `src/main/resources/samples`, manifest, dokumentácia pôvodu a konverzné nástroje; potom nový webový build a overenie offline cache. |
 

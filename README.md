@@ -84,9 +84,16 @@ Nepotrebuje Java backend; produkčný build vytvorí statický adresár `web/dis
 Keď rytmus hrá, tlačidlo **Play** sa zmení na **Next** (dvojitá šípka). Next zaradí
 rytmus, ktorý v súbore nasleduje po práve hranom, na koniec aktuálneho patternu,
 rovnako ako Play počas hrania. **Dvojklik / dvojťuk** na Next (dve stlačenia do 350 ms)
-zaradí namiesto toho **predchádzajúci** rytmus. Poradie je poradie hlavných kľúčov
+zaradí namiesto toho **predchádzajúci** rytmus. Jedno stlačenie sa preto vykoná až
+po 350 ms, keď je isté, že druhé neprišlo; pri dvojťuku sa nasledujúci rytmus
+vôbec nezaradí ani nezobrazí. Poradie je poradie hlavných kľúčov
 v YAML a dookola: po poslednom rytme nasleduje prvý, pred prvým posledný.
 Kurzor editora sa presunie na zaradený rytmus.
+
+**Potiahnutie prstom (alebo myšou) po tlačidle Play/Next** prepína hneď, bez čakania:
+doprava = nasledujúci rytmus, doľava = predchádzajúci. Počas hrania ho zaradí na koniec
+patternu (opakované potiahnutie pokračuje od už zaradeného rytmu), keď nič nehrá,
+rytmus iba vyberie a Play ho spustí. Funguje v hlavnom pohľade aj v Živom hraní.
 
 Next sa zobrazuje, iba kým je kurzor v hranom (alebo zaradenom) rytme a text sa
 nezmenil. Po presune kurzora na iný rytmus alebo po úprave YAML sa tlačidlo vráti

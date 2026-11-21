@@ -15,13 +15,16 @@ import { type Controls } from './timing';
 import { config } from './config';
 import { ArrowIcon, DownloadIcon, FolderIcon, FullscreenIcon, NewIcon, NextIcon, PlayIcon } from './icons';
 import { LiveView } from './LiveView';
+import { useSwipe } from './useSwipe';
 import { caretAtSourceOffset, entryAtCaret, rhythmNeighbors, type RhythmEntry } from './rhythm-navigation';
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}generated/${path}`;
 const mixerKey = (rhythm: Rhythm) => JSON.stringify([rhythm.id, rhythm.tracks.map(track => track.instrument)]);
 /** Two Next taps closer together than this play the previous rhythm instead. */
 export const DOUBLE_TAP_MS = 350;
-type ParsedDocument = { source: string; rhythm: Rhythm | null; entries: RhythmEntry[] };
+/** `next` queues while playing; `cue` only selects while stopped (Živé hranie). */
+type TapKind = 'next' | 'cue';
+type ParsedDocument ={ source: string; rhythm: Rhythm | null; entries: RhythmEntry[] };
 const entryOf = ({ rhythm, offset }: { rhythm: Rhythm; offset: number }): RhythmEntry => ({ id: rhythm.id, name: rhythm.name, offset });
 
 /** The rhythm under the caret plus the ordered list of all rhythms; throws on invalid YAML. */
@@ -57,7 +60,9 @@ export function App() {
   const [playingRhythm, setPlayingRhythm] = useState<Rhythm | null>(null);
   /** The rhythm whose start was requested (loading, or queued until the end of the pattern). */
   const [pendingRhythm, setPendingRhythm] = useState<Rhythm | null>(null);
-  const lastNextTap = useRef<{ time: number; anchorId: string } | null>(null);
+  /** A single Next tap waiting DOUBLE_TAP_MS for a possible second tap. */
+  const pendingTap = useRef<{ kind: TapKind; anchorId: string; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const tapActions = useRef<Record<TapKind, (direction: 1 | -1, anchorId: string) => void>>(null!);
   const stoppedAt = useRef(0);
   const [isLiveOpen, setLiveOpen] = useState(false);
   const [validation, setValidation] = useState('');
@@ -85,7 +90,8 @@ export function App() {
     && (caretRhythmId === playingRhythm.id || caretRhythmId === pendingRhythm?.id);
   const primaryDisabled = !source.trim() || isLoading;
   const primaryContent = nextMode ? <><NextIcon />Next</> : <><PlayIcon />Play</>;
-  const primaryTitle = nextMode ? 'Ďalší rytmus · dvojklik: predchádzajúci' : 'Prehrať rytmus pod kurzorom';
+  const primaryTitle = (nextMode ? 'Ďalší rytmus · dvojklik: predchádzajúci' : 'Prehrať rytmus pod kurzorom')
+    + ' · potiahni → ďalší, ← predchádzajúci';
   const [mixes, setMixes] = useState<Record<string, TrackMix[]>>({});
   const [masterVolume, setMasterVolume] = useState(config.defaultMasterVolume);
   const [humanizeProbability, setHumanizeProbability] = useState(config.humanizeApplianceProbability);
@@ -267,7 +273,10 @@ export function App() {
       applySource(draft.source, draft.fileName, false, draft, false);
       saveActiveDraft.current = true;
     } else void loadDefaultFile();
-    return () => { loadRequest.current++; playRequest.current++; engine.current?.dispose(); };
+    return () => {
+      loadRequest.current++; playRequest.current++; engine.current?.dispose();
+      if (pendingTap.current) clearTimeout(pendingTap.current.timer);
+    };
   }, []);
 
   useEffect(() => {
@@ -337,11 +346,16 @@ export function App() {
       if (index < 0) return parseRhythmAtCaret(source, caretRef.current);
       const target = entries[(index + direction + entries.length) % entries.length];
       // Follow with the caret so the editor, heading and the Next button stay on the queued rhythm.
-      const caret = caretAtSourceOffset(source, target.offset);
-      caretRef.current = caret;
-      editor.current?.setCaret(caret);
+      moveCaretToRhythm(target.offset);
       return target.rhythm;
     });
+  }
+
+  /** Put the caret on the rhythm key at this YAML source offset, without focusing the editor. */
+  function moveCaretToRhythm(sourceOffset: number) {
+    const caret = caretAtSourceOffset(source, sourceOffset);
+    caretRef.current = caret;
+    editor.current?.setCaret(caret);
   }
 
   async function startRhythm(select: () => Rhythm) {
@@ -368,26 +382,34 @@ export function App() {
     } finally { if (request === playRequest.current) { setStarting(false); setPendingRhythm(null); } }
   }
 
+  function cancelPendingTap() {
+    if (pendingTap.current) clearTimeout(pendingTap.current.timer);
+    pendingTap.current = null;
+  }
+
   /**
-   * A Next tap moves forward; a second tap within DOUBLE_TAP_MS moves back instead, relative to the
-   * rhythm of the first tap (while playing, the first Next may already have started).
+   * A single Next tap acts only after DOUBLE_TAP_MS. A second tap within that time cancels it and moves
+   * back instead, relative to the rhythm of the first tap, so the screen changes only once.
    */
-  function neighborTap(anchorId: string): { direction: 1 | -1; anchorId: string } {
-    const now = Date.now();
-    const last = lastNextTap.current;
-    if (last && now - last.time < DOUBLE_TAP_MS) {
-      lastNextTap.current = null;
-      return { direction: -1, anchorId: last.anchorId };
-    }
-    lastNextTap.current = { time: now, anchorId };
-    return { direction: 1, anchorId };
+  function neighborTap(kind: TapKind, anchorId: string) {
+    const last = pendingTap.current;
+    cancelPendingTap();
+    if (last?.kind === kind) { tapActions.current[kind](-1, last.anchorId); return; }
+    const timer = setTimeout(() => { pendingTap.current = null; tapActions.current[kind](1, anchorId); }, DOUBLE_TAP_MS);
+    pendingTap.current = { kind, anchorId, timer };
+  }
+
+  /** Select the rhythm next to `anchorId` without playing it. */
+  function cueTo(direction: 1 | -1, anchorId: string) {
+    if (parsedDocument.source !== source) return;
+    const neighbors = rhythmNeighbors(parsedDocument.entries, anchorId);
+    if (neighbors) moveCaretToRhythm(direction === 1 ? neighbors.next.offset : neighbors.previous.offset);
   }
 
   /** Play, or while playing Next; a double tap plays the previous rhythm instead. */
   function pressPrimary() {
-    if (!nextMode || !playingRhythm) { lastNextTap.current = null; void play(); return; }
-    const tap = neighborTap(playingRhythm.id);
-    void playNeighbor(tap.direction, tap.anchorId);
+    if (!nextMode || !playingRhythm) { cancelPendingTap(); void play(); return; }
+    neighborTap('next', playingRhythm.id);
   }
 
   /** Živé hranie while stopped: select the next (double tap: previous) rhythm without playing it. */
@@ -395,19 +417,35 @@ export function App() {
     // A quick second press on Stop must not already pick another rhythm.
     if (busy || isLoading || Date.now() - stoppedAt.current < DOUBLE_TAP_MS || parsedDocument.source !== source) return;
     const anchor = entryAtCaret(parsedDocument.entries, source, caretRef.current);
-    if (!anchor) return;
-    const tap = neighborTap(anchor.id);
-    const neighbors = rhythmNeighbors(parsedDocument.entries, tap.anchorId);
-    if (!neighbors) return;
-    const target = tap.direction === 1 ? neighbors.next : neighbors.previous;
-    const caret = caretAtSourceOffset(source, target.offset);
-    caretRef.current = caret;
-    editor.current?.setCaret(caret);
+    if (anchor) neighborTap('cue', anchor.id);
   }
+
+  /** Swipe on Play: right = next, left = previous; queued while playing, only selected while stopped. */
+  function swipeRhythm(direction: 1 | -1) {
+    cancelPendingTap();
+    if (isPlaying && playingRhythm) {
+      // Relative to the already queued rhythm, so repeated swipes walk through the list.
+      void playNeighbor(direction, pendingRhythm?.id ?? playingRhythm.id);
+    } else if (!busy && !isLoading && parsedDocument.source === source) {
+      const anchor = entryAtCaret(parsedDocument.entries, source, caretRef.current);
+      if (anchor) cueTo(direction, anchor.id);
+    }
+  }
+
+  // Timers run the latest render's functions, so a delayed tap sees the current playback state.
+  tapActions.current = {
+    next: (direction, anchorId) => { if (isPlaying) void playNeighbor(direction, anchorId); },
+    cue: (direction, anchorId) => { if (!busy) cueTo(direction, anchorId); },
+  };
+  const playSwipe = useSwipe(swipeRhythm);
+  const primaryProps = {
+    ...playSwipe.handlers,
+    onClick() { if (!playSwipe.consumeClick()) pressPrimary(); },
+  };
 
   function stop() {
     playRequest.current++;
-    lastNextTap.current = null;
+    cancelPendingTap();
     stoppedAt.current = Date.now();
     engine.current?.stop(); setPlaying(false); setStarting(false); setPlayingRhythm(null); setPendingRhythm(null);
     setMessage('');
@@ -521,7 +559,7 @@ export function App() {
           <div className="rhythm-heading"><h1 title={displayedRhythm?.name}>{displayedRhythm?.name ?? 'Rytmus'}</h1></div>
           <div className="playback-controls">
           <div className="transport">
-            <button className="button play" aria-pressed={busy} onClick={pressPrimary} disabled={primaryDisabled} title={primaryTitle}>{primaryContent}</button>
+            <button className="button play" aria-pressed={busy} {...primaryProps} disabled={primaryDisabled} title={primaryTitle}>{primaryContent}</button>
             <button className="button stop" onClick={stop} disabled={!busy}><span className="stop-square" />Stop</button>
           </div>
           {message && <p className="playback-message" role="status">{message}</p>}
@@ -590,7 +628,7 @@ export function App() {
       </div>
     </dialog>
     <LiveView open={isLiveOpen} onClose={() => setLiveOpen(false)}
-      next={nextMode} onPrimary={pressPrimary} primaryDisabled={primaryDisabled}
+      next={nextMode} primaryProps={primaryProps} primaryDisabled={primaryDisabled}
       playing={busy} onStop={stop}
       onCue={cueNeighbor} cueDisabled={isLoading || parsedDocument.source !== source || parsedDocument.entries.length < 2}
       rhythmName={displayedRhythm?.name} neighbors={rhythmNeighbors(parsedDocument.entries, playingRhythm?.id ?? caretRhythmId ?? displayedRhythm?.id)} message={message} />

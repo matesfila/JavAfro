@@ -15,6 +15,9 @@ tlačidlami Play/Next a Stop a s poradím rytmov `predchádzajúci ← aktuálny
 - [x] Inteligentné prepnutie: po úprave textu alebo presune kurzora na iný rytmus sa tlačidlo vráti na Play
 - [x] Pohľad **Živé hranie** (Súbor → Živé hranie) s veľkými tlačidlami, info riadkom a tlačidlom ×
 - [x] V Živom hraní sa po Stop druhé tlačidlo zmení na Next: vyberie ďalší rytmus bez prehrania (dvojťuk predchádzajúci), Play ho spustí
+- [x] Väčší text poradia rytmov v Živom hraní
+- [x] Dvojťuk mení zobrazenie len raz: jedno ťuknutie sa vykoná až po 350 ms
+- [x] Potiahnutie po Play: doprava nasledujúci, doľava predchádzajúci (počas hrania aj v pokoji, bez oneskorenia)
 - [x] Testy (`rhythm-navigation.test.ts`, `App.test.ts`) a dokumentácia
 - [ ] Ručné overenie na telefóne (dvojťuk na iPhone, portrait/landscape)
 

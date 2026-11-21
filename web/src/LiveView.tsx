@@ -1,11 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ButtonHTMLAttributes } from 'react';
 import { CloseIcon, NextIcon, PlayIcon } from './icons';
 import type { RhythmNeighbors } from './rhythm-navigation';
 
 /** Full-screen "Živé hranie": only the big Play/Next and Stop buttons, for playing with a group. */
-export function LiveView({ open, onClose, next, onPrimary, primaryDisabled, playing, onStop, onCue, cueDisabled, rhythmName, neighbors, message }: {
+export function LiveView({ open, onClose, next, primaryProps, primaryDisabled, playing, onStop, onCue, cueDisabled, rhythmName, neighbors, message }: {
   open: boolean; onClose: () => void;
-  next: boolean; onPrimary: () => void; primaryDisabled: boolean;
+  /** Click and swipe handlers of the Play/Next button, shared with the main view. */
+  next: boolean; primaryProps: ButtonHTMLAttributes<HTMLButtonElement>; primaryDisabled: boolean;
   /** While playing the 2nd button is Stop; while stopped it selects the next rhythm (Play then starts it). */
   playing: boolean; onStop: () => void;
   onCue: () => void; cueDisabled: boolean;
@@ -34,10 +35,11 @@ export function LiveView({ open, onClose, next, onPrimary, primaryDisabled, play
     </header>
     {message && <p className="live-message" role="status">{message}</p>}
     <div className="live-buttons">
-      <button type="button" className="button play live-primary" onClick={onPrimary} disabled={primaryDisabled}
-        title={next ? 'Ďalší rytmus · dvojklik: predchádzajúci' : 'Prehrať rytmus pod kurzorom'}>
+      <button type="button" className="button play live-primary" {...primaryProps} disabled={primaryDisabled}
+        title={(next ? 'Ďalší rytmus · dvojklik: predchádzajúci' : 'Prehrať rytmus pod kurzorom') + ' · potiahni → ďalší, ← predchádzajúci'}>
         {next ? <NextIcon /> : <PlayIcon />}
-        <span className="live-label">{next ? 'Next' : 'Play'}{next && <small>dvojťuk: predchádzajúci</small>}</span>
+        <span className="live-label">{next ? 'Next' : 'Play'}
+          <small>{next && 'dvojťuk: predchádzajúci · '}potiahni ← →</small></span>
       </button>
       {playing
         ? <button type="button" className="button stop live-stop" onClick={onStop}>

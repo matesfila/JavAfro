@@ -361,19 +361,79 @@ it('turns Play into Next and plays the following rhythms in file order, wrapping
   expect(mainButton().textContent).toBe('Next');
 });
 
-it('plays the previous rhythm on a double tap of Next, relative to the rhythm playing at the first tap', async () => {
+it('plays only the previous rhythm on a double tap of Next, without first switching to the next one', async () => {
   const start = await renderPlaying(three.replace(/\n/g, '\r\n'), 'Two');
+  const caretAt = (name: string) => editor().state.doc.toString().slice(editor().state.selection.main.head).startsWith(name + ':');
+  await act(async () => mainButton().click());
+  await act(() => vi.advanceTimersByTimeAsync(100));
+  // A single tap waits for a possible second one: nothing has changed yet.
+  expect(startedIds(start)).toEqual(['Two']);
+  expect(caretAt('Two')).toBe(true);
+  await act(async () => mainButton().click());
+  expect(startedIds(start)).toEqual(['Two', 'One']);
+  expect(caretAt('One')).toBe(true);
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  expect(startedIds(start)).toEqual(['Two', 'One']);
   await act(async () => mainButton().click());
   await act(() => vi.advanceTimersByTimeAsync(100));
   await act(async () => mainButton().click());
   await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(startedIds(start)).toEqual(['Two', 'Three', 'One']);
-  expect(editor().state.doc.toString().slice(editor().state.selection.main.head).startsWith('One:')).toBe(true);
+  expect(startedIds(start)).toEqual(['Two', 'One', 'Three']);
+});
+
+it('does not play a delayed Next tap after Stop', async () => {
+  const start = await renderPlaying();
   await act(async () => mainButton().click());
-  await act(() => vi.advanceTimersByTimeAsync(100));
-  await act(async () => mainButton().click());
+  await act(async () => document.querySelector<HTMLButtonElement>('.transport button.stop')!.click());
   await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(startedIds(start)).toEqual(['Two', 'Three', 'One', 'Two', 'Three']);
+  expect(startedIds(start)).toEqual(['One']);
+  expect(mainButton().textContent).toBe('Play');
+});
+
+function swipe(button: HTMLButtonElement, dx: number, dy = 0) {
+  return act(async () => {
+    button.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, clientX: 200, clientY: 100 }));
+    button.dispatchEvent(new MouseEvent('pointerup', { bubbles: true, clientX: 200 + dx, clientY: 100 + dy }));
+    button.click();
+  });
+}
+
+it('switches rhythms by swiping Play while playing: right = next, left = previous, without delay', async () => {
+  const start = await renderPlaying();
+  await swipe(mainButton(), 80);
+  expect(startedIds(start)).toEqual(['One', 'Two']);
+  await swipe(mainButton(), 80);
+  expect(startedIds(start)).toEqual(['One', 'Two', 'Three']);
+  await swipe(mainButton(), -80);
+  await swipe(mainButton(), -80);
+  expect(startedIds(start)).toEqual(['One', 'Two', 'Three', 'Two', 'One']);
+  // Too short or mostly vertical drags stay taps (here Next after the double-tap delay).
+  await swipe(mainButton(), 30);
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  await swipe(mainButton(), 80, 60);
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  expect(startedIds(start)).toEqual(['One', 'Two', 'Three', 'Two', 'One', 'Two', 'Three']);
+});
+
+it('selects rhythms by swiping Play while stopped, then Play starts the selected one', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
+  const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
+  await act(() => root.render(createElement(App)));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  await click('Súbor');
+  await click('Živé hranie');
+  const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
+  const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
+  const primary = live.querySelector<HTMLButtonElement>('.live-primary')!;
+  await swipe(primary, -80);
+  expect(rhythms()).toBe('Two←Three→One');
+  await swipe(primary, 80);
+  await swipe(primary, 80);
+  expect(rhythms()).toBe('One←Two→Three');
+  expect(start).not.toHaveBeenCalled();
+  await act(async () => primary.click());
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  expect(startedIds(start)).toEqual(['Two']);
 });
 
 it('goes back to Play after an edit or when the caret moves to another rhythm', async () => {
@@ -404,20 +464,21 @@ it('opens Živé hranie from Súbor with big Play/Next and Stop buttons and the 
   expect(live.open).toBe(true);
   const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
   const primary = live.querySelector<HTMLButtonElement>('.live-primary')!;
+  const primaryLabel = () => primary.querySelector('.live-label')!.firstChild!.textContent;
   expect(rhythms()).toBe('Three←One→Two');
-  expect(primary.textContent).toBe('Play');
+  expect(primaryLabel()).toBe('Play');
   expect(live.querySelector('.live-stop')).toBeNull();
   expect(live.querySelector('.live-cue')?.textContent).toContain('Next');
   await act(async () => primary.click());
   await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(primary.textContent).toContain('Next');
+  expect(primaryLabel()).toBe('Next');
   await act(async () => primary.click());
   await act(() => vi.advanceTimersByTimeAsync(400));
   expect(startedIds(start)).toEqual(['One', 'Two']);
   expect(rhythms()).toBe('One←Two→Three');
   await act(async () => live.querySelector<HTMLButtonElement>('.live-stop')!.click());
   expect(stop).toHaveBeenCalled();
-  expect(primary.textContent).toBe('Play');
+  expect(primaryLabel()).toBe('Play');
   expect(live.querySelector('.live-stop')).toBeNull();
   await click('Zavrieť živé hranie');
   expect(live.open).toBe(false);
@@ -448,8 +509,9 @@ it('selects the next or previous rhythm after Stop in Živé hranie without play
   // Later presses select the following rhythm, wrapping at the end.
   await press(second());
   expect(rhythms()).toBe('One←Two→Three');
-  // Double tap: previous of the rhythm selected at the first tap (Two → One).
+  // Double tap: previous of the rhythm selected at the first tap (Two → One), shown only once.
   await press(second(), 100);
+  expect(rhythms()).toBe('One←Two→Three');
   await press(second());
   expect(rhythms()).toBe('Three←One→Two');
   await press(second());

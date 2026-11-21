@@ -310,6 +310,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 /* Play/Next and Stop must not zoom on a quick double tap (Next twice = previous rhythm). */
 .transport .button { touch-action: manipulation; }
+/* Play also takes horizontal swipes (→ next, ← previous rhythm): the browser may only pan vertically. */
+.transport .play { touch-action: pan-y; }
 
 /* Živé hranie: a full-screen view with only two big buttons. */
 .live-dialog {
@@ -320,9 +322,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .live-dialog[open] { display: flex; flex-direction: column; gap: 10px; }
 .live-dialog::backdrop { background: #f5f0e8; }
 .live-header { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
-.live-rhythms { flex: 1; min-width: 0; margin: 0; display: flex; align-items: baseline; justify-content: center; gap: 8px; font-size: 14px; color: var(--muted); white-space: nowrap; }
+.live-rhythms { flex: 1; min-width: 0; margin: 0; display: flex; align-items: baseline; justify-content: center; gap: 8px; font-size: clamp(17px, 3.6vmin, 24px); color: var(--muted); white-space: nowrap; }
 .live-neighbor { min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
-.live-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 0 2 auto; color: #44372e; font: 700 17px 'Manrope Variable', sans-serif; }
+.live-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 0 2 auto; color: #44372e; font: 700 clamp(21px, 4.6vmin, 30px) 'Manrope Variable', sans-serif; }
 .live-close { flex: 0 0 auto; width: 40px; min-height: 40px; padding: 0; border-color: var(--border); background: transparent; color: #6f5843; }
 .live-close:hover { background: #f1e8da; }
 .live-message { flex: 0 0 auto; margin: 0; text-align: center; font-size: 14px; color: #8d4e35; overflow-wrap: anywhere; }
@@ -335,3 +337,4 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 @media (orientation: landscape) {
   .live-buttons { grid-template-rows: none; grid-template-columns: 1fr 1fr; }
 }
+.live-buttons .live-primary { touch-action: none; }
