@@ -166,7 +166,7 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 
 | Trieda alebo vnorený typ | Zodpovednosť |
 | --- | --- |
-| `RhythmPlayerPanel` | Hlavný panel a koordinátor desktopu, rozložený ako web: hlavička (logo, Otvoriť, menu Súbor), vľavo karta editora (názov súboru s `*` pri neuložených zmenách, prepínače Noty/Prepisovanie, šípky presunu rytmu, YAML editor, klávesnica nôt, stavový riadok s chybami YAML a stav konceptu), vpravo karta prehrávania (názov rytmu, Play/Stop, tempo, rozbaľovacie sekcie Mixer, Dialect a Humanize). Rieši aj výber rytmu pod kurzorom, synchronizáciu ovládania a chyby. |
+| `RhythmPlayerPanel` | Hlavný panel a koordinátor desktopu, rozložený ako web: hlavička (logo, Otvoriť, menu Súbor so skupinami Súbory a Pomoc, menu Úpravy so Zbaliť/Rozbaliť všetko cez `setAllFolds()`), vľavo karta editora (názov súboru s `*` pri neuložených zmenách, prepínače Noty/Prepisovanie, šípky presunu rytmu, YAML editor, klávesnica nôt, stavový riadok s chybami YAML a stav konceptu), vpravo karta prehrávania (názov rytmu, Play/Stop, tempo, rozbaľovacie sekcie Mixer, Dialect a Humanize). Rieši aj výber rytmu pod kurzorom, synchronizáciu ovládania a chyby. |
 | `RhythmPlayerPanel.PlaybackSession` | Balíková abstrakcia životného cyklu prehrávania (`play`, `queue`, `cancelQueued`, `stop`, `isStopped`). Produkčne obaluje sekvencer, testy môžu vložiť vlastnú session cez factory. |
 | `RhythmPlayerPanel.PlaybackRequest` | Súkromný record rytmu a nastavení pre konkrétne spustenie. Pri reštartoch sa uchováva iba posledná čakajúca požiadavka. |
 | `MixerPanel` | Zostavuje ovládanie hlasitosti, Mute a Solo podľa trackov (Solo = jediný nestlmený track), uchováva master a prepája hodnoty s aktuálnym `PlaybackSettings` cez `bind()`. `reset()` obnovuje tracky pri načítaní súboru. Je priamo v karte prehrávania, nie v samostatnom okne. |
@@ -175,7 +175,7 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 | `NotePad` | Klávesnica nôt (prepínač Noty): noty nástroja pod kurzorom (`RhythmLoader.instrumentAtCaret()` a `notesFor()`), `.`, `|`, medzera, Enter, Backspace a šípky. Tlačidlá neberú fokus; každé stlačenie je samostatný krok späť. Rešpektuje prepisovanie; balafon vkladá tokeny oddelené medzerou. Port webových `NotePad.tsx` a `note-input.ts`. |
 | `AboutDialog` | Okno O aplikácii (logo, verzia, autor, pomocník pri vývoji, pôvod sample) podľa webového `AboutDialog.tsx`, bez tlačidla aktualizácie. |
 | `HelpDocuments` | Súbor → Dokumentácia / Obrázkový návod: PDF pribalené z `web/public` (cez `pom.xml` do `docs/`) skopíruje do dočasného súboru a otvorí systémovým prehliadačom. Otvárač sa dá v testoch nahradiť. |
-| `UiIcons` | Malé vektorové ikony (Play, Stop, priečinok, uloženie, nový, dokument, info, šípky hore/dole) kreslené ako webové SVG, vo farbe popredia tlačidla; logo djembe pre hlavičku a O aplikácii. |
+| `UiIcons` | Malé vektorové ikony (Play, Stop, priečinok, uloženie, nový, obnoviť, dokument, info, šípky hore/dole, zbaliť/rozbaliť) kreslené ako webové SVG, vo farbe popredia tlačidla; logo djembe pre hlavičku a O aplikácii. |
 | `RhythmFoldParser` | Určuje zbaliteľné bloky hlavných YAML definícií pre RSyntaxTextArea podľa YAML uzlov. Rozpracovaný chybný text necháva editovateľný. |
 | `RhythmMove` | Vymení hlavnú YAML definíciu pod kurzorom so susednou (port web `rhythm-move.ts`). Rytmus siaha od riadka svojho kľúča po ďalší kľúč, takže komentáre pod ním sa presúvajú s ním. Panel ho volá šípkami ↑/↓ ako jednu úpravu pre krok späť a znovu zbalí zbalené rytmy. |
 | `EditorFoldIcon` | Vykresľuje vlastnú ikonu rozbalenia/zbalenia v editore. |
@@ -263,14 +263,14 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `App.tsx` / `App` | Koordinuje zdrojový YAML, kurzor, vybraný a prehrávaný rytmus, validáciu, súbory, uloženie, živé ovládanie a mix. Počítadlá požiadaviek chránia stav pred oneskorenými výsledkami otvorenia a Play. |
 | `SettingsPanel.tsx` / `SettingsPanel` | Zobrazuje jednu sadu ovládačov ako desktopový `details` alebo mobilné tlačidlo a natívny modálny `dialog`. Riadi otvorenie a zatvorenie; hodnoty drží nadradený `App`, takže zatvorenie ani zmena rozloženia nastavenia nemaže. |
 | `useViewport.ts` / `useViewport()` | Sleduje breakpoint a výšku `visualViewport` vrátane mobilnej klávesnice. Poskytuje dostupnú výšku a kompaktný režim; jeho media query musí zodpovedať pravidlám v `style.css`. |
-| `Editor.tsx` / `YamlEditor` | Integrácia CodeMirror do Reactu: text, kurzor, YAML diagnostika, folding a režim prepisovania. |
+| `Editor.tsx` / `YamlEditor` | Integrácia CodeMirror do Reactu: text, kurzor, YAML diagnostika, folding (`foldAll()`/`unfoldAll()` pre menu Úpravy) a režim prepisovania. |
 | `editor-setup.ts` | Spoločná konfigurácia rozšírení a klávesových skratiek editora. |
 | `overwrite.ts` | CodeMirror stav, efekt a vstupná logika Insert/Overwrite. |
 | `rhythm-folding.ts` | Vytvára efekty zbalenia hlavných YAML definícií. |
 | `rhythm-move.ts` | Vymení hlavnú YAML definíciu pod kurzorom so susednou; `YamlEditorHandle.moveRhythm()` to použije pre šípky ↑/↓ v lište editora a zachová zbalenie. |
 | `rhythm-navigation.ts` | Poradie rytmov pre Next/predchádzajúci: `RhythmEntry` (id, názov, offset v zdroji), `neighborIndex()` a `rhythmNeighbors()` s obtáčaním na koncoch, `entryAtCaret()` (synchrónny rytmus pod kurzorom) a `caretAtSourceOffset()` (prevod YAML offsetu na kurzor CodeMirror pri CRLF). |
 | `LiveView.tsx` / `LiveView` | Pohľad **Živé hranie**: natívny celoobrazovkový `dialog` s jediným veľkým tlačidlom Play/Stop (potiahnutím → / ← prepína rytmy), riadkom `predchádzajúci ← aktuálny → nasledujúci` a tlačidlom ×. Nemá vlastný stav prehrávania; obsluhu dostáva z `App`. |
-| `icons.tsx` | Spoločné inline SVG ikony (Play, Next, priečinok, uloženie, šípky, nový, celá obrazovka, zavrieť). |
+| `icons.tsx` | Spoločné inline SVG ikony (Play, Next, priečinok, uloženie, šípky, nový, obnoviť, dokument, info, zbaliť/rozbaliť, celá obrazovka, zavrieť). |
 | `rhythm-document.ts` / `readRhythmDocument()` | Otvorí dokument aj pri chybe validácie: vráti pôvodný text, `rhythm: null` a správu. Používateľ môže chybný YAML opraviť v editore. |
 | `rhythm.ts` | Typy `Rhythm`, `Track`, `Instrument`, `CatalogEntry`, validácia a parsovanie definícií. `parseRhythm()` vyberá prvý rytmus, `parseRhythmAtCaret()` podľa kurzora a `parseRhythmEntries()` vracia aj pozície definícií. |
 | `timing.ts` | Typy `Controls` a `Hit`, validácia živých hodnôt, `minimumGap()` a `planBeat()`. Vypočíta údery doby, ďalšiu pozíciu a koniec doby; náhodu možno vložiť cez parameter na testovanie. |

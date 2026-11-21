@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { appInfo } from './app-info';
 import { UpdateButton } from './UpdateButton';
+import { InfoIcon } from './icons';
 
 export function AboutDialog({ updateDisabled, beforeUpdateReload }: {
   updateDisabled: boolean; beforeUpdateReload: (reloading: boolean) => void;
@@ -8,7 +9,7 @@ export function AboutDialog({ updateDisabled, beforeUpdateReload }: {
   const dialog = useRef<HTMLDialogElement>(null);
 
   return <>
-    <button className="button subtle" onClick={() => dialog.current?.showModal()}>O aplikácii</button>
+    <button className="button subtle" onClick={() => dialog.current?.showModal()}><InfoIcon /><span>O aplikácii</span></button>
     <dialog ref={dialog} className="about-dialog" aria-labelledby="about-title" onClick={event => {
       if (event.target === event.currentTarget) dialog.current?.close();
     }}>

@@ -100,4 +100,34 @@ public class DesktopLayoutTest {
             assertTrue(closed[0]);
         });
     }
+
+    @Test public void fileMenuIsGroupedWithHeadingsAndRestoreAfterOpen() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            var panel = new RhythmPlayerPanel(YAML);
+            var labels = new java.util.ArrayList<String>();
+            for (var component : panel.fileMenu().getComponents()) {
+                if (component instanceof JLabel label) labels.add("# " + label.getText());
+                else if (component instanceof JMenuItem item) labels.add(item.getText());
+                else if (component instanceof JSeparator) labels.add("---");
+            }
+            assertEquals(java.util.List.of("# SÚBORY", "Nový rytmus", "Otvoriť YAML…", "Obnoviť posledný súbor", "Uložiť", "Uložiť ako…",
+                    "---", "# POMOC", HelpDocuments.Document.GUIDE.title, HelpDocuments.Document.VISUAL_GUIDE.title, "O aplikácii"), labels);
+        });
+    }
+
+    @Test public void editMenuCollapsesAndExpandsEveryRhythm() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            var panel = new RhythmPlayerPanel(YAML);
+            var editor = (RSyntaxTextArea) NotePadTest.find(panel, "yamlEditor");
+            var folds = editor.getFoldManager();
+            var items = panel.editMenu().getComponents();
+            assertEquals("Zbaliť všetko", ((JMenuItem) items[0]).getText());
+            assertEquals("Rozbaliť všetko", ((JMenuItem) items[1]).getText());
+            assertEquals(2, folds.getFoldCount());
+            ((JMenuItem) items[1]).doClick(0);
+            for (int i = 0; i < folds.getFoldCount(); i++) assertFalse(folds.getFold(i).isCollapsed());
+            ((JMenuItem) items[0]).doClick(0);
+            for (int i = 0; i < folds.getFoldCount(); i++) assertTrue(folds.getFold(i).isCollapsed());
+        });
+    }
 }

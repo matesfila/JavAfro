@@ -81,7 +81,7 @@ načíta sa predvolený súbor so zbalenými rytmami.
 Koncept sa neposiela na server; patrí konkrétnej adrese a prehliadaču.
 
 Pri nahradení upraveného dokumentu cez **Nový rytmus**, **Otvoriť**,
-**Obnoviť naposledy otvorený súbor** alebo presunutím súboru
+**Obnoviť posledný súbor** alebo presunutím súboru
 sa ponúkne **Zrušiť**, **Uložiť a pokračovať** alebo **Zrušiť zmeny**.
 Zrušenie zachová editor aj undo. **Uložiť** umožňuje stiahnuť aj neplatný YAML bez zmeny textu.
 Pri platnom dokumente naďalej zohľadňuje tempo a dialect vybraného rytmu.
@@ -102,7 +102,7 @@ do okna.
 Na telefóne sa hlavná plocha zmestí na jednu obrazovku bez posúvania stránky:
 približne polovicu zaberá editor a druhú názov rytmu, **Play**, **Stop** a **Tempo**.
 **Humanize**, **Mixer** a **Dialect** sa otvárajú tlačidlami v samostatných dialógoch;
-**Súbor** nad editorom ponúka nový rytmus, otvorenie, uloženie a Insert/Overwrite.
+**Súbor** a **Úpravy** v hlavičke sa otvárajú ako dialógy.
 Dialóg zatvoríš tlačidlom **Zavrieť**, klávesom Escape alebo kliknutím na pozadie.
 Zatvorenie zachová nastavenia aj prehrávanie. Dlhé riadky editora sa na mobile
 zalamujú bez zmeny uloženého textu. Posúva sa iba text v editore alebo
@@ -144,8 +144,12 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Šípky **↑/↓** vpravo v lište editora presunú rytmus pod kurzorom nad predchádzajúci
   alebo pod nasledujúci rytmus (s komentármi pod ním). Kurzor zostane v presunutom rytme,
   zbalené rytmy zostanú zbalené a presun sa vráti jedným krokom späť.
-- **Noty**, **Prepisovanie** a **Súbor** sú v spoločnej hornej
-  lište. Ponuka **Súbor** obsahuje nový rytmus, otvorenie, uloženie a **O aplikácii**.
+- **Noty** a **Prepisovanie** sú v lište editora, **Súbor** a **Úpravy** v hlavičke.
+  Ponuka **Súbor** má tri skupiny: **Súbory** (**Nový rytmus**, **Otvoriť…**,
+  **Obnoviť posledný súbor**, **Uložiť**), **Hranie** (**Živé hranie**) a **Pomoc**
+  (**Dokumentácia**, **Obrázkový návod**, **O aplikácii**).
+  Ponuka **Úpravy** obsahuje **Zbaliť všetko** a **Rozbaliť všetko**. Zbaľujú sa iba celé
+  rytmy, rovnako ako pri otvorení súboru.
   Názov otvoreného súboru sa nezobrazuje, pri ukladaní zostáva zachovaný.
 - Zapnuté tlačidlo **Prepisovanie** prepisuje znaky pod kurzorom, vypnuté vkladá.
   Režim prepína aj kláves **Insert**. Zapnuté prepisovanie je zvýraznené.

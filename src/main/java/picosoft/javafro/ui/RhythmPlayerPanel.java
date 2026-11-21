@@ -72,7 +72,9 @@ public final class RhythmPlayerPanel extends JPanel {
     private DesktopDraftStore draftStore;
     private final JLabel draftStatus = new JLabel("");
     private final Timer draftTimer = new Timer(400, event -> persistDraft());
-    private final JMenuItem restorePrevious = new JMenuItem("Obnoviť predchádzajúci dokument");
+    private final JMenuItem restorePrevious = new JMenuItem("Obnoviť posledný súbor");
+    private final JPopupMenu fileMenuPopup = new JPopupMenu();
+    private final JPopupMenu editMenuPopup = new JPopupMenu();
 
     public RhythmPlayerPanel(String yaml) {
         this(yaml, AppConfig.defaults());
@@ -179,11 +181,12 @@ public final class RhythmPlayerPanel extends JPanel {
         actions.add(open);
         JButton fileMenu = new JButton("Súbor");
         fileMenu.setName("fileMenuButton");
-        JPopupMenu files = new JPopupMenu();
+        JPopupMenu files = fileMenuPopup;
         JMenuItem newDocument = menuItem("Nový rytmus", UiIcons.Shape.NEW, "control N", event -> newDocument());
         JMenuItem openItem = menuItem("Otvoriť YAML…", UiIcons.Shape.FOLDER, "control O", event -> openYaml());
         JMenuItem save = menuItem("Uložiť", UiIcons.Shape.DOWNLOAD, "control S", event -> saveDocument(false));
         JMenuItem saveAs = menuItem("Uložiť ako…", null, "control shift S", event -> saveDocument(true));
+        restorePrevious.setIcon(UiIcons.icon(UiIcons.Shape.RESTORE, 16));
         restorePrevious.setEnabled(false);
         restorePrevious.addActionListener(event -> { if (previousDocument != null && worker == null) replaceDocument(previousDocument); });
         JMenuItem guide = menuItem(HelpDocuments.Document.GUIDE.title, UiIcons.Shape.DOCUMENT, null,
@@ -192,11 +195,11 @@ public final class RhythmPlayerPanel extends JPanel {
                 event -> openHelp(HelpDocuments.Document.VISUAL_GUIDE));
         JMenuItem about = menuItem("O aplikácii", UiIcons.Shape.INFO, null, event -> AboutDialog.show(this));
         about.setName("aboutButton");
-        files.add(newDocument); files.add(openItem); files.add(save); files.add(saveAs); files.add(restorePrevious);
+        files.add(menuHeading("Súbory"));
+        files.add(newDocument); files.add(openItem); files.add(restorePrevious); files.add(save); files.add(saveAs);
         files.addSeparator();
-        files.add(guide); files.add(visualGuide);
-        files.addSeparator();
-        files.add(about);
+        files.add(menuHeading("Pomoc"));
+        files.add(guide); files.add(visualGuide); files.add(about);
         fileMenu.addActionListener(event -> {
             newDocument.setEnabled(worker == null);
             openItem.setEnabled(worker == null);
@@ -204,9 +207,37 @@ public final class RhythmPlayerPanel extends JPanel {
             files.show(fileMenu, fileMenu.getWidth() - files.getPreferredSize().width, fileMenu.getHeight() + 2);
         });
         actions.add(fileMenu);
+
+        JButton editMenu = new JButton("Úpravy");
+        editMenu.setName("editMenuButton");
+        JMenuItem collapseAll = menuItem("Zbaliť všetko", UiIcons.Shape.COLLAPSE, null, event -> setAllFolds(true));
+        JMenuItem expandAll = menuItem("Rozbaliť všetko", UiIcons.Shape.EXPAND, null, event -> setAllFolds(false));
+        editMenuPopup.add(collapseAll); editMenuPopup.add(expandAll);
+        editMenu.addActionListener(event -> {
+            boolean hasText = !editor.getText().isBlank();
+            collapseAll.setEnabled(hasText);
+            expandAll.setEnabled(hasText);
+            editMenuPopup.show(editMenu, editMenu.getWidth() - editMenuPopup.getPreferredSize().width, editMenu.getHeight() + 2);
+        });
+        actions.add(editMenu);
         header.add(actions, BorderLayout.EAST);
         return header;
     }
+
+    /** Small muted group title inside a popup menu (web .menu-group-title). */
+    private static JLabel menuHeading(String text) {
+        JLabel heading = new JLabel(text.toUpperCase(java.util.Locale.ROOT));
+        heading.setName("menuHeading");
+        heading.setForeground(SandTheme.MUTED);
+        heading.setFont(heading.getFont().deriveFont(Font.BOLD, heading.getFont().getSize2D() - 2f));
+        heading.setBorder(BorderFactory.createEmptyBorder(6, 10, 3, 10));
+        heading.setFocusable(false);
+        return heading;
+    }
+
+    /** The Súbor and Úpravy popups, for tests. */
+    JPopupMenu fileMenu() { return fileMenuPopup; }
+    JPopupMenu editMenu() { return editMenuPopup; }
 
     private static JMenuItem menuItem(String text, UiIcons.Shape icon, String accelerator, java.awt.event.ActionListener action) {
         JMenuItem item = new JMenuItem(text);
@@ -574,6 +605,15 @@ public final class RhythmPlayerPanel extends JPanel {
         updateFileName(); // Tempo and dialect listeners fired while the rhythm was only half switched.
     }
 
+    /** Collapses or expands every rhythm definition (Úpravy → Zbaliť / Rozbaliť všetko, and collapse on load). */
+    void setAllFolds(boolean collapsed) {
+        var folds = editor.getFoldManager();
+        folds.reparse();
+        for (int i = 0; i < folds.getFoldCount(); i++) folds.getFold(i).setCollapsed(collapsed);
+        editor.revalidate();
+        editor.repaint();
+    }
+
     private void loadYaml(String yaml) {
         selectedDefinition = null; selectedRhythmId = null; dialectYaml = null;
         rhythmName.setText("Rytmus"); rhythmName.setToolTipText(null);
@@ -588,9 +628,7 @@ public final class RhythmPlayerPanel extends JPanel {
                 return;
             }
             Rhythm rhythm = parseRhythm(yaml, config.initialTempo());
-            var folds = editor.getFoldManager();
-            folds.reparse();
-            for (int i = 0; i < folds.getFoldCount(); i++) folds.getFold(i).setCollapsed(true);
+            setAllFolds(true);
             syncRhythm(rhythm);
         } catch (IllegalArgumentException exception) {
             play.setEnabled(!yaml.isBlank()); setEditorStatus("Neplatný YAML · text môžeš upraviť alebo uložiť", true);

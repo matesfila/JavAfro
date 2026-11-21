@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type DragEvent } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type DragEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import { YamlEditor, type EditorInputMode, type YamlEditorHandle } from './Editor';
 import { AboutDialog } from './AboutDialog';
 import { SettingsPanel } from './SettingsPanel';
@@ -13,7 +13,7 @@ import { exportRhythm, writeDialect } from './rhythm-export';
 import blankRhythmSource from '../../rhythms/blankRhythm.yaml?raw';
 import { type Controls } from './timing';
 import { config } from './config';
-import { ArrowIcon, DownloadIcon, FolderIcon, FullscreenIcon, NewIcon, NextIcon, PlayIcon } from './icons';
+import { ArrowIcon, CollapseIcon, DocumentIcon, DownloadIcon, ExpandIcon, FolderIcon, FullscreenIcon, NewIcon, NextIcon, PlayIcon, RestoreIcon } from './icons';
 import { LiveView } from './LiveView';
 import { useSwipe } from './useSwipe';
 import { caretAtSourceOffset, entryAtCaret, rhythmNeighbors, type RhythmEntry } from './rhythm-navigation';
@@ -475,12 +475,19 @@ export function App() {
     void openFile(event.dataTransfer.files[0]);
   }
 
+  /** Menu buttons close their dialog; the help group stays outside because About opens its own dialog. */
+  const closeMenuOnAction = (event: ReactMouseEvent<HTMLElement>) => {
+    if ((event.target as Element).closest('button:not(:disabled)')) event.currentTarget.closest('dialog')?.close();
+  };
   const fileActions = <>
     <button className="button subtle" onClick={newRhythm} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Nový rytmus z prázdnej šablóny'}><NewIcon /><span>Nový rytmus</span></button>
-    <button className="button subtle" onClick={() => fileInput.current?.click()} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Otvoriť YAML súbor'}><FolderIcon /><span>Otvoriť</span></button>
-    <button className="button subtle" onClick={restoreLastFile} disabled={busy || isLoading || !restorableDraft}><FolderIcon /><span>Obnoviť naposledy otvorený súbor</span></button>
+    <button className="button subtle" onClick={() => fileInput.current?.click()} disabled={busy || isLoading} title={busy ? 'Najprv stlač Stop' : 'Otvoriť YAML súbor'}><FolderIcon /><span>Otvoriť…</span></button>
+    <button className="button subtle" onClick={restoreLastFile} disabled={busy || isLoading || !restorableDraft} title={busy ? 'Najprv stlač Stop' : 'Znova otvoriť predchádzajúci súbor'}><RestoreIcon /><span>Obnoviť posledný súbor</span></button>
     <button className="button subtle" onClick={save} disabled={isLoading}><DownloadIcon /><span>Uložiť</span></button>
-    <button className="button subtle" onClick={() => setLiveOpen(true)} title="Celá obrazovka s veľkými tlačidlami Play/Next a Stop"><FullscreenIcon /><span>Živé hranie</span></button>
+  </>;
+  const editActions = <>
+    <button className="button subtle" onClick={() => editor.current?.foldAll()} disabled={isLoading || !source.trim()} title="Zbaliť všetky rytmy v editore"><CollapseIcon /><span>Zbaliť všetko</span></button>
+    <button className="button subtle" onClick={() => editor.current?.unfoldAll()} disabled={isLoading || !source.trim()} title="Rozbaliť všetky rytmy v editore"><ExpandIcon /><span>Rozbaliť všetko</span></button>
   </>;
   const modeButton = <button className="button mode-button" aria-pressed={overwrite} title="Zapnuté: prepisovanie. Vypnuté: vkladanie. (Insert)" onMouseDown={event => event.preventDefault()} onClick={() => setOverwriteMode(previous => !previous)}>Prepisovanie</button>;
   function changeInputMode(nextMode: EditorInputMode) {
@@ -507,21 +514,27 @@ export function App() {
       <div className="brand"><img src={asset('icons/djembe.svg')} alt="" /><span>JavAfro</span></div>
       <div className="header-controls">
         <SettingsPanel title="Súbor" compact className="file-options">
-          <div className="file-dialog-actions" onClick={event => {
-            if ((event.target as Element).closest('button:not(:disabled)')) event.currentTarget.closest('dialog')?.close();
-          }}>{fileActions}</div>
-          {isLoading && <p role="status">Načítavam…</p>}
-          {message && <p role="status">{message}</p>}
-          <hr className="file-separator" />
+          <div onClick={closeMenuOnAction}>
+            <h3 className="menu-group-title">Súbory</h3>
+            <div className="file-dialog-actions">{fileActions}</div>
+            <h3 className="menu-group-title">Hranie</h3>
+            <div className="file-dialog-actions">
+              <button className="button subtle" onClick={() => setLiveOpen(true)} title="Celá obrazovka s veľkými tlačidlami Play/Next a Stop"><FullscreenIcon /><span>Živé hranie</span></button>
+            </div>
+          </div>
+          <h3 className="menu-group-title">Pomoc</h3>
           <div className="file-about">
-            <a className="button subtle" href={`${import.meta.env.BASE_URL}navod-pre-zaciatocnikov.pdf`} target="_blank" rel="noopener">Dokumentácia</a>
-            <a className="button subtle" href={`${import.meta.env.BASE_URL}obrazovy-navod.pdf`} target="_blank" rel="noopener">Obrázkový návod</a>
+            <a className="button subtle" href={`${import.meta.env.BASE_URL}navod-pre-zaciatocnikov.pdf`} target="_blank" rel="noopener"><DocumentIcon /><span>Dokumentácia</span></a>
+            <a className="button subtle" href={`${import.meta.env.BASE_URL}obrazovy-navod.pdf`} target="_blank" rel="noopener"><DocumentIcon /><span>Obrázkový návod</span></a>
             <AboutDialog updateDisabled={busy || isLoading} beforeUpdateReload={reloading => {
               if (!draftStore.current || !activeDraft.current) throw new Error('Pred aktualizáciou ulož rytmus cez Súbor → Uložiť. Úložisko konceptov nie je dostupné.');
               draftStore.current.save(activeDraft.current);
               updateReload.current = reloading;
             }} />
           </div>
+        </SettingsPanel>
+        <SettingsPanel title="Úpravy" compact className="edit-options">
+          <div className="file-dialog-actions" onClick={closeMenuOnAction}>{editActions}</div>
         </SettingsPanel>
       </div>
     </header>

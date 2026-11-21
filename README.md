@@ -185,9 +185,11 @@ medzera, Enter, Backspace a šípky. Mimo riadku nástroja ukáže „Vyber riad
 Každé stlačenie je samostatný krok späť (Ctrl+Z), prepisovanie platí aj pre klávesnicu
 nôt a balafónové noty sa vkladajú ako tokeny oddelené medzerou.
 
-Ponuka **Súbor** poskytuje nový rytmus, otvorenie súboru, **Uložiť**, **Uložiť ako…**,
-obnovu predchádzajúceho dokumentu, PDF **Dokumentácia** a **Obrázkový návod** (rovnaké
-ako na webe, otvoria sa v systémovom prehliadači PDF) a okno **O aplikácii**.
+Ponuka **Súbor** má dve skupiny. **Súbory**: **Nový rytmus**, **Otvoriť YAML…**,
+**Obnoviť posledný súbor**, **Uložiť** a **Uložiť ako…**. **Pomoc**: PDF **Dokumentácia**
+a **Obrázkový návod** (rovnaké ako na webe, otvoria sa v systémovom prehliadači PDF)
+a okno **O aplikácii**. Vedľa nej je ponuka **Úpravy** so **Zbaliť všetko** a
+**Rozbaliť všetko**, ktoré zbalia alebo rozbalia všetky rytmy v editore.
 Skratky: Ctrl+N, Ctrl+O, Ctrl+S a Ctrl+Shift+S.
 Uložiť funguje aj pre prázdny alebo neplatný YAML, ktorý zapíše presne tak,
 ako je v editore. Pri platnom nezmenenom zápise zahrnie upravené BPM/dialect

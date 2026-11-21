@@ -5,7 +5,7 @@ import { editorSetup } from './editor-setup';
 import { yaml } from '@codemirror/lang-yaml';
 import { config } from './config';
 import { rhythmFoldEffects } from './rhythm-folding';
-import { foldedRanges } from '@codemirror/language';
+import { foldedRanges, unfoldAll } from '@codemirror/language';
 import { moveRhythm, type MoveDirection } from './rhythm-move';
 import { overwriteExtension, overwriteState, setOverwrite } from './overwrite';
 import { NotePad } from './NotePad';
@@ -38,6 +38,10 @@ export interface YamlEditorHandle {
   moveRhythm: (direction: MoveDirection) => void;
   /** Move the caret without focusing the editor, so no software keyboard opens. */
   setCaret: (offset: number) => void;
+  /** Collapse every rhythm definition, as on load; nested fields stay expanded. */
+  foldAll: () => void;
+  /** Expand every collapsed range. */
+  unfoldAll: () => void;
 }
 
 function enablePinchZoom(editor: EditorView) {
@@ -88,6 +92,13 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   const modeChange = useRef(onOverwriteChange); modeChange.current = onOverwriteChange;
   const [activeInstrument, setActiveInstrument] = useState<Instrument | null>(null);
   useImperativeHandle(ref, () => ({
+    foldAll() {
+      const editor = view.current;
+      if (editor) editor.dispatch({ effects: rhythmFoldEffects(editor.state) });
+    },
+    unfoldAll() {
+      if (view.current) unfoldAll(view.current);
+    },
     moveRhythm(direction) {
       const editor = view.current;
       if (!editor || editor.state.readOnly) return;

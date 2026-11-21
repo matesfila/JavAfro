@@ -497,3 +497,30 @@ it('uses one big Play/Stop button in Živé hranie and switches rhythms by swipi
   await click('Zavrieť živé hranie');
   expect(live.open).toBe(false);
 });
+
+it('groups the Súbor menu into Súbory, Hranie and Pomoc without status messages', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const menu = document.querySelector<HTMLDialogElement>('dialog.file-options')!;
+  expect(Array.from(menu.querySelectorAll('.menu-group-title'), title => title.textContent)).toEqual(['Súbory', 'Hranie', 'Pomoc']);
+  expect(Array.from(menu.querySelectorAll('.dialog-body .button'), button => button.closest('.about-dialog') ? null : button.textContent).filter(Boolean)).toEqual([
+    'Nový rytmus', 'Otvoriť…', 'Obnoviť posledný súbor', 'Uložiť', 'Živé hranie',
+    'Dokumentácia', 'Obrázkový návod', 'O aplikácii']);
+  expect(menu.querySelector('.dialog-body > [role="status"]')).toBeNull();
+});
+
+it('collapses and expands every rhythm from the Úpravy menu', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const view = editor();
+  const folds = () => { let count = 0; foldedRanges(view.state).between(0, view.state.doc.length, () => { count++; }); return count; };
+  await act(() => { unfoldAll(view); });
+  expect(folds()).toBe(0);
+  await click('Úpravy');
+  await click('Zbaliť všetko');
+  expect(document.querySelector<HTMLDialogElement>('dialog.edit-options')?.open).toBe(false);
+  expect(folds()).toBe(2);
+  await click('Úpravy');
+  await click('Rozbaliť všetko');
+  expect(folds()).toBe(0);
+});
