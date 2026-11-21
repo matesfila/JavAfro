@@ -22,8 +22,6 @@ const asset = (path: string) => `${import.meta.env.BASE_URL}generated/${path}`;
 const mixerKey = (rhythm: Rhythm) => JSON.stringify([rhythm.id, rhythm.tracks.map(track => track.instrument)]);
 /** Two Next taps closer together than this play the previous rhythm instead. */
 export const DOUBLE_TAP_MS = 350;
-/** `next` queues while playing; `cue` only selects while stopped (Živé hranie). */
-type TapKind = 'next' | 'cue';
 type ParsedDocument ={ source: string; rhythm: Rhythm | null; entries: RhythmEntry[] };
 const entryOf = ({ rhythm, offset }: { rhythm: Rhythm; offset: number }): RhythmEntry => ({ id: rhythm.id, name: rhythm.name, offset });
 
@@ -61,9 +59,9 @@ export function App() {
   /** The rhythm whose start was requested (loading, or queued until the end of the pattern). */
   const [pendingRhythm, setPendingRhythm] = useState<Rhythm | null>(null);
   /** A single Next tap waiting DOUBLE_TAP_MS for a possible second tap. */
-  const pendingTap = useRef<{ kind: TapKind; anchorId: string; timer: ReturnType<typeof setTimeout> } | null>(null);
-  const tapActions = useRef<Record<TapKind, (direction: 1 | -1, anchorId: string) => void>>(null!);
-  const stoppedAt = useRef(0);
+  const pendingTap = useRef<{ anchorId: string; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const delayedNext = useRef<(direction: 1 | -1, anchorId: string) => void>(null!);
+  const liveToggledAt = useRef(Number.NEGATIVE_INFINITY);
   const [isLiveOpen, setLiveOpen] = useState(false);
   const [validation, setValidation] = useState('');
   const [message, setMessage] = useState('');
@@ -391,12 +389,12 @@ export function App() {
    * A single Next tap acts only after DOUBLE_TAP_MS. A second tap within that time cancels it and moves
    * back instead, relative to the rhythm of the first tap, so the screen changes only once.
    */
-  function neighborTap(kind: TapKind, anchorId: string) {
+  function neighborTap(anchorId: string) {
     const last = pendingTap.current;
     cancelPendingTap();
-    if (last?.kind === kind) { tapActions.current[kind](-1, last.anchorId); return; }
-    const timer = setTimeout(() => { pendingTap.current = null; tapActions.current[kind](1, anchorId); }, DOUBLE_TAP_MS);
-    pendingTap.current = { kind, anchorId, timer };
+    if (last) { delayedNext.current(-1, last.anchorId); return; }
+    const timer = setTimeout(() => { pendingTap.current = null; delayedNext.current(1, anchorId); }, DOUBLE_TAP_MS);
+    pendingTap.current = { anchorId, timer };
   }
 
   /** Select the rhythm next to `anchorId` without playing it. */
@@ -409,15 +407,16 @@ export function App() {
   /** Play, or while playing Next; a double tap plays the previous rhythm instead. */
   function pressPrimary() {
     if (!nextMode || !playingRhythm) { cancelPendingTap(); void play(); return; }
-    neighborTap('next', playingRhythm.id);
+    neighborTap(playingRhythm.id);
   }
 
-  /** Živé hranie while stopped: select the next (double tap: previous) rhythm without playing it. */
-  function cueNeighbor() {
-    // A quick second press on Stop must not already pick another rhythm.
-    if (busy || isLoading || Date.now() - stoppedAt.current < DOUBLE_TAP_MS || parsedDocument.source !== source) return;
-    const anchor = entryAtCaret(parsedDocument.entries, source, caretRef.current);
-    if (anchor) neighborTap('cue', anchor.id);
+  /** Živé hranie: the one big button is Play while stopped and Stop while playing. */
+  function toggleLive() {
+    // A nervous double press must not stop and restart (or start and stop) the rhythm.
+    if (Date.now() - liveToggledAt.current < DOUBLE_TAP_MS) return;
+    liveToggledAt.current = Date.now();
+    if (busy) stop();
+    else { cancelPendingTap(); void play(); }
   }
 
   /** Swipe on Play: right = next, left = previous; queued while playing, only selected while stopped. */
@@ -432,21 +431,21 @@ export function App() {
     }
   }
 
-  // Timers run the latest render's functions, so a delayed tap sees the current playback state.
-  tapActions.current = {
-    next: (direction, anchorId) => { if (isPlaying) void playNeighbor(direction, anchorId); },
-    cue: (direction, anchorId) => { if (!busy) cueTo(direction, anchorId); },
-  };
+  // The timer runs the latest render's function, so a delayed tap sees the current playback state.
+  delayedNext.current = (direction, anchorId) => { if (isPlaying) void playNeighbor(direction, anchorId); };
   const playSwipe = useSwipe(swipeRhythm);
   const primaryProps = {
     ...playSwipe.handlers,
     onClick() { if (!playSwipe.consumeClick()) pressPrimary(); },
   };
+  const liveProps = {
+    ...playSwipe.handlers,
+    onClick() { if (!playSwipe.consumeClick()) toggleLive(); },
+  };
 
   function stop() {
     playRequest.current++;
     cancelPendingTap();
-    stoppedAt.current = Date.now();
     engine.current?.stop(); setPlaying(false); setStarting(false); setPlayingRhythm(null); setPendingRhythm(null);
     setMessage('');
   }
@@ -628,9 +627,7 @@ export function App() {
       </div>
     </dialog>
     <LiveView open={isLiveOpen} onClose={() => setLiveOpen(false)}
-      next={nextMode} primaryProps={primaryProps} primaryDisabled={primaryDisabled}
-      playing={busy} onStop={stop}
-      onCue={cueNeighbor} cueDisabled={isLoading || parsedDocument.source !== source || parsedDocument.entries.length < 2}
+      playing={busy} buttonProps={liveProps} playDisabled={primaryDisabled}
       rhythmName={displayedRhythm?.name} neighbors={rhythmNeighbors(parsedDocument.entries, playingRhythm?.id ?? caretRhythmId ?? displayedRhythm?.id)} message={message} />
   </div>;
 }

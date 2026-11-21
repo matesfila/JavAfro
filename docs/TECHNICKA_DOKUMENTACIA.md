@@ -269,7 +269,7 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `rhythm-folding.ts` | Vytvára efekty zbalenia hlavných YAML definícií. |
 | `rhythm-move.ts` | Vymení hlavnú YAML definíciu pod kurzorom so susednou; `YamlEditorHandle.moveRhythm()` to použije pre šípky ↑/↓ v lište editora a zachová zbalenie. |
 | `rhythm-navigation.ts` | Poradie rytmov pre Next/predchádzajúci: `RhythmEntry` (id, názov, offset v zdroji), `neighborIndex()` a `rhythmNeighbors()` s obtáčaním na koncoch, `entryAtCaret()` (synchrónny rytmus pod kurzorom) a `caretAtSourceOffset()` (prevod YAML offsetu na kurzor CodeMirror pri CRLF). |
-| `LiveView.tsx` / `LiveView` | Pohľad **Živé hranie**: natívny celoobrazovkový `dialog` s veľkými tlačidlami Play/Next a Stop (po zastavení Next na výber ďalšieho rytmu), riadkom `predchádzajúci ← aktuálny → nasledujúci` a tlačidlom ×. Nemá vlastný stav prehrávania; obsluhu dostáva z `App`. |
+| `LiveView.tsx` / `LiveView` | Pohľad **Živé hranie**: natívny celoobrazovkový `dialog` s jediným veľkým tlačidlom Play/Stop (potiahnutím → / ← prepína rytmy), riadkom `predchádzajúci ← aktuálny → nasledujúci` a tlačidlom ×. Nemá vlastný stav prehrávania; obsluhu dostáva z `App`. |
 | `icons.tsx` | Spoločné inline SVG ikony (Play, Next, priečinok, uloženie, šípky, nový, celá obrazovka, zavrieť). |
 | `rhythm-document.ts` / `readRhythmDocument()` | Otvorí dokument aj pri chybe validácie: vráti pôvodný text, `rhythm: null` a správu. Používateľ môže chybný YAML opraviť v editore. |
 | `rhythm.ts` | Typy `Rhythm`, `Track`, `Instrument`, `CatalogEntry`, validácia a parsovanie definícií. `parseRhythm()` vyberá prvý rytmus, `parseRhythmAtCaret()` podľa kurzora a `parseRhythmEntries()` vracia aj pozície definícií. |
@@ -325,20 +325,22 @@ klávesnica). Dvojťuk sa zisťuje časom (`DOUBLE_TAP_MS`, `Date.now()`), nie u
 `dblclick`, ktorú iOS Safari spoľahlivo neposiela. `neighborTap()` jedno ťuknutie
 odloží časovačom (`pendingTap`) o `DOUBLE_TAP_MS`; druhé ťuknutie v tom čase časovač
 zruší a vykoná iba „predchádzajúci“ voči rytmu z prvého ťuknutia. Obrazovka, kurzor
-aj zaradenie sa tak zmenia len raz. Časovač volá akcie cez `tapActions` (ref s funkciami
+aj zaradenie sa tak zmenia len raz. Časovač volá akciu cez `delayedNext` (ref s funkciou
 z posledného renderu), aby videl aktuálny stav; Stop a odpojenie ho zrušia.
 Tlačidlá majú `touch-action: manipulation`, aby dvojťuk nezoomoval.
-`neighborTap()` používa aj `cueNeighbor()`: v Živom
-hraní po Stop druhé tlačidlo iba presunie kurzor na susedný rytmus (bez audia)
-a Play potom spustí rytmus pod kurzorom. `stoppedAt` ignoruje stlačenie do
-`DOUBLE_TAP_MS` po Stop, keďže ide o to isté miesto na obrazovke.
+
+**Živé hranie** má jediné tlačidlo; `toggleLive()` ho prepína medzi Play (`play()`)
+a Stop (`stop()`). Dvojťuk tu nie je; ťuknutie do `DOUBLE_TAP_MS` po predchádzajúcom
+(`liveToggledAt`) sa ignoruje, aby nervózne dvojité stlačenie rytmus nezastavilo
+a hneď nespustilo. Rytmy sa tu prepínajú iba potiahnutím.
 
 **Potiahnutie po Play.** `useSwipe.ts` rozpozná vodorovné potiahnutie (aspoň
 `SWIPE_MIN_PX`, prevažne vodorovne) cez pointer udalosti s `setPointerCapture`
 a potlačí klik, ktorý prehliadač pošle na konci potiahnutia (`consumeClick()`).
 `swipeRhythm()` v `App` počas hrania volá `playNeighbor()` hneď, bez čakania na dvojťuk,
 relatívne k `pendingRhythm ?? playingRhythm`; v pokoji iba presunie kurzor (`cueTo()`).
-Tie isté obslužné funkcie (`primaryProps`) dostáva hlavné tlačidlo aj `LiveView`.
+Hlavné tlačidlo dostáva `primaryProps` (klik = Play/Next) a `LiveView` `liveProps`
+(klik = Play/Stop); potiahnutie (`playSwipe.handlers`) je v oboch rovnaké.
 Aby prehliadač vodorovné gesto neprevzal na posun, má `.transport .play`
 `touch-action: pan-y` a `.live-primary` `touch-action: none`.
 

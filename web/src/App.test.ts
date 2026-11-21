@@ -452,7 +452,7 @@ it('goes back to Play after an edit or when the caret moves to another rhythm', 
   expect(mainButton().textContent).toBe('Next');
 });
 
-it('opens Živé hranie from Súbor with big Play/Next and Stop buttons and the rhythm order', async () => {
+it('uses one big Play/Stop button in Živé hranie and switches rhythms by swiping it', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
   const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
   const stop = vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
@@ -463,64 +463,37 @@ it('opens Živé hranie from Súbor with big Play/Next and Stop buttons and the 
   const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
   expect(live.open).toBe(true);
   const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
-  const primary = live.querySelector<HTMLButtonElement>('.live-primary')!;
-  const primaryLabel = () => primary.querySelector('.live-label')!.firstChild!.textContent;
-  expect(rhythms()).toBe('Three←One→Two');
-  expect(primaryLabel()).toBe('Play');
-  expect(live.querySelector('.live-stop')).toBeNull();
-  expect(live.querySelector('.live-cue')?.textContent).toContain('Next');
-  await act(async () => primary.click());
-  await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(primaryLabel()).toBe('Next');
-  await act(async () => primary.click());
-  await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(startedIds(start)).toEqual(['One', 'Two']);
-  expect(rhythms()).toBe('One←Two→Three');
-  await act(async () => live.querySelector<HTMLButtonElement>('.live-stop')!.click());
-  expect(stop).toHaveBeenCalled();
-  expect(primaryLabel()).toBe('Play');
-  expect(live.querySelector('.live-stop')).toBeNull();
-  await click('Zavrieť živé hranie');
-  expect(live.open).toBe(false);
-});
-
-it('selects the next or previous rhythm after Stop in Živé hranie without playing it', async () => {
-  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
-  const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
-  vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
-  await act(() => root.render(createElement(App)));
-  await act(() => vi.advanceTimersByTimeAsync(200));
-  await click('Súbor');
-  await click('Živé hranie');
-  const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
-  const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
-  const primary = live.querySelector<HTMLButtonElement>('.live-primary')!;
-  const second = () => live.querySelector<HTMLButtonElement>('.live-stop, .live-cue')!;
-  const press = async (button: HTMLButtonElement, wait = 400) => {
+  const button = live.querySelector<HTMLButtonElement>('.live-primary')!;
+  const label = () => button.querySelector('.live-label')!.firstChild!.textContent;
+  const press = async (wait = 400) => {
     await act(async () => button.click());
     await act(() => vi.advanceTimersByTimeAsync(wait));
   };
-  await press(primary);
-  await press(second(), 0);
-  // The Stop button turned into Next in place; a press right after Stop is ignored.
-  expect(second().className).toContain('live-cue');
-  await press(second());
+  expect(live.querySelectorAll('.live-buttons button')).toHaveLength(1);
   expect(rhythms()).toBe('Three←One→Two');
-  // Later presses select the following rhythm, wrapping at the end.
-  await press(second());
-  expect(rhythms()).toBe('One←Two→Three');
-  // Double tap: previous of the rhythm selected at the first tap (Two → One), shown only once.
-  await press(second(), 100);
-  expect(rhythms()).toBe('One←Two→Three');
-  await press(second());
-  expect(rhythms()).toBe('Three←One→Two');
-  await press(second());
-  await press(second());
-  await press(second());
-  expect(rhythms()).toBe('Three←One→Two');
-  await press(second());
+  expect(label()).toBe('Play');
+  await press(0);
   expect(startedIds(start)).toEqual(['One']);
-  await press(primary);
+  expect(label()).toBe('Stop');
+  // A quick second press (nervous double tap) neither stops nor restarts the rhythm.
+  await press();
+  expect(stop).not.toHaveBeenCalled();
+  expect(label()).toBe('Stop');
+  // Swipe right queues the next rhythm right away, swipe left the previous one.
+  await swipe(button, 80);
   expect(startedIds(start)).toEqual(['One', 'Two']);
-  expect(second().className).toContain('live-stop');
+  expect(rhythms()).toBe('One←Two→Three');
+  await swipe(button, -80);
+  await swipe(button, -80);
+  expect(startedIds(start)).toEqual(['One', 'Two', 'One', 'Three']);
+  expect(stop).not.toHaveBeenCalled();
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  await press();
+  expect(stop).toHaveBeenCalledOnce();
+  expect(label()).toBe('Play');
+  expect(rhythms()).toBe('Two←Three→One');
+  await press();
+  expect(startedIds(start)).toEqual(['One', 'Two', 'One', 'Three', 'Three']);
+  await click('Zavrieť živé hranie');
+  expect(live.open).toBe(false);
 });

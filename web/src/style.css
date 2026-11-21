@@ -328,13 +328,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .live-close { flex: 0 0 auto; width: 40px; min-height: 40px; padding: 0; border-color: var(--border); background: transparent; color: #6f5843; }
 .live-close:hover { background: #f1e8da; }
 .live-message { flex: 0 0 auto; margin: 0; text-align: center; font-size: 14px; color: #8d4e35; overflow-wrap: anywhere; }
-.live-buttons { flex: 1; min-height: 0; display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
-.live-buttons .button { min-height: 0; border-radius: 18px; gap: 0.5em; flex-direction: column; font: 700 clamp(2rem, 9vmin, 4.5rem) 'Manrope Variable', sans-serif; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-.live-buttons .button svg { width: clamp(48px, 18vmin, 140px); height: clamp(48px, 18vmin, 140px); }
-.live-buttons .stop-square { width: clamp(36px, 13vmin, 100px); height: clamp(36px, 13vmin, 100px); border-radius: 6px; }
+/* One button fills the screen: Play while stopped, Stop while playing; swipe → / ← switches rhythms. */
+.live-buttons { flex: 1; min-height: 0; display: grid; }
+.live-buttons .button { min-height: 0; border-radius: 18px; gap: 0.5em; flex-direction: column; font: 700 clamp(2.5rem, 12vmin, 6rem) 'Manrope Variable', sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
+.live-buttons .button svg { width: clamp(64px, 26vmin, 220px); height: clamp(64px, 26vmin, 220px); }
+.live-buttons .stop-square { width: clamp(48px, 19vmin, 160px); height: clamp(48px, 19vmin, 160px); border-radius: 8px; }
 .live-label { display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
-.live-label small { margin-top: 0.35em; font: 500 clamp(12px, 2.6vmin, 18px) 'DM Sans Variable', sans-serif; opacity: .85; }
-@media (orientation: landscape) {
-  .live-buttons { grid-template-rows: none; grid-template-columns: 1fr 1fr; }
-}
-.live-buttons .live-primary { touch-action: none; }
+.live-label small { margin-top: 0.35em; font: 500 clamp(13px, 2.8vmin, 20px) 'DM Sans Variable', sans-serif; opacity: .85; }

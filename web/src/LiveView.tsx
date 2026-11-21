@@ -1,15 +1,15 @@
 import { useEffect, useRef, type ButtonHTMLAttributes } from 'react';
-import { CloseIcon, NextIcon, PlayIcon } from './icons';
+import { CloseIcon, PlayIcon } from './icons';
 import type { RhythmNeighbors } from './rhythm-navigation';
 
-/** Full-screen "Živé hranie": only the big Play/Next and Stop buttons, for playing with a group. */
-export function LiveView({ open, onClose, next, primaryProps, primaryDisabled, playing, onStop, onCue, cueDisabled, rhythmName, neighbors, message }: {
+/**
+ * Full-screen "Živé hranie" for playing with a group: one big button that is Play while stopped
+ * and Stop while playing. Swiping it switches rhythms: → next, ← previous.
+ */
+export function LiveView({ open, onClose, playing, buttonProps, playDisabled, rhythmName, neighbors, message }: {
   open: boolean; onClose: () => void;
-  /** Click and swipe handlers of the Play/Next button, shared with the main view. */
-  next: boolean; primaryProps: ButtonHTMLAttributes<HTMLButtonElement>; primaryDisabled: boolean;
-  /** While playing the 2nd button is Stop; while stopped it selects the next rhythm (Play then starts it). */
-  playing: boolean; onStop: () => void;
-  onCue: () => void; cueDisabled: boolean;
+  /** Click (Play/Stop) and swipe handlers of the big button. */
+  playing: boolean; buttonProps: ButtonHTMLAttributes<HTMLButtonElement>; playDisabled: boolean;
   rhythmName?: string; neighbors: RhythmNeighbors | null; message: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -35,19 +35,12 @@ export function LiveView({ open, onClose, next, primaryProps, primaryDisabled, p
     </header>
     {message && <p className="live-message" role="status">{message}</p>}
     <div className="live-buttons">
-      <button type="button" className="button play live-primary" {...primaryProps} disabled={primaryDisabled}
-        title={(next ? 'Ďalší rytmus · dvojklik: predchádzajúci' : 'Prehrať rytmus pod kurzorom') + ' · potiahni → ďalší, ← predchádzajúci'}>
-        {next ? <NextIcon /> : <PlayIcon />}
-        <span className="live-label">{next ? 'Next' : 'Play'}
-          <small>{next && 'dvojťuk: predchádzajúci · '}potiahni ← →</small></span>
+      <button type="button" className={'button live-primary ' + (playing ? 'stop' : 'play')} {...buttonProps}
+        disabled={!playing && playDisabled} aria-pressed={playing}
+        title={(playing ? 'Zastaviť' : 'Prehrať rytmus') + ' · potiahni → ďalší, ← predchádzajúci'}>
+        {playing ? <span className="stop-square" /> : <PlayIcon />}
+        <span className="live-label">{playing ? 'Stop' : 'Play'}<small>potiahni → ďalší · ← predchádzajúci</small></span>
       </button>
-      {playing
-        ? <button type="button" className="button stop live-stop" onClick={onStop}>
-          <span className="stop-square" /><span className="live-label">Stop</span>
-        </button>
-        : <button type="button" className="button stop live-cue" onClick={onCue} disabled={cueDisabled} title="Vybrať ďalší rytmus bez prehrania · dvojťuk: predchádzajúci">
-          <NextIcon /><span className="live-label">Next<small>vybrať ďalší · dvojťuk: predchádzajúci</small></span>
-        </button>}
     </div>
   </dialog>;
 }
