@@ -3,6 +3,15 @@
 ## Úlohy a nápady
 
 ### Otvorené úlohy
+- [] bug: swipe left/right nefunguje na stop buttone v live view
+- [] stlacenie Done na sys keyb ju deaktuvuje aj v app
+- [] auto zap/vyp overwrite mod podla polohy kurzora
+- [] pridat novy rytmus do aktualneho dokumentu
+- [] dialog novy rytmus s uvodnymi parametrami
+- [] bug: slidre v mixpulte nejdu az do konca
+- [] sys keyb vyvolat iba buttonom v internej keyb ??
+- [] sys keyb moznost zavret krizikom vpravo hore
+- [] pridat moznost zapnut africky ambient do pozadia
 - [] Dvojklik/dvojťuk na pattern má selektnúť daný pattern + dedikovaný editor pre pattern ???
 - [] Zoznam stôp dať ako list, nie mapu. Umožniť tak dať ten istý nástroj viackrát.
 - [] Alternatívne názvy pre nástroje, povoliť aj menej presné názvy, využiť nejaký word distance algoritmus ?

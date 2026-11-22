@@ -333,16 +333,20 @@ Tlačidlá majú `touch-action: manipulation`, aby dvojťuk nezoomoval.
 **Živé hranie** má jediné tlačidlo; `toggleLive()` ho prepína medzi Play (`play()`)
 a Stop (`stop()`). Dvojťuk tu nie je; ťuknutie do `DOUBLE_TAP_MS` po predchádzajúcom
 (`liveToggledAt`) sa ignoruje, aby nervózne dvojité stlačenie rytmus nezastavilo
-a hneď nespustilo. Rytmy sa tu prepínajú iba potiahnutím.
+a hneď nespustilo. Rytmy sa tu prepínajú iba potiahnutím. Riadok
+`predchádzajúci ← aktuálny → nasledujúci` sa počíta od `pendingRhythm ?? playingRhythm`,
+lebo `AudioEngine.start()` počas hrania skončí až na konci patternu; potiahnutie po Stop
+sa tak na obrazovke prejaví hneď, nie až po dohraní patternu.
 
 **Potiahnutie po Play.** `useSwipe.ts` rozpozná vodorovné potiahnutie (aspoň
 `SWIPE_MIN_PX`, prevažne vodorovne) cez pointer udalosti s `setPointerCapture`
 a potlačí klik, ktorý prehliadač pošle na konci potiahnutia (`consumeClick()`).
 `swipeRhythm()` v `App` počas hrania volá `playNeighbor()` hneď, bez čakania na dvojťuk,
 relatívne k `pendingRhythm ?? playingRhythm`; v pokoji iba presunie kurzor (`cueTo()`).
-Hlavné tlačidlo dostáva `primaryProps` (klik = Play/Next) a `LiveView` `liveProps`
-(klik = Play/Stop); potiahnutie (`playSwipe.handlers`) je v oboch rovnaké.
-Aby prehliadač vodorovné gesto neprevzal na posun, má `.transport .play`
+Hlavné tlačidlo dostáva `primaryProps` (klik = Play/Next), Stop v hlavnom pohľade
+`stopProps` (klik = Stop) a `LiveView` `liveProps` (klik = Play/Stop); potiahnutie
+(`playSwipe.handlers`) je vo všetkých rovnaké.
+Aby prehliadač vodorovné gesto neprevzal na posun, majú `.transport .play` a `.transport .stop`
 `touch-action: pan-y` a `.live-primary` `touch-action: none`.
 
 Signál ide cez gain konkrétneho úderu, voliteľný stereo panner, gain tracku

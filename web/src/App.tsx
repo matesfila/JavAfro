@@ -443,6 +443,11 @@ export function App() {
     ...playSwipe.handlers,
     onClick() { if (!playSwipe.consumeClick()) toggleLive(); },
   };
+  // Stop is enabled only while playing, so a swipe on it always queues the neighbor after the pattern.
+  const stopProps = {
+    ...playSwipe.handlers,
+    onClick() { if (!playSwipe.consumeClick()) stop(); },
+  };
 
   function stop() {
     playRequest.current++;
@@ -573,7 +578,7 @@ export function App() {
           <div className="playback-controls">
           <div className="transport">
             <button className="button play" aria-pressed={busy} {...primaryProps} disabled={primaryDisabled} title={primaryTitle}>{primaryContent}</button>
-            <button className="button stop" onClick={stop} disabled={!busy}><span className="stop-square" />Stop</button>
+            <button className="button stop" {...stopProps} disabled={!busy}><span className="stop-square" />Stop</button>
           </div>
           {message && <p className="playback-message" role="status">{message}</p>}
           <TempoControl value={controls.bpm} minimum={config.minimumTempo} maximum={config.maximumTempo}
@@ -642,7 +647,7 @@ export function App() {
     </dialog>
     <LiveView open={isLiveOpen} onClose={() => setLiveOpen(false)}
       playing={busy} buttonProps={liveProps} playDisabled={primaryDisabled}
-      rhythmName={displayedRhythm?.name} neighbors={rhythmNeighbors(parsedDocument.entries, playingRhythm?.id ?? caretRhythmId ?? displayedRhythm?.id)} message={message} />
+      rhythmName={displayedRhythm?.name} neighbors={rhythmNeighbors(parsedDocument.entries, pendingRhythm?.id ?? playingRhythm?.id ?? caretRhythmId ?? displayedRhythm?.id)} message={message} />
   </div>;
 }
 

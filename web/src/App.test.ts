@@ -421,6 +421,21 @@ it('switches rhythms by swiping Play while playing: right = next, left = previou
   expect(startedIds(start)).toEqual(['One', 'Two', 'Three', 'Two', 'One', 'Two', 'Three']);
 });
 
+it('switches rhythms by swiping Stop while playing, without stopping; a tap still stops', async () => {
+  const start = await renderPlaying();
+  const stop = vi.mocked(AudioEngine.prototype.stop);
+  const stopButton = document.querySelector<HTMLButtonElement>('.transport .stop')!;
+  await swipe(stopButton, 80);
+  expect(startedIds(start)).toEqual(['One', 'Two']);
+  await swipe(stopButton, -80);
+  await swipe(stopButton, -80);
+  expect(startedIds(start)).toEqual(['One', 'Two', 'One', 'Three']);
+  expect(stop).not.toHaveBeenCalled();
+  await act(() => vi.advanceTimersByTimeAsync(600));
+  await act(async () => stopButton.click());
+  expect(stop).toHaveBeenCalledOnce();
+});
+
 it('selects rhythms by swiping Play while stopped, then Play starts the selected one', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
   const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
@@ -502,6 +517,37 @@ it('uses one big Play/Stop button in Živé hranie and switches rhythms by swipi
   expect(startedIds(start)).toEqual(['One', 'Two', 'One', 'Three', 'Three']);
   await click('Zavrieť živé hranie');
   expect(live.open).toBe(false);
+});
+
+it('shows the rhythm queued by swiping Stop in Živé hranie before the current pattern ends', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
+  // Like the real engine: while playing, the next start resolves only at the end of the pattern.
+  const queued: ((started: boolean) => void)[] = [];
+  const start = vi.spyOn(AudioEngine.prototype, 'start')
+    .mockResolvedValueOnce(true)
+    .mockImplementation(() => new Promise<boolean>(resolve => { queued.push(resolve); }));
+  vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
+  await act(() => root.render(createElement(App)));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  await click('Súbor');
+  await click('Živé hranie');
+  const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
+  const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
+  const button = live.querySelector<HTMLButtonElement>('.live-primary')!;
+  await act(async () => button.click());
+  expect(button.classList.contains('stop')).toBe(true);
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  await swipe(button, 80);
+  expect(rhythms()).toBe('One←Two→Three');
+  expect(live.querySelector('.live-message')!.textContent).toBe('Po skončení patternu: Two');
+  // A further swipe walks on from the queued rhythm, not from the one still playing.
+  await swipe(button, 80);
+  expect(startedIds(start)).toEqual(['One', 'Two', 'Three']);
+  expect(rhythms()).toBe('Two←Three→One');
+  expect(button.classList.contains('stop')).toBe(true);
+  await act(async () => queued.at(-1)!(true));
+  expect(rhythms()).toBe('Two←Three→One');
+  expect(live.querySelector('.live-message')).toBeNull();
 });
 
 it('groups the Súbor menu into Súbory, Hranie and Pomoc without status messages', async () => {

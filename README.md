@@ -90,10 +90,11 @@ vôbec nezaradí ani nezobrazí. Poradie je poradie hlavných kľúčov
 v YAML a dookola: po poslednom rytme nasleduje prvý, pred prvým posledný.
 Kurzor editora sa presunie na zaradený rytmus.
 
-**Potiahnutie prstom (alebo myšou) po tlačidle Play/Next** prepína hneď, bez čakania:
+**Potiahnutie prstom (alebo myšou) po tlačidle Play/Next alebo Stop** prepína hneď, bez čakania:
 doprava = nasledujúci rytmus, doľava = predchádzajúci. Počas hrania ho zaradí na koniec
 patternu (opakované potiahnutie pokračuje od už zaradeného rytmu), keď nič nehrá,
-rytmus iba vyberie a Play ho spustí. Funguje v hlavnom pohľade aj v Živom hraní.
+rytmus iba vyberie a Play ho spustí (Stop je vtedy neaktívne). Potiahnutie po Stop
+hranie nezastaví. Funguje v hlavnom pohľade aj v Živom hraní.
 
 Next sa zobrazuje, iba kým je kurzor v hranom (alebo zaradenom) rytme a text sa
 nezmenil. Po presune kurzora na iný rytmus alebo po úprave YAML sa tlačidlo vráti
