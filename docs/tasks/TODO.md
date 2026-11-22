@@ -3,24 +3,15 @@
 ## Úlohy a nápady
 
 ### Otvorené úlohy
-- [x] Doladiť fonty: farbu, typ fontu, vzdialenosti riadkov/písmen, ... 
-- [x] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
-- [ ] Pridať klávesu enter pod backspace, pridať aj medzerník
-- [ ] Upraviť font editora (farba, spacing)
-- [ ] Odklik sóla má unmutnuť ostatné tracky
-- [ ] Dvojklik/dvojťuk na pattern má selektnúť daný pattern + dedikovaný editor pre pattern ???
+- [] Dvojklik/dvojťuk na pattern má selektnúť daný pattern + dedikovaný editor pre pattern ???
 - [] Zoznam stôp dať ako list, nie mapu. Umožniť tak dať ten istý nástroj viackrát.
 - [] Alternatívne názvy pre nástroje, povoliť aj menej presné názvy, využiť nejaký word distance algoritmus ?
   - cieľom je možnosť mať kenken, kensereni, kensedeni, kenken bell, kenken_withBell, kenken with bell, 
 - [] Pomenované noty - bude jednoduchšie ich zadávať, pre djembe napr bum, ton, slap, closed sl, closed tn
 - [] Dununba dialekty, dialekt má byť medzi druhý a tretím pulzom, ale má byť aj medzi prvým a druhým ?? Na djembe asi ano, ale na dunoch ??
-- [] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...
-  - web: play/next/predchádzajúci a stop hotové ([Živé hranie](web-dalsi-rytmus-zive-hranie.md)), zostáva speed up, break...
-- [ ] Desktop: tlačidlo Next/predchádzajúci (dvojklik) a pohľad Živé hranie ako vo webe
 - [] Podpora MIDI
 - [] Djembe so sese ???
 - [] Prihlasovanie/licencie ???
-- [] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
 - [] Tlačidlo otvoriť súbor by nemalo byť disabled počas prehrávania, otvoriť súbor a hrať súčasne je štandardná činnosť
 - [] Všetky parametre by mali byť nastaviteľné per pattern (humanize, dialect, ...)
   - pattern sa zo String zrejme zmení na triedu Pattern
@@ -51,9 +42,19 @@ nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u ni
 - [x] Balafon
 - [x] Nové rozloženie klávesnice Noty: namiesto bodky medzera, namiesto `|` Enter; `|` a `.` v dolnom rade vľavo od šípky doľava
 - [x] [Desktop: vzhľad a funkcie ako webová verzia](desktop-vzhlad-ako-web.md) – FlatLaf, dve karty, mixer v okne, klávesnica nôt, PDF návody (zostáva ručné overenie)
-- [x] [Web: Next / predchádzajúci rytmus a Živé hranie](web-dalsi-rytmus-zive-hranie.md) – Play sa počas hrania mení na Next, dvojťuk = predchádzajúci, Súbor → Živé hranie (zostáva ručné overenie na telefóne)
+- [x] [Web: Next / predchádzajúci rytmus a Živé hranie](web-dalsi-rytmus-zive-hranie.md) – Play sa počas hrania mení na Next, dvojťuk = predchádzajúci, Súbor → Živé hranie
+- [x] Doladiť fonty: farbu, typ fontu, vzdialenosti riadkov/písmen, ...
+- [x] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
+- [x] Pridať klávesu enter pod backspace, pridať aj medzerník
+- [x] Upraviť font editora (farba, spacing)
+- [x] Odklik sóla má unmutnuť ostatné tracky
+  (zostáva ručné overenie na telefóne)
+- [x] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...
+  - web: play/next/predchádzajúci a stop hotové ([Živé hranie](web-dalsi-rytmus-zive-hranie.md)), zostáva speed up, break...
+- [x] Desktop: tlačidlo Next/predchádzajúci (dvojklik) a pohľad Živé hranie ako vo webe
+- [x] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
 
-### v0.6.1 (current)
+### v0.6.2 (current)
 - [x] Aktualizovať rytmy, nedokončené odstrániť z basicRhythms.```yaml
 - [x] Fix tempo potenciometra
 - [x] Info hláška o dokončenej aktualizácii
