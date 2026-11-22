@@ -20,7 +20,8 @@ const theme = EditorView.theme({
   '.cm-line': { padding: '0 20px' },
   '.cm-gutters': { background: '#f7f0e5', color: '#a39179', border: 'none', paddingRight: '8px' },
   '.cm-foldGutter .cm-gutterElement': { padding: '0 4px', cursor: 'pointer' },
-  '.cm-foldGutter span': { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', fontSize: '24px', lineHeight: '1', color: '#705840' },
+  // Pinch zoom sets --editor-zoom, so the fold arrows grow and shrink with the text.
+  '.cm-foldGutter span': { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 'calc(32px * var(--editor-zoom, 1))', fontSize: 'calc(24px * var(--editor-zoom, 1))', lineHeight: '1', color: '#705840' },
   // Selection is drawn behind the text: the active line must stay translucent.
   '.cm-activeLine': { backgroundColor: '#d8bd8b22' },
   '.cm-activeLineGutter': { backgroundColor: '#faf5ed' },
@@ -44,9 +45,13 @@ export interface YamlEditorHandle {
   unfoldAll: () => void;
 }
 
+/** Fold arrows follow the text size, but stay within half to double their normal size so the gutter stays usable. */
+export const foldArrowZoom = (fontSize: number, baseFontSize: number) => Math.min(2, Math.max(0.5, fontSize / baseFontSize));
+
 function enablePinchZoom(editor: EditorView) {
   const scroller = editor.scrollDOM;
   let pinch: { distance: number; fontSize: number } | null = null;
+  let baseFontSize: number | undefined;
 
   function handleTouch(event: TouchEvent) {
     if (event.touches.length !== 2 || event.type === 'touchcancel') {
@@ -60,10 +65,13 @@ function enablePinchZoom(editor: EditorView) {
     if (!distance) return;
     if (!pinch || event.type !== 'touchmove') {
       pinch = { distance, fontSize: parseFloat(getComputedStyle(editor.contentDOM).fontSize) };
+      // The size before the first pinch is the one the arrows were designed for.
+      baseFontSize ??= pinch.fontSize;
       return;
     }
     const size = Math.min(72, Math.max(8, pinch.fontSize * distance / pinch.distance));
     editor.contentDOM.style.fontSize = size + 'px';
+    if (baseFontSize) editor.dom.style.setProperty('--editor-zoom', String(foldArrowZoom(size, baseFontSize)));
     editor.requestMeasure();
   }
 

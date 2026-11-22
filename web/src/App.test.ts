@@ -537,6 +537,32 @@ it('lists input mode, overwrite and folding in the Editor menu, which replaces Ã
   expect(menu.hidden).toBe(true);
 });
 
+it('scales the fold arrows with pinch zoom, within half to double size', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const view = editor();
+  view.contentDOM.style.fontSize = '18px';
+  const pinch = (type: string, distance: number) => {
+    const touches = [0, 1].map(id => ({ target: view.contentDOM, clientX: 100 + (id ? distance : 0), clientY: 100 }));
+    const event = new Event(type, { bubbles: true, cancelable: true });
+    Object.defineProperty(event, 'touches', { value: touches });
+    view.scrollDOM.dispatchEvent(event);
+  };
+  const zoom = () => view.dom.style.getPropertyValue('--editor-zoom');
+  pinch('touchstart', 100);
+  pinch('touchmove', 150);
+  expect(view.contentDOM.style.fontSize).toBe('27px');
+  expect(zoom()).toBe('1.5');
+  pinch('touchmove', 400);
+  expect(view.contentDOM.style.fontSize).toBe('72px');
+  expect(zoom()).toBe('2');
+  pinch('touchend', 0);
+  pinch('touchstart', 400);
+  pinch('touchmove', 50);
+  expect(view.contentDOM.style.fontSize).toBe('9px');
+  expect(zoom()).toBe('0.5');
+});
+
 it('collapses and expands every rhythm from the Editor menu and closes it', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
