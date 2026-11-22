@@ -207,19 +207,6 @@ public final class RhythmPlayerPanel extends JPanel {
             files.show(fileMenu, fileMenu.getWidth() - files.getPreferredSize().width, fileMenu.getHeight() + 2);
         });
         actions.add(fileMenu);
-
-        JButton editMenu = new JButton("Úpravy");
-        editMenu.setName("editMenuButton");
-        JMenuItem collapseAll = menuItem("Zbaliť všetko", UiIcons.Shape.COLLAPSE, null, event -> setAllFolds(true));
-        JMenuItem expandAll = menuItem("Rozbaliť všetko", UiIcons.Shape.EXPAND, null, event -> setAllFolds(false));
-        editMenuPopup.add(collapseAll); editMenuPopup.add(expandAll);
-        editMenu.addActionListener(event -> {
-            boolean hasText = !editor.getText().isBlank();
-            collapseAll.setEnabled(hasText);
-            expandAll.setEnabled(hasText);
-            editMenuPopup.show(editMenu, editMenu.getWidth() - editMenuPopup.getPreferredSize().width, editMenu.getHeight() + 2);
-        });
-        actions.add(editMenu);
         header.add(actions, BorderLayout.EAST);
         return header;
     }
@@ -235,7 +222,7 @@ public final class RhythmPlayerPanel extends JPanel {
         return heading;
     }
 
-    /** The Súbor and Úpravy popups, for tests. */
+    /** The Súbor popup and the Editor popup in the editor toolbar, for tests. */
     JPopupMenu fileMenu() { return fileMenuPopup; }
     JPopupMenu editMenu() { return editMenuPopup; }
 
@@ -269,18 +256,18 @@ public final class RhythmPlayerPanel extends JPanel {
         editor.setLineWrap(false);
         editor.getAccessibleContext().setAccessibleName("YAML definícia rytmu");
 
-        JToggleButton editMode = toolbarToggle("Prepisovanie", "insertModeButton",
+        JCheckBoxMenuItem editMode = menuToggle("Prepisovanie", "insertModeItem",
                 "Prepnúť vkladanie a prepisovanie znakov (Insert)");
-        editMode.addActionListener(event -> {
-            boolean overwrite = editMode.isSelected();
-            editor.setTextMode(overwrite ? TextMode.OVERWRITE : TextMode.INSERT);
-            editor.requestFocusInWindow();
-        });
+        editMode.setAccelerator(KeyStroke.getKeyStroke("INSERT")); // only displayed, the editor binding below performs it
+        editMode.addActionListener(event -> applyEditMode(editMode.isSelected()));
         editor.getInputMap().put(KeyStroke.getKeyStroke("INSERT"), "toggleEditMode");
         editor.getActionMap().put("toggleEditMode", new AbstractAction() {
-            @Override public void actionPerformed(java.awt.event.ActionEvent event) { editMode.doClick(); }
+            @Override public void actionPerformed(java.awt.event.ActionEvent event) {
+                editMode.setSelected(!editMode.isSelected());
+                applyEditMode(editMode.isSelected());
+            }
         });
-        JToggleButton notesMode = toolbarToggle("Noty", "notesModeButton",
+        JCheckBoxMenuItem notesMode = menuToggle("Noty", "notesModeItem",
                 "Zobraziť klávesnicu nôt pre nástroj pod kurzorom");
         notePad.setVisible(false);
         notesMode.addActionListener(event -> {
@@ -288,6 +275,24 @@ public final class RhythmPlayerPanel extends JPanel {
             if (notesMode.isSelected()) updateNotePad();
             revalidate(); repaint();
             editor.requestFocusInWindow();
+        });
+        JMenuItem expandAll = menuItem("Rozbaliť všetko", UiIcons.Shape.EXPAND, null, event -> setAllFolds(false));
+        JMenuItem collapseAll = menuItem("Zbaliť všetko", UiIcons.Shape.COLLAPSE, null, event -> setAllFolds(true));
+        editMenuPopup.add(notesMode); editMenuPopup.add(editMode);
+        editMenuPopup.addSeparator();
+        editMenuPopup.add(expandAll); editMenuPopup.add(collapseAll);
+        JButton editorMenu = new JButton("Editor", UiIcons.icon(UiIcons.Shape.ARROW_DOWN, 12));
+        editorMenu.setHorizontalTextPosition(SwingConstants.LEADING);
+        editorMenu.setName("editorMenuButton");
+        editorMenu.setToolTipText("Noty, prepisovanie a zbalenie rytmov");
+        editorMenu.setFocusable(false);
+        editorMenu.setMargin(new Insets(2, 10, 2, 10));
+        editorMenu.setFont(editorMenu.getFont().deriveFont(editorMenu.getFont().getSize2D() - 1f));
+        editorMenu.addActionListener(event -> {
+            boolean hasText = !editor.getText().isBlank();
+            collapseAll.setEnabled(hasText);
+            expandAll.setEnabled(hasText);
+            editMenuPopup.show(editorMenu, editorMenu.getWidth() - editMenuPopup.getPreferredSize().width, editorMenu.getHeight() + 2);
         });
 
         editorScroll.setFoldIndicatorEnabled(true);
@@ -315,7 +320,7 @@ public final class RhythmPlayerPanel extends JPanel {
         fileName.setForeground(new Color(0x715C49));
         JPanel modes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         modes.setOpaque(false);
-        modes.add(notesMode); modes.add(editMode);
+        modes.add(editorMenu);
         modes.add(moveButton(UiIcons.Shape.ARROW_UP, "moveRhythmUpButton", "Posunúť rytmus pod kurzorom nad predchádzajúci", -1));
         modes.add(moveButton(UiIcons.Shape.ARROW_DOWN, "moveRhythmDownButton", "Posunúť rytmus pod kurzorom pod nasledujúci", 1));
         JPanel toolbar = new JPanel(new BorderLayout(12, 0));
@@ -402,14 +407,18 @@ public final class RhythmPlayerPanel extends JPanel {
         catch (javax.swing.text.BadLocationException exception) { return -1; }
     }
 
-    private static JToggleButton toolbarToggle(String text, String name, String tooltip) {
-        JToggleButton button = new JToggleButton(text);
-        button.setName(name);
-        button.setToolTipText(tooltip);
-        button.setFocusable(false);
-        button.setMargin(new Insets(2, 10, 2, 10));
-        button.setFont(button.getFont().deriveFont(button.getFont().getSize2D() - 1f));
-        return button;
+    private void applyEditMode(boolean overwrite) {
+        editor.setTextMode(overwrite ? TextMode.OVERWRITE : TextMode.INSERT);
+        editor.requestFocusInWindow();
+    }
+
+    /** A checkbox item that keeps the Editor popup open, like the web menu. */
+    private static JCheckBoxMenuItem menuToggle(String text, String name, String tooltip) {
+        JCheckBoxMenuItem item = new JCheckBoxMenuItem(text);
+        item.setName(name);
+        item.setToolTipText(tooltip);
+        item.putClientProperty("CheckBoxMenuItem.doNotCloseOnMouseClick", Boolean.TRUE);
+        return item;
     }
 
     /** Rhythm name, transport, tempo and the Mixer / Dialect / Humanize sections (web playback-card). */

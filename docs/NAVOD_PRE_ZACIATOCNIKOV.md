@@ -12,17 +12,17 @@ Ak chceš počas hrania prepnúť na iný rytmus, klikni doň a znova stlač **P
 
 ## Editor nôt
 
-Začínaš v režime **Plocha**. Na počítači s myšou alebo touchpadom prepínaš tlačidlom nad editorom medzi **Plocha** a **Noty**. V oboch režimoch môžeš kliknúť do zápisu a písať fyzickou klávesnicou. Na telefóne alebo tablete s dotykovým ovládaním sa režimy striedajú v poradí **Plocha → Noty → Klávesnica → Plocha**.
+Začínaš v režime **Plocha**. Režim prepínaš prvou položkou ponuky **Editor** vpravo nad editorom; položka ukazuje aktuálny režim a ponuka pri prepínaní zostane otvorená. Na počítači s myšou alebo touchpadom sa strieda **Plocha** a **Noty**. V oboch režimoch môžeš kliknúť do zápisu a písať fyzickou klávesnicou. Na telefóne alebo tablete s dotykovým ovládaním sa režimy striedajú v poradí **Plocha → Noty → Klávesnica → Plocha**.
 
 - V režime **Noty** klikni do riadka nástroja. Pod editorom sa zobrazí jeho názov a tlačidlá s údermi, ktoré vie zahrať. Na djembe skús `B` a `b`. Obe znamenajú basový úder, malé `b` znie tichšie. Bodkou `.` vložíš pauzu.
-- Ak chceš na dotykovom zariadení napísať napríklad názov rytmu, v režime **Noty** klepni na tlačidlo **Noty**. Prepneš na **Klávesnica** a otvorí sa systémová klávesnica.
-- **Prepisovanie** – keď je zapnuté, nové znaky nahrádzajú znaky pod kurzorom. Keď je vypnuté, vkladajú sa medzi existujúce znaky.
+- Ak chceš na dotykovom zariadení napísať napríklad názov rytmu, v režime **Noty** klepni na **Editor → Noty**. Prepneš na **Klávesnica** a otvorí sa systémová klávesnica.
+- **Editor → Prepisovanie** – keď je zaškrtnuté, nové znaky nahrádzajú znaky pod kurzorom. Keď je vypnuté, vkladajú sa medzi existujúce znaky.
 
 Na telefóne roztiahni dva prsty v editore, ak chceš zväčšiť písmo. Priblížením prstov ho zmenšíš. Dlhý riadok si posuň do strany prstom.
 
 ## Uloženie a návrat k práci
 
-- Cez **Súbor → Uložiť ako…** si stiahneš vlastnú kópiu rytmov ako súbor YAML. Keď ju chceš znova otvoriť, vyber **Súbor → Otvoriť**. V ponuke **Súbor** môžeš vytvoriť aj nový rytmus. Cez **Úpravy → Zbaliť všetko** alebo **Rozbaliť všetko** naraz zbalíš alebo rozbalíš všetky rytmy v editore.
+- Cez **Súbor → Uložiť ako…** si stiahneš vlastnú kópiu rytmov ako súbor YAML. Keď ju chceš znova otvoriť, vyber **Súbor → Otvoriť**. V ponuke **Súbor** môžeš vytvoriť aj nový rytmus. Cez **Editor → Zbaliť všetko** alebo **Rozbaliť všetko** naraz zbalíš alebo rozbalíš všetky rytmy v editore.
 - Ak chceš po ďalšom otvorení aplikácie pokračovať tam, kde si skončil, v tom istom prehliadači vyber **Súbor → Obnoviť posledný súbor**. Pri otázke **Uložiť rozpracované zmeny?** vyber **Áno**, ak si chceš pred výmenou súboru stiahnuť kópiu. **Nie** pokračuje bez uloženia a **Zrušiť** ťa vráti k úpravám.
 - Ak chceš aplikáciu aktualizovať, zastav prehrávanie a pri pripojení na internet otvor **Súbor → O aplikácii → Aktualizovať aplikáciu**. O výsledku ťa informuje hlásenie. Rozpracovaný rytmus zostane uložený.
 

@@ -40,9 +40,15 @@ function editor() {
 
 function click(label: string) {
   const button = Array.from(document.querySelectorAll('button')).find(button =>
-    (button.getAttribute('aria-label') ?? button.textContent) === label);
+    (button.getAttribute('aria-label') ?? button.textContent) === label && !button.closest('[hidden]'));
   if (!button) throw new Error('Missing button ' + label);
   return act(() => button.click());
+}
+
+/** Clicks an Editor menu item, opening the menu first when it is closed. */
+async function editorMenu(label: string) {
+  if (document.querySelector('.editor-menu .menu-dropdown')?.hasAttribute('hidden')) await click('Editor');
+  await click(label);
 }
 
 it.each([false, true])('offers the software keyboard when primary input is touch: %s', async touch => {
@@ -51,29 +57,29 @@ it.each([false, true])('offers the software keyboard when primary input is touch
   }));
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
-  await click('Plocha');
-  await click('Noty');
+  await editorMenu('Plocha');
+  await editorMenu('Noty');
   if (touch) {
     expect(editor().contentDOM.getAttribute('inputmode')).toBe('text');
-    await click('Klávesnica');
+    await editorMenu('Klávesnica');
   }
   expect(document.querySelector('.input-mode-button')?.textContent).toBe('Plocha');
   expect(editor().contentDOM.getAttribute('inputmode')).toBe('none');
 });
 
-it('shares overwrite mode between the Noty keyboard and the editor toolbar', async () => {
+it('shares overwrite mode between the Noty keyboard and the Editor menu', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
-  await click('Plocha');
+  await editorMenu('Plocha');
   const view = editor();
   await act(() => { unfoldAll(view); });
   const anchor = view.state.doc.toString().indexOf('b.tt');
   await act(() => view.dispatch({ selection: { anchor } }));
-  const toolbar = document.querySelector<HTMLButtonElement>('.editor-actions button[aria-pressed]')!;
+  const toolbar = document.querySelector<HTMLButtonElement>('.editor-menu [role="menuitemcheckbox"]')!;
   const pad = document.querySelector<HTMLButtonElement>('.note-navigation .mode-button')!;
   expect(pad.nextElementSibling?.className).toBe('note-backspace');
   await act(() => pad.click());
-  expect(toolbar.getAttribute('aria-pressed')).toBe('true');
+  expect(toolbar.getAttribute('aria-checked')).toBe('true');
   await click('Pauza (.)');
   expect(view.state.doc.sliceString(anchor, anchor + 4)).toBe('..tt');
   await act(() => toolbar.click());
@@ -85,7 +91,7 @@ it('shares overwrite mode between the Noty keyboard and the editor toolbar', asy
 it('inserts a space and a new line from the Noty keyboard', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
-  await click('Plocha');
+  await editorMenu('Plocha');
   const view = editor();
   await act(() => { unfoldAll(view); });
   const anchor = view.state.doc.toString().indexOf('b.tt');
@@ -208,7 +214,7 @@ it('follows the editor caret between tracks in a Windows-line-ending file on mob
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => source }));
   await act(() => root.render(createElement(App)));
   const view = editor();
-  await click('Plocha');
+  await editorMenu('Plocha');
   await act(() => { unfoldAll(view); });
   const text = view.state.doc.toString();
   for (const instrument of ['djembe', 'dundun_withBell', 'djembe']) {
@@ -223,7 +229,7 @@ it('starts native text input on the mode tap and returns focus to the existing s
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
   const view = editor();
-  await click('Plocha');
+  await editorMenu('Plocha');
   await act(() => {
     view.focus();
     view.dispatch({ selection: { anchor: 2, head: 5 } });
@@ -232,7 +238,7 @@ it('starts native text input on the mode tap and returns focus to the existing s
   const recordFocus = (event: FocusEvent) => focused.push(event.target as Element);
   document.addEventListener('focusin', recordFocus);
   try {
-    await click('Noty');
+    await editorMenu('Noty');
   } finally {
     document.removeEventListener('focusin', recordFocus);
   }
@@ -241,7 +247,7 @@ it('starts native text input on the mode tap and returns focus to the existing s
   expect(document.activeElement).toBe(view.contentDOM);
   expect(view.contentDOM.getAttribute('inputmode')).toBe('text');
   expect(view.state.selection.main).toMatchObject({ anchor: 2, head: 5 });
-  await click('Klávesnica');
+  await editorMenu('Klávesnica');
   expect(view.contentDOM.getAttribute('inputmode')).toBe('none');
   expect(document.activeElement).not.toBe(view.contentDOM);
 });
@@ -509,18 +515,40 @@ it('groups the Súbor menu into Súbory, Hranie and Pomoc without status message
   expect(menu.querySelector('.dialog-body > [role="status"]')).toBeNull();
 });
 
-it('collapses and expands every rhythm from the Úpravy menu', async () => {
+it('lists input mode, overwrite and folding in the Editor menu, which replaces Úpravy', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const menu = document.querySelector<HTMLElement>('.editor-menu .menu-dropdown')!;
+  expect(Array.from(menu.children, item => item.tagName === 'HR' ? '---' : item.textContent)).toEqual([
+    'Plocha', 'Prepisovanie', '---', 'Rozbaliť všetko', 'Zbaliť všetko']);
+  expect(document.querySelector('.editor-actions .input-mode-button:not(.menu-item)')).toBeNull();
+  expect(Array.from(document.querySelectorAll('.header-controls button'), button => button.textContent)).not.toContain('Úpravy');
+  await click('Editor');
+  expect(menu.hidden).toBe(false);
+  await click('Plocha');
+  await click('Prepisovanie');
+  expect(menu.hidden).toBe(false);
+  expect(menu.querySelector('.input-mode-button')?.textContent).toBe('Noty');
+  expect(menu.querySelector('[role="menuitemcheckbox"]')?.getAttribute('aria-checked')).toBe('true');
+  await act(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })));
+  expect(menu.hidden).toBe(true);
+  await click('Editor');
+  await act(() => document.querySelector('.file-name')!.dispatchEvent(new Event('pointerdown', { bubbles: true })));
+  expect(menu.hidden).toBe(true);
+});
+
+it('collapses and expands every rhythm from the Editor menu and closes it', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
   const view = editor();
+  const menu = document.querySelector<HTMLElement>('.editor-menu .menu-dropdown')!;
   const folds = () => { let count = 0; foldedRanges(view.state).between(0, view.state.doc.length, () => { count++; }); return count; };
   await act(() => { unfoldAll(view); });
   expect(folds()).toBe(0);
-  await click('Úpravy');
-  await click('Zbaliť všetko');
-  expect(document.querySelector<HTMLDialogElement>('dialog.edit-options')?.open).toBe(false);
+  await editorMenu('Zbaliť všetko');
+  expect(menu.hidden).toBe(true);
   expect(folds()).toBe(2);
-  await click('Úpravy');
-  await click('Rozbaliť všetko');
+  await editorMenu('Rozbaliť všetko');
+  expect(menu.hidden).toBe(true);
   expect(folds()).toBe(0);
 });

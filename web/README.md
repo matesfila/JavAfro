@@ -102,7 +102,7 @@ do okna.
 Na telefóne sa hlavná plocha zmestí na jednu obrazovku bez posúvania stránky:
 približne polovicu zaberá editor a druhú názov rytmu, **Play**, **Stop** a **Tempo**.
 **Humanize**, **Mixer** a **Dialect** sa otvárajú tlačidlami v samostatných dialógoch;
-**Súbor** a **Úpravy** v hlavičke sa otvárajú ako dialógy.
+**Súbor** v hlavičke sa otvára ako dialóg, **Editor** v lište editora ako rozbaľovacia ponuka.
 Dialóg zatvoríš tlačidlom **Zavrieť**, klávesom Escape alebo kliknutím na pozadie.
 Zatvorenie zachová nastavenia aj prehrávanie. Dlhé riadky editora sa na mobile
 zalamujú bez zmeny uloženého textu. Posúva sa iba text v editore alebo
@@ -134,7 +134,8 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   Vpravo dole sú šípky v tvare obráteného T (`← ↓ →`, nad `↓` je `↑`), nad `←`
   je medzera `␣`, nad `→` nový riadok `↵` (Enter, zachová odsadenie) a vpravo hore
   Backspace. Dolný rad pokračuje vľavo od `←` oddeľovačom taktov `|` a pred ním pauzou `.`.
-  Pri ovládaní myšou alebo touchpadom tlačidlo prepína medzi **Plocha** a **Noty**.
+  Režim prepína prvá položka ponuky **Editor**, ktorá ukazuje aktuálny režim.
+  Pri ovládaní myšou alebo touchpadom prepína medzi **Plocha** a **Noty**.
   Na primárne dotykových zariadeniach cyklicky prepína **Plocha → Noty → Klávesnica → Plocha** a zobrazuje
   aktuálny režim. **Klávesnica** priamo pri kliknutí zameria editor a vyvolá
   systémovú klávesnicu na úpravu ostatného YAML. **Plocha** skryje panel nôt aj
@@ -144,15 +145,16 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Šípky **↑/↓** vpravo v lište editora presunú rytmus pod kurzorom nad predchádzajúci
   alebo pod nasledujúci rytmus (s komentármi pod ním). Kurzor zostane v presunutom rytme,
   zbalené rytmy zostanú zbalené a presun sa vráti jedným krokom späť.
-- **Noty** a **Prepisovanie** sú v lište editora, **Súbor** a **Úpravy** v hlavičke.
-  Ponuka **Súbor** má tri skupiny: **Súbory** (**Nový rytmus**, **Otvoriť…**,
+- Vpravo v lište editora je ponuka **Editor**: režim (**Plocha** / **Noty** / **Klávesnica**),
+  **Prepisovanie**, oddeľovač, **Rozbaliť všetko** a **Zbaliť všetko**. Zbaľujú sa iba celé
+  rytmy, rovnako ako pri otvorení súboru. Režim a Prepisovanie nechajú ponuku otvorenú,
+  zbalenie a rozbalenie ju zavrú; zavrie sa aj klávesom Escape alebo kliknutím mimo nej.
+  V hlavičke je **Súbor** s tromi skupinami: **Súbory** (**Nový rytmus**, **Otvoriť…**,
   **Obnoviť posledný súbor**, **Uložiť ako…**), **Hranie** (**Živé hranie**) a **Pomoc**
   (**Dokumentácia**, **Obrázkový návod**, **O aplikácii**).
-  Ponuka **Úpravy** obsahuje **Zbaliť všetko** a **Rozbaliť všetko**. Zbaľujú sa iba celé
-  rytmy, rovnako ako pri otvorení súboru.
   Názov otvoreného súboru sa nezobrazuje, pri ukladaní zostáva zachovaný.
-- Zapnuté tlačidlo **Prepisovanie** prepisuje znaky pod kurzorom, vypnuté vkladá.
-  Režim prepína aj kláves **Insert**. Zapnuté prepisovanie je zvýraznené.
+- Zapnuté **Prepisovanie** (zaškrtnuté v ponuke Editor) prepisuje znaky pod kurzorom, vypnuté vkladá.
+  Režim prepína aj kláves **Insert** a tlačidlo Prepisovanie na klávesnici nôt.
   Prepisovanie neodstraňuje
   koniec riadka; na jeho konci sa znaky pridávajú. Označený text sa nahrádza bežne.
 - Play opakuje základné patterny nepretržite. Stop zruší aj naplánované údery.

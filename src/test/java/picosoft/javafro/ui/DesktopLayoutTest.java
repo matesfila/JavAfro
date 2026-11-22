@@ -115,18 +115,26 @@ public class DesktopLayoutTest {
         });
     }
 
-    @Test public void editMenuCollapsesAndExpandsEveryRhythm() throws Exception {
+    @Test public void editorMenuReplacesTheModeTogglesAndFoldsEveryRhythm() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             var panel = new RhythmPlayerPanel(YAML);
             var editor = (RSyntaxTextArea) NotePadTest.find(panel, "yamlEditor");
             var folds = editor.getFoldManager();
+            assertNotNull(NotePadTest.find(panel, "editorMenuButton"));
+            assertNull(NotePadTest.find(panel, "editMenuButton"));
+            assertNull(NotePadTest.find(panel, "notesModeButton"));
+            assertNull(NotePadTest.find(panel, "insertModeButton"));
+            var labels = new java.util.ArrayList<String>();
+            for (var component : panel.editMenu().getComponents()) {
+                if (component instanceof JMenuItem item) labels.add(item.getText());
+                else if (component instanceof JSeparator) labels.add("---");
+            }
+            assertEquals(java.util.List.of("Noty", "Prepisovanie", "---", "Rozbaliť všetko", "Zbaliť všetko"), labels);
             var items = panel.editMenu().getComponents();
-            assertEquals("Zbaliť všetko", ((JMenuItem) items[0]).getText());
-            assertEquals("Rozbaliť všetko", ((JMenuItem) items[1]).getText());
             assertEquals(2, folds.getFoldCount());
-            ((JMenuItem) items[1]).doClick(0);
+            ((JMenuItem) items[3]).doClick(0);
             for (int i = 0; i < folds.getFoldCount(); i++) assertFalse(folds.getFold(i).isCollapsed());
-            ((JMenuItem) items[0]).doClick(0);
+            ((JMenuItem) items[4]).doClick(0);
             for (int i = 0; i < folds.getFoldCount(); i++) assertTrue(folds.getFold(i).isCollapsed());
         });
     }

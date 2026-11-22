@@ -131,7 +131,7 @@ a ponuka **Súbor**.
 
 Okno je rozložené ako webová verzia (vzhľad FlatLaf v teplých papierových farbách):
 vľavo editor s názvom súboru (`*` pri neuložených zmenách textu, tempa alebo dialectu),
-prepínačmi **Noty** a **Prepisovanie**, šípkami **↑/↓** a stavovým riadkom pre chyby YAML; vpravo názov
+ponukou **Editor** (**Noty**, **Prepisovanie**, **Rozbaliť všetko**, **Zbaliť všetko**), šípkami **↑/↓** a stavovým riadkom pre chyby YAML; vpravo názov
 rytmu pod kurzorom, **Play/Stop**, tempo a rozbaľovacie panely **Mixer**, **Dialect**
 (s tlačidlom **Vynulovať**) a **Humanize**. Okno má najmenej 900 × 600 px.
 Jeden súbor `.yaml` alebo `.yml` možno tiež presunúť z Prieskumníka priamo do okna
@@ -176,10 +176,12 @@ komentár pred prvým rytmom zostáva na začiatku súboru. Kurzor zostane v pre
 zbalené rytmy zostanú zbalené a presun sa vráti jedným krokom späť (Ctrl+Z). Pri prvom
 rytme (šípka hore), poslednom rytme (šípka dole) alebo neplatnom YAML sa nič nezmení.
 
-Desktop používa fyzickú klávesnicu na úpravu YAML. **Prepisovanie** má stály názov;
-zapnutý stav alebo kláves Insert zapne prepisovanie.
+Desktop používa fyzickú klávesnicu na úpravu YAML. Ponuka **Editor** vpravo v lište editora
+obsahuje zaškrtávacie položky **Noty** a **Prepisovanie** (pri kliknutí ponuka zostane otvorená),
+oddeľovač a **Rozbaliť všetko** / **Zbaliť všetko**, ktoré rozbalia alebo zbalia všetky rytmy.
+Zaškrtnuté **Prepisovanie** alebo kláves Insert zapne prepisovanie.
 
-Prepínač **Noty** zobrazí pod editorom klávesnicu nôt ako na webe: noty nástroja,
+Položka **Noty** zobrazí pod editorom klávesnicu nôt ako na webe: noty nástroja,
 v ktorého riadku je kurzor (v poradí podľa manifestu sample), a klávesy `.`, `|`,
 medzera, Enter, Backspace a šípky. Mimo riadku nástroja ukáže „Vyber riadok nástroja“.
 Každé stlačenie je samostatný krok späť (Ctrl+Z), prepisovanie platí aj pre klávesnicu
@@ -188,8 +190,7 @@ nôt a balafónové noty sa vkladajú ako tokeny oddelené medzerou.
 Ponuka **Súbor** má dve skupiny. **Súbory**: **Nový rytmus**, **Otvoriť YAML…**,
 **Obnoviť posledný súbor**, **Uložiť** a **Uložiť ako…**. **Pomoc**: PDF **Dokumentácia**
 a **Obrázkový návod** (rovnaké ako na webe, otvoria sa v systémovom prehliadači PDF)
-a okno **O aplikácii**. Vedľa nej je ponuka **Úpravy** so **Zbaliť všetko** a
-**Rozbaliť všetko**, ktoré zbalia alebo rozbalia všetky rytmy v editore.
+a okno **O aplikácii**.
 Skratky: Ctrl+N, Ctrl+O, Ctrl+S a Ctrl+Shift+S.
 Uložiť funguje aj pre prázdny alebo neplatný YAML, ktorý zapíše presne tak,
 ako je v editore. Pri platnom nezmenenom zápise zahrnie upravené BPM/dialect

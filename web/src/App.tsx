@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type DragEvent, type M
 import { YamlEditor, type EditorInputMode, type YamlEditorHandle } from './Editor';
 import { AboutDialog } from './AboutDialog';
 import { SettingsPanel } from './SettingsPanel';
+import { MenuDropdown } from './MenuDropdown';
 import { TempoControl } from './TempoControl';
 import { useViewport } from './useViewport';
 import { appInfo } from './app-info';
@@ -485,10 +486,6 @@ export function App() {
     <button className="button subtle" onClick={restoreLastFile} disabled={busy || isLoading || !restorableDraft} title={busy ? 'Najprv stlač Stop' : 'Znova otvoriť predchádzajúci súbor'}><RestoreIcon /><span>Obnoviť posledný súbor</span></button>
     <button className="button subtle" onClick={save} disabled={isLoading}><DownloadIcon /><span>Uložiť ako…</span></button>
   </>;
-  const editActions = <>
-    <button className="button subtle" onClick={() => editor.current?.foldAll()} disabled={isLoading || !source.trim()} title="Zbaliť všetky rytmy v editore"><CollapseIcon /><span>Zbaliť všetko</span></button>
-    <button className="button subtle" onClick={() => editor.current?.unfoldAll()} disabled={isLoading || !source.trim()} title="Rozbaliť všetky rytmy v editore"><ExpandIcon /><span>Rozbaliť všetko</span></button>
-  </>;
   const modeButton = <button className="button mode-button" aria-pressed={overwrite} title="Zapnuté: prepisovanie. Vypnuté: vkladanie. (Insert)" onMouseDown={event => event.preventDefault()} onClick={() => setOverwriteMode(previous => !previous)}>Prepisovanie</button>;
   function changeInputMode(nextMode: EditorInputMode) {
     // Keep focus inside the tap handler so iOS can open the software keyboard.
@@ -505,7 +502,14 @@ export function App() {
     <button type="button" className="button mode-button move-button" aria-label="Posunúť rytmus vyššie" title="Posunúť rytmus pod kurzorom nad predchádzajúci" disabled={isLoading || !source.trim()} onMouseDown={event => event.preventDefault()} onClick={() => editor.current?.moveRhythm(-1)}><ArrowIcon up /></button>
     <button type="button" className="button mode-button move-button" aria-label="Posunúť rytmus nižšie" title="Posunúť rytmus pod kurzorom pod nasledujúci" disabled={isLoading || !source.trim()} onMouseDown={event => event.preventDefault()} onClick={() => editor.current?.moveRhythm(1)}><ArrowIcon up={false} /></button>
   </>;
-  const inputModeButton = <button type="button" className="button mode-button input-mode-button" title={`Režim: ${currentInputMode.label}. Prepnúť na ${inputModes[currentInputMode.next].label}.`} onMouseDown={event => event.preventDefault()} onClick={() => changeInputMode(currentInputMode.next)}>{currentInputMode.label}</button>;
+  const keepFocus = (event: ReactMouseEvent) => event.preventDefault();
+  const editorMenu = <MenuDropdown label="Editor" title="Režim zápisu, prepisovanie a zbalenie rytmov" className="editor-menu">
+    <button type="button" role="menuitem" data-keep-open className="menu-item input-mode-button" title={`Režim: ${currentInputMode.label}. Prepnúť na ${inputModes[currentInputMode.next].label}.`} onMouseDown={keepFocus} onClick={() => changeInputMode(currentInputMode.next)}>{currentInputMode.label}</button>
+    <button type="button" role="menuitemcheckbox" aria-checked={overwrite} data-keep-open className="menu-item" title="Zapnuté: prepisovanie. Vypnuté: vkladanie. (Insert)" onMouseDown={keepFocus} onClick={() => setOverwriteMode(previous => !previous)}>Prepisovanie</button>
+    <hr className="menu-separator" />
+    <button type="button" role="menuitem" className="menu-item" onMouseDown={keepFocus} onClick={() => editor.current?.unfoldAll()} disabled={isLoading || !source.trim()} title="Rozbaliť všetky rytmy v editore"><ExpandIcon /><span>Rozbaliť všetko</span></button>
+    <button type="button" role="menuitem" className="menu-item" onMouseDown={keepFocus} onClick={() => editor.current?.foldAll()} disabled={isLoading || !source.trim()} title="Zbaliť všetky rytmy v editore"><CollapseIcon /><span>Zbaliť všetko</span></button>
+  </MenuDropdown>;
 
   return <div className={'app' + (viewport.keyboard ? ' keyboard-open' : '') + (inputMode === 'notes' ? ' notes-mode' : inputMode === 'surface' ? ' surface-mode' : '')} style={{ height: viewport.compact ? viewport.height : undefined, '--viewport-height': `${viewport.height}px` } as CSSProperties} onDragOver={event => {
     if (event.dataTransfer.types.includes('Files')) { event.preventDefault(); event.dataTransfer.dropEffect = busy ? 'none' : 'copy'; setDragging(true); }
@@ -533,9 +537,6 @@ export function App() {
             }} />
           </div>
         </SettingsPanel>
-        <SettingsPanel title="Úpravy" compact className="edit-options">
-          <div className="file-dialog-actions" onClick={closeMenuOnAction}>{editActions}</div>
-        </SettingsPanel>
       </div>
     </header>
     <main>
@@ -548,7 +549,7 @@ export function App() {
             <span className="file-name" title={fileName}>
               {isModified ? <strong>*{fileName}</strong> : fileName}
             </span>
-            <div className="editor-actions">{inputModeButton}{modeButton}{moveButtons}</div>
+            <div className="editor-actions">{editorMenu}{moveButtons}</div>
           </div>
           <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} foldRhythms={editorDocument.foldRhythms} overwriteButton={modeButton} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);

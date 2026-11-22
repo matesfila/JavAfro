@@ -166,7 +166,7 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 
 | Trieda alebo vnorený typ | Zodpovednosť |
 | --- | --- |
-| `RhythmPlayerPanel` | Hlavný panel a koordinátor desktopu, rozložený ako web: hlavička (logo, Otvoriť, menu Súbor so skupinami Súbory a Pomoc, menu Úpravy so Zbaliť/Rozbaliť všetko cez `setAllFolds()`), vľavo karta editora (názov súboru s `*` pri neuložených zmenách, prepínače Noty/Prepisovanie, šípky presunu rytmu, YAML editor, klávesnica nôt, stavový riadok s chybami YAML a stav konceptu), vpravo karta prehrávania (názov rytmu, Play/Stop, tempo, rozbaľovacie sekcie Mixer, Dialect a Humanize). Rieši aj výber rytmu pod kurzorom, synchronizáciu ovládania a chyby. |
+| `RhythmPlayerPanel` | Hlavný panel a koordinátor desktopu, rozložený ako web: hlavička (logo, Otvoriť, menu Súbor so skupinami Súbory a Pomoc), vľavo karta editora (názov súboru s `*` pri neuložených zmenách, popup Editor so zaškrtávacími položkami Noty/Prepisovanie, ktoré popup nezatvárajú, a Rozbaliť/Zbaliť všetko cez `setAllFolds()`, šípky presunu rytmu, YAML editor, klávesnica nôt, stavový riadok s chybami YAML a stav konceptu), vpravo karta prehrávania (názov rytmu, Play/Stop, tempo, rozbaľovacie sekcie Mixer, Dialect a Humanize). Rieši aj výber rytmu pod kurzorom, synchronizáciu ovládania a chyby. |
 | `RhythmPlayerPanel.PlaybackSession` | Balíková abstrakcia životného cyklu prehrávania (`play`, `queue`, `cancelQueued`, `stop`, `isStopped`). Produkčne obaluje sekvencer, testy môžu vložiť vlastnú session cez factory. |
 | `RhythmPlayerPanel.PlaybackRequest` | Súkromný record rytmu a nastavení pre konkrétne spustenie. Pri reštartoch sa uchováva iba posledná čakajúca požiadavka. |
 | `MixerPanel` | Zostavuje ovládanie hlasitosti, Mute a Solo podľa trackov (Solo = jediný nestlmený track), uchováva master a prepája hodnoty s aktuálnym `PlaybackSettings` cez `bind()`. `reset()` obnovuje tracky pri načítaní súboru. Je priamo v karte prehrávania, nie v samostatnom okne. |
@@ -262,8 +262,9 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `main.tsx` | Pripojí React `App`, štýly a inicializuje offline podporu. |
 | `App.tsx` / `App` | Koordinuje zdrojový YAML, kurzor, vybraný a prehrávaný rytmus, validáciu, súbory, uloženie, živé ovládanie a mix. Počítadlá požiadaviek chránia stav pred oneskorenými výsledkami otvorenia a Play. |
 | `SettingsPanel.tsx` / `SettingsPanel` | Zobrazuje jednu sadu ovládačov ako desktopový `details` alebo mobilné tlačidlo a natívny modálny `dialog`. Riadi otvorenie a zatvorenie; hodnoty drží nadradený `App`, takže zatvorenie ani zmena rozloženia nastavenia nemaže. |
+| `MenuDropdown.tsx` / `MenuDropdown` | Tlačidlo s rozbaľovacou ponukou (ponuka Editor v lište editora: režim, Prepisovanie, Rozbaliť/Zbaliť všetko). Panel je `position: fixed`, aby ho neorezala karta editora s `overflow: hidden`. Zatvorí sa Escape, kliknutím mimo, zmenou veľkosti okna a kliknutím na položku bez `data-keep-open`. |
 | `useViewport.ts` / `useViewport()` | Sleduje breakpoint a výšku `visualViewport` vrátane mobilnej klávesnice. Poskytuje dostupnú výšku a kompaktný režim; jeho media query musí zodpovedať pravidlám v `style.css`. |
-| `Editor.tsx` / `YamlEditor` | Integrácia CodeMirror do Reactu: text, kurzor, YAML diagnostika, folding (`foldAll()`/`unfoldAll()` pre menu Úpravy) a režim prepisovania. |
+| `Editor.tsx` / `YamlEditor` | Integrácia CodeMirror do Reactu: text, kurzor, YAML diagnostika, folding (`foldAll()`/`unfoldAll()` pre ponuku Editor) a režim prepisovania. |
 | `editor-setup.ts` | Spoločná konfigurácia rozšírení a klávesových skratiek editora. |
 | `overwrite.ts` | CodeMirror stav, efekt a vstupná logika Insert/Overwrite. |
 | `rhythm-folding.ts` | Vytvára efekty zbalenia hlavných YAML definícií. |

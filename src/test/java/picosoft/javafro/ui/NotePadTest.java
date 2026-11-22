@@ -16,7 +16,7 @@ public class NotePadTest {
             var editor = (RSyntaxTextArea) find(panel, "yamlEditor");
             var pad = (NotePad) find(panel, "notePad");
             assertFalse(pad.isVisible());
-            ((JToggleButton) find(panel, "notesModeButton")).doClick();
+            menuItem(panel, "notesModeItem").doClick(0);
             assertTrue(pad.isVisible());
             editor.setCaretPosition(YAML.indexOf("b.tt") + 1);
             assertEquals("djembe", pad.instrument());
@@ -74,6 +74,9 @@ public class NotePadTest {
     }
 
     private static void click(Container root, String name) { ((AbstractButton) find(root, name)).doClick(0); }
+
+    /** An item of the Editor popup, which is not part of the panel's component tree. */
+    static JMenuItem menuItem(RhythmPlayerPanel panel, String name) { return (JMenuItem) find(panel.editMenu(), name); }
 
     static Component find(Container parent, String name) {
         for (Component child : parent.getComponents()) {
