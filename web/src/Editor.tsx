@@ -19,7 +19,9 @@ const theme = EditorView.theme({
   '.cm-content': { padding: '20px 0', caretColor: '#745137' },
   '.cm-line': { padding: '0 20px' },
   '.cm-gutters': { background: '#f7f0e5', color: '#a39179', border: 'none', paddingRight: '8px' },
-  '.cm-foldGutter .cm-gutterElement': { padding: '0 4px', cursor: 'pointer' },
+  // Flex centering keeps the arrow on its line: as inline text it would sit on the gutter's own
+  // 18px line box, which is taller than a zoomed-out line and pushes the arrow down.
+  '.cm-foldGutter .cm-gutterElement': { display: 'flex', alignItems: 'center', padding: '0 4px', cursor: 'pointer' },
   // Pinch zoom sets --editor-zoom, so the fold arrows grow and shrink with the text.
   '.cm-foldGutter span': { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 'calc(32px * var(--editor-zoom, 1))', fontSize: 'calc(24px * var(--editor-zoom, 1))', lineHeight: '1', color: '#705840' },
   // Selection is drawn behind the text: the active line must stay translucent.
