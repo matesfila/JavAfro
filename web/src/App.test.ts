@@ -549,10 +549,13 @@ it('scales the fold arrows with pinch zoom, within half to double size', async (
     view.scrollDOM.dispatchEvent(event);
   };
   const zoom = () => view.dom.style.getPropertyValue('--editor-zoom');
+  const themeBefore = view.themeClasses;
   pinch('touchstart', 100);
   pinch('touchmove', 150);
   expect(view.contentDOM.style.fontSize).toBe('27px');
   expect(zoom()).toBe('1.5');
+  // A short document keeps its content height, so the zoom itself must make CodeMirror re-measure line heights.
+  expect(view.themeClasses).not.toBe(themeBefore);
   pinch('touchmove', 400);
   expect(view.contentDOM.style.fontSize).toBe('72px');
   expect(zoom()).toBe('2');

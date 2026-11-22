@@ -50,8 +50,17 @@ export interface YamlEditorHandle {
 /** Fold arrows follow the text size, but stay within half to double their normal size so the gutter stays usable. */
 export const foldArrowZoom = (fontSize: number, baseFontSize: number) => Math.min(2, Math.max(0.5, fontSize / baseFontSize));
 
+/**
+ * CodeMirror re-measures line heights only when the content height changes. A short document
+ * fills the editor at any font size, so after a pinch the gutter would keep the old line heights.
+ * Swapping between two empty themes is the public way to make CodeMirror re-measure every visible line.
+ */
+const zoomRemeasure = new Compartment();
+const remeasureThemes = [EditorView.theme({}), EditorView.theme({})];
+
 function enablePinchZoom(editor: EditorView) {
   const scroller = editor.scrollDOM;
+  let remeasureTheme = 0;
   let pinch: { distance: number; fontSize: number } | null = null;
   let baseFontSize: number | undefined;
 
@@ -74,7 +83,8 @@ function enablePinchZoom(editor: EditorView) {
     const size = Math.min(72, Math.max(8, pinch.fontSize * distance / pinch.distance));
     editor.contentDOM.style.fontSize = size + 'px';
     if (baseFontSize) editor.dom.style.setProperty('--editor-zoom', String(foldArrowZoom(size, baseFontSize)));
-    editor.requestMeasure();
+    remeasureTheme = 1 - remeasureTheme;
+    editor.dispatch({ effects: zoomRemeasure.reconfigure(remeasureThemes[remeasureTheme]) });
   }
 
   const events = ['touchstart', 'touchmove', 'touchend', 'touchcancel'] as const;
@@ -164,7 +174,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
     }
     const editor = new EditorView({
       parent: host.current!, doc: value, selection: { anchor: Math.min(caretOffset, value.length) },
-      extensions: [overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), theme,
+      extensions: [overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), theme, zoomRemeasure.of(remeasureThemes[0]),
         editing.current.of([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]),
         inputAttributes.current.of(EditorView.contentAttributes.of({ inputmode: inputMode === 'keyboard' ? 'text' : 'none' })),
         EditorView.contentAttributes.of({ 'aria-label': 'YAML editor rytmu', spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),
