@@ -11,7 +11,7 @@ JavAfro plays West African drum rhythms written in YAML. There are **two indepen
 
 The two players share the rhythm library (`rhythms/`), the app config (`javafro.yaml`), the WAV samples, and the sample manifest `src/main/resources/samples/afroplayer-samples.yaml`. **The YAML parser, the pattern/timing logic and the note→sample mapping are implemented separately in Java and TypeScript.** Any change to the rhythm format, the note syntax, the manifest or the timing rules has to be made on both sides and tested on both sides.
 
-All documentation, UI strings, commit history and task notes are in **Slovak**. Write new user-facing text and doc updates in Slovak. Detailed docs:
+All documentation, UI strings and task notes are in **Slovak**. Write new user-facing text and doc updates in Slovak. Commit messages are in **English** (older commits may be in Slovak). Detailed docs:
 - `docs/TECHNICKA_DOKUMENTACIA.md`: architecture, class responsibilities, playback flow, and a table of "where to change X". Keep it in sync when the architecture changes.
 - `README.md`: the user-facing YAML format, the note tables for each instrument, config keys, and packaging.
 - `web/README.md`: web build, versioning, PWA/offline behavior, and phone install.
