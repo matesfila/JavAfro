@@ -3,13 +3,15 @@ import type { NoteCommand } from './note-input';
 import type { Instrument } from './rhythm';
 import { notesForInstrument } from './sounds';
 
-export function NotePad({ instrument, overwriteButton, insert, command }: {
+export function NotePad({ instrument, overwriteButton, insert, command, close }: {
   instrument: Instrument | null;
   overwriteButton: ReactNode;
   insert: (text: string) => void; command: (command: NoteCommand) => void;
+  /** Hides the pad like Done on the system keyboard (the editor switches to Plocha). */
+  close: () => void;
 }) {
   const notes = notesForInstrument(instrument);
-  const key = (label: string, title: string, action: () => void, className?: string) =>
+  const key = (label: ReactNode, title: string, action: () => void, className?: string) =>
     <button type="button" key={title} className={className} aria-label={title} title={title} onClick={action}>{label}</button>;
   const action = (label: string, title: string, name: NoteCommand) => key(label, title, () => command(name), `note-${name}`);
   return <div className="note-pad" role="group" aria-label="Zadávanie nôt"
@@ -21,6 +23,8 @@ export function NotePad({ instrument, overwriteButton, insert, command }: {
       </div>
     </div>
     <div className="note-navigation">
+      {/* An SVG cross fills the short button; a × glyph stays small at any font size. */}
+      {key(<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3 17 17M17 3 3 17" /></svg>, 'Zavrieť klávesnicu', close, 'note-close')}
       {overwriteButton}
       {action('⌫', 'Vymazať pred kurzorom', 'backspace')}
       {key('␣', 'Medzera', () => insert(' '), 'note-space')}

@@ -92,6 +92,17 @@ it('switches from Klávesnica to Plocha when the system keyboard is hidden', asy
   expect(document.activeElement).not.toBe(editor().contentDOM);
 });
 
+it('closes the Noty pad with its close button and switches to Plocha', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  await editorMenu('Plocha');
+  expect(document.querySelector('.note-navigation button')?.className).toBe('note-close');
+  await click('Zavrieť klávesnicu');
+  expect(document.querySelector('.note-pad')).toBeNull();
+  expect(document.querySelector('.input-mode-button')?.textContent).toBe('Plocha');
+  expect(document.activeElement).not.toBe(editor().contentDOM);
+});
+
 it('shares overwrite mode between the Noty keyboard and the Editor menu', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
@@ -122,7 +133,7 @@ it('inserts a space and a new line from the Noty keyboard', async () => {
   const anchor = view.state.doc.toString().indexOf('b.tt');
   await act(() => view.dispatch({ selection: { anchor } }));
   const keys = Array.from(document.querySelectorAll('.note-navigation button'), button => button.className);
-  expect(keys.slice(1)).toEqual(['note-backspace', 'note-space', 'note-up', 'note-enter',
+  expect(keys.slice(2)).toEqual(['note-backspace', 'note-space', 'note-up', 'note-enter',
     'note-rest', 'note-bar', 'note-left', 'note-down', 'note-right']);
   await click('Medzera');
   expect(view.state.doc.sliceString(anchor, anchor + 5)).toBe(' b.tt');

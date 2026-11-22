@@ -94,8 +94,10 @@ function enablePinchZoom(editor: EditorView) {
   };
 }
 
-export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, overwriteButton, onOverwriteChange, inputMode = 'keyboard', readOnly = false }: {
+export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, overwriteButton, onOverwriteChange, onCloseNotes, inputMode = 'keyboard', readOnly = false }: {
   ref?: Ref<YamlEditorHandle>;
+  /** The close button on the Noty pad. */
+  onCloseNotes?: () => void;
   value: string; onChange: (value: string) => void; onCaretChange: (offset: number) => void; caretOffset: number;
   foldRhythms?: boolean;
   overwrite?: boolean; onOverwriteChange: (overwrite: boolean) => void;
@@ -234,6 +236,6 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
     <div className="editor-host" ref={host} />
     {inputMode === 'notes' && <NotePad instrument={activeInstrument} overwriteButton={overwriteButton} insert={text => {
       if (view.current && !readOnly) { insertNote(view.current, text, activeInstrument === 'balafon'); view.current.focus(); }
-    }} command={runCommand} />}
+    }} command={runCommand} close={() => onCloseNotes?.()} />}
   </div>;
 }

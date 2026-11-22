@@ -134,6 +134,8 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   Vpravo dole sú šípky v tvare obráteného T (`← ↓ →`, nad `↓` je `↑`), nad `←`
   je medzera `␣`, nad `→` nový riadok `↵` (Enter, zachová odsadenie) a vpravo hore
   Backspace. Dolný rad pokračuje vľavo od `←` oddeľovačom taktov `|` a pred ním pauzou `.`.
+  Malé tlačidlo **×** nad Backspace panel zavrie a prepne editor do režimu **Plocha**,
+  podobne ako Hotovo na systémovej klávesnici.
   Režim prepína prvá položka ponuky **Editor**, ktorá ukazuje aktuálny režim.
   Pri ovládaní myšou alebo touchpadom prepína medzi **Plocha** a **Noty**.
   Na primárne dotykových zariadeniach cyklicky prepína **Plocha → Noty → Klávesnica → Plocha** a zobrazuje
