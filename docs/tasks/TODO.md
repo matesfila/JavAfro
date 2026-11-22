@@ -3,7 +3,6 @@
 ## Úlohy a nápady
 
 ### Otvorené úlohy
-- [] stlacenie Done na sys keyb ju deaktuvuje aj v app
 - [] auto zap/vyp overwrite mod podla polohy kurzora
 - [] pridat novy rytmus do aktualneho dokumentu
 - [] dialog novy rytmus s uvodnymi parametrami
@@ -45,6 +44,7 @@ nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u ni
 ## Changelist
 
 ### v0.7.0
+- [x] stlacenie Done na sys keyb ju deaktuvuje aj v app
 - [?] bug: swipe left/right nefunguje na stop buttone v live view
 - [?] bug: slidre v mixpulte nejdu az do konca
 - [x] Nezávislé stopy pre duny a zvonce

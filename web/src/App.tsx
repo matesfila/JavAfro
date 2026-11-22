@@ -79,6 +79,8 @@ export function App() {
   const [message, setMessage] = useState('');
   const [isPlaying, setPlaying] = useState(false);
   const [isStarting, setStarting] = useState(false);
+  /** Stop was tapped; the current pattern plays to its end first. */
+  const [isStopping, setStopping] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [controls, setControls] = useState<Controls>({ bpm: config.initialTempo, humanize: config.humanize, dialect: [0, 0, 0, 0] });
@@ -270,7 +272,7 @@ export function App() {
   useEffect(() => {
     engine.current = new AudioEngine(() => controlsRef.current, message => {
       playRequest.current++;
-      setMessage(message); setPlaying(false); setStarting(false); setPlayingRhythm(null); setPendingRhythm(null);
+      setMessage(message); setPlaying(false); setStarting(false); setStopping(false); setPlayingRhythm(null); setPendingRhythm(null);
     }, undefined, config.humanizeMaxOffsetMs, config.humanizeApplianceProbability);
     try {
       draftStore.current = new DraftStore(window.localStorage, `javafro:draft:v1:${import.meta.env.BASE_URL}`);
@@ -376,6 +378,8 @@ export function App() {
       const nextControls = syncedSource.current !== source || syncedRhythmId.current !== parsed.id
         ? controlsFor(parsed, activeDraft.current)
         : controlsRef.current;
+      // A queued rhythm overrides a Stop that waits for the pattern end.
+      setStopping(false);
       setStarting(true); setPendingRhythm(parsed); setMessage(isPlaying ? `Po skončení patternu: ${parsed.name}` : '');
       const started = await engine.current!.start(parsed, nextControls, mixes[mixerKey(parsed)] ?? []);
       if (request !== playRequest.current) return;
@@ -427,7 +431,7 @@ export function App() {
     // A nervous double press must not stop and restart (or start and stop) the rhythm.
     if (Date.now() - liveToggledAt.current < DOUBLE_TAP_MS) return;
     liveToggledAt.current = Date.now();
-    if (busy) stop();
+    if (busy) requestStop();
     else { cancelPendingTap(); void play(); }
   }
 
@@ -457,13 +461,30 @@ export function App() {
   // Stop is enabled only while playing, so a swipe on it always queues the neighbor after the pattern.
   const stopProps = {
     ...playSwipe.handlers,
-    onClick() { if (!playSwipe.consumeClick()) stop(); },
+    onClick() { if (!playSwipe.consumeClick()) requestStop(); },
   };
+
+  /**
+   * Stop tap: like a swipe, it takes effect at the end of the current pattern. A second tap while
+   * waiting (or a tap while the first rhythm is still loading) stops at once.
+   */
+  function requestStop() {
+    if (!isPlaying || isStopping) { stop(); return; }
+    const request = ++playRequest.current;
+    cancelPendingTap();
+    setStarting(false); setPendingRhythm(null); setStopping(true);
+    setMessage('Zastaví sa po skončení patternu');
+    void engine.current?.stopAtPatternEnd().then(ended => {
+      if (!ended || request !== playRequest.current) return;
+      setPlaying(false); setStopping(false); setPlayingRhythm(null);
+      setMessage('');
+    });
+  }
 
   function stop() {
     playRequest.current++;
     cancelPendingTap();
-    engine.current?.stop(); setPlaying(false); setStarting(false); setPlayingRhythm(null); setPendingRhythm(null);
+    engine.current?.stop(); setPlaying(false); setStarting(false); setStopping(false); setPlayingRhythm(null); setPendingRhythm(null);
     setMessage('');
   }
 

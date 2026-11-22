@@ -309,7 +309,12 @@ hranici. Krátke metrá sa rozdelia na hranici patternu so zachovaním fázy bea
 Budúce údery nahradeného cyklu sa zrušia; už znejúce údery
 si ponechajú svoj gain graf a prirodzene doznejú. Graf sa odpojí po poslednom
 `onended`. Stop stíši aktívny graf aj všetky doznievajúce grafy a zneplatní
-rozpracované požiadavky. Chyba parsovania alebo načítania nového rytmu
+rozpracované požiadavky. `stopAtPatternEnd()` zastaví ako zaradené Play: na rovnakej
+hranici patternu (už známej `scheduledBoundary`, inak cez `queued` v plánovači) vypne
+plánovač, zruší údery ďalšieho cyklu, ktoré look-ahead už naplánoval, a po dosiahnutí
+hranice presunie graf medzi doznievajúce, bez stíšenia. Nové `start()` počas čakania
+začne presne na tejto hranici (vypnutý plánovač = `interval === null`) a čakanie
+skončí s `false`, rovnako ako `stop()`. Chyba parsovania alebo načítania nového rytmu
 zachová pôvodné prehrávanie.
 Timer pravidelne dopĺňa plán dopredu cez `planBeat()`, presný začiatok zvuku
 určuje `AudioBufferSourceNode.start()` podľa hodín `AudioContext`, nie UI timer.
@@ -330,8 +335,15 @@ aj zaradenie sa tak zmenia len raz. Časovač volá akciu cez `delayedNext` (ref
 z posledného renderu), aby videl aktuálny stav; Stop a odpojenie ho zrušia.
 Tlačidlá majú `touch-action: manipulation`, aby dvojťuk nezoomoval.
 
+**Stop** (hlavný pohľad aj Živé hranie) volá `requestStop()`: počas hrania nastaví
+`isStopping`, správu „Zastaví sa po skončení patternu“ a čaká na
+`AudioEngine.stopAtPatternEnd()`; stav hrania vynuluje, iba ak medzitým neprišla iná
+požiadavka (`playRequest`). Druhé ťuknutie počas čakania, ťuknutie počas prvého
+načítavania a chyby volajú okamžité `stop()`. `startRhythm()` (potiahnutie, Next, Play)
+čakajúce zastavenie zruší.
+
 **Živé hranie** má jediné tlačidlo; `toggleLive()` ho prepína medzi Play (`play()`)
-a Stop (`stop()`). Dvojťuk tu nie je; ťuknutie do `DOUBLE_TAP_MS` po predchádzajúcom
+a Stop (`requestStop()`). Dvojťuk tu nie je; ťuknutie do `DOUBLE_TAP_MS` po predchádzajúcom
 (`liveToggledAt`) sa ignoruje, aby nervózne dvojité stlačenie rytmus nezastavilo
 a hneď nespustilo. Rytmy sa tu prepínajú iba potiahnutím. Riadok
 `predchádzajúci ← aktuálny → nasledujúci` sa počíta od `pendingRhythm ?? playingRhythm`,
@@ -344,7 +356,7 @@ a potlačí klik, ktorý prehliadač pošle na konci potiahnutia (`consumeClick(
 `swipeRhythm()` v `App` počas hrania volá `playNeighbor()` hneď, bez čakania na dvojťuk,
 relatívne k `pendingRhythm ?? playingRhythm`; v pokoji iba presunie kurzor (`cueTo()`).
 Hlavné tlačidlo dostáva `primaryProps` (klik = Play/Next), Stop v hlavnom pohľade
-`stopProps` (klik = Stop) a `LiveView` `liveProps` (klik = Play/Stop); potiahnutie
+`stopProps` (klik = `requestStop()`) a `LiveView` `liveProps` (klik = Play/Stop); potiahnutie
 (`playSwipe.handlers`) je vo všetkých rovnaké.
 Aby prehliadač vodorovné gesto neprevzal na posun, majú `.transport .play` a `.transport .stop`
 `touch-action: pan-y` a `.live-primary` `touch-action: none`.

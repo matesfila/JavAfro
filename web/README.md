@@ -160,7 +160,9 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   Režim prepína aj kláves **Insert** a tlačidlo Prepisovanie na klávesnici nôt.
   Prepisovanie neodstraňuje
   koniec riadka; na jeho konci sa znaky pridávajú. Označený text sa nahrádza bežne.
-- Play opakuje základné patterny nepretržite. Stop zruší aj naplánované údery.
+- Play opakuje základné patterny nepretržite. **Stop** dohrá aktuálny pattern a zastaví
+  na jeho konci (bez stíšenia, údery doznejú); druhé Stop počas čakania zastaví hneď
+  a zruší aj naplánované údery.
 - Opätovné **Play** zaradí zvolený rytmus na prehratie po skončení aktuálneho
   patternu, vrátane všetkých jeho taktov. Na tejto hranici začne nový rytmus
   od začiatku bez pridanej pauzy; doznievajúce údery sa neprerušia.
