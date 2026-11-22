@@ -67,6 +67,31 @@ it.each([false, true])('offers the software keyboard when primary input is touch
   expect(editor().contentDOM.getAttribute('inputmode')).toBe('none');
 });
 
+it('switches from Klávesnica to Plocha when the system keyboard is hidden', async () => {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === '(pointer: coarse)', addEventListener() {}, removeEventListener() {},
+  }));
+  const visual = Object.assign(new EventTarget(), { height: window.innerHeight, scale: 1 });
+  vi.stubGlobal('visualViewport', visual);
+  const resize = (height: number) => act(() => { visual.height = height; visual.dispatchEvent(new Event('resize')); });
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const mode = () => document.querySelector('.input-mode-button')?.textContent;
+  await editorMenu('Plocha');
+  await editorMenu('Noty');
+  expect(mode()).toBe('Klávesnica');
+  // A resize before the keyboard has appeared does not leave the mode.
+  await resize(window.innerHeight);
+  expect(mode()).toBe('Klávesnica');
+  await resize(window.innerHeight - 300);
+  expect(document.querySelector('.app')?.classList.contains('keyboard-open')).toBe(true);
+  expect(mode()).toBe('Klávesnica');
+  await resize(window.innerHeight);
+  expect(mode()).toBe('Plocha');
+  expect(editor().contentDOM.getAttribute('inputmode')).toBe('none');
+  expect(document.activeElement).not.toBe(editor().contentDOM);
+});
+
 it('shares overwrite mode between the Noty keyboard and the Editor menu', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));

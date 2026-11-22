@@ -3,12 +3,10 @@
 ## Úlohy a nápady
 
 ### Otvorené úlohy
-- [] bug: swipe left/right nefunguje na stop buttone v live view
 - [] stlacenie Done na sys keyb ju deaktuvuje aj v app
 - [] auto zap/vyp overwrite mod podla polohy kurzora
 - [] pridat novy rytmus do aktualneho dokumentu
 - [] dialog novy rytmus s uvodnymi parametrami
-- [] bug: slidre v mixpulte nejdu az do konca
 - [] sys keyb vyvolat iba buttonom v internej keyb ??
 - [] sys keyb moznost zavret krizikom vpravo hore
 - [] pridat moznost zapnut africky ambient do pozadia
@@ -46,7 +44,9 @@ nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u ni
 
 ## Changelist
 
-### v0.6.2 (beta)
+### v0.7.0
+- [?] bug: swipe left/right nefunguje na stop buttone v live view
+- [?] bug: slidre v mixpulte nejdu az do konca
 - [x] Nezávislé stopy pre duny a zvonce
 - [x] Balafon
 - [x] Nové rozloženie klávesnice Noty: namiesto bodky medzera, namiesto `|` Enter; `|` a `.` v dolnom rade vľavo od šípky doľava
@@ -74,7 +74,7 @@ nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u ni
 - [x] Button Prepisovanie bude aj v custom klávesnici Noty vedla backspace
 - [x] Vytvoriť stable release a netlify presmerovať na ňu
 
-### v0.5.3 (current)
+### v0.5.3
 - [x] Dá sa JavAfro zverejniť cez github pages ??
 - [x] Prepnutie do režimu systémovej klávesnice musí hneď zobraziť klávesnicu, nie až vtedy keď editor znovuzíska focus
 - [x] Bug: Skladba sa ulozila aj s dialektom aj ked v nej predtym nebol, navyse v multiriadkovó formate

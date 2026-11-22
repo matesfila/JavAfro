@@ -39,6 +39,17 @@ export function App() {
   const [selectedMode, setInputMode] = useState<EditorInputMode>('surface');
   const inputMode = selectedMode === 'keyboard' && !viewport.touchInput ? 'surface' : selectedMode;
   const editor = useRef<YamlEditorHandle>(null);
+  const keyboardShown = useRef(false);
+  useEffect(() => {
+    if (inputMode !== 'keyboard') { keyboardShown.current = false; return; }
+    if (viewport.keyboard) keyboardShown.current = true;
+    else if (keyboardShown.current) {
+      // The user hid the system keyboard (Done / back), so leave Klávesnica for Plocha.
+      keyboardShown.current = false;
+      editor.current?.setInputMode('surface');
+      setInputMode('surface');
+    }
+  }, [inputMode, viewport.keyboard]);
   const [source, setSource] = useState('');
   const [overwrite, setOverwriteMode] = useState(false);
   const [editorDocument, setEditorDocument] = useState({ revision: 0, foldRhythms: true });

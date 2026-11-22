@@ -138,7 +138,8 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   Pri ovládaní myšou alebo touchpadom prepína medzi **Plocha** a **Noty**.
   Na primárne dotykových zariadeniach cyklicky prepína **Plocha → Noty → Klávesnica → Plocha** a zobrazuje
   aktuálny režim. **Klávesnica** priamo pri kliknutí zameria editor a vyvolá
-  systémovú klávesnicu na úpravu ostatného YAML. **Plocha** skryje panel nôt aj
+  systémovú klávesnicu na úpravu ostatného YAML. Keď systémovú klávesnicu skryješ
+  (Hotovo, Done alebo späť), aplikácia sa sama prepne do režimu **Plocha**. **Plocha** skryje panel nôt aj
   systémovú klávesnicu; editor využije uvoľnenú výšku nad kompaktným prehrávačom.
   Dotyk editora v režime Plocha systémovú klávesnicu nevyvoláva.
   Prepnutie zachová dokument, výber aj históriu úprav. Posúva sa iba obsah dokumentu.
