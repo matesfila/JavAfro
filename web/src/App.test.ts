@@ -181,6 +181,31 @@ it('uses the configured tempo limits for dial accessibility and keyboard input',
   }
 });
 
+it('keeps the BPM input read-only until a double tap on the tempo dial', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const dial = document.querySelector<HTMLElement>('.tempo-knob')!;
+  const input = dial.querySelector('input')!;
+  dial.setPointerCapture = vi.fn();
+  dial.releasePointerCapture = vi.fn();
+  async function touch(type: string, y: number) {
+    const event = new MouseEvent(type, { bubbles: true, clientX: 50, clientY: y, button: 0 });
+    Object.assign(event, { pointerType: 'touch', pointerId: 1, isPrimary: true });
+    await act(() => input.dispatchEvent(event));
+  }
+  async function tap() { await touch('pointerdown', 100); await touch('pointerup', 100); }
+  async function swipe() { await touch('pointerdown', 100); await touch('pointermove', 60); await touch('pointerup', 60); }
+  expect(input.readOnly).toBe(true);
+  await tap(); await swipe(); await tap(); await swipe();
+  expect(input.readOnly).toBe(true);
+  expect(document.activeElement).not.toBe(input);
+  await tap(); await tap();
+  expect(input.readOnly).toBe(false);
+  expect(document.activeElement).toBe(input);
+  await act(() => input.blur());
+  expect(input.readOnly).toBe(true);
+});
+
 it.each(['"b.tt..s."', '@'])('retains a tempo drag while the editor validates track %s', async pattern => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));

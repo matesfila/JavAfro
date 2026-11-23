@@ -21,6 +21,12 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
   const numberInput = useRef<HTMLInputElement>(null);
   const slider = useRef<HTMLDivElement>(null);
   const [entry, setEntry] = useState<string | null>(null);
+  // Read-only keeps the system keyboard closed even when iOS focuses the input on its own.
+  const [editing, setEditing] = useState(false);
+  function startEditing(input: HTMLInputElement) {
+    input.readOnly = false;
+    setEditing(true);
+  }
   const dialMinimum = Math.min(minimum, value);
   const dialMaximum = Math.max(maximum, value);
   const changeDial = (next: number) => onChange(Math.max(dialMinimum, Math.min(dialMaximum, Math.round(next))));
@@ -59,8 +65,11 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
         const tap = { time: event.timeStamp, x: event.clientX, y: event.clientY };
         if (isDoubleTap(lastTap.current, tap)) {
           lastTap.current = null;
-          numberInput.current?.focus({ preventScroll: true });
-          numberInput.current?.select();
+          const input = numberInput.current;
+          if (!input) return;
+          startEditing(input);
+          input.focus({ preventScroll: true });
+          input.select();
         } else lastTap.current = tap;
       }} onLostPointerCapture={event => {
         if (drag.current?.pointer === event.pointerId) drag.current = null;
@@ -75,13 +84,17 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
           </svg>
         </div>
         <div className="bpm-value"><input ref={numberInput} id="bpm-number" aria-label="Tempo v BPM" type="number"
-          inputMode="numeric" min="1" max={limit} step="1" value={entry ?? value}
+          inputMode="numeric" min="1" max={limit} step="1" value={entry ?? value} readOnly={!editing}
           onChange={event => {
             setEntry(event.target.value);
             const next = event.target.valueAsNumber;
             if (Number.isInteger(next) && next >= 1 && next <= limit) onChange(next);
-          }} onBlur={() => setEntry(null)} onKeyDown={event => {
+          }} onBlur={() => { setEntry(null); setEditing(false); }} onKeyDown={event => {
             if (event.key === 'Enter') event.currentTarget.blur();
+            // A physical keyboard (Tab to the input, then type) can edit without the double tap.
+            else if (event.currentTarget.readOnly && (/^\d$/.test(event.key) || event.key === 'Backspace' || event.key === 'Delete')) {
+              startEditing(event.currentTarget);
+            }
           }} /><span>BPM</span></div>
       </div>
     </div>
