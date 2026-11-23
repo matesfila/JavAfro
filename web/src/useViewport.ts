@@ -17,22 +17,32 @@ function viewport() {
 export function useViewport() {
   const [size, setSize] = useState(viewport);
   useEffect(() => {
-    const update = () => setSize(viewport());
     const media = window.matchMedia(compactQuery);
     const touchInput = window.matchMedia(touchInputQuery);
     const meta = document.querySelector<HTMLMetaElement>('meta[name="viewport"]');
     const normalViewport = meta?.content;
     let restoreTimer: number | undefined;
+    let keyboardOpen = viewport().keyboard;
     function restoreZoomLimits() {
       window.clearTimeout(restoreTimer);
       if (meta && normalViewport) meta.content = normalViewport;
     }
-    function rotate() {
-      if (!meta || !normalViewport || !media.matches) return;
-      // Request the initial scale during rotation, then allow normal pinch zoom again.
+    /** Request the initial scale for a moment, then allow normal pinch zoom again. */
+    function resetZoom() {
+      if (!meta || !normalViewport) return;
       meta.content = normalViewport + ', minimum-scale=1, maximum-scale=1';
       window.clearTimeout(restoreTimer);
       restoreTimer = window.setTimeout(restoreZoomLimits, 500);
+    }
+    const update = () => {
+      const next = viewport();
+      // iOS can leave the page zoomed in after the system keyboard hides.
+      if (keyboardOpen && !next.keyboard && (window.visualViewport?.scale ?? 1) > 1.01) resetZoom();
+      keyboardOpen = next.keyboard;
+      setSize(next);
+    };
+    function rotate() {
+      if (media.matches) resetZoom();
     }
     const orientation = window.screen.orientation;
     if (orientation) orientation.addEventListener('change', rotate);

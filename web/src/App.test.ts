@@ -92,6 +92,30 @@ it('switches from Klávesnica to Plocha when the system keyboard is hidden', asy
   expect(document.activeElement).not.toBe(editor().contentDOM);
 });
 
+it('resets a leftover zoom when the system keyboard is hidden', async () => {
+  const meta = Object.assign(document.createElement('meta'), { name: 'viewport', content: 'width=device-width, initial-scale=1.0' });
+  document.head.append(meta);
+  try {
+    const visual = Object.assign(new EventTarget(), { height: window.innerHeight, scale: 1 });
+    vi.stubGlobal('visualViewport', visual);
+    const resize = (height: number, scale: number) => act(() => {
+      Object.assign(visual, { height, scale }); visual.dispatchEvent(new Event('resize'));
+    });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+    await act(() => root.render(createElement(App)));
+    // Pinch zoom without the keyboard is left alone.
+    await resize(window.innerHeight / 2, 2);
+    expect(meta.content).toBe('width=device-width, initial-scale=1.0');
+    await resize(window.innerHeight, 1);
+    await resize((window.innerHeight - 300) / 1.5, 1.5);
+    expect(meta.content).toBe('width=device-width, initial-scale=1.0');
+    await resize(window.innerHeight / 1.5, 1.5);
+    expect(meta.content).toBe('width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1');
+  } finally {
+    meta.remove();
+  }
+});
+
 it('closes the Noty pad with its close button and switches to Plocha', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
