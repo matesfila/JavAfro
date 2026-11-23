@@ -4,11 +4,20 @@ export function tempoFromDrag(start: number, distance: number, minimum: number, 
   return Math.max(minimum, Math.min(maximum, start + Math.round(distance / 4)));
 }
 
+export type Tap = { time: number; x: number; y: number };
+
+/** Two still taps close in time and place open the BPM input with the system keyboard. */
+export function isDoubleTap(previous: Tap | null, next: Tap) {
+  return previous !== null && next.time - previous.time <= 400
+    && Math.hypot(next.x - previous.x, next.y - previous.y) <= 24;
+}
+
 export function TempoControl({ value, minimum, maximum, limit, onChange }: {
   value: number; minimum: number; maximum: number; limit: number;
   onChange: (value: number) => void;
 }) {
-  const drag = useRef<{ pointer: number; y: number; value: number; minimum: number; maximum: number; moved: boolean; onNumber: boolean } | null>(null);
+  const drag = useRef<{ pointer: number; y: number; value: number; minimum: number; maximum: number; moved: boolean } | null>(null);
+  const lastTap = useRef<Tap | null>(null);
   const numberInput = useRef<HTMLInputElement>(null);
   const slider = useRef<HTMLDivElement>(null);
   const [entry, setEntry] = useState<string | null>(null);
@@ -33,7 +42,7 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
         slider.current?.focus({ preventScroll: true });
         event.currentTarget.setPointerCapture(event.pointerId);
         drag.current = { pointer: event.pointerId, y: event.clientY, value, minimum: dialMinimum,
-          maximum: dialMaximum, moved: false, onNumber: event.target === numberInput.current };
+          maximum: dialMaximum, moved: false };
       }} onPointerMove={event => {
         const start = drag.current;
         if (start?.pointer !== event.pointerId) return;
@@ -46,13 +55,19 @@ export function TempoControl({ value, minimum, maximum, limit, onChange }: {
         if (start?.pointer !== event.pointerId) return;
         drag.current = null;
         event.currentTarget.releasePointerCapture(event.pointerId);
-        if (start.onNumber && !start.moved) numberInput.current?.focus({ preventScroll: true });
+        if (start.moved) { lastTap.current = null; return; }
+        const tap = { time: event.timeStamp, x: event.clientX, y: event.clientY };
+        if (isDoubleTap(lastTap.current, tap)) {
+          lastTap.current = null;
+          numberInput.current?.focus({ preventScroll: true });
+          numberInput.current?.select();
+        } else lastTap.current = tap;
       }} onLostPointerCapture={event => {
         if (drag.current?.pointer === event.pointerId) drag.current = null;
       }}>
         <div ref={slider} className="tempo-dial" role="slider" tabIndex={0} aria-label="Tempo"
           aria-valuemin={dialMinimum} aria-valuemax={dialMaximum} aria-valuenow={value} aria-valuetext={`${value} BPM`}
-          title="Ťahaj hore pre zrýchlenie, dole pre spomalenie" onKeyDown={keyDown}>
+          title="Ťahaj hore pre zrýchlenie, dole pre spomalenie, dvojklikom zadáš číslo" onKeyDown={keyDown}>
           <svg viewBox="0 0 80 80" aria-hidden="true">
             <path className="tempo-dial-track" d="M 15.25 64.75 A 35 35 0 1 1 64.75 64.75" />
             <circle className="tempo-dial-face" cx="40" cy="40" r="27" />

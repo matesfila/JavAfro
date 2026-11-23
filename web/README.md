@@ -113,7 +113,8 @@ a hlavné ovládanie prehrávania. Na počítači zostávajú rozšírené ovlá
 
 Tempo sa nastavuje okrúhlym ovládačom: potiahnutie hore zrýchľuje, dole spomaľuje
 (4 px na 1 BPM, bez skoku pri dotyku). Veľké tlačidlá **−** a **+** menia tempo
-presne o 1 BPM; číslo BPM sa dá upraviť aj priamo. Ovládač podporuje šípky
+presne o 1 BPM. Číslo BPM sa dá upraviť aj priamo: systémová klávesnica sa otvorí až
+po dvojkliku (dvojťuknutí) na ovládač, jedno ťuknutie ju neotvorí. Ovládač podporuje šípky
 (1 BPM), Page Up/Down (10 BPM) a Home/End (predvolené hranice tempa).
 
 Jeden YAML súbor môže obsahovať viac rytmov pod samostatnými hlavnými kľúčmi.
