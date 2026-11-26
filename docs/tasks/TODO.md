@@ -8,7 +8,9 @@
   - nastaví kurzor na začiatok taktu
   - otvorí hudobnú klávesnicu
   - atomaticky zapne prepisovací mód
-- [] sys keyb vyvolat iba buttonom v internej keyb ??
+- [x] sys keyb vyvolat iba buttonom v internej keyb ??
+  - tlačidlo Sys. keyb. nad Prepisovaním; režim Klávesnica ostáva aj v ponuke Editor
+- [x] chybová správa hore v hlavičke vedľa JavAfro, bez zmeny rozloženia (web aj desktop)
 - [] sys keyb moznost zavret krizikom vpravo hore
 - [] Dvojklik/dvojťuk na pattern má selektnúť daný pattern + dedikovaný editor pre pattern ???
 
