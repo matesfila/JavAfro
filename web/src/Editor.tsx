@@ -10,7 +10,7 @@ import { moveRhythm, type MoveDirection } from './rhythm-move';
 import { overwriteExtension, overwriteState, setOverwrite } from './overwrite';
 import { NotePad } from './NotePad';
 import { insertNote, noteCommands, type NoteCommand } from './note-input';
-import { instrumentAtCaret } from './note-context';
+import { instrumentAtCaret, patternBarStart } from './note-context';
 import type { Instrument } from './rhythm';
 
 const theme = EditorView.theme({
@@ -94,8 +94,56 @@ function enablePinchZoom(editor: EditorView) {
   };
 }
 
-export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, overwriteButton, onOverwriteChange, onCloseNotes, inputMode = 'keyboard', readOnly = false }: {
+/**
+ * The browser places the caret for a tap itself, sometimes after pointerup, and CodeMirror reads
+ * it as a "select.pointer" selection. While `active()` (shortly after a pattern tap), such
+ * selections inside a pattern move to the start of their bar too.
+ */
+export function patternBarSnap(active: () => boolean) {
+  return EditorState.transactionFilter.of(transaction => {
+    if (transaction.docChanged || !transaction.selection || !transaction.isUserEvent('select.pointer') || !active()) return transaction;
+    const barStart = patternBarStart(transaction.newDoc.toString(), transaction.newSelection.main.head);
+    return barStart === null ? transaction : [transaction, { selection: { anchor: barStart }, sequential: true }];
+  });
+}
+
+/**
+ * Report single-finger taps (no drag, no long press) on the editor text. Scrolling and pinching
+ * cancel the pointer, a long press keeps the native selection handles.
+ */
+function onFingerTap(editor: EditorView, tap: (x: number, y: number) => void) {
+  const active = new Set<number>();
+  let start: { id: number; x: number; y: number; time: number } | null = null;
+  function down(event: PointerEvent) {
+    if (event.pointerType !== 'touch') return;
+    active.add(event.pointerId);
+    start = active.size === 1 ? { id: event.pointerId, x: event.clientX, y: event.clientY, time: event.timeStamp } : null;
+  }
+  function up(event: PointerEvent) {
+    if (!active.delete(event.pointerId)) return;
+    const begin = start;
+    if (begin?.id !== event.pointerId) return;
+    start = null;
+    if (event.type === 'pointerup' && event.timeStamp - begin.time < 500
+      && Math.hypot(event.clientX - begin.x, event.clientY - begin.y) < 10) tap(event.clientX, event.clientY);
+  }
+  editor.contentDOM.addEventListener('pointerdown', down);
+  window.addEventListener('pointerup', up);
+  window.addEventListener('pointercancel', up);
+  return () => {
+    editor.contentDOM.removeEventListener('pointerdown', down);
+    window.removeEventListener('pointerup', up);
+    window.removeEventListener('pointercancel', up);
+  };
+}
+
+export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, overwriteButton, onOverwriteChange, onCloseNotes, onPatternTap, inputMode = 'keyboard', readOnly = false }: {
   ref?: Ref<YamlEditorHandle>;
+  /**
+   * A finger tap on a track pattern moves the caret to the start of the tapped bar, then calls
+   * this. Without it, taps place the caret as usual.
+   */
+  onPatternTap?: () => void;
   /** The close button on the Noty pad. */
   onCloseNotes?: () => void;
   value: string; onChange: (value: string) => void; onCaretChange: (offset: number) => void; caretOffset: number;
@@ -112,6 +160,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   const change = useRef(onChange); change.current = onChange;
   const caretChange = useRef(onCaretChange); caretChange.current = onCaretChange;
   const modeChange = useRef(onOverwriteChange); modeChange.current = onOverwriteChange;
+  const patternTap = useRef(onPatternTap); patternTap.current = onPatternTap;
   const [activeInstrument, setActiveInstrument] = useState<Instrument | null>(null);
   useImperativeHandle(ref, () => ({
     foldAll() {
@@ -174,9 +223,11 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
       // The selection uses CodeMirror's single-character line breaks, even for CRLF files.
       setActiveInstrument(instrumentAtCaret(state.doc.toString(), state.selection.main.head));
     }
+    let barSnapUntil = 0;
+    const barSnap = patternBarSnap(() => performance.now() <= barSnapUntil);
     const editor = new EditorView({
       parent: host.current!, doc: value, selection: { anchor: Math.min(caretOffset, value.length) },
-      extensions: [overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), theme, zoomRemeasure.of(remeasureThemes[0]),
+      extensions: [barSnap, overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), theme, zoomRemeasure.of(remeasureThemes[0]),
         editing.current.of([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]),
         inputAttributes.current.of(EditorView.contentAttributes.of({ inputmode: inputMode === 'keyboard' ? 'text' : 'none' })),
         EditorView.contentAttributes.of({ 'aria-label': 'YAML editor rytmu', spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),
@@ -191,9 +242,19 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
     });
     view.current = editor;
     const removePinchZoom = enablePinchZoom(editor);
+    const removeFingerTap = onFingerTap(editor, (x, y) => {
+      const tapped = patternTap.current;
+      if (!tapped || editor.state.readOnly) return;
+      const offset = editor.posAtCoords({ x, y });
+      const barStart = offset === null ? null : patternBarStart(editor.state.doc.toString(), offset);
+      if (barStart === null) return;
+      barSnapUntil = performance.now() + 600;
+      editor.dispatch({ selection: { anchor: barStart }, userEvent: 'select.bar' });
+      tapped();
+    });
     updateInstrument(editor.state);
     if (foldRhythms) editor.dispatch({ effects: rhythmFoldEffects(editor.state) });
-    return () => { removePinchZoom(); editor.destroy(); view.current = null; };
+    return () => { removePinchZoom(); removeFingerTap(); editor.destroy(); view.current = null; };
     // The editor instance is retained while documents change.
   }, []);
   useEffect(() => {

@@ -3,13 +3,25 @@
 ## Úlohy a nápady
 
 ### Otvorené úlohy
+
+- [x] Klik na pattern:
+  - nastaví kurzor na začiatok taktu
+  - otvorí hudobnú klávesnicu
+  - atomaticky zapne prepisovací mód
+- [] sys keyb vyvolat iba buttonom v internej keyb ??
+- [] sys keyb moznost zavret krizikom vpravo hore
+- [] Dvojklik/dvojťuk na pattern má selektnúť daný pattern + dedikovaný editor pre pattern ???
+
+- [] Spoločný repozitár pre dokumenty: ak sa striedajú devices, aby mali vždy aktuálny zdroj
+- [] lockovanie parametrov (tempo, dialect... co sa da nastavit per pattern aj globalne)
+- [] lock rytmu: ak sa zapne, nebude sa zobrazivat klavesnica a ani sa nijako nezmeni zdrojovy kod
+- [] live view moznost zmeny tempa swipe up/down,
+- [] bug: zase tempo dial, nerefreshuje sa info, refreshne sa az po kliknuti do editora
+- [x] zrusit auto zobrazovanie klavesnice pri toceni tempom, aktivovat iba dvojklikom
 - [] auto zap/vyp overwrite mod podla polohy kurzora
 - [] pridat novy rytmus do aktualneho dokumentu
 - [] dialog novy rytmus s uvodnymi parametrami
-- [] sys keyb vyvolat iba buttonom v internej keyb ??
-- [] sys keyb moznost zavret krizikom vpravo hore
 - [] pridat moznost zapnut africky ambient do pozadia
-- [] Dvojklik/dvojťuk na pattern má selektnúť daný pattern + dedikovaný editor pre pattern ???
 - [] Zoznam stôp dať ako list, nie mapu. Umožniť tak dať ten istý nástroj viackrát.
 - [] Alternatívne názvy pre nástroje, povoliť aj menej presné názvy, využiť nejaký word distance algoritmus ?
   - cieľom je možnosť mať kenken, kensereni, kensedeni, kenken bell, kenken_withBell, kenken with bell, 

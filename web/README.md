@@ -145,6 +145,10 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   (Hotovo, Done alebo späť), aplikácia sa sama prepne do režimu **Plocha**. **Plocha** skryje panel nôt aj
   systémovú klávesnicu; editor využije uvoľnenú výšku nad kompaktným prehrávačom.
   Dotyk editora v režime Plocha systémovú klávesnicu nevyvoláva.
+  Ťuknutie prstom na pattern nástroja (aj v `base` a `variations`) v režime **Plocha** alebo
+  **Noty** presunie kurzor na začiatok ťuknutého taktu, otvorí klávesnicu nôt a zapne
+  **Prepisovanie**. Presnú pozíciu v takte nastavíš šípkami na klávesnici nôt.
+  V režime **Klávesnica** ťuknutie iba presunie kurzor; myš a touchpad sa správajú ako doteraz.
   Prepnutie zachová dokument, výber aj históriu úprav. Posúva sa iba obsah dokumentu.
 - Šípky **↑/↓** vpravo v lište editora presunú rytmus pod kurzorom nad predchádzajúci
   alebo pod nasledujúci rytmus (s komentármi pod ním). Kurzor zostane v presunutom rytme,

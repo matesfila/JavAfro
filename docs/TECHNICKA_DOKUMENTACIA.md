@@ -264,7 +264,7 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `SettingsPanel.tsx` / `SettingsPanel` | Zobrazuje jednu sadu ovládačov ako desktopový `details` alebo mobilné tlačidlo a natívny modálny `dialog`. Riadi otvorenie a zatvorenie; hodnoty drží nadradený `App`, takže zatvorenie ani zmena rozloženia nastavenia nemaže. |
 | `MenuDropdown.tsx` / `MenuDropdown` | Tlačidlo s rozbaľovacou ponukou (ponuka Editor v lište editora: režim, Prepisovanie, Rozbaliť/Zbaliť všetko). Panel je `position: fixed`, aby ho neorezala karta editora s `overflow: hidden`. Zatvorí sa Escape, kliknutím mimo, zmenou veľkosti okna a kliknutím na položku bez `data-keep-open`. |
 | `useViewport.ts` / `useViewport()` | Sleduje breakpoint a výšku `visualViewport` vrátane mobilnej klávesnice. Poskytuje dostupnú výšku, kompaktný režim a príznak `keyboard`; `App` podľa neho prepne režim Klávesnica na Plocha, keď sa zobrazená systémová klávesnica skryje. Keď sa klávesnica skryje a stránka ostala priblížená, na 500 ms pridá do meta `viewport` `maximum-scale=1`, čím iOS vráti mierku 1 (rovnako pri otočení); jeho media query musí zodpovedať pravidlám v `style.css`. |
-| `Editor.tsx` / `YamlEditor` | Integrácia CodeMirror do Reactu: text, kurzor, YAML diagnostika, folding (`foldAll()`/`unfoldAll()` pre ponuku Editor) a režim prepisovania. |
+| `Editor.tsx` / `YamlEditor` | Integrácia CodeMirror do Reactu: text, kurzor, YAML diagnostika, folding (`foldAll()`/`unfoldAll()` pre ponuku Editor) a režim prepisovania. Ťuknutie prstom na pattern (`onFingerTap()`, `patternBarStart()` v `note-context.ts`) presunie kurzor na začiatok taktu a zavolá `onPatternTap`; `App` zapne Prepisovanie a režim Noty (okrem režimu Klávesnica). Filter `patternBarSnap()` ešte 600 ms udrží na začiatku taktu aj kurzor, ktorý prehliadač po ťuknutí umiestni sám. |
 | `editor-setup.ts` | Spoločná konfigurácia rozšírení a klávesových skratiek editora. |
 | `overwrite.ts` | CodeMirror stav, efekt a vstupná logika Insert/Overwrite. |
 | `rhythm-folding.ts` | Vytvára efekty zbalenia hlavných YAML definícií. |
@@ -475,7 +475,7 @@ a spustí lokálny HTTPS server cez `scripts/phone-server.mjs`.
 | Časovanie a živé ovládanie | Java `LivePlaybackTest`, `DialectPlaybackTest`, `MixerPlaybackTest`; web `timing.test.ts`, `audio.test.ts`. |
 | Nástroje, multisample a hlasitosť | Java `WavSampleInstrumentTest`, `DjembeInstrumentTest`, `AfroSampleInstrumentTest`, `AudioHeadroomTest`; web `sounds.test.ts`, `afro-instruments.test.ts`. |
 | Editor a životný cyklus UI | Java `PlaybackRestartTest`, `YamlFileTransferHandlerTest`, `YamlFoldingTest`, `DialectControlsTest`, `MixerPanelTest`, `EditorModeTest`, `DesktopLayoutTest`, `AfroJavaPlayerTest`, `RhythmMoveTest`; web `rhythm-folding.test.ts`, `rhythm-move.test.ts`, `rhythm-navigation.test.ts`, `overwrite.test.ts`, `App.test.ts` (aj Next/predchádzajúci a Živé hranie). |
-| Klávesnica nôt | Java `NoteContextTest` (nástroj pod kurzorom, zoznam nôt), `NotePadTest`; web `note-context.test.ts`, `note-input.test.ts`. |
+| Klávesnica nôt | Java `NoteContextTest` (nástroj pod kurzorom, zoznam nôt), `NotePadTest`; web `note-context.test.ts`, `note-input.test.ts`, `Editor.test.ts` (ťuknutie na pattern). |
 | Distribúcia a offline | Web `offline-worker.test.ts`, `obfuscation.test.ts`; importný nástroj `tools/import-afroplayer.test.cjs`. |
 
 Pri zmene plánovania používaj existujúce falošné audio výstupy a vloženú náhodu;

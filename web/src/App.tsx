@@ -529,6 +529,11 @@ export function App() {
     editor.current?.setInputMode(nextMode);
     setInputMode(nextMode);
   }
+  /** A finger tap on a pattern edits it with the note pad in overwrite mode. Klávesnica keeps the system keyboard. */
+  function editTappedPattern() {
+    setOverwriteMode(true);
+    if (inputMode !== 'notes') changeInputMode('notes');
+  }
   const inputModes = {
     notes: { label: 'Noty', next: viewport.touchInput ? 'keyboard' : 'surface' },
     keyboard: { label: 'Klávesnica', next: 'surface' },
@@ -588,7 +593,7 @@ export function App() {
             </span>
             <div className="editor-actions">{editorMenu}{moveButtons}</div>
           </div>
-          <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} onCloseNotes={() => changeInputMode('surface')} foldRhythms={editorDocument.foldRhythms} overwriteButton={modeButton} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
+          <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} onCloseNotes={() => changeInputMode('surface')} onPatternTap={inputMode === 'keyboard' ? undefined : editTappedPattern} foldRhythms={editorDocument.foldRhythms} overwriteButton={modeButton} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);
             if (activeDraft.current) {
               const draft = { ...activeDraft.current, caretOffset: Math.min(offset, activeDraft.current.source.length) };
