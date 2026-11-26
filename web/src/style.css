@@ -80,8 +80,10 @@
 /* The notes sit above `. |`, which extend the bottom row of arrows to the left. */
 .note-strokes{grid-area:1 / 1 / 4 / 4;min-width:0;margin-right:3px}
 .note-instrument{font-size:12px;color:#705840;margin-bottom:4px;overflow-wrap:anywhere}
-/* Row 1 holds only the small close button, right above Backspace. */
-.note-pad .note-close{grid-area:1 / 6;display:grid;place-items:center;min-height:24px;height:24px;padding:0}
+/* Row 1 holds only short buttons: Sys. keyb. above Prepisovanie and close above Backspace. */
+.note-pad :is(.note-close,.note-system-keyboard){min-height:24px;height:24px}
+.note-pad .note-close{grid-area:1 / 6;display:grid;place-items:center;padding:0}
+.note-pad .note-system-keyboard{grid-area:1 / 4 / 2 / 6;padding:0 2px;font-size:12px;white-space:nowrap}
 .note-close svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round}
 .note-keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(40px,1fr));gap:5px;max-height:calc(2 * var(--note-key-height) + 5px);overflow-y:auto}
 .note-navigation{display:contents}

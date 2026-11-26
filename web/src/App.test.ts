@@ -127,6 +127,29 @@ it('closes the Noty pad with its close button and switches to Plocha', async () 
   expect(document.activeElement).not.toBe(editor().contentDOM);
 });
 
+it.each([false, true])('offers Sys. keyb. above Prepisovanie on the Noty pad only with touch input: %s', async touch => {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === '(pointer: coarse)' && touch, addEventListener() {}, removeEventListener() {},
+  }));
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  await editorMenu('Plocha');
+  expect(document.querySelector('.input-mode-button')?.textContent).toBe('Noty');
+  const button = document.querySelector<HTMLButtonElement>('.note-navigation .note-system-keyboard');
+  if (!touch) {
+    expect(button).toBeNull();
+    return;
+  }
+  expect(button?.textContent).toBe('Sys. keyb.');
+  expect(button?.getAttribute('aria-label')).toBe('Zobraziť systémovú klávesnicu');
+  expect(button?.nextElementSibling?.classList.contains('mode-button')).toBe(true);
+  await click('Zobraziť systémovú klávesnicu');
+  expect(document.querySelector('.note-pad')).toBeNull();
+  expect(document.querySelector('.input-mode-button')?.textContent).toBe('Klávesnica');
+  expect(editor().contentDOM.getAttribute('inputmode')).toBe('text');
+  expect(document.activeElement).toBe(editor().contentDOM);
+});
+
 it('shares overwrite mode between the Noty keyboard and the Editor menu', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));

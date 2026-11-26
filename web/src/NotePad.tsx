@@ -3,12 +3,17 @@ import type { NoteCommand } from './note-input';
 import type { Instrument } from './rhythm';
 import { notesForInstrument } from './sounds';
 
-export function NotePad({ instrument, overwriteButton, insert, command, close }: {
+export function NotePad({ instrument, overwriteButton, insert, command, close, systemKeyboard }: {
   instrument: Instrument | null;
   overwriteButton: ReactNode;
   insert: (text: string) => void; command: (command: NoteCommand) => void;
   /** Hides the pad like Done on the system keyboard (the editor switches to Plocha). */
   close: () => void;
+  /**
+   * Switches to Klávesnica (the system keyboard); the button above Prepisovanie is shown only
+   * with it. It must run synchronously in the tap, or iOS does not open the keyboard.
+   */
+  systemKeyboard?: () => void;
 }) {
   const notes = notesForInstrument(instrument);
   const key = (label: ReactNode, title: string, action: () => void, className?: string) =>
@@ -25,6 +30,7 @@ export function NotePad({ instrument, overwriteButton, insert, command, close }:
     <div className="note-navigation">
       {/* An SVG cross fills the short button; a × glyph stays small at any font size. */}
       {key(<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3 17 17M17 3 3 17" /></svg>, 'Zavrieť klávesnicu', close, 'note-close')}
+      {systemKeyboard && key('Sys. keyb.', 'Zobraziť systémovú klávesnicu', systemKeyboard, 'note-system-keyboard')}
       {overwriteButton}
       {action('⌫', 'Vymazať pred kurzorom', 'backspace')}
       {key('␣', 'Medzera', () => insert(' '), 'note-space')}

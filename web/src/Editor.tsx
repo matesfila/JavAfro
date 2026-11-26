@@ -137,7 +137,7 @@ function onFingerTap(editor: EditorView, tap: (x: number, y: number) => void) {
   };
 }
 
-export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, overwriteButton, onOverwriteChange, onCloseNotes, onPatternTap, inputMode = 'keyboard', readOnly = false }: {
+export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, foldRhythms = true, overwrite = false, overwriteButton, onOverwriteChange, onCloseNotes, onSystemKeyboard, onPatternTap, inputMode = 'keyboard', readOnly = false }: {
   ref?: Ref<YamlEditorHandle>;
   /**
    * A finger tap on a track pattern moves the caret to the start of the tapped bar, then calls
@@ -146,6 +146,8 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
   onPatternTap?: () => void;
   /** The close button on the Noty pad. */
   onCloseNotes?: () => void;
+  /** The Sys. keyb. button on the Noty pad; without it the button is hidden (no touch input). */
+  onSystemKeyboard?: () => void;
   value: string; onChange: (value: string) => void; onCaretChange: (offset: number) => void; caretOffset: number;
   foldRhythms?: boolean;
   overwrite?: boolean; onOverwriteChange: (overwrite: boolean) => void;
@@ -297,6 +299,6 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
     <div className="editor-host" ref={host} />
     {inputMode === 'notes' && <NotePad instrument={activeInstrument} overwriteButton={overwriteButton} insert={text => {
       if (view.current && !readOnly) { insertNote(view.current, text, activeInstrument === 'balafon'); view.current.focus(); }
-    }} command={runCommand} close={() => onCloseNotes?.()} />}
+    }} command={runCommand} close={() => onCloseNotes?.()} systemKeyboard={onSystemKeyboard} />}
   </div>;
 }

@@ -140,6 +140,9 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   Backspace. Dolný rad pokračuje vľavo od `←` oddeľovačom taktov `|` a pred ním pauzou `.`.
   Malé tlačidlo **×** nad Backspace panel zavrie a prepne editor do režimu **Plocha**,
   podobne ako Hotovo na systémovej klávesnici.
+  Na primárne dotykových zariadeniach je vedľa neho, nad tlačidlom **Prepisovanie**, rovnako
+  nízke tlačidlo **Sys. keyb.**, ktoré prepne editor do režimu **Klávesnica** a zobrazí
+  systémovú klávesnicu. Pri ovládaní myšou sa nezobrazuje.
   Režim prepína prvá položka ponuky **Editor**, ktorá ukazuje aktuálny režim.
   Pri ovládaní myšou alebo touchpadom prepína medzi **Plocha** a **Noty**.
   Na primárne dotykových zariadeniach cyklicky prepína **Plocha → Noty → Klávesnica → Plocha** a zobrazuje

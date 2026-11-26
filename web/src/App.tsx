@@ -596,7 +596,7 @@ export function App() {
             </span>
             <div className="editor-actions">{editorMenu}{moveButtons}</div>
           </div>
-          <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} onCloseNotes={() => changeInputMode('surface')} onPatternTap={inputMode === 'keyboard' ? undefined : editTappedPattern} foldRhythms={editorDocument.foldRhythms} overwriteButton={modeButton} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
+          <div className="editor-wrap"><YamlEditor ref={editor} key={editorDocument.revision} readOnly={isLoading} inputMode={inputMode} onCloseNotes={() => changeInputMode('surface')} onSystemKeyboard={viewport.touchInput ? () => changeInputMode('keyboard') : undefined}onPatternTap={inputMode === 'keyboard' ? undefined : editTappedPattern} foldRhythms={editorDocument.foldRhythms} overwriteButton={modeButton} overwrite={overwrite} onOverwriteChange={setOverwriteMode} value={source} onChange={editSource} caretOffset={caretOffset} onCaretChange={offset => {
             caretRef.current = offset; setCaretOffset(offset);
             if (activeDraft.current) {
               const draft = { ...activeDraft.current, caretOffset: Math.min(offset, activeDraft.current.source.length) };
