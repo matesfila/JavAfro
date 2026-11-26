@@ -189,6 +189,23 @@ it('updates rhythm context across invalid patterns and YAML syntax errors', asyn
   }
 });
 
+it('shows YAML errors in the fixed header slot and expands them on tap', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
+  await act(() => root.render(createElement(App)));
+  const slot = document.querySelector('.site-header > .header-status')!;
+  expect(slot.textContent).toBe('');
+  await act(() => editor().dispatch({ changes: { from: 0, to: editor().state.doc.length, insert: 'One:\n  tracks:\n    djembe: "?"\n' } }));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  const message = slot.querySelector<HTMLButtonElement>('.header-status-text.invalid')!;
+  expect(slot.getAttribute('role')).toBe('alert');
+  expect(message.textContent).toContain('?');
+  expect(document.querySelector('.editor-card')?.textContent).not.toContain(message.textContent);
+  await act(() => message.click());
+  expect(message.getAttribute('aria-expanded')).toBe('true');
+  await act(() => document.body.dispatchEvent(new Event('pointerdown', { bubbles: true })));
+  expect(message.getAttribute('aria-expanded')).toBe('false');
+});
+
 it('uses the configured tempo limits for dial accessibility and keyboard input', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));

@@ -128,7 +128,10 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
 - Predvolený súbor obsahuje viac rytmov; prehrávaný rytmus určuje kurzor v editore.
 - Vlastný YAML otvoríš tlačidlom alebo presunutím jedného súboru do okna.
   Súbor sa číta lokálne v prehliadači; nikam sa neodosiela.
-- Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť.
+- Editor zvýrazňuje YAML a priebežne kontroluje jeho platnosť. Chyby a stav „Upravené · stlač Play“
+  sa ukážu hore v hlavičke vedľa názvu JavAfro. Miesto pre správu je vyhradené vždy, takže
+  správa nemení rozloženie okna. Dlhú správu orezanú na dva riadky otvoríš celú ťuknutím;
+  zavrie ju ťuknutie mimo nej alebo Escape.
 - Editor sa otvorí v režime **Plocha**. V režime **Noty** panel ponúka všetky povolené
   noty nástroja na aktuálnom riadku kurzora vrátane akcentov a pravdepodobnostných
   úderov; funguje aj v jeho `base` a `variations`. Mimo tracku sa noty skryjú.

@@ -263,6 +263,7 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `App.tsx` / `App` | Koordinuje zdrojový YAML, kurzor, vybraný a prehrávaný rytmus, validáciu, súbory, uloženie, živé ovládanie a mix. Počítadlá požiadaviek chránia stav pred oneskorenými výsledkami otvorenia a Play. |
 | `SettingsPanel.tsx` / `SettingsPanel` | Zobrazuje jednu sadu ovládačov ako desktopový `details` alebo mobilné tlačidlo a natívny modálny `dialog`. Riadi otvorenie a zatvorenie; hodnoty drží nadradený `App`, takže zatvorenie ani zmena rozloženia nastavenia nemaže. |
 | `MenuDropdown.tsx` / `MenuDropdown` | Tlačidlo s rozbaľovacou ponukou (ponuka Editor v lište editora: režim, Prepisovanie, Rozbaliť/Zbaliť všetko). Panel je `position: fixed`, aby ho neorezala karta editora s `overflow: hidden`. Zatvorí sa Escape, kliknutím mimo, zmenou veľkosti okna a kliknutím na položku bez `data-keep-open`. |
+| `HeaderStatus.tsx` / `HeaderStatus` | Správy editora (chyby YAML, „Upravené · stlač Play“, chyby konceptu) v hlavičke medzi logom a ponukou Súbor. Miesto má vždy rovnakú veľkosť (`flex: 1 1 0`), takže správa nemení rozloženie; text sa oreže na dva riadky a ťuknutie ho otvorí celý ako prekrytie pod hlavičkou (zavrie ho ťuknutie mimo, Escape alebo nová správa). Tlačidlo neberie fokus editoru. |
 | `useViewport.ts` / `useViewport()` | Sleduje breakpoint a výšku `visualViewport` vrátane mobilnej klávesnice. Poskytuje dostupnú výšku, kompaktný režim a príznak `keyboard`; `App` podľa neho prepne režim Klávesnica na Plocha, keď sa zobrazená systémová klávesnica skryje. Keď sa klávesnica skryje a stránka ostala priblížená, na 500 ms pridá do meta `viewport` `maximum-scale=1`, čím iOS vráti mierku 1 (rovnako pri otočení); jeho media query musí zodpovedať pravidlám v `style.css`. |
 | `Editor.tsx` / `YamlEditor` | Integrácia CodeMirror do Reactu: text, kurzor, YAML diagnostika, folding (`foldAll()`/`unfoldAll()` pre ponuku Editor) a režim prepisovania. Ťuknutie prstom na pattern (`onFingerTap()`, `patternBarStart()` v `note-context.ts`) presunie kurzor na začiatok taktu a zavolá `onPatternTap`; `App` zapne Prepisovanie a režim Noty (okrem režimu Klávesnica). Filter `patternBarSnap()` ešte 600 ms udrží na začiatku taktu aj kurzor, ktorý prehliadač po ťuknutí umiestni sám. |
 | `editor-setup.ts` | Spoločná konfigurácia rozšírení a klávesových skratiek editora. |
@@ -367,7 +368,7 @@ a spoločný master do výstupu. Každý úder má vlastný source node; dekódo
 s krátkym stíšením; `dispose()` navyše zatvorí kontext.
 
 Web aj desktop načítajú chybný dokument ako editovateľný text a chybu ukážu
-v stavovom riadku pod editorom. Webové Uložiť používa YAML dokumentový model: zachová celý súbor
+(desktop v stavovom riadku pod editorom, web v pevnom mieste hlavičky vedľa loga). Webové Uložiť používa YAML dokumentový model: zachová celý súbor
 a zapíše BPM a dialect vybraného, počas hrania prehrávaného rytmu. Mixer,
 master a humanizáciu do rytmu neukladá. Java výstup je mono, web podporuje aj pan
 z manifestu.

@@ -16,6 +16,7 @@ import { type Controls } from './timing';
 import { config } from './config';
 import { ArrowIcon, CollapseIcon, DocumentIcon, DownloadIcon, ExpandIcon, FolderIcon, FullscreenIcon, NewIcon, NextIcon, PlayIcon, RestoreIcon } from './icons';
 import { LiveView } from './LiveView';
+import { HeaderStatus } from './HeaderStatus';
 import { useSwipe } from './useSwipe';
 import { caretAtSourceOffset, entryAtCaret, rhythmNeighbors, type RhythmEntry } from './rhythm-navigation';
 
@@ -94,6 +95,7 @@ export function App() {
   const engine = useRef<AudioEngine | null>(null);
   const busy = isPlaying || isStarting;
   const displayedRhythm = playingRhythm ?? rhythm;
+  // Shown in the header slot next to the logo, so messages never resize the editor.
   const editorStatus = validation || (busy && source !== playingSource.current ? 'Upravené · stlač Play' : '');
   // Play turns into Next while the caret stays in the playing (or queued) rhythm of the unchanged text.
   // Moving the caret elsewhere or editing brings Play back, which queues the caret rhythm or the edit.
@@ -558,6 +560,7 @@ export function App() {
   }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false); }} onDrop={drop}>
     <header className="site-header">
       <div className="brand"><img src={asset('icons/djembe.svg')} alt="" /><span>JavAfro</span></div>
+      <HeaderStatus messages={[editorStatus, draftError]} invalid={!!(validation || draftError)} />
       <div className="header-controls">
         <SettingsPanel title="Súbor" compact className="file-options">
           <div onClick={closeMenuOnAction}>
@@ -603,10 +606,6 @@ export function App() {
           }} />
             {!source && !isLoading && <div className="editor-placeholder">Otvor YAML súbor.</div>}
           </div>
-          {editorStatus && <div className={'editor-status' + (validation ? ' invalid' : '')} role={validation ? 'alert' : 'status'}>
-            {editorStatus}
-          </div>}
-          {draftError && <div className="editor-status invalid" role="alert">{draftError}</div>}
           {dragging && <div className="drop-overlay"><FolderIcon /><strong>{busy ? 'Najprv stlač Stop' : 'Pusti sem YAML súbor'}</strong></div>}
         </section>
 
