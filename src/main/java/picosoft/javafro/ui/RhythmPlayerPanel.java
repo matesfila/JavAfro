@@ -46,7 +46,7 @@ public final class RhythmPlayerPanel extends JPanel {
     private final NotePad notePad;
     private final JLabel fileName = new JLabel("rytmus.yaml");
     private final JLabel rhythmName = new JLabel("Rytmus");
-    private final JLabel editorStatus = new JLabel("");
+    private final HeaderStatus headerStatus = new HeaderStatus();
     private final AppConfig config;
     private final JSlider tempo;
     private final JSlider humanize;
@@ -70,7 +70,6 @@ public final class RhythmPlayerPanel extends JPanel {
     private Path currentFile;
     private Draft previousDocument;
     private DesktopDraftStore draftStore;
-    private final JLabel draftStatus = new JLabel("");
     private final Timer draftTimer = new Timer(400, event -> persistDraft());
     private final JMenuItem restorePrevious = new JMenuItem("Obnoviť posledný súbor");
     private final JPopupMenu fileMenuPopup = new JPopupMenu();
@@ -109,7 +108,6 @@ public final class RhythmPlayerPanel extends JPanel {
         humanizeProbability = new JSlider(0, 100, config.humanizeApplianceProbability());
         notePad = new NotePad(editor);
         draftTimer.setRepeats(false);
-        draftStatus.setName("draftStatus");
         setBorder(BorderFactory.createEmptyBorder(8, 18, 8, 18));
         add(buildHeader(), BorderLayout.NORTH);
         JPanel workspace = new JPanel(new BorderLayout(16, 0));
@@ -164,9 +162,10 @@ public final class RhythmPlayerPanel extends JPanel {
         shortcut("control N", "newDocument", this::newDocument);
     }
 
-    /** Brand on the left; Open and the Súbor menu on the right (web site-header). */
+    /** Brand on the left, editor messages in the middle, Open and the Súbor menu on the right (web site-header). */
     private JComponent buildHeader() {
-        JPanel header = new JPanel(new BorderLayout());
+        JPanel header = new JPanel(new BorderLayout(12, 0));
+        header.setName("header");
         header.setOpaque(false);
         header.setBorder(BorderFactory.createEmptyBorder(0, 2, 2, 0));
         JLabel brand = new JLabel("JavAfro", UiIcons.logo(30), SwingConstants.LEFT);
@@ -174,6 +173,7 @@ public final class RhythmPlayerPanel extends JPanel {
         brand.setIconTextGap(10);
         brand.setFont(SandTheme.heading(brand.getFont(), 23f));
         header.add(brand, BorderLayout.WEST);
+        header.add(headerStatus, BorderLayout.CENTER);
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         actions.setOpaque(false);
         open.setIcon(UiIcons.icon(UiIcons.Shape.FOLDER, 18));
@@ -235,7 +235,7 @@ public final class RhythmPlayerPanel extends JPanel {
         return item;
     }
 
-    /** Toolbar with the file name and editing modes, the editor, the note keyboard and the status bar (web editor-card). */
+    /** Toolbar with the file name and editing modes, the editor and the note keyboard (web editor-card). */
     private JComponent buildEditorCard() {
         editor.setName("yamlEditor");
         editor.setLineHeight(config.editorStyle().lineHeight());
@@ -336,23 +336,10 @@ public final class RhythmPlayerPanel extends JPanel {
         surface.add(editorScroll, BorderLayout.CENTER);
         surface.add(notePad, BorderLayout.SOUTH);
 
-        editorStatus.setName("editorStatus");
-        editorStatus.setBorder(BorderFactory.createEmptyBorder(7, 14, 7, 14));
-        editorStatus.setVisible(false);
-        draftStatus.setFont(draftStatus.getFont().deriveFont(draftStatus.getFont().getSize2D() - 1f));
-        draftStatus.setForeground(SandTheme.MUTED);
-        draftStatus.setBorder(BorderFactory.createEmptyBorder(6, 14, 7, 14));
-        JPanel statusBar = new JPanel(new BorderLayout());
-        statusBar.setOpaque(false);
-        statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, SandTheme.BORDER));
-        statusBar.add(editorStatus, BorderLayout.NORTH);
-        statusBar.add(draftStatus, BorderLayout.SOUTH);
-
         JPanel card = SandTheme.card(new JPanel(new BorderLayout()), 1);
         card.setName("editorCard");
         card.add(toolbar, BorderLayout.NORTH);
         card.add(surface, BorderLayout.CENTER);
-        card.add(statusBar, BorderLayout.SOUTH);
         return card;
     }
 
@@ -572,15 +559,13 @@ public final class RhythmPlayerPanel extends JPanel {
         fileName.setToolTipText(currentFile == null ? null : currentFile.toString());
     }
 
-    /** Validation and editing hints under the editor; hidden when empty. */
+    /** Validation and editing hints in the header slot; an empty text clears them without moving anything. */
     private void setEditorStatus(String text, boolean invalid) {
-        editorStatus.setText(text);
-        editorStatus.setToolTipText(text.isEmpty() ? null : text);
-        editorStatus.setOpaque(invalid);
-        editorStatus.setBackground(SandTheme.ERROR_BACKGROUND);
-        editorStatus.setForeground(invalid ? SandTheme.ERROR : SandTheme.MUTED);
-        editorStatus.setVisible(!text.isEmpty());
+        headerStatus.setMessage(HeaderStatus.Slot.EDITOR, text, invalid);
     }
+
+    /** The header message slot, for tests. */
+    HeaderStatus headerStatus() { return headerStatus; }
 
     public static Rhythm parseRhythm(String yaml) {
         var rhythms = RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
@@ -715,15 +700,16 @@ public final class RhythmPlayerPanel extends JPanel {
         if (draftStore == null) return;
         try {
             draftStore.save(snapshotDraft(), false);
-            draftStatus.setText((currentFile == null ? "rytmus.yaml" : currentFile.getFileName().toString())
-                    + (snapshotDraft().dirty() ? " · rozpracovaný koncept uložený" : " · koncept uložený"));
-            draftStatus.setToolTipText(null);
+            headerStatus.setMessage(HeaderStatus.Slot.DRAFT, (currentFile == null ? "rytmus.yaml" : currentFile.getFileName().toString())
+                    + (snapshotDraft().dirty() ? " · rozpracovaný koncept uložený" : " · koncept uložený"), false);
         } catch (IOException exception) { draftError(exception); }
     }
 
     private void draftError(Exception exception) {
-        draftStatus.setText("Koncept sa nepodarilo uložiť alebo obnoviť. Ulož prácu cez Súbor → Uložiť.");
-        draftStatus.setToolTipText(exception.getMessage());
+        // The cause used to be only in a tooltip; the opened full message shows it now.
+        String detail = exception.getMessage() == null ? "" : " · " + exception.getMessage();
+        headerStatus.setMessage(HeaderStatus.Slot.DRAFT,
+                "Koncept sa nepodarilo uložiť alebo obnoviť. Ulož prácu cez Súbor → Uložiť." + detail, true);
     }
 
     private void applyDraft(Draft draft) {

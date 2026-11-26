@@ -166,7 +166,7 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 
 | Trieda alebo vnorený typ | Zodpovednosť |
 | --- | --- |
-| `RhythmPlayerPanel` | Hlavný panel a koordinátor desktopu, rozložený ako web: hlavička (logo, Otvoriť, menu Súbor so skupinami Súbory a Pomoc), vľavo karta editora (názov súboru s `*` pri neuložených zmenách, popup Editor so zaškrtávacími položkami Noty/Prepisovanie, ktoré popup nezatvárajú, a Rozbaliť/Zbaliť všetko cez `setAllFolds()`, šípky presunu rytmu, YAML editor, klávesnica nôt, stavový riadok s chybami YAML a stav konceptu), vpravo karta prehrávania (názov rytmu, Play/Stop, tempo, rozbaľovacie sekcie Mixer, Dialect a Humanize). Rieši aj výber rytmu pod kurzorom, synchronizáciu ovládania a chyby. |
+| `RhythmPlayerPanel` | Hlavný panel a koordinátor desktopu, rozložený ako web: hlavička (logo, `HeaderStatus` so správami editora a stavom konceptu, Otvoriť, menu Súbor so skupinami Súbory a Pomoc), vľavo karta editora (názov súboru s `*` pri neuložených zmenách, popup Editor so zaškrtávacími položkami Noty/Prepisovanie, ktoré popup nezatvárajú, a Rozbaliť/Zbaliť všetko cez `setAllFolds()`, šípky presunu rytmu, YAML editor, klávesnica nôt), vpravo karta prehrávania (názov rytmu, Play/Stop, tempo, rozbaľovacie sekcie Mixer, Dialect a Humanize). Rieši aj výber rytmu pod kurzorom, synchronizáciu ovládania a chyby. |
 | `RhythmPlayerPanel.PlaybackSession` | Balíková abstrakcia životného cyklu prehrávania (`play`, `queue`, `cancelQueued`, `stop`, `isStopped`). Produkčne obaluje sekvencer, testy môžu vložiť vlastnú session cez factory. |
 | `RhythmPlayerPanel.PlaybackRequest` | Súkromný record rytmu a nastavení pre konkrétne spustenie. Pri reštartoch sa uchováva iba posledná čakajúca požiadavka. |
 | `MixerPanel` | Zostavuje ovládanie hlasitosti, Mute a Solo podľa trackov (Solo = jediný nestlmený track), uchováva master a prepája hodnoty s aktuálnym `PlaybackSettings` cez `bind()`. `reset()` obnovuje tracky pri načítaní súboru. Je priamo v karte prehrávania, nie v samostatnom okne. |
@@ -179,6 +179,7 @@ Konfigurácia sa pri pohybe posuvníkov neprepisuje.
 | `RhythmFoldParser` | Určuje zbaliteľné bloky hlavných YAML definícií pre RSyntaxTextArea podľa YAML uzlov. Rozpracovaný chybný text necháva editovateľný. |
 | `RhythmMove` | Vymení hlavnú YAML definíciu pod kurzorom so susednou (port web `rhythm-move.ts`). Rytmus siaha od riadka svojho kľúča po ďalší kľúč, takže komentáre pod ním sa presúvajú s ním. Panel ho volá šípkami ↑/↓ ako jednu úpravu pre krok späť a znovu zbalí zbalené rytmy. |
 | `EditorFoldIcon` | Vykresľuje vlastnú ikonu rozbalenia/zbalenia v editore. |
+| `HeaderStatus` | Pevné miesto pre správy v hlavičke medzi logom a tlačidlami (port webového `HeaderStatus.tsx`): chyby YAML, „Upravené · stlač Play“ (slot `EDITOR`) a stav alebo chyba konceptu (slot `DRAFT`), každá správa na vlastnom riadku. Preferovaná výška sú vždy dva riadky a šírka 0, takže v `BorderLayout.CENTER` zaberie voľné miesto a správa nikdy nemení rozloženie (`setMessage()` iba prekreslí). Text sa zalomí na najviac dva riadky s „…“, chyby sú červené na svetlom pozadí. Kliknutie otvorí celú správu v `JPopupMenu` pod hlavičkou; zavrie ho kliknutie mimo, Escape (dočasný `KeyEventDispatcher`, fokus ostáva v editore) alebo nová správa. |
 | `YamlFileTransferHandler` | Prijíma presunutie jedného YAML súboru; kontroluje typ vstupu a dostupnosť otvorenia. Bežné textové operácie deleguje pôvodnému transfer handleru. |
 | `SandTheme` | Nastavuje vzhľad FlatLaf Light s paletou webu (`web/src/style.css`): pozadie, papierové karty, hnedý akcent, zaoblenia. Pomocníci `card()`, `accent()`, `key()` a `heading()` štýlujú karty a tlačidlá; fungujú aj bez nainštalovaného FlatLaf (testy). Z `AppConfig.EditorStyle` (sekcia `editor` v `javafro.yaml`) vytvára písmo editora a písmo reťazcov (tučné, rozostup písmen cez `TextAttribute.TRACKING`). |
 | `SpacedSyntaxTextArea` | RSyntaxTextArea s nastaviteľnou výškou riadka (`editor.lineHeight`). RSTA nemá nastavenie riadkovania, preto trieda pripočíta medzeru k výške riadka a text vycentruje. |
@@ -368,7 +369,7 @@ a spoločný master do výstupu. Každý úder má vlastný source node; dekódo
 s krátkym stíšením; `dispose()` navyše zatvorí kontext.
 
 Web aj desktop načítajú chybný dokument ako editovateľný text a chybu ukážu
-(desktop v stavovom riadku pod editorom, web v pevnom mieste hlavičky vedľa loga). Webové Uložiť používa YAML dokumentový model: zachová celý súbor
+(obe v pevnom mieste hlavičky vedľa loga: desktop `HeaderStatus.java`, web `HeaderStatus.tsx`). Webové Uložiť používa YAML dokumentový model: zachová celý súbor
 a zapíše BPM a dialect vybraného, počas hrania prehrávaného rytmu. Mixer,
 master a humanizáciu do rytmu neukladá. Java výstup je mono, web podporuje aj pan
 z manifestu.
@@ -378,8 +379,8 @@ samostatné panely a testy nepoužívajú používateľské úložisko. Bez argu
 koncept; explicitný súbor uloží predchádzajúci koncept do jednej zálohy. Debounce 400 ms
 a `flushDraft()` pri deaktivácii/zatvorení uložia aj neplatný či prázdny text. `saveTo()`
 zapíše súbor cez dočasný súbor; pôvodný editor a uložená základná verzia sa aktualizujú
-až po úspechu. Zápis súboru a záznamu konceptu sú oddelené, chyby konceptu sa zobrazia
-pod editorom. `requestClose()` pri zrušení alebo neúspešnom uložení ponechá okno otvorené.
+až po úspechu. Zápis súboru a záznamu konceptu sú oddelené, stav aj chyby konceptu sa zobrazia
+v hlavičke (`HeaderStatus`, slot `DRAFT`). `requestClose()` pri zrušení alebo neúspešnom uložení ponechá okno otvorené.
 
 ## 5. Dátový formát a pravidlá pri zmenách
 
@@ -493,7 +494,7 @@ manuálnym spustením príslušnej aplikácie.
 | Nový samplový nástroj | Manifest a WAV resources, konkrétna trieda `matesamples`, Java mapovanie v `RhythmLoader.instrument()`, webový zoznam `instruments` v `rhythm.ts`, testy a synchronizácia assetov. |
 | Zmena časovania/humanizácie | Java `BeepSequencer`, `Dialect`, `PlaybackSettings`; web `timing.ts`, `audio.ts`, prípadne `sounds.ts`; príslušné audio konštanty. |
 | Zmena hlasitosti/mute | Java `MixerPanel`, `PlaybackSettings`, renderer a `AudioConstants`; web `App.tsx` a `AudioEngine`. Zachovať prevod medzi UI a internou stupnicou. |
-| Zmena editora | Java `RhythmPlayerPanel`, `RhythmFoldParser`, `RhythmMove`, `EditorFoldIcon`, `SandTheme`, `SpacedSyntaxTextArea`, `EditorZoom`; web `Editor.tsx`, `editor-setup.ts`, `overwrite.ts`, `rhythm-folding.ts`, `rhythm-move.ts`. |
+| Zmena editora | Java `RhythmPlayerPanel`, `HeaderStatus`, `RhythmFoldParser`, `RhythmMove`, `EditorFoldIcon`, `SandTheme`, `SpacedSyntaxTextArea`, `EditorZoom`; web `Editor.tsx`, `editor-setup.ts`, `overwrite.ts`, `rhythm-folding.ts`, `rhythm-move.ts`. |
 | Vzhľad desktopu | `SandTheme` (FlatLaf kľúče a paleta), `UiIcons`, kreslenie `TempoDial`/`TouchSliders`/`DisclosurePanel`; webová predloha je `web/src/style.css`. FlatLaf potrebuje v `proguard.pro` pravidlo `-keep class com.formdev.flatlaf.**` a natívny prístup (`Enable-Native-Access` v manifeste, `--enable-native-access` v `build-windows.ps1`). |
 | Prepínanie rytmov počas hrania (Next, dvojťuk, Živé hranie) | Web `App.tsx` (`nextMode`, `pressPrimary()`, `playNeighbor()`, `startRhythm()`, `DOUBLE_TAP_MS`), `rhythm-navigation.ts`, `LiveView.tsx`, `useSwipe.ts` (potiahnutie), `Editor.tsx` (`setCaret()`), štýly `.live-*` v `style.css`. Desktop to zatiaľ nemá. |
 | Klávesnica nôt | Java `NotePad`, `RhythmLoader.instrumentAtCaret()`/`notesFor()`, `Instrument.notes()`; web `NotePad.tsx`, `note-input.ts`, `note-context.ts`, `sounds.ts`. Poradie nôt je poradie v manifeste na oboch stranách. |

@@ -133,11 +133,14 @@ Bez argumentu sa obnoví posledný koncept; ak neexistuje, otvorí sa prázdny e
 Predvolený rytmus z resources sa nenačítava. Explicitný súbor má prednosť pred
 konceptom; predchádzajúci koncept zostane dostupný ako jedna obnoviteľná záloha.
 Relatívna cesta sa vyhodnocuje voči pracovnému priečinku. V hlavičke okna je tlačidlo **Otvoriť**
-a ponuka **Súbor**.
+a ponuka **Súbor**. Medzi logom a týmito tlačidlami je pevné miesto pre správy editora:
+chyby YAML, „Upravené · stlač Play“ a stav konceptu. Správa nikdy neposunie ani nezmení
+veľkosť ostatných častí okna. Dlhý text sa oreže na dva riadky; kliknutím sa celá správa
+zobrazí pod hlavičkou a zavrie sa kliknutím mimo, klávesom Escape alebo novou správou.
 
 Okno je rozložené ako webová verzia (vzhľad FlatLaf v teplých papierových farbách):
 vľavo editor s názvom súboru (`*` pri neuložených zmenách textu, tempa alebo dialectu),
-ponukou **Editor** (**Noty**, **Prepisovanie**, **Rozbaliť všetko**, **Zbaliť všetko**), šípkami **↑/↓** a stavovým riadkom pre chyby YAML; vpravo názov
+ponukou **Editor** (**Noty**, **Prepisovanie**, **Rozbaliť všetko**, **Zbaliť všetko**) a šípkami **↑/↓**; vpravo názov
 rytmu pod kurzorom, **Play/Stop**, tempo a rozbaľovacie panely **Mixer**, **Dialect**
 (s tlačidlom **Vynulovať**) a **Humanize**. Okno má najmenej 900 × 600 px.
 Jeden súbor `.yaml` alebo `.yml` možno tiež presunúť z Prieskumníka priamo do okna
@@ -210,7 +213,7 @@ aj pri strate aktivácie okna a potvrdenom zatvorení. Pred zatvorením neulože
 sa dá uložiť súbor alebo odchod zrušiť. Nejde o neobmedzenú históriu ani náhradu
 za vlastné YAML súbory. Koncept zostáva lokálny; neposiela sa na server.
 Poškodený záznam ani novší koncept z iného okna sa automaticky neprepíše.
-Chyba úložiska je viditeľná pod editorom; prácu možno naďalej uložiť do súboru.
+Chyba úložiska je viditeľná v hlavičke okna; prácu možno naďalej uložiť do súboru.
 
 Nepretržité prehrávanie možno použiť aj bez GUI (blokuje volajúce vlákno):
 

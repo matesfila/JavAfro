@@ -102,7 +102,9 @@ public class DesktopEditingTest {
             } catch (Exception exception) { throw new AssertionError(exception); }
             panel.flushDraft();
             assertEquals("this window: [", editor.getText());
-            assertTrue(((JLabel) find(panel, "draftStatus")).getText().contains("nepodarilo"));
+            var status = (HeaderStatus) find(panel, "headerStatus");
+            assertTrue(status.message(HeaderStatus.Slot.DRAFT).contains("nepodarilo"));
+            assertTrue(status.isInvalid());
         });
         assertEquals("newer window: [", new DesktopDraftStore(directory).current().source());
     }

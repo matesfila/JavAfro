@@ -45,7 +45,7 @@ public class DesktopLayoutTest {
         assertTrue(Files.readString(target).contains("bpm: 133"));
     }
 
-    @Test public void mixerAndLiveControlsAreInlineAndInvalidYamlIsReportedUnderTheEditor() throws Exception {
+    @Test public void mixerAndLiveControlsAreInlineAndInvalidYamlIsReportedInTheHeader() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             var panel = new RhythmPlayerPanel(YAML);
             var mixer = NotePadTest.find(panel, "masterVolume");
@@ -53,15 +53,80 @@ public class DesktopLayoutTest {
             assertTrue(SwingUtilities.isDescendingFrom(mixer, panel));
             assertNull(SwingUtilities.getAncestorOfClass(JDialog.class, mixer));
             assertNotNull(NotePadTest.find(panel, "trackSolo-0"));
-            var status = (JLabel) NotePadTest.find(panel, "editorStatus");
-            assertFalse(status.isVisible());
+            var status = (HeaderStatus) NotePadTest.find(panel, "headerStatus");
+            assertSame(NotePadTest.find(panel, "header"), status.getParent());
+            assertNull(NotePadTest.find(panel, "editorStatus"));
+            assertNull(NotePadTest.find(panel, "draftStatus"));
+            assertEquals("", status.text());
             var editor = (RSyntaxTextArea) NotePadTest.find(panel, "yamlEditor");
             editor.insert("Broken: [\n", 0);
             editor.setCaretPosition(3);
-            assertTrue(status.isVisible());
-            assertTrue(status.getText().startsWith("Neplatný YAML"));
+            assertTrue(status.message(HeaderStatus.Slot.EDITOR).startsWith("Neplatný YAML"));
+            assertTrue(status.isInvalid());
             assertEquals("", ((JLabel) NotePadTest.find(panel, "playbackStatus")).getText());
         });
+    }
+
+    @Test public void headerMessagesNeverMoveOrResizeAnything() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            var panel = new RhythmPlayerPanel(YAML);
+            var status = panel.headerStatus();
+            var header = NotePadTest.find(panel, "header");
+            var brand = NotePadTest.find(panel, "brand");
+            var card = NotePadTest.find(panel, "editorCard");
+            var editor = (RSyntaxTextArea) NotePadTest.find(panel, "yamlEditor");
+            panel.setSize(900, 600);
+            layoutTree(panel);
+            var before = java.util.List.of(header.getBounds(), brand.getBounds(), status.getBounds(), card.getBounds(),
+                    NotePadTest.find(panel, "fileMenuButton").getBounds());
+            var preferred = java.util.List.of(panel.getPreferredSize(), header.getPreferredSize(), status.getPreferredSize());
+            assertEquals(0, status.getPreferredSize().width);
+
+            editor.insert("Broken: [\n", 0);
+            editor.setCaretPosition(3);
+            status.setMessage(HeaderStatus.Slot.DRAFT, "rytmus.yaml · " + "veľmi dlhá správa ".repeat(40), true);
+            assertTrue(status.isInvalid());
+            assertTrue(status.text().contains("\n"));
+            var lines = status.visibleLines();
+            assertEquals(HeaderStatus.MAX_LINES, lines.size());
+            assertTrue(lines.getFirst().text().startsWith("Neplatný YAML"));
+            assertTrue(lines.getLast().text().endsWith("…"));
+            assertEquals(preferred, java.util.List.of(panel.getPreferredSize(), header.getPreferredSize(), status.getPreferredSize()));
+            layoutTree(panel);
+            assertEquals(before, java.util.List.of(header.getBounds(), brand.getBounds(), status.getBounds(), card.getBounds(),
+                    NotePadTest.find(panel, "fileMenuButton").getBounds()));
+
+            status.setMessage(HeaderStatus.Slot.EDITOR, "", false);
+            status.setMessage(HeaderStatus.Slot.DRAFT, "", false);
+            assertEquals("", status.text());
+            assertTrue(status.visibleLines().isEmpty());
+            layoutTree(panel);
+            assertEquals(before.get(2), status.getBounds());
+            assertEquals(before.get(3), card.getBounds());
+            assertFalse(status.isFullMessageShown()); // headless: never shown, never throws
+            status.showFullMessage();
+            assertFalse(status.isFullMessageShown());
+
+            var image = new java.awt.image.BufferedImage(header.getWidth(), header.getHeight(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
+            var graphics = image.createGraphics();
+            header.paint(graphics); // painting an empty and a filled slot must not fail
+            status.setMessage(HeaderStatus.Slot.EDITOR, "Neplatný YAML · chyba", true);
+            header.paint(graphics);
+            graphics.dispose();
+        });
+    }
+
+    @Test public void longWordsWrapAnywhere() {
+        var metrics = new JLabel().getFontMetrics(new java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12));
+        int width = metrics.stringWidth("0123456789");
+        assertEquals(java.util.List.of("0123456789", "0123456789", "ab cd"), HeaderStatus.wrap("01234567890123456789 ab cd", metrics, width));
+        assertEquals(java.util.List.of("ab cd", "efgh"), HeaderStatus.wrap("ab cd efgh", metrics, width - 1));
+        assertEquals(java.util.List.of("a", "b"), HeaderStatus.wrap("a\n\nb", metrics, width));
+    }
+
+    private static void layoutTree(java.awt.Container container) {
+        container.doLayout();
+        for (var child : container.getComponents()) if (child instanceof java.awt.Container nested) layoutTree(nested);
     }
 
     @Test public void dialectResetZeroesEveryPulse() throws Exception {
