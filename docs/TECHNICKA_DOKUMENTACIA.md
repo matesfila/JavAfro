@@ -272,7 +272,7 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `rhythm-folding.ts` | Vytvára efekty zbalenia hlavných YAML definícií. |
 | `rhythm-move.ts` | Vymení hlavnú YAML definíciu pod kurzorom so susednou; `YamlEditorHandle.moveRhythm()` to použije pre šípky ↑/↓ v lište editora a zachová zbalenie. |
 | `rhythm-navigation.ts` | Poradie rytmov pre Next/predchádzajúci: `RhythmEntry` (id, názov, offset v zdroji), `neighborIndex()` a `rhythmNeighbors()` s obtáčaním na koncoch, `entryAtCaret()` (synchrónny rytmus pod kurzorom) a `caretAtSourceOffset()` (prevod YAML offsetu na kurzor CodeMirror pri CRLF). |
-| `LiveView.tsx` / `LiveView` | Pohľad **Živé hranie**: natívny celoobrazovkový `dialog` s jediným veľkým tlačidlom Play/Stop (potiahnutím → / ← prepína rytmy), riadkom `predchádzajúci ← aktuálny → nasledujúci` a tlačidlom ×. Nemá vlastný stav prehrávania; obsluhu dostáva z `App`. |
+| `LiveView.tsx` / `LiveView` | Pohľad **Živé hranie**: natívny celoobrazovkový `dialog` s jediným veľkým tlačidlom Play/Stop (potiahnutím → / ← prepína rytmy, ↑ / ↓ mení tempo o ±2 BPM), riadkom `predchádzajúci ← aktuálny → nasledujúci` a tlačidlom ×. Nemá vlastný stav prehrávania; obsluhu dostáva z `App`. |
 | `icons.tsx` | Spoločné inline SVG ikony (Play, Next, priečinok, uloženie, šípky, nový, obnoviť, dokument, info, zbaliť/rozbaliť, celá obrazovka, zavrieť). |
 | `rhythm-document.ts` / `readRhythmDocument()` | Otvorí dokument aj pri chybe validácie: vráti pôvodný text, `rhythm: null` a správu. Používateľ môže chybný YAML opraviť v editore. |
 | `rhythm.ts` | Typy `Rhythm`, `Track`, `Instrument`, `CatalogEntry`, validácia a parsovanie definícií. `parseRhythm()` vyberá prvý rytmus, `parseRhythmAtCaret()` podľa kurzora a `parseRhythmEntries()` vracia aj pozície definícií. |
@@ -358,10 +358,15 @@ a potlačí klik, ktorý prehliadač pošle na konci potiahnutia (`consumeClick(
 `swipeRhythm()` v `App` počas hrania volá `playNeighbor()` hneď, bez čakania na dvojťuk,
 relatívne k `pendingRhythm ?? playingRhythm`; v pokoji iba presunie kurzor (`cueTo()`).
 Hlavné tlačidlo dostáva `primaryProps` (klik = Play/Next), Stop v hlavnom pohľade
-`stopProps` (klik = `requestStop()`) a `LiveView` `liveProps` (klik = Play/Stop); potiahnutie
-(`playSwipe.handlers`) je vo všetkých rovnaké.
-Aby prehliadač vodorovné gesto neprevzal na posun, majú `.transport .play` a `.transport .stop`
-`touch-action: pan-y` a `.live-primary` `touch-action: none`.
+`stopProps` (klik = `requestStop()`) a `LiveView` `liveProps` (klik = Play/Stop); vodorovné
+potiahnutie je vo všetkých rovnaké. `LiveView` má vlastnú inštanciu `liveSwipe =
+useSwipe(swipeRhythm, swipeTempo)`: druhý callback zapne aj zvislé potiahnutie (hore = 1,
+dole = −1), ktoré `swipeTempo()` mení tempo o `LIVE_TEMPO_STEP` (2) BPM cez `editTempo()`,
+orezané na `playback.tempo` limity rovnako ako otočný ovládač. Engine číta `controlsRef`,
+takže zmena platí hneď aj počas hrania. Aktuálne BPM zobrazuje `.live-bpm` v hlavičke.
+Aby prehliadač gesto neprevzal na posun, majú `.transport .play` a `.transport .stop`
+`touch-action: pan-y` (zvislé potiahnutie tam ostáva posunom stránky) a `.live-primary`
+`touch-action: none`.
 
 Signál ide cez gain konkrétneho úderu, voliteľný stereo panner, gain tracku
 a spoločný master do výstupu. Každý úder má vlastný source node; dekódované

@@ -349,6 +349,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .live-rhythms { flex: 1; min-width: 0; margin: 0; display: flex; align-items: baseline; justify-content: center; gap: 8px; font-size: clamp(17px, 3.6vmin, 24px); color: var(--muted); white-space: nowrap; }
 .live-neighbor { min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
 .live-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; flex: 0 2 auto; color: #44372e; font: 700 clamp(21px, 4.6vmin, 30px) 'Manrope Variable', sans-serif; }
+.live-bpm { flex: 0 0 auto; color: #795739; font: 600 clamp(19px, 4vmin, 26px) 'Manrope Variable', sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.live-bpm small { margin-left: 4px; font: 400 12px 'DM Sans Variable', sans-serif; color: var(--muted); }
 .live-close { flex: 0 0 auto; width: 40px; min-height: 40px; padding: 0; border-color: var(--border); background: transparent; color: #6f5843; }
 .live-close:hover { background: #f1e8da; }
 .live-message { flex: 0 0 auto; margin: 0; text-align: center; font-size: 14px; color: #8d4e35; overflow-wrap: anywhere; }

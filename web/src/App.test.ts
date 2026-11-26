@@ -678,6 +678,45 @@ it('uses one big Play/Stop button in Živé hranie and switches rhythms by swipi
   expect(live.open).toBe(false);
 });
 
+it('changes the tempo by 2 BPM by swiping the big Živé hranie button up or down', async () => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
+  const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
+  const stop = vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
+  await act(() => root.render(createElement(App)));
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  await click('Súbor');
+  await click('Živé hranie');
+  const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
+  const button = live.querySelector<HTMLButtonElement>('.live-primary')!;
+  const dial = document.querySelector<HTMLElement>('[role="slider"][aria-label="Tempo"]')!;
+  const tempo = () => Number(dial.getAttribute('aria-valuenow'));
+  const shown = () => live.querySelector('.live-bpm')!.textContent;
+  const initial = tempo();
+  expect(shown()).toBe(initial + 'BPM');
+  // While stopped: the swipe changes only the tempo and does not start playback.
+  await swipe(button, 0, -80);
+  expect(tempo()).toBe(initial + 2);
+  expect(shown()).toBe(initial + 2 + 'BPM');
+  expect(start).not.toHaveBeenCalled();
+  await act(async () => button.click());
+  await act(() => vi.advanceTimersByTimeAsync(400));
+  expect(startedIds(start)).toEqual(['One']);
+  // While playing: up and down adjust the tempo, neither stops nor switches the rhythm.
+  await swipe(button, 0, -80);
+  await swipe(button, 10, 80);
+  await swipe(button, 0, 80);
+  expect(tempo()).toBe(initial);
+  expect(stop).not.toHaveBeenCalled();
+  expect(startedIds(start)).toEqual(['One']);
+  // The configured limits hold.
+  await act(() => dial.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true })));
+  await swipe(button, 0, -80);
+  expect(tempo()).toBe(config.maximumTempo);
+  await act(() => dial.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true })));
+  await swipe(button, 0, 80);
+  expect(tempo()).toBe(config.minimumTempo);
+});
+
 it('shows the rhythm queued by swiping Stop in Živé hranie before the current pattern ends', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => three }));
   // Like the real engine: while playing, the next start resolves only at the end of the pattern.

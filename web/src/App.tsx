@@ -24,6 +24,8 @@ const asset = (path: string) => `${import.meta.env.BASE_URL}generated/${path}`;
 const mixerKey = (rhythm: Rhythm) => JSON.stringify([rhythm.id, rhythm.tracks.map(track => track.instrument)]);
 /** Two Next taps closer together than this play the previous rhythm instead. */
 export const DOUBLE_TAP_MS = 350;
+/** BPM change of one vertical swipe on the big Živé hranie button. */
+export const LIVE_TEMPO_STEP = 2;
 type ParsedDocument ={ source: string; rhythm: Rhythm | null; entries: RhythmEntry[] };
 const entryOf = ({ rhythm, offset }: { rhythm: Rhythm; offset: number }): RhythmEntry => ({ id: rhythm.id, name: rhythm.name, offset });
 
@@ -449,6 +451,15 @@ export function App() {
     }
   }
 
+  /** Swipe on the big Živé hranie button: up = faster, down = slower by `LIVE_TEMPO_STEP` BPM. */
+  function swipeTempo(direction: 1 | -1) {
+    const bpm = controlsRef.current.bpm;
+    // Like the dial: stay within the configured limits, but never jump into them from outside.
+    const next = Math.max(Math.min(config.minimumTempo, bpm),
+      Math.min(Math.max(config.maximumTempo, bpm), bpm + direction * LIVE_TEMPO_STEP));
+    if (next !== bpm) editTempo(next);
+  }
+
   // The timer runs the latest render's function, so a delayed tap sees the current playback state.
   delayedNext.current = (direction, anchorId) => { if (isPlaying) void playNeighbor(direction, anchorId); };
   const playSwipe = useSwipe(swipeRhythm);
@@ -456,9 +467,10 @@ export function App() {
     ...playSwipe.handlers,
     onClick() { if (!playSwipe.consumeClick()) pressPrimary(); },
   };
+  const liveSwipe = useSwipe(swipeRhythm, swipeTempo);
   const liveProps = {
-    ...playSwipe.handlers,
-    onClick() { if (!playSwipe.consumeClick()) toggleLive(); },
+    ...liveSwipe.handlers,
+    onClick() { if (!liveSwipe.consumeClick()) toggleLive(); },
   };
   // Stop is enabled only while playing, so a swipe on it always queues the neighbor after the pattern.
   const stopProps = {
@@ -682,7 +694,7 @@ export function App() {
       </div>
     </dialog>
     <LiveView open={isLiveOpen} onClose={() => setLiveOpen(false)}
-      playing={busy} buttonProps={liveProps} playDisabled={primaryDisabled}
+      playing={busy} buttonProps={liveProps} playDisabled={primaryDisabled} bpm={controls.bpm}
       rhythmName={displayedRhythm?.name} neighbors={rhythmNeighbors(parsedDocument.entries, pendingRhythm?.id ?? playingRhythm?.id ?? caretRhythmId ?? displayedRhythm?.id)} message={message} />
   </div>;
 }

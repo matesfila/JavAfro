@@ -4,13 +4,13 @@ import type { RhythmNeighbors } from './rhythm-navigation';
 
 /**
  * Full-screen "Živé hranie" for playing with a group: one big button that is Play while stopped
- * and Stop while playing. Swiping it switches rhythms: → next, ← previous.
+ * and Stop while playing. Swiping it switches rhythms: → next, ← previous; ↑ / ↓ changes the tempo.
  */
-export function LiveView({ open, onClose, playing, buttonProps, playDisabled, rhythmName, neighbors, message }: {
+export function LiveView({ open, onClose, playing, buttonProps, playDisabled, rhythmName, neighbors, message, bpm }: {
   open: boolean; onClose: () => void;
   /** Click (Play/Stop) and swipe handlers of the big button. */
   playing: boolean; buttonProps: ButtonHTMLAttributes<HTMLButtonElement>; playDisabled: boolean;
-  rhythmName?: string; neighbors: RhythmNeighbors | null; message: string;
+  rhythmName?: string; neighbors: RhythmNeighbors | null; message: string; bpm: number;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
 
@@ -31,15 +31,16 @@ export function LiveView({ open, onClose, playing, buttonProps, playDisabled, rh
         <strong className="live-current">{current ?? 'Rytmus'}</strong>
         {showNeighbors && <><span aria-hidden="true">→</span><span className="live-neighbor">{neighbors.next.name}</span></>}
       </p>
+      <output className="live-bpm" aria-label="Tempo">{bpm}<small>BPM</small></output>
       <button type="button" className="button live-close" aria-label="Zavrieť živé hranie" title="Zavrieť živé hranie" onClick={onClose}><CloseIcon /></button>
     </header>
     {message && <p className="live-message" role="status">{message}</p>}
     <div className="live-buttons">
       <button type="button" className={'button live-primary ' + (playing ? 'stop' : 'play')} {...buttonProps}
         disabled={!playing && playDisabled} aria-pressed={playing}
-        title={(playing ? 'Zastaviť' : 'Prehrať rytmus') + ' · potiahni ⇒ ďalší, ⇐ predchádzajúci'}>
+        title={(playing ? 'Zastaviť' : 'Prehrať rytmus') + ' · potiahni ⇒ ďalší, ⇐ predchádzajúci, ⇑ rýchlejšie, ⇓ pomalšie'}>
         {playing ? <span className="stop-square" /> : <PlayIcon />}
-        <span className="live-label">{playing ? 'Stop' : 'Play'}<small>potiahni ⇒ ďalší · ⇐ predchádzajúci</small></span>
+        <span className="live-label">{playing ? 'Stop' : 'Play'}<small>potiahni ⇒ ďalší · ⇐ predchádzajúci</small><small>⇑ +2 BPM · ⇓ −2 BPM</small></span>
       </button>
     </div>
   </dialog>;

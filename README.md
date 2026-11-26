@@ -109,6 +109,8 @@ na **Play**: zaradí rytmus pod kurzorom, prípadne úpravy, tak ako doteraz.
 keď nič nehrá, je to **Play** (spustí rytmus), počas hrania **Stop**. Rytmy sa
 prepínajú potiahnutím po tlačidle: doprava nasledujúci, doľava predchádzajúci (počas
 hrania sa zaradí na koniec patternu, v pokoji sa iba vyberie a Play ho spustí).
+Potiahnutie hore zrýchli tempo o 2 BPM, dole ho o 2 BPM spomalí (v rámci limitov
+`playback.tempo`, počas hrania sa prejaví hneď); aktuálne BPM je vpravo hore.
 Postup na pódiu je teda napr. Stop → potiahnuť → Play. Ťuknutie do 350 ms po
 predchádzajúcom sa ignoruje, aby dvojité stlačenie nezastavilo a hneď znova nespustilo
 rytmus. Hore je poradie `predchádzajúci ← aktuálny → nasledujúci` a malé tlačidlo ×
