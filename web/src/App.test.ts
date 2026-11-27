@@ -600,8 +600,7 @@ it('selects rhythms by swiping Play while stopped, then Play starts the selected
   const start = vi.spyOn(AudioEngine.prototype, 'start').mockResolvedValue(true);
   await act(() => root.render(createElement(App)));
   await act(() => vi.advanceTimersByTimeAsync(200));
-  await click('Súbor');
-  await click('Živé hranie');
+  await click('Live!');
   const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
   const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
   const primary = live.querySelector<HTMLButtonElement>('.live-primary')!;
@@ -638,8 +637,7 @@ it('uses one big Play/Stop button in Živé hranie and switches rhythms by swipi
   const stop = vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
   await act(() => root.render(createElement(App)));
   await act(() => vi.advanceTimersByTimeAsync(200));
-  await click('Súbor');
-  await click('Živé hranie');
+  await click('Live!');
   const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
   expect(live.open).toBe(true);
   const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
@@ -684,8 +682,7 @@ it('changes the tempo by 2 BPM by swiping the big Živé hranie button up or dow
   const stop = vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
   await act(() => root.render(createElement(App)));
   await act(() => vi.advanceTimersByTimeAsync(200));
-  await click('Súbor');
-  await click('Živé hranie');
+  await click('Live!');
   const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
   const button = live.querySelector<HTMLButtonElement>('.live-primary')!;
   const dial = document.querySelector<HTMLElement>('[role="slider"][aria-label="Tempo"]')!;
@@ -727,8 +724,7 @@ it('shows the rhythm queued by swiping Stop in Živé hranie before the current 
   vi.spyOn(AudioEngine.prototype, 'stop').mockImplementation(() => {});
   await act(() => root.render(createElement(App)));
   await act(() => vi.advanceTimersByTimeAsync(200));
-  await click('Súbor');
-  await click('Živé hranie');
+  await click('Live!');
   const live = document.querySelector<HTMLDialogElement>('dialog.live-dialog')!;
   const rhythms = () => live.querySelector('.live-rhythms')!.textContent;
   const button = live.querySelector<HTMLButtonElement>('.live-primary')!;
@@ -748,15 +744,18 @@ it('shows the rhythm queued by swiping Stop in Živé hranie before the current 
   expect(live.querySelector('.live-message')).toBeNull();
 });
 
-it('groups the Súbor menu into Súbory, Hranie and Pomoc without status messages', async () => {
+it('groups the Súbor menu into Súbory and Pomoc, with Live! next to it, without status messages', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
   const menu = document.querySelector<HTMLDialogElement>('dialog.file-options')!;
-  expect(Array.from(menu.querySelectorAll('.menu-group-title'), title => title.textContent)).toEqual(['Súbory', 'Hranie', 'Pomoc']);
+  expect(Array.from(menu.querySelectorAll('.menu-group-title'), title => title.textContent)).toEqual(['Súbory', 'Pomoc']);
   expect(Array.from(menu.querySelectorAll('.dialog-body .button'), button => button.closest('.about-dialog') ? null : button.textContent).filter(Boolean)).toEqual([
-    'Nový rytmus', 'Otvoriť…', 'Obnoviť posledný súbor', 'Uložiť ako…', 'Živé hranie',
+    'Nový rytmus', 'Otvoriť…', 'Obnoviť posledný súbor', 'Uložiť ako…',
     'Dokumentácia', 'Obrázkový návod', 'O aplikácii']);
   expect(menu.querySelector('.dialog-body > [role="status"]')).toBeNull();
+  const header = Array.from(document.querySelectorAll('.header-controls > button'), button => button.textContent);
+  expect(header.slice(header.indexOf('Súbor'))).toEqual(['Súbor', 'Live!']);
+  expect(document.querySelector('.header-controls > .live-button svg')).not.toBeNull();
 });
 
 it('lists input mode, overwrite and folding in the Editor menu, which replaces Úpravy', async () => {

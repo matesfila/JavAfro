@@ -15,6 +15,7 @@ tlačidlami Play/Next a Stop a s poradím rytmov `predchádzajúci ← aktuálny
 - [x] Inteligentné prepnutie: po úprave textu alebo presune kurzora na iný rytmus sa tlačidlo vráti na Play
 - [x] Pohľad **Živé hranie** (Súbor → Živé hranie) s veľkými tlačidlami, info riadkom a tlačidlom ×
 - [x] Živé hranie má jediné celoobrazovkové tlačidlo Play/Stop; rytmy sa prepínajú potiahnutím (nahradilo samostatné Stop/Next tlačidlo)
+- [x] Živé hranie sa otvára tlačidlom **Live!** v hlavičke vedľa Súbor (už nie zo Súbor)
 - [x] Väčší text poradia rytmov v Živom hraní
 - [x] Dvojťuk mení zobrazenie len raz: jedno ťuknutie sa vykoná až po 350 ms
 - [x] Potiahnutie po Play: doprava nasledujúci, doľava predchádzajúci (počas hrania aj v pokoji, bez oneskorenia)
@@ -25,7 +26,7 @@ tlačidlami Play/Next a Stop a s poradím rytmov `predchádzajúci ← aktuálny
 
 - Počas hrania tlačidlo ukazuje Next a jeho stlačenie prepne na ďalší rytmus na konci patternu.
 - Dvojťuk prepne na predchádzajúci rytmus aj na iPhone, bez zoomu stránky.
-- Živé hranie sa dá otvoriť zo Súbor, ovládať jedným veľkým tlačidlom Play/Stop a potiahnutím, a zavrieť × alebo Esc bez zastavenia hudby.
+- Živé hranie sa dá otvoriť tlačidlom Live! v hlavičke, ovládať jedným veľkým tlačidlom Play/Stop a potiahnutím, a zavrieť × alebo Esc bez zastavenia hudby.
 
 ## Poznámky
 

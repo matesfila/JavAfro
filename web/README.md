@@ -163,9 +163,10 @@ nastavenia iba vybranému rytmu (počas hrania prehrávanému rytmu).
   **Prepisovanie**, oddeľovač, **Rozbaliť všetko** a **Zbaliť všetko**. Zbaľujú sa iba celé
   rytmy, rovnako ako pri otvorení súboru. Režim a Prepisovanie nechajú ponuku otvorenú,
   zbalenie a rozbalenie ju zavrú; zavrie sa aj klávesom Escape alebo kliknutím mimo nej.
-  V hlavičke je **Súbor** s tromi skupinami: **Súbory** (**Nový rytmus**, **Otvoriť…**,
-  **Obnoviť posledný súbor**, **Uložiť ako…**), **Hranie** (**Živé hranie**) a **Pomoc**
-  (**Dokumentácia**, **Obrázkový návod**, **O aplikácii**).
+  V hlavičke je **Súbor** s dvoma skupinami: **Súbory** (**Nový rytmus**, **Otvoriť…**,
+  **Obnoviť posledný súbor**, **Uložiť ako…**) a **Pomoc** (**Dokumentácia**,
+  **Obrázkový návod**, **O aplikácii**). Vpravo vedľa neho je tlačidlo **Live!**, ktoré
+  otvorí celoobrazovkové **Živé hranie**.
   Názov otvoreného súboru sa nezobrazuje, pri ukladaní zostáva zachovaný.
 - Zapnuté **Prepisovanie** (zaškrtnuté v ponuke Editor) prepisuje znaky pod kurzorom, vypnuté vkladá.
   Režim prepína aj kláves **Insert** a tlačidlo Prepisovanie na klávesnici nôt.

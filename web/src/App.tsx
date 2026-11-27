@@ -578,10 +578,6 @@ export function App() {
           <div onClick={closeMenuOnAction}>
             <h3 className="menu-group-title">Súbory</h3>
             <div className="file-dialog-actions">{fileActions}</div>
-            <h3 className="menu-group-title">Hranie</h3>
-            <div className="file-dialog-actions">
-              <button className="button subtle" onClick={() => setLiveOpen(true)} title="Celá obrazovka s veľkými tlačidlami Play/Next a Stop"><FullscreenIcon /><span>Živé hranie</span></button>
-            </div>
           </div>
           <h3 className="menu-group-title">Pomoc</h3>
           <div className="file-about">
@@ -594,6 +590,7 @@ export function App() {
             }} />
           </div>
         </SettingsPanel>
+        <button className="button settings-button live-button" onClick={() => setLiveOpen(true)} title="Živé hranie: celá obrazovka s jedným veľkým tlačidlom Play/Stop"><FullscreenIcon /><span>Live!</span></button>
       </div>
     </header>
     <main>

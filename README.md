@@ -105,7 +105,7 @@ Next sa zobrazuje, iba kým je kurzor v hranom (alebo zaradenom) rytme a text sa
 nezmenil. Po presune kurzora na iný rytmus alebo po úprave YAML sa tlačidlo vráti
 na **Play**: zaradí rytmus pod kurzorom, prípadne úpravy, tak ako doteraz.
 
-**Súbor → Živé hranie** otvorí celú obrazovku s jediným veľkým tlačidlom:
+Tlačidlo **Live!** v hlavičke (vpravo vedľa **Súbor**) otvorí **Živé hranie**, celú obrazovku s jediným veľkým tlačidlom:
 keď nič nehrá, je to **Play** (spustí rytmus), počas hrania **Stop**. Rytmy sa
 prepínajú potiahnutím po tlačidle: doprava nasledujúci, doľava predchádzajúci (počas
 hrania sa zaradí na koniec patternu, v pokoji sa iba vyberie a Play ho spustí).

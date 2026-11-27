@@ -96,6 +96,7 @@
 .settings-launchers { display: contents; }
 .settings-button { min-height: 44px; padding: 8px 12px; border-color: var(--border); background: #f2eadf; }
 .settings-button:hover { background: #eaddcb; }
+.live-button { gap: 6px; white-space: nowrap; }
 .control-dialog {
   width: min(480px, calc(100vw - 24px));
   max-height: calc(var(--viewport-height, 100dvh) - 24px);

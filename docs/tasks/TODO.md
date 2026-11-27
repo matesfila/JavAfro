@@ -65,7 +65,7 @@ nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u ni
 - [x] Balafon
 - [x] Nové rozloženie klávesnice Noty: namiesto bodky medzera, namiesto `|` Enter; `|` a `.` v dolnom rade vľavo od šípky doľava
 - [x] [Desktop: vzhľad a funkcie ako webová verzia](desktop-vzhlad-ako-web.md) – FlatLaf, dve karty, mixer v okne, klávesnica nôt, PDF návody (zostáva ručné overenie)
-- [x] [Web: Next / predchádzajúci rytmus a Živé hranie](web-dalsi-rytmus-zive-hranie.md) – Play sa počas hrania mení na Next, dvojťuk = predchádzajúci, Súbor → Živé hranie
+- [x] [Web: Next / predchádzajúci rytmus a Živé hranie](web-dalsi-rytmus-zive-hranie.md) – Play sa počas hrania mení na Next, dvojťuk = predchádzajúci, tlačidlo Live! v hlavičke
 - [x] Doladiť fonty: farbu, typ fontu, vzdialenosti riadkov/písmen, ...
 - [x] Presúvanie rytmu v yaml - možnosť switchnúť rytmy - aktuálny rytmus presun hore alebo presun dole
 - [x] Pridať klávesu enter pod backspace, pridať aj medzerník
