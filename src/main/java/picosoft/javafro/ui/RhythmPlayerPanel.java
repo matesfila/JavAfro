@@ -417,8 +417,8 @@ public final class RhythmPlayerPanel extends JPanel {
         play.setName("playButton");
         stop.setName("stopButton");
         open.setName("openButton");
-        SandTheme.accent(play);
-        SandTheme.key(stop);
+        SandTheme.play(play);
+        SandTheme.stop(stop);
         play.setIcon(UiIcons.icon(UiIcons.Shape.PLAY, 20));
         stop.setIcon(UiIcons.icon(UiIcons.Shape.STOP, 20));
         for (JButton button : new JButton[]{play, stop}) {

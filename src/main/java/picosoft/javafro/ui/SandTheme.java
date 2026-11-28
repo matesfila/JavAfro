@@ -31,6 +31,9 @@ public final class SandTheme {
     public static final Color LABEL = new Color(0x705840);
     public static final Color ACCENT = new Color(0x805638);
     public static final Color ON_ACCENT = new Color(0xFFFAF4);
+    /** The soft web Live green {@code rgb(84,140,86)} and red {@code rgb(196,98,84)} at 85% over {@link #PAPER}. */
+    public static final Color PLAY = new Color(0x6E9D6E);
+    public static final Color STOP = new Color(0xCD796D);
     public static final Color CARET = new Color(0x745137);
     public static final Color SLIDER = new Color(0x987047);
     public static final Color TRACK = new Color(0xD3C2AC);
@@ -109,15 +112,29 @@ public final class SandTheme {
         return component;
     }
 
-    /** Filled accent button (web {@code .play}); FlatLaf derives hover and pressed shades from the background. */
-    public static <T extends AbstractButton> T accent(T button) {
-        button.setBackground(ACCENT);
+    /** Filled green Play button (web {@code .play}). */
+    public static <T extends AbstractButton> T play(T button) {
+        return filled(button, PLAY, "#6e9d6e", "#659065", "#5c845c");
+    }
+
+    /** Filled red Stop button (web {@code .stop}). */
+    public static <T extends AbstractButton> T stop(T button) {
+        return filled(button, STOP, "#cd796d", "#bf7065", "#b0675d");
+    }
+
+    /**
+     * The global {@code Button.hoverBackground} / {@code pressedBackground} would turn a filled button beige under
+     * the mouse, so hover and press use darker shades of the button's own colour instead.
+     */
+    private static <T extends AbstractButton> T filled(T button, Color background, String border, String hover, String pressed) {
+        button.setBackground(background);
         button.setForeground(ON_ACCENT);
-        button.putClientProperty(FlatClientProperties.STYLE, "borderColor: #805638; focusedBorderColor: #b88a5b");
+        button.putClientProperty(FlatClientProperties.STYLE, "borderColor: " + border + "; focusedBorderColor: #b88a5b"
+                + "; hoverBackground: " + hover + "; pressedBackground: " + pressed);
         return button;
     }
 
-    /** Beige key-like button (web {@code .stop}, mute/solo and note keys). */
+    /** Beige key-like button (web mute/solo and note keys). */
     public static <T extends AbstractButton> T key(T button) {
         button.setBackground(KEY);
         button.setForeground(LABEL);
