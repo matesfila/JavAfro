@@ -7,8 +7,7 @@ import { TempoControl } from './TempoControl';
 import { useViewport } from './useViewport';
 import { appInfo } from './app-info';
 import { AudioEngine, defaultTrackMix, type TrackMix } from './audio';
-import { parseRhythmAtCaret, parseRhythmEntries, rhythmContextAtCaret, type Rhythm } from './rhythm';
-import { readRhythmDocument } from './rhythm-document';
+import { parseRhythmAtCaret, readRhythmEntries, rhythmContextAtCaret, type Rhythm } from './rhythm';
 import { DraftStore, hasUnsavedChanges, pendingControls, type Draft } from './draft';
 import { exportRhythm, writeDialect } from './rhythm-export';
 import blankRhythmSource from '../../rhythms/blankRhythm.yaml?raw';
@@ -27,14 +26,18 @@ export const DOUBLE_TAP_MS = 350;
 /** BPM change of one vertical swipe on the big Živé hranie button. */
 export const LIVE_TEMPO_STEP = 2;
 type ParsedDocument ={ source: string; rhythm: Rhythm | null; entries: RhythmEntry[] };
-const entryOf = ({ rhythm, offset }: { rhythm: Rhythm; offset: number }): RhythmEntry => ({ id: rhythm.id, name: rhythm.name, offset });
+const entryOf = ({ id, offset }: { id: string; offset: number }): RhythmEntry => ({ id, name: id, offset });
 
-/** The rhythm under the caret plus the ordered list of all rhythms; throws on invalid YAML. */
+/**
+ * The rhythm under the caret plus the ordered list of all rhythms, broken ones included. Never throws:
+ * a broken rhythm under the caret is recovered as far as possible for the heading and controls.
+ */
 function parseAtCaret(source: string, caretOffset: number): ParsedDocument {
-  const parsed = parseRhythmEntries(source);
+  if (!source.trim()) return { source, rhythm: null, entries: [] };
+  const parsed = readRhythmEntries(source);
   const entries = parsed.map(entryOf);
-  const selected = entries.indexOf(entryAtCaret(entries, source, caretOffset)!);
-  return { source, rhythm: parsed[selected].rhythm, entries };
+  const selected = parsed[entries.indexOf(entryAtCaret(entries, source, caretOffset)!)];
+  return { source, rhythm: selected?.rhythm ?? rhythmContextAtCaret(source, caretOffset), entries };
 }
 
 export function App() {
@@ -78,7 +81,6 @@ export function App() {
   const delayedNext = useRef<(direction: 1 | -1, anchorId: string) => void>(null!);
   const liveToggledAt = useRef(Number.NEGATIVE_INFINITY);
   const [isLiveOpen, setLiveOpen] = useState(false);
-  const [validation, setValidation] = useState('');
   const [message, setMessage] = useState('');
   const [isPlaying, setPlaying] = useState(false);
   const [isStarting, setStarting] = useState(false);
@@ -97,8 +99,9 @@ export function App() {
   const engine = useRef<AudioEngine | null>(null);
   const busy = isPlaying || isStarting;
   const displayedRhythm = playingRhythm ?? rhythm;
-  // Shown in the header slot next to the logo, so messages never resize the editor.
-  const editorStatus = validation || (busy && source !== playingSource.current ? 'Upravené · stlač Play' : '');
+  // Shown in the header slot next to the logo, so messages never resize the editor. Rhythm errors are
+  // only underlined in the editor; their text appears when the broken rhythm is played.
+  const editorStatus = busy && source !== playingSource.current ? 'Upravené · stlač Play' : '';
   // Play turns into Next while the caret stays in the playing (or queued) rhythm of the unchanged text.
   // Moving the caret elsewhere or editing brings Play back, which queues the caret rhythm or the edit.
   const caretRhythmId = parsedDocument.source === source ? entryAtCaret(parsedDocument.entries, source, caretOffset)?.id : undefined;
@@ -187,10 +190,8 @@ export function App() {
     if (!synced) {
       if (!busy) return;
       // Keep playback adjustable even while the editor contains an unfinished change.
-      try {
-        const entry = parseRhythmEntries(draft.source).find(entry => entry.rhythm.id === displayedRhythm.id);
-        if (entry?.rhythm.stepsPerBeat !== dialect.length) return;
-      } catch { return; }
+      const entry = readRhythmEntries(draft.source).find(entry => entry.id === displayedRhythm.id);
+      if (entry?.rhythm?.stepsPerBeat !== dialect.length) return;
     }
     const target = busy ? displayedRhythm : rhythmContextAtCaret(draft.source, caretRef.current);
     if (!target) return;
@@ -213,14 +214,11 @@ export function App() {
   }
 
   function applySource(text: string, filename: string, foldRhythms = true, restored?: Draft, persist = true) {
-    const document = readRhythmDocument(text);
     const offset = restored?.caretOffset ?? 0;
-    let parsed = document.rhythm;
-    let entries: RhythmEntry[] = [];
-    try { ({ rhythm: parsed, entries } = parseAtCaret(text, offset)); } catch { parsed = rhythmContextAtCaret(text, offset); }
+    const { rhythm: parsed, entries } = parseAtCaret(text, offset);
     setMixes({});
     caretRef.current = offset; setCaretOffset(offset);
-    setSource(document.source); setFileName(filename); setParsedDocument({ source: text, rhythm: parsed, entries }); setValidation(document.validation);
+    setSource(text); setFileName(filename); setParsedDocument({ source: text, rhythm: parsed, entries });
     // A different file starts a fresh editor session, including selection and undo history.
     setEditorDocument(previous => ({ revision: previous.revision + 1, foldRhythms }));
     syncedSource.current = text;
@@ -314,15 +312,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      try {
-        setParsedDocument(source.trim() ? parseAtCaret(source, caretOffset) : { source, rhythm: null, entries: [] });
-        setValidation('');
-      } catch (error) {
-        setParsedDocument({ source, rhythm: rhythmContextAtCaret(source, caretOffset), entries: [] });
-        setValidation((error as Error).message);
-      }
-    }, 150);
+    const timeout = setTimeout(() => setParsedDocument(parseAtCaret(source, caretOffset)), 150);
     return () => clearTimeout(timeout);
   }, [source, caretOffset]);
 
@@ -357,12 +347,14 @@ export function App() {
   async function playNeighbor(direction: 1 | -1, anchorId: string) {
     if (isLoading || !source.trim()) return;
     await startRhythm(() => {
-      const entries = parseRhythmEntries(source);
-      const index = entries.findIndex(entry => entry.rhythm.id === anchorId);
+      const entries = readRhythmEntries(source);
+      const index = entries.findIndex(entry => entry.id === anchorId);
       if (index < 0) return parseRhythmAtCaret(source, caretRef.current);
       const target = entries[(index + direction + entries.length) % entries.length];
       // Follow with the caret so the editor, heading and the Next button stay on the queued rhythm.
+      // A broken neighbour keeps the caret on it, so its underlined error is in view.
       moveCaretToRhythm(target.offset);
+      if (!target.rhythm) throw new Error(target.error!.message);
       return target.rhythm;
     });
   }
@@ -396,6 +388,8 @@ export function App() {
       }
     } catch (error) {
       if (request !== playRequest.current) return;
+      // A broken rhythm requested while another one plays stops the playback, then explains why.
+      if (isPlaying || isStarting) stop();
       setMessage(`Prehrávanie sa nepodarilo: ${(error as Error).message}`);
     } finally { if (request === playRequest.current) { setStarting(false); setPendingRhythm(null); } }
   }
@@ -572,7 +566,7 @@ export function App() {
   }} onDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false); }} onDrop={drop}>
     <header className="site-header">
       <div className="brand"><img src={asset('icons/djembe.svg')} alt="" /><span>JavAfro</span></div>
-      <HeaderStatus messages={[editorStatus, draftError]} invalid={!!(validation || draftError)} />
+      <HeaderStatus messages={[editorStatus, draftError]} invalid={!!draftError} />
       <div className="header-controls">
         <SettingsPanel title="Súbor" compact className="file-options">
           <div onClick={closeMenuOnAction}>

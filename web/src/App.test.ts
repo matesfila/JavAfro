@@ -212,21 +212,22 @@ it('updates rhythm context across invalid patterns and YAML syntax errors', asyn
   }
 });
 
-it('shows YAML errors in the fixed header slot and expands them on tap', async () => {
+it('only underlines a broken rhythm and shows its error when it is played', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, text: async () => yaml }));
   await act(() => root.render(createElement(App)));
   const slot = document.querySelector('.site-header > .header-status')!;
-  expect(slot.textContent).toBe('');
-  await act(() => editor().dispatch({ changes: { from: 0, to: editor().state.doc.length, insert: 'One:\n  tracks:\n    djembe: "?"\n' } }));
+  const text = 'One:\n  tracks:\n    djembe: "?"\nTwo:\n  tracks:\n    djembe: "b.tt..s."\n';
+  await act(() => editor().dispatch({ changes: { from: 0, to: editor().state.doc.length, insert: text } }));
   await act(() => vi.advanceTimersByTimeAsync(200));
-  const message = slot.querySelector<HTMLButtonElement>('.header-status-text.invalid')!;
-  expect(slot.getAttribute('role')).toBe('alert');
-  expect(message.textContent).toContain('?');
-  expect(document.querySelector('.editor-card')?.textContent).not.toContain(message.textContent);
-  await act(() => message.click());
-  expect(message.getAttribute('aria-expanded')).toBe('true');
-  await act(() => document.body.dispatchEvent(new Event('pointerdown', { bubbles: true })));
-  expect(message.getAttribute('aria-expanded')).toBe('false');
+  expect(slot.textContent).toBe('');
+  expect(slot.getAttribute('role')).toBe('status');
+  expect([...document.querySelectorAll('.cm-rhythm-error')].map(node => node.textContent)).toEqual(['One:', 'djembe: "?"']);
+  const play = document.querySelector<HTMLButtonElement>('.button.play')!;
+  expect(play.disabled).toBe(false);
+  await act(() => { editor().dispatch({ selection: { anchor: 0 } }); play.click(); });
+  await act(() => vi.advanceTimersByTimeAsync(0));
+  expect(document.querySelector('.playback-message')?.textContent).toContain('?');
+  expect(slot.textContent).toBe('');
 });
 
 it('uses the configured tempo limits for dial accessibility and keyboard input', async () => {
@@ -490,6 +491,19 @@ it('turns Play into Next and plays the following rhythms in file order, wrapping
   // The caret follows the queued rhythm, so the button stays Next.
   expect(editor().state.selection.main.head).toBe(0);
   expect(mainButton().textContent).toBe('Next');
+});
+
+it('plays next to a broken rhythm; Next onto it stops playback and shows its error', async () => {
+  const start = await renderPlaying(three.replace('Two:\n  tracks: {djembe: "b.tt..s."}', 'Two:\n  tracks: {djembe: "b.tt..x."}'));
+  const stop = vi.mocked(AudioEngine.prototype.stop);
+  expect(startedIds(start)).toEqual(['One']);
+  expect(document.querySelector('.site-header > .header-status')?.textContent).toBe('');
+  await pressMain();
+  expect(startedIds(start)).toEqual(['One']);
+  expect(stop).toHaveBeenCalled();
+  expect(mainButton().textContent).toBe('Play');
+  expect(document.querySelector('.playback-message')?.textContent).toContain('Two');
+  expect(editor().state.doc.toString().slice(editor().state.selection.main.head).startsWith('Two:')).toBe(true);
 });
 
 it('plays only the previous rhythm on a double tap of Next, without first switching to the next one', async () => {

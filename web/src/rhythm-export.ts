@@ -1,5 +1,5 @@
 import { isMap, isScalar, isSeq, parseDocument } from 'yaml';
-import { parseRhythmAtCaret, parseRhythmEntries } from './rhythm';
+import { parseRhythmAtCaret, readRhythmEntries } from './rhythm';
 import type { Controls } from './timing';
 
 export function writeDialect(source: string, rhythmId: string, dialect: number[]) {
@@ -24,12 +24,15 @@ export function writeDialect(source: string, rhythmId: string, dialect: number[]
   return source;
 }
 
-/** Invalid work can always be downloaded verbatim; controls only touch a valid document. */
+/**
+ * Invalid work can always be downloaded verbatim. Controls are written into the target rhythm when it is
+ * valid, even if another rhythm is broken; a YAML syntax error leaves the text unchanged.
+ */
 export function exportRhythm(source: string, caret: number,
   controls?: Pick<Controls, 'bpm' | 'dialect'>, playingId?: string) {
   try {
     const selected = playingId
-      ? parseRhythmEntries(source).find(entry => entry.rhythm.id === playingId)?.rhythm
+      ? readRhythmEntries(source).find(entry => entry.id === playingId)?.rhythm
       : parseRhythmAtCaret(source, caret);
     if (!selected || !controls) return source;
     const tempoChanged = controls.bpm !== selected.bpm;

@@ -13,6 +13,7 @@ public class NotePadTest {
     @Test public void notesModeShowsTheKeyboardForTheTrackUnderTheCaret() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             var panel = new RhythmPlayerPanel(YAML);
+            panel.setAllFolds(false); // the incomplete rhythm is folded on load like any other
             var editor = (RSyntaxTextArea) find(panel, "yamlEditor");
             var pad = (NotePad) find(panel, "notePad");
             assertFalse(pad.isVisible());

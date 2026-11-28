@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * Editor messages (YAML errors, „Upravené · stlač Play“, draft errors) in a fixed slot of the header.
+ * Editor messages („Upravené · stlač Play“, draft errors; rhythm errors are only underlined in the editor) in a fixed slot of the header.
  * The slot always takes the free header space, so a message never changes the layout. Long text is
  * clipped to two lines; a tap opens the whole message as an overlay below it.
  */

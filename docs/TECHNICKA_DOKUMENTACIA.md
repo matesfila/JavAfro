@@ -152,9 +152,9 @@ prehrávanie sa vytvára nový `BeepSequencer`.
 | [`AfroJavaPlayer`](../src/main/java/picosoft/javafro/AfroJavaPlayer.java) | Vstupný bod. Na Swing EDT nastaví vzhľad, načíta konfiguráciu a voliteľný YAML z argumentu, zapne lokálnu obnovu konceptu a vytvorí okno. Pri zatváraní chráni neuloženú prácu a zastaví prehrávanie. |
 | [`AppInfo`](../src/main/java/picosoft/javafro/AppInfo.java) | Sprístupňuje verziu a autorstvo z resource `app-info.properties`. |
 | [`config.AppConfig`](../src/main/java/picosoft/javafro/config/AppConfig.java) | Record predvolených nastavení; načítanie a striktná validácia `javafro.yaml`, doplnenie chýbajúcich hodnôt a vyriešenie adresára knižnice. |
-| [`io.RhythmLoader`](../src/main/java/picosoft/javafro/io/RhythmLoader.java) | Parsuje YAML cez SnakeYAML `SafeConstructor`, odmieta duplicitné kľúče a neznáme polia definície, vytvára `Rhythm`, `BeepTrack` a konkrétne nástroje. `load()` vracia mapu v poradí dokumentu; `atCaret()` vyberá rytmus podľa kurzora. |
+| [`io.RhythmLoader`](../src/main/java/picosoft/javafro/io/RhythmLoader.java) | Parsuje YAML cez SnakeYAML `SafeConstructor`, odmieta duplicitné kľúče a neznáme polia definície, vytvára `Rhythm`, `BeepTrack` a konkrétne nástroje. `load()` vracia mapu v poradí dokumentu; `atCaret()` vyberá rytmus podľa kurzora; `entries()` validuje každý rytmus samostatne (chyba so správou a rozsahmi na podčiarknutie) a `valid()` vráti len platné rytmy. |
 | `io.DesktopDraftStore` | Verziovaný lokálny záznam aktuálneho a predchádzajúceho dokumentu, vrátane surového textu, kurzora, cesty, uloženej verzie a živého BPM/dialectu. Lock a porovnanie predchádzajúceho obsahu chránia novšiu verziu z iného okna; zápis používa dočasný súbor a move. |
-| `io.RhythmExport` | Pri platnom dokumente upraví BPM/dialect vybraného rytmu cez SnakeYAML uzly so zachovaním komentárov. Neplatný alebo prázdny dokument vracia bezo zmeny. |
+| `io.RhythmExport` | Pri platnom vybranom rytme (aj keď je iný rytmus chybný) upraví jeho BPM/dialect cez SnakeYAML uzly so zachovaním komentárov. Neplatný alebo prázdny dokument vracia bezo zmeny. |
 
 `AppConfig.load()` hľadá konfiguráciu v pracovnom priečinku, vedľa JAR,
 pri balení cez jpackage aj vedľa spúšťača, potom v resources. Bez resource použije
@@ -226,10 +226,12 @@ gain a rate počas celého doznievania; `null` znamená pravdepodobnostne vynech
 ## 3. Hlavný tok desktopového prehrávania
 
 1. Používateľ otvorí UTF-8 YAML. Panel pred nahradením chráni neuložené zmeny;
-   neplatný text ponechá editovateľný. Pri platnom dokumente nastaví rytmus a ovládanie.
+   neplatný text ponechá editovateľný. Ovládanie nastaví podľa prvého platného rytmu.
 2. Play zavolá `RhythmLoader.atCaret()`. Vyberie posledný hlavný YAML kľúč pred
-   kurzorom; pred prvým kľúčom sa vyberie prvý rytmus. Parser validuje dokument
-   a zostaví doménové objekty.
+   kurzorom; pred prvým kľúčom sa vyberie prvý rytmus. Každý rytmus sa validuje
+   samostatne (`RhythmLoader.entries()`), takže chyba v inom rytme Play neblokuje.
+   Chyba vybraného rytmu sa ukáže v chybovom dialógu; ak práve hrá iný rytmus,
+   prehrávanie sa najprv zastaví.
 3. Panel vytvorí `PlaybackSettings`, pripojí mixer a cez session spustí
    `BeepSequencer.playContinuously()` na pracovnom vlákne.
    Ďalšie Play použije `queueRhythm()` s oddelenými nastaveniami. Najnovšia
@@ -264,7 +266,7 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `App.tsx` / `App` | Koordinuje zdrojový YAML, kurzor, vybraný a prehrávaný rytmus, validáciu, súbory, uloženie, živé ovládanie a mix. Počítadlá požiadaviek chránia stav pred oneskorenými výsledkami otvorenia a Play. |
 | `SettingsPanel.tsx` / `SettingsPanel` | Zobrazuje jednu sadu ovládačov ako desktopový `details` alebo mobilné tlačidlo a natívny modálny `dialog`. Riadi otvorenie a zatvorenie; hodnoty drží nadradený `App`, takže zatvorenie ani zmena rozloženia nastavenia nemaže. |
 | `MenuDropdown.tsx` / `MenuDropdown` | Tlačidlo s rozbaľovacou ponukou (ponuka Editor v lište editora: režim, Prepisovanie, Rozbaliť/Zbaliť všetko). Panel je `position: fixed`, aby ho neorezala karta editora s `overflow: hidden`. Zatvorí sa Escape, kliknutím mimo, zmenou veľkosti okna a kliknutím na položku bez `data-keep-open`. |
-| `HeaderStatus.tsx` / `HeaderStatus` | Správy editora (chyby YAML, „Upravené · stlač Play“, chyby konceptu) v hlavičke medzi logom a ponukou Súbor. Miesto má vždy rovnakú veľkosť (`flex: 1 1 0`), takže správa nemení rozloženie; text sa oreže na dva riadky a ťuknutie ho otvorí celý ako prekrytie pod hlavičkou (zavrie ho ťuknutie mimo, Escape alebo nová správa). Tlačidlo neberie fokus editoru. |
+| `HeaderStatus.tsx` / `HeaderStatus` | Správy editora („Upravené · stlač Play“, chyby konceptu; chyby rytmov sa len podčiarknu v editore) v hlavičke medzi logom a ponukou Súbor. Miesto má vždy rovnakú veľkosť (`flex: 1 1 0`), takže správa nemení rozloženie; text sa oreže na dva riadky a ťuknutie ho otvorí celý ako prekrytie pod hlavičkou (zavrie ho ťuknutie mimo, Escape alebo nová správa). Tlačidlo neberie fokus editoru. |
 | `useViewport.ts` / `useViewport()` | Sleduje breakpoint a výšku `visualViewport` vrátane mobilnej klávesnice. Poskytuje dostupnú výšku, kompaktný režim a príznak `keyboard`; `App` podľa neho prepne režim Klávesnica na Plocha, keď sa zobrazená systémová klávesnica skryje. Keď sa klávesnica skryje a stránka ostala priblížená, na 500 ms pridá do meta `viewport` `maximum-scale=1`, čím iOS vráti mierku 1 (rovnako pri otočení); jeho media query musí zodpovedať pravidlám v `style.css`. |
 | `Editor.tsx` / `YamlEditor` | Integrácia CodeMirror do Reactu: text, kurzor, YAML diagnostika, folding (`foldAll()`/`unfoldAll()` pre ponuku Editor) a režim prepisovania. Ťuknutie prstom na pattern (`onFingerTap()`, `patternBarStart()` v `note-context.ts`) presunie kurzor na začiatok taktu a zavolá `onPatternTap`; `App` zapne Prepisovanie a režim Noty (okrem režimu Klávesnica). Filter `patternBarSnap()` ešte 600 ms udrží na začiatku taktu aj kurzor, ktorý prehliadač po ťuknutí umiestni sám. |
 | `editor-setup.ts` | Spoločná konfigurácia rozšírení a klávesových skratiek editora. |
@@ -274,8 +276,8 @@ Web používa funkčné komponenty a moduly; hlavnou stavovou triedou je `AudioE
 | `rhythm-navigation.ts` | Poradie rytmov pre Next/predchádzajúci: `RhythmEntry` (id, názov, offset v zdroji), `neighborIndex()` a `rhythmNeighbors()` s obtáčaním na koncoch, `entryAtCaret()` (synchrónny rytmus pod kurzorom) a `caretAtSourceOffset()` (prevod YAML offsetu na kurzor CodeMirror pri CRLF). |
 | `LiveView.tsx` / `LiveView` | Pohľad **Živé hranie**: natívny celoobrazovkový `dialog` s jediným veľkým tlačidlom Play/Stop (otvára ho tlačidlo **Live!** v hlavičke vedľa Súbor; potiahnutím → / ← prepína rytmy, ↑ / ↓ mení tempo o ±2 BPM), riadkom `predchádzajúci ← aktuálny → nasledujúci` a tlačidlom ×. Nemá vlastný stav prehrávania; obsluhu dostáva z `App`. |
 | `icons.tsx` | Spoločné inline SVG ikony (Play, Next, priečinok, uloženie, šípky, nový, obnoviť, dokument, info, zbaliť/rozbaliť, celá obrazovka, zavrieť). |
-| `rhythm-document.ts` / `readRhythmDocument()` | Otvorí dokument aj pri chybe validácie: vráti pôvodný text, `rhythm: null` a správu. Používateľ môže chybný YAML opraviť v editore. |
-| `rhythm.ts` | Typy `Rhythm`, `Track`, `Instrument`, `CatalogEntry`, validácia a parsovanie definícií. `parseRhythm()` vyberá prvý rytmus, `parseRhythmAtCaret()` podľa kurzora a `parseRhythmEntries()` vracia aj pozície definícií. |
+| `rhythm-diagnostics.ts` | CodeMirror rozšírenie: chvíľu po písaní podčiarkne vlnovkou chybný riadok a meno každého chybného rytmu (`rhythmErrorRanges()`). Žiadnu správu neukazuje. |
+| `rhythm.ts` | Typy `Rhythm`, `Track`, `Instrument`, `CatalogEntry`, validácia a parsovanie definícií. `parseRhythm()` a `parseRhythmEntries()` validujú celý dokument striktne (testy, knižnica). `readRhythmEntries()` validuje každý rytmus samostatne a pri chybe vráti správu a rozsahy na podčiarknutie; `parseRhythmAtCaret()` podľa kurzora hodí chybu len pre vybraný rytmus. |
 | `timing.ts` | Typy `Controls` a `Hit`, validácia živých hodnôt, `minimumGap()` a `planBeat()`. Vypočíta údery doby, ďalšiu pozíciu a koniec doby; náhodu možno vložiť cez parameter na testovanie. |
 | `sounds.ts` | Mapuje symboly na banky a konkrétne sample. `selectSounds()` rieši multisample, pravdepodobnosť, gain, rate, pan a automatický zvonec. `samplesForInstrument()` poskytuje zoznam na prednačítanie. |
 | `audio.ts` / `AudioEngine` | Vlastní `AudioContext`, cache bufferov, prebiehajúce načítania, plánovací timer, aktívne zdroje a gain uzly. Spúšťa, zastavuje a uvoľňuje audio; aplikuje živý mix a master. |
@@ -373,8 +375,19 @@ a spoločný master do výstupu. Každý úder má vlastný source node; dekódo
 `AudioBuffer` sa zdieľajú. Stop zruší plánovací timer a naplánované zdroje
 s krátkym stíšením; `dispose()` navyše zatvorí kontext.
 
-Web aj desktop načítajú chybný dokument ako editovateľný text a chybu ukážu
-(obe v pevnom mieste hlavičky vedľa loga: desktop `HeaderStatus.java`, web `HeaderStatus.tsx`). Webové Uložiť používa YAML dokumentový model: zachová celý súbor
+Web aj desktop načítajú chybný dokument ako editovateľný text. Každý hlavný rytmus
+sa validuje samostatne (web `readRhythmEntries()`, Java `RhythmLoader.entries()`):
+platné rytmy hrajú normálne aj vedľa chybného. Pri chybe syntaxe YAML alebo
+duplicitnom kľúči sa text rozdelí podľa riadkov hlavných kľúčov a každá časť sa
+parsuje zvlášť. Miesto chyby sa nájde opakovanou validáciou častí rytmu (metadáta,
+jednotlivé tracky, `base` a položky `variations`). Editor podčiarkne vlnovkou
+chybný riadok aj riadok s menom rytmu (viditeľné aj pri zbalenom rytme): web
+`rhythm-diagnostics.ts`, desktop `ui/RhythmErrorHighlighter.java`. Text chyby sa
+v hlavičke neukazuje; zobrazí sa až pri prehraní chybného rytmu (web v správe pod
+Play, desktop v dialógu). Next, potiahnutie alebo Play na chybný rytmus počas hrania
+prehrávanie zastaví a ukáže chybu. Pevné miesto hlavičky vedľa loga (desktop
+`HeaderStatus.java`, web `HeaderStatus.tsx`) ukazuje už len „Upravené · stlač Play“
+a chyby konceptu. Webové Uložiť používa YAML dokumentový model: zachová celý súbor
 a zapíše BPM a dialect vybraného, počas hrania prehrávaného rytmu. Mixer,
 master a humanizáciu do rytmu neukladá. Java výstup je mono, web podporuje aj pan
 z manifestu.

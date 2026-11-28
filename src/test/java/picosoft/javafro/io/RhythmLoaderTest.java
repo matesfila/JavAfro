@@ -106,7 +106,54 @@ public class RhythmLoaderTest {
         assertEquals(3, RhythmLoader.atCaret(source, source.length(), 116).dialect().offsets().size());
         String flow = "{First: {tracks: {dundun_withBell: 'D.......'}}, Second: {tracks: {dundun_withBell: '....D...'}}}";
         assertEquals("Second", RhythmLoader.atCaret(flow, flow.indexOf("Second"), 116).name());
-        assertThrows(IllegalArgumentException.class, () -> RhythmLoader.atCaret(source + first, 0, 116));
+        // A duplicate breaks only the repeated rhythm.
+        String duplicate = source + first;
+        assertEquals("Prvý rytmus", RhythmLoader.atCaret(duplicate, 0, 116).name());
+        assertEquals("Druhý: rytmus", RhythmLoader.atCaret(duplicate, duplicate.indexOf("'Druhý"), 116).name());
+        assertThrows(IllegalArgumentException.class, () -> RhythmLoader.atCaret(duplicate, duplicate.lastIndexOf("\"Prvý"), 116));
+    }
+
+    private static final String GOOD = "Good:\n  tracks:\n    djembe: 'b.tt..s.'\n";
+
+    private static java.util.List<String> lines(String source, java.util.List<int[]> ranges) {
+        return ranges.stream().map(range -> source.substring(range[0], range[1])).toList();
+    }
+
+    @Test
+    public void validatesEachRhythmOnItsOwnAndLocatesTheFaultyLine() {
+        String source = GOOD + "Broken:\n  bpm: 100\n  tracks:\n    djembe: 'b.tt..s.'\n    dundun: 'x.......'\n" + GOOD.replace("Good", "Third");
+        var entries = RhythmLoader.entries(source, 116);
+        assertEquals(java.util.List.of("Good", "Broken", "Third"), entries.stream().map(RhythmLoader.Entry::id).toList());
+        assertNotNull(entries.get(0).rhythm());
+        assertNull(entries.get(1).rhythm());
+        assertNotNull(entries.get(2).rhythm());
+        assertTrue(entries.get(1).error().contains("Broken"));
+        assertEquals(java.util.List.of("dundun: 'x.......'", "Broken:"), lines(source, entries.get(1).ranges()));
+        assertEquals("Good", RhythmLoader.atCaret(source, 0, 116).name());
+        assertEquals("Third", RhythmLoader.atCaret(source, source.indexOf("Third"), 116).name());
+        assertThrows(IllegalArgumentException.class, () -> RhythmLoader.atCaret(source, source.indexOf("Broken"), 116));
+        assertEquals(java.util.List.of("Good", "Third"), new ArrayList<>(RhythmLoader.valid(source, 116).keySet()));
+    }
+
+    @Test
+    public void locatesBrokenVariationAndMetadataField() {
+        String variation = "V:\n  tracks:\n    djembe:\n      base: 'b.tt..s.'\n      variations:\n        - 'b.tt..s.'\n        - 'b.tt..x.'\n";
+        assertEquals(java.util.List.of("- 'b.tt..x.'", "V:"), lines(variation, RhythmLoader.entries(variation, 116).getFirst().ranges()));
+        String bpm = "B:\n  bpm: -3\n  tracks:\n    djembe: 'b.tt..s.'\n";
+        assertEquals(java.util.List.of("bpm: -3", "B:"), lines(bpm, RhythmLoader.entries(bpm, 116).getFirst().ranges()));
+        String unknown = "U:\n  swing: 1\n  tracks:\n    djembe: 'b.tt..s.'\n";
+        assertEquals(java.util.List.of("swing: 1", "U:"), lines(unknown, RhythmLoader.entries(unknown, 116).getFirst().ranges()));
+    }
+
+    @Test
+    public void isolatesYamlSyntaxErrorsAndEmptyDocuments() {
+        String syntax = GOOD + "Bad:\n  tracks:\n    djembe: 'b.tt..s.\n" + GOOD.replace("Good", "After");
+        var entries = RhythmLoader.entries(syntax, 116);
+        assertEquals(java.util.List.of("Good", "Bad", "After"), entries.stream().map(RhythmLoader.Entry::id).toList());
+        assertNull(entries.get(1).rhythm());
+        assertEquals("After", RhythmLoader.atCaret(syntax, syntax.indexOf("After"), 116).name());
+        assertTrue(RhythmLoader.entries("- a\n- b\n", 116).isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> RhythmLoader.atCaret("- a\n", 0, 116));
     }
 
     @Test

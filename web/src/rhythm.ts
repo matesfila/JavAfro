@@ -1,4 +1,4 @@
-import { isMap, isScalar, parseDocument } from 'yaml';
+import { isMap, isScalar, isSeq, parseDocument } from 'yaml';
 import { supportsNote } from './sounds';
 import { config } from './config';
 import { patternBars } from './pattern';
@@ -63,15 +63,165 @@ export function sourceOffsetAtCaret(source: string, caretOffset: number) {
   return offset;
 }
 
+/** The rhythm under the caret. Only an error in that rhythm throws; other broken rhythms do not matter. */
 export function parseRhythmAtCaret(source: string, caretOffset: number, defaultBpm = config.initialTempo): Rhythm {
-  const entries = parseRhythmEntries(source, defaultBpm);
+  const entries = readRhythmEntries(source, defaultBpm);
+  if (!entries.length) {
+    parseRhythmEntries(source, defaultBpm); // throws the document-level reason
+    throw new Error('YAML musí obsahovať aspoň jeden rytmus.');
+  }
   const offset = sourceOffsetAtCaret(source, caretOffset);
-  let selected = entries[0].rhythm;
+  let selected = entries[0];
   for (const entry of entries) {
     if (entry.offset > offset) break;
-    selected = entry.rhythm;
+    selected = entry;
   }
-  return selected;
+  if (!selected.rhythm) throw new Error(selected.error!.message);
+  return selected.rhythm;
+}
+
+/** Source ranges to underline: the lines of the faulty YAML node and the rhythm's key line. */
+export interface RhythmProblem { message: string; ranges: [number, number][] }
+/** A top-level rhythm validated on its own: either `rhythm` or `error` is set. */
+export interface RhythmEntryResult { id: string; offset: number; rhythm?: Rhythm; error?: RhythmProblem }
+
+type YamlNode = { range?: [number, number, number] | null };
+type YamlPair = { key: unknown; value: unknown };
+
+/**
+ * Every top-level rhythm, each validated independently, so one broken rhythm never blocks the others.
+ * A YAML syntax error (or a duplicate key) splits the text at top-level keys and parses each part alone.
+ * Returns an empty list when the document has no top-level map at all.
+ */
+export function readRhythmEntries(source: string, defaultBpm = config.initialTempo): RhythmEntryResult[] {
+  if (source.length > 3 * 1024 * 1024) return [];
+  const document = parseDocument(source, { version: '1.1', uniqueKeys: true });
+  if (!document.errors.length) return documentEntries(source, document, 0, defaultBpm, new Set());
+  const seen = new Set<string>();
+  const entries: RhythmEntryResult[] = [];
+  for (const [start, end] of topLevelSegments(source)) {
+    const part = parseDocument(source.slice(start, end), { version: '1.1', uniqueKeys: true });
+    if (!part.errors.length) { entries.push(...documentEntries(source, part, start, defaultBpm, seen)); continue; }
+    const id = segmentKey(source.slice(start, end));
+    const error = part.errors[0];
+    const at = start + Math.min(error.pos[0], end - start - 1);
+    entries.push({ id, offset: start, error: { message: `${id}: ${error.message}`,
+      ranges: [...lineRanges(source, at, at), ...lineRanges(source, start, start)] } });
+    seen.add(id);
+  }
+  return entries;
+}
+
+/** Text ranges that start at a line beginning at column 0 (a top-level key); leading comments are skipped. */
+function topLevelSegments(source: string): [number, number][] {
+  const starts: number[] = [];
+  for (let line = 0; line < source.length; line = source.indexOf('\n', line) + 1 || source.length) {
+    if (/^[^\s#]/.test(source.slice(line, line + 1)) && !source.startsWith('---', line) && !source.startsWith('...', line)) starts.push(line);
+  }
+  return starts.map((start, i) => [start, starts[i + 1] ?? source.length]);
+}
+
+function segmentKey(segment: string) {
+  const line = segment.split(/\r?\n/, 1)[0];
+  const match = /^(?:"([^"]*)"|'([^']*)'|([^:#]*?))\s*:/.exec(line);
+  return (match?.[1] ?? match?.[2] ?? match?.[3] ?? line).trim() || line.trim();
+}
+
+function documentEntries(source: string, document: ReturnType<typeof parseDocument>, base: number, defaultBpm: number,
+  seen: Set<string>): RhythmEntryResult[] {
+  if (!isMap(document.contents)) return [];
+  let definitions: Record<string, unknown> | null = null;
+  let documentError = '';
+  try { definitions = record(document.toJS({ maxAliasCount: 50 }), 'YAML'); }
+  catch (error) { documentError = (error as Error).message; }
+  return (document.contents.items as YamlPair[]).map(pair => {
+    const key = pair.key as YamlNode & { value?: unknown };
+    const offset = base + (key.range?.[0] ?? 0);
+    const id = String(key.value ?? '');
+    const keyLine = lineRanges(source, offset, offset);
+    const fail = (message: string, node?: [number, number] | null): RhythmEntryResult => {
+      seen.add(id);
+      return { id, offset, error: { message: `${id}: ${message}`,
+        ranges: [...(node ? lineRanges(source, base + node[0], base + node[1]) : []), ...keyLine] } };
+    };
+    if (seen.has(id)) return fail(`Rytmus „${id}“ je v YAML viackrát.`);
+    if (!definitions) return fail(documentError);
+    try {
+      text(key.value, 'Identifikátor');
+      const rhythm = parseDefinition(id, definitions[id], defaultBpm);
+      seen.add(id);
+      return { id, offset, rhythm };
+    } catch (error) {
+      return fail((error as Error).message, locateProblem(id, pair.value, definitions[id], defaultBpm));
+    }
+  });
+}
+
+const nodeRange = (node: unknown): [number, number] | null => {
+  const range = (node as YamlNode | null)?.range;
+  return range ? [range[0], range[1]] : null;
+};
+const pairRange = (pair: YamlPair): [number, number] | null => {
+  const key = nodeRange(pair.key);
+  const value = nodeRange(pair.value);
+  return key ? [key[0], value?.[1] ?? key[1]] : value;
+};
+
+/** Find the YAML node of a definition error by validating its parts alone with the same rules. */
+function locateProblem(id: string, node: unknown, definition: unknown, defaultBpm: number): [number, number] | null {
+  if (!isMap(node) || typeof definition !== 'object' || definition === null || Array.isArray(definition)) return nodeRange(node);
+  const data = definition as Record<string, unknown>;
+  const pairs = node.items as YamlPair[];
+  const field = (name: string) => pairs.find(pair => isScalar(pair.key) && pair.key.value === name);
+  const allowed = ['bpm', 'timeSignature', 'stepsPerBeat', 'dialect', 'tracks', 'legacy'];
+  const unknown = pairs.find(pair => !isScalar(pair.key) || !allowed.includes(String(pair.key.value)));
+  if (unknown) return pairRange(unknown);
+  const metadata: Record<string, unknown> = {};
+  for (const name of ['bpm', 'timeSignature', 'stepsPerBeat', 'dialect', 'legacy']) {
+    if (!(name in data)) continue;
+    try { parseMetadata({ ...metadata, [name]: data[name] }, defaultBpm); metadata[name] = data[name]; }
+    catch { const pair = field(name); return pair ? pairRange(pair) : null; }
+  }
+  const tracksPair = field('tracks');
+  if (!tracksPair || !isMap(tracksPair.value)) return tracksPair ? pairRange(tracksPair) : null;
+  const tracks = data.tracks as Record<string, unknown>;
+  const fails = (instrument: string, track: unknown) => {
+    try { parseDefinition(id, { ...metadata, tracks: { [instrument]: track } }, defaultBpm); return false; }
+    catch { return true; }
+  };
+  for (const pair of tracksPair.value.items as YamlPair[]) {
+    const instrument = isScalar(pair.key) ? String(pair.key.value) : '';
+    if (!fails(instrument, tracks[instrument])) continue;
+    if (instruments.includes(instrument as Instrument) && isMap(pair.value)) {
+      const track = pair.value.items as YamlPair[];
+      const part = (name: string) => track.find(item => isScalar(item.key) && item.key.value === name);
+      const basePair = part('base');
+      if (basePair && isScalar(basePair.value) && fails(instrument, basePair.value.value)) return nodeRange(basePair.value);
+      const variations = part('variations')?.value;
+      if (isSeq(variations)) {
+        for (const item of variations.items) if (isScalar(item) && fails(instrument, item.value)) return nodeRange(item);
+      }
+    }
+    return pairRange(pair);
+  }
+  return tracksPair ? pairRange(tracksPair) : null;
+}
+
+/** Each non-blank line touching [start, end], from its first non-blank character to the line end. */
+function lineRanges(source: string, start: number, end: number): [number, number][] {
+  const ranges: [number, number][] = [];
+  // A node range may end right after its line break; that next line is not part of it.
+  const last = end > start ? end - 1 : start;
+  let line = start > 0 ? source.lastIndexOf('\n', start - 1) + 1 : 0;
+  for (;;) {
+    const next = source.indexOf('\n', line);
+    const text = source.slice(line, next < 0 ? source.length : next).replace(/\r$/, '');
+    const indent = text.length - text.trimStart().length;
+    if (text.trim()) ranges.push([line + indent, line + text.length]);
+    if (next < 0 || next >= last) break;
+    line = next + 1;
+  }
+  return ranges;
 }
 
 export function parseRhythmEntries(source: string, defaultBpm = config.initialTempo): { rhythm: Rhythm; offset: number }[] {

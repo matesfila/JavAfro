@@ -8,13 +8,17 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-/** Invalid work is always saved verbatim; valid documents retain comments and other rhythms. */
+/**
+ * Invalid work is always saved verbatim; comments and other rhythms are retained. Controls are written into
+ * the selected rhythm when it is valid, even if another rhythm is broken (a YAML syntax error keeps the text).
+ */
 public final class RhythmExport {
     private RhythmExport() {}
     public static String export(String source, DesktopDraftStore.Controls controls, int defaultBpm) {
         if (controls == null) return source;
         try {
-            var rhythms = RhythmLoader.load(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), defaultBpm);
+            // Another broken rhythm must not stop the selected one's controls from being saved.
+            var rhythms = RhythmLoader.valid(source, defaultBpm);
             var selected = rhythms.get(controls.rhythm());
             if (selected == null || selected.stepsPerBeat() != controls.dialect().size()) return source;
             boolean tempoChanged = selected.bpm() != controls.bpm();

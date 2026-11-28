@@ -45,7 +45,7 @@ public class DesktopLayoutTest {
         assertTrue(Files.readString(target).contains("bpm: 133"));
     }
 
-    @Test public void mixerAndLiveControlsAreInlineAndInvalidYamlIsReportedInTheHeader() throws Exception {
+    @Test public void mixerAndLiveControlsAreInlineAndInvalidYamlIsOnlyUnderlined() throws Exception {
         SwingUtilities.invokeAndWait(() -> {
             var panel = new RhythmPlayerPanel(YAML);
             var mixer = NotePadTest.find(panel, "masterVolume");
@@ -61,9 +61,28 @@ public class DesktopLayoutTest {
             var editor = (RSyntaxTextArea) NotePadTest.find(panel, "yamlEditor");
             editor.insert("Broken: [\n", 0);
             editor.setCaretPosition(3);
-            assertTrue(status.message(HeaderStatus.Slot.EDITOR).startsWith("Neplatný YAML"));
-            assertTrue(status.isInvalid());
+            assertEquals("", status.text());
+            assertFalse(status.isInvalid());
             assertEquals("", ((JLabel) NotePadTest.find(panel, "playbackStatus")).getText());
+            assertTrue(((JButton) NotePadTest.find(panel, "playButton")).isEnabled());
+            panel.errorHighlighter().refresh();
+            String text = editor.getText();
+            assertEquals(java.util.List.of("Broken: ["), panel.errorHighlighter().highlighted().stream()
+                    .map(range -> text.substring(range[0], range[1])).toList());
+            // The other rhythms stay selectable.
+            editor.setCaretPosition(text.indexOf("Second") + 2);
+            assertEquals("Second", ((JLabel) NotePadTest.find(panel, "rhythmName")).getText());
+        });
+    }
+
+    @Test public void brokenPatternUnderlinesItsLineAndRhythmName() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            String broken = YAML.replace("{djembe: 'b.tt..s.'}", "\n    djembe: 'b.tt..x.'");
+            var panel = new RhythmPlayerPanel(broken);
+            assertEquals("Second", ((JLabel) NotePadTest.find(panel, "rhythmName")).getText());
+            assertEquals("", panel.headerStatus().text());
+            assertEquals(java.util.List.of("First:", "djembe: 'b.tt..x.'"), panel.errorHighlighter().highlighted().stream()
+                    .map(range -> broken.substring(range[0], range[1])).toList());
         });
     }
 
@@ -82,14 +101,13 @@ public class DesktopLayoutTest {
             var preferred = java.util.List.of(panel.getPreferredSize(), header.getPreferredSize(), status.getPreferredSize());
             assertEquals(0, status.getPreferredSize().width);
 
-            editor.insert("Broken: [\n", 0);
-            editor.setCaretPosition(3);
+            status.setMessage(HeaderStatus.Slot.EDITOR, "Upravené · stlač Play", false);
             status.setMessage(HeaderStatus.Slot.DRAFT, "rytmus.yaml · " + "veľmi dlhá správa ".repeat(40), true);
             assertTrue(status.isInvalid());
             assertTrue(status.text().contains("\n"));
             var lines = status.visibleLines();
             assertEquals(HeaderStatus.MAX_LINES, lines.size());
-            assertTrue(lines.getFirst().text().startsWith("Neplatný YAML"));
+            assertTrue(lines.getFirst().text().startsWith("Upravené"));
             assertTrue(lines.getLast().text().endsWith("…"));
             assertEquals(preferred, java.util.List.of(panel.getPreferredSize(), header.getPreferredSize(), status.getPreferredSize()));
             layoutTree(panel);

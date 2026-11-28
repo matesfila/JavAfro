@@ -47,6 +47,7 @@ public final class RhythmPlayerPanel extends JPanel {
     private final JLabel fileName = new JLabel("rytmus.yaml");
     private final JLabel rhythmName = new JLabel("Rytmus");
     private final HeaderStatus headerStatus = new HeaderStatus();
+    private final RhythmErrorHighlighter errorHighlighter;
     private final AppConfig config;
     private final JSlider tempo;
     private final JSlider humanize;
@@ -101,6 +102,7 @@ public final class RhythmPlayerPanel extends JPanel {
     RhythmPlayerPanel(String yaml, AppConfig config, java.util.function.IntFunction<PlaybackSession> sessionFactory) {
         super(new BorderLayout(0, 10));
         this.config = config;
+        errorHighlighter = new RhythmErrorHighlighter(editor, config::initialTempo);
         mixer = new MixerPanel(config.defaultTrackVolume(), config.defaultMasterVolume());
         this.sessionFactory = sessionFactory;
         tempo = new TempoDial(config.minimumTempo(), config.maximumTempo(), config.initialTempo());
@@ -146,7 +148,7 @@ public final class RhythmPlayerPanel extends JPanel {
             try {
                 syncRhythm(RhythmLoader.atCaret(editor.getText(), editor.getCaretPosition(), config.initialTempo()));
             } catch (IllegalArgumentException exception) {
-                setEditorStatus("Neplatný YAML · " + exception.getMessage(), true);
+                // A broken rhythm is only underlined; its error appears when it is played.
             }
         });
         setTransferHandler(fileDropHandler(getTransferHandler()));
@@ -567,6 +569,9 @@ public final class RhythmPlayerPanel extends JPanel {
     /** The header message slot, for tests. */
     HeaderStatus headerStatus() { return headerStatus; }
 
+    /** The editor's error underlines, for tests. */
+    RhythmErrorHighlighter errorHighlighter() { return errorHighlighter; }
+
     public static Rhythm parseRhythm(String yaml) {
         var rhythms = RhythmLoader.load(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
         return firstRhythm(rhythms);
@@ -621,12 +626,12 @@ public final class RhythmPlayerPanel extends JPanel {
                 setEditorStatus("Otvor YAML alebo ho presuň do okna", false);
                 return;
             }
-            Rhythm rhythm = parseRhythm(yaml, config.initialTempo());
             setAllFolds(true);
-            syncRhythm(rhythm);
-        } catch (IllegalArgumentException exception) {
-            play.setEnabled(!yaml.isBlank()); setEditorStatus("Neplatný YAML · text môžeš upraviť alebo uložiť", true);
-        } finally { loadingYaml = false; }
+            play.setEnabled(true);
+            // Broken rhythms are only underlined; the first valid one sets up the controls.
+            var rhythms = RhythmLoader.valid(yaml, config.initialTempo());
+            if (!rhythms.isEmpty()) syncRhythm(rhythms.values().iterator().next());
+        } finally { loadingYaml = false; errorHighlighter.refresh(); }
     }
 
     private void openYaml() {
@@ -719,12 +724,13 @@ public final class RhythmPlayerPanel extends JPanel {
         try {
             currentFile = path; savedSource = draft.savedSource();
             if (!draft.source().isBlank()) {
-                try {
-                    Rhythm selected = RhythmLoader.atCaret(draft.source(), draft.caret(), config.initialTempo());
-                    if (draft.controls() != null) {
-                        var rhythms = RhythmLoader.load(new ByteArrayInputStream(draft.source().getBytes(StandardCharsets.UTF_8)), config.initialTempo());
-                        selected = rhythms.getOrDefault(draft.controls().rhythm(), selected);
-                    }
+                Rhythm selected;
+                try { selected = RhythmLoader.atCaret(draft.source(), draft.caret(), config.initialTempo()); }
+                catch (IllegalArgumentException exception) { selected = null; }
+                if (draft.controls() != null) {
+                    selected = RhythmLoader.valid(draft.source(), config.initialTempo()).getOrDefault(draft.controls().rhythm(), selected);
+                }
+                if (selected != null) {
                     syncRhythm(selected);
                     if (draft.controls() != null && selected.name().equals(draft.controls().rhythm())) {
                         int bpm = draft.controls().bpm();
@@ -733,7 +739,7 @@ public final class RhythmPlayerPanel extends JPanel {
                             dialectControls.setDialect(picosoft.javafro.base.Dialect.of(selected.stepsPerBeat(), draft.controls().dialect()));
                         }
                     }
-                } catch (IllegalArgumentException exception) { setEditorStatus("Neplatný YAML · text môžeš upraviť alebo uložiť", true); }
+                }
             }
             editor.setCaretPosition(draft.caret());
         } finally { loadingYaml = false; }
@@ -800,10 +806,7 @@ public final class RhythmPlayerPanel extends JPanel {
                 finally { editor.endAtomicEdit(); }
             }
             currentFile = target; savedSource = exported; dialectYaml = exported;
-            try {
-                var rhythms = RhythmLoader.load(new ByteArrayInputStream(exported.getBytes(StandardCharsets.UTF_8)), config.initialTempo());
-                selectedDefinition = rhythms.get(selectedRhythmId);
-            } catch (IllegalArgumentException exception) { selectedDefinition = null; }
+            selectedDefinition = selectedRhythmId == null ? null : RhythmLoader.valid(exported, config.initialTempo()).get(selectedRhythmId);
         } finally { loadingYaml = false; }
         persistDraft();
         updateFileName();
@@ -827,7 +830,12 @@ public final class RhythmPlayerPanel extends JPanel {
             rhythm = RhythmLoader.atCaret(editor.getText(), editor.getCaretPosition(), config.initialTempo());
             requestPlayback(rhythm);
         }
-        catch (IllegalArgumentException exception) { pendingPlayback = null; showError(exception); }
+        catch (IllegalArgumentException exception) {
+            pendingPlayback = null;
+            // A broken rhythm requested while another one plays stops the playback, then explains why.
+            stopPlayback();
+            showError(exception);
+        }
     }
 
     private void requestPlayback(Rhythm rhythm) {

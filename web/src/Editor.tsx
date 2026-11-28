@@ -8,6 +8,7 @@ import { rhythmFoldEffects } from './rhythm-folding';
 import { foldedRanges, unfoldAll } from '@codemirror/language';
 import { moveRhythm, type MoveDirection } from './rhythm-move';
 import { overwriteExtension, overwriteState, setOverwrite } from './overwrite';
+import { rhythmDiagnostics } from './rhythm-diagnostics';
 import { NotePad } from './NotePad';
 import { insertNote, noteCommands, type NoteCommand } from './note-input';
 import { instrumentAtCaret, patternBarStart } from './note-context';
@@ -229,7 +230,7 @@ export function YamlEditor({ ref, value, onChange, onCaretChange, caretOffset, f
     const barSnap = patternBarSnap(() => performance.now() <= barSnapUntil);
     const editor = new EditorView({
       parent: host.current!, doc: value, selection: { anchor: Math.min(caretOffset, value.length) },
-      extensions: [barSnap, overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), theme, zoomRemeasure.of(remeasureThemes[0]),
+      extensions: [barSnap, overwriteExtension, overwriteState.init(() => overwrite), editorSetup, yaml(), rhythmDiagnostics, theme, zoomRemeasure.of(remeasureThemes[0]),
         editing.current.of([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]),
         inputAttributes.current.of(EditorView.contentAttributes.of({ inputmode: inputMode === 'keyboard' ? 'text' : 'none' })),
         EditorView.contentAttributes.of({ 'aria-label': 'YAML editor rytmu', spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),

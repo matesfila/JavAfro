@@ -19,6 +19,12 @@ public class RhythmExportTest {
         assertTrue(exported.contains("# keep tempo comment"));
         assertTrue(exported.contains("marker: keep"));
     }
+    @Test public void exportsControlsOfAValidRhythmNextToABrokenOne() {
+        String source = "First:\n  stepsPerBeat: 4\n  tracks: {djembe: 'b.tt..s.'}\nBroken:\n  tracks: {djembe: 'b.tt..x.'}\n";
+        String exported = RhythmExport.export(source, CONTROLS, 116);
+        assertTrue(exported.contains("bpm: 143"));
+        assertTrue(exported.contains("b.tt..x."));
+    }
     @Test public void invalidOrEmptyWorkIsSavedVerbatim() {
         for (String source : List.of("First: [", "", "# rozpracovaný rytmus\nFirst: {bpm: -1}\n")) {
             assertEquals(source, RhythmExport.export(source, CONTROLS, 116));
