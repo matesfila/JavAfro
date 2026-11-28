@@ -40,7 +40,13 @@ export function LiveView({ open, onClose, playing, buttonProps, playDisabled, rh
         disabled={!playing && playDisabled} aria-pressed={playing}
         title={(playing ? 'Zastaviť' : 'Prehrať rytmus') + ' · potiahni ⇒ ďalší, ⇐ predchádzajúci, ⇑ rýchlejšie, ⇓ pomalšie'}>
         {playing ? <span className="stop-square" /> : <PlayIcon />}
-        <span className="live-label">{playing ? 'Stop' : 'Play'}<small>potiahni ⇒ ďalší · ⇐ predchádzajúci</small><small>⇑ +2 BPM · ⇓ −2 BPM</small></span>
+        <span className="live-label">{playing ? 'Stop' : 'Play'}</span>
+        <span className="live-hints" aria-hidden="true">
+          <span className="live-hint"><b>⇐</b> predchádzajúci</span>
+          <span className="live-hint">ďalší <b>⇒</b></span>
+          <span className="live-hint"><b>⇑</b> +2 BPM</span>
+          <span className="live-hint"><b>⇓</b> −2 BPM</span>
+        </span>
       </button>
     </div>
   </dialog>;
