@@ -217,55 +217,6 @@ describe('audio lifecycle', () => {
     engine.dispose();
   });
 
-  it('Stop at the pattern end lets the pattern play out and its last hits ring', async () => {
-    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    await engine.start(rhythm);
-    const master = context.gains[0];
-    context.currentTime = .05;
-    expect(await finishSwitch(engine.stopAtPatternEnd())).toBe(true);
-    expect(context.currentTime).toBeGreaterThanOrEqual(2.002);
-    expect(context.sources).toHaveLength(16);
-    expect(context.sources.every(source => source.stop.mock.calls.length === 0)).toBe(true);
-    expect(master.gain.setTargetAtTime).not.toHaveBeenCalled();
-    context.currentTime = 5; vi.advanceTimersByTime(3000);
-    expect(context.sources).toHaveLength(16);
-    expect(master.disconnect).not.toHaveBeenCalled();
-    context.sources.forEach(source => source.onended?.());
-    expect(master.disconnect).toHaveBeenCalledOnce();
-    engine.dispose();
-  });
-
-  it('a Stop waiting for the pattern end cancels prepared hits; Play meanwhile starts at that end instead', async () => {
-    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    await engine.start(rhythm);
-    for (let i = 0; i < 76; i++) { context.currentTime += .025; vi.advanceTimersByTime(25); }
-    const prepared = context.sources.slice(16);
-    expect(prepared.length).toBeGreaterThan(0);
-    const stopping = engine.stopAtPatternEnd();
-    prepared.forEach(source => expect(source.stop).toHaveBeenCalledWith(expect.closeTo(2.002, 6)));
-    expect(context.sources.slice(0, 16).every(source => source.stop.mock.calls.length === 0)).toBe(true);
-    const count = context.sources.length;
-    expect(await engine.start(rhythm)).toBe(true);
-    expect(context.sources[count].start.mock.calls[0][0]).toBeCloseTo(2.002);
-    context.currentTime = 2.1; await vi.advanceTimersByTimeAsync(200);
-    expect(await stopping).toBe(false);
-    expect(context.sources.length).toBeGreaterThan(count + 1);
-    engine.dispose();
-  });
-
-  it('Stop while waiting for the pattern end silences at once', async () => {
-    const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());
-    await engine.start(rhythm);
-    const stopping = engine.stopAtPatternEnd();
-    engine.stop();
-    expect(await stopping).toBe(false);
-    expect(context.gains[0].gain.setTargetAtTime).toHaveBeenCalledWith(0, context.currentTime, .002);
-    const count = context.sources.length;
-    context.currentTime = 3; vi.advanceTimersByTime(3000);
-    expect(context.sources).toHaveLength(count);
-    engine.dispose();
-  });
-
   it('uses the newest queued Play and waits for the full multi-bar pattern', async () => {
     const long = parseRhythm('long:\n  stepsPerBeat: 4\n  tracks: {dundun_freesound: "DDDDDDDDDDDDDDDD|DDDDDDDDDDDDDDDD"}');
     const engine = new AudioEngine(() => ({ bpm: 120, humanize: 0, dialect: [0, 0, 0, 0] }), vi.fn());

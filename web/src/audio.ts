@@ -101,9 +101,7 @@ export class AudioEngine {
       // loop. Replace that unplayed loop rather than making the user wait another.
       const earliest = context.currentTime + AudioConstants.MIN_SOURCE_START_DELAY_SECONDS;
       const boundary = this.graph!.startTime > earliest ? this.graph!.startTime : this.graph!.scheduledBoundary;
-      // While a stop waits for the pattern end, the scheduler is off, so start at that end (or now if it just passed).
-      const finishing = this.interval === null;
-      if (boundary !== undefined && (boundary > earliest || finishing)) {
+      if (boundary !== undefined && boundary > earliest) {
         return this.activate(rhythm, initial, mix, Math.max(boundary, earliest));
       }
       return new Promise<boolean>((resolve, reject) => {
@@ -248,52 +246,6 @@ export class AudioEngine {
     this.tails.delete(graph);
     graph.tracks.forEach(gain => gain.disconnect());
     graph.gain.disconnect();
-  }
-
-  /**
-   * Stop at the end of the current pattern, like a queued Play: the pattern plays out and its last
-   * hits ring naturally. Resolves true once playback ended there, false when a later Play/Stop took over.
-   */
-  stopAtPatternEnd(): Promise<boolean> {
-    const context = this.context;
-    const graph = this.graph;
-    if (!this.active || !context || !graph) { this.stop(); return Promise.resolve(true); }
-    this.cancelPendingStart();
-    const earliest = context.currentTime + AudioConstants.MIN_SOURCE_START_DELAY_SECONDS;
-    const boundary = graph.startTime > earliest ? graph.startTime : graph.scheduledBoundary;
-    if (boundary !== undefined && boundary > earliest) return this.finishAt(boundary);
-    return new Promise<boolean>(resolve => {
-      this.queued = { activate: time => resolve(this.finishAt(time)), cancel: () => resolve(false) };
-    });
-  }
-
-  private finishAt(end: number): Promise<boolean> {
-    const context = this.context!;
-    const graph = this.graph!;
-    const generation = this.generation;
-    if (this.interval !== null) clearInterval(this.interval);
-    this.interval = null;
-    // A later Play during the wait starts exactly here instead of a stop.
-    graph.scheduledBoundary = end;
-    for (const [source, { start, loopStart }] of graph.sources) {
-      // Cancel only hits of the next loop that the look-ahead already scheduled.
-      if (start >= end || loopStart >= end) {
-        try { source.stop(Math.min(start, end)); } catch { /* already ended */ }
-      }
-    }
-    return new Promise<boolean>(resolve => {
-      const wait = () => {
-        if (generation !== this.generation || !this.active) { resolve(false); return; }
-        const remaining = end - context.currentTime;
-        if (remaining > 0) { setTimeout(wait, remaining * AudioConstants.MILLISECONDS_PER_SECOND); return; }
-        this.active = false; this.generation++;
-        this.graph = null;
-        this.tails.add(graph);
-        if (!graph.sources.size) this.disconnectGraph(graph);
-        resolve(true);
-      };
-      wait();
-    });
   }
 
   stop() {

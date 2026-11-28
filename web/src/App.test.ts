@@ -575,38 +575,14 @@ it('switches rhythms by swiping Stop while playing, without stopping; a tap stil
   expect(stop).toHaveBeenCalledOnce();
 });
 
-it('Stop finishes the pattern first; a second tap stops at once and a swipe keeps playing', async () => {
+it('Stop stops at once without waiting for the pattern end', async () => {
   await renderPlaying();
   const stop = vi.mocked(AudioEngine.prototype.stop);
-  let finish!: (ended: boolean) => void;
-  const atEnd = vi.spyOn(AudioEngine.prototype, 'stopAtPatternEnd')
-    .mockImplementation(() => new Promise<boolean>(resolve => { finish = resolve; }));
   const stopButton = document.querySelector<HTMLButtonElement>('.transport .stop')!;
-  await act(async () => stopButton.click());
-  expect(atEnd).toHaveBeenCalledOnce();
-  expect(stop).not.toHaveBeenCalled();
-  expect(document.body.textContent).toContain('Zastaví sa po skončení patternu');
-  expect(stopButton.disabled).toBe(false);
-  await act(async () => finish(true));
-  expect(mainButton().textContent).toBe('Play');
-  expect(stopButton.disabled).toBe(true);
-
-  // Waiting for the pattern end: a second tap stops immediately.
-  await act(async () => mainButton().click());
-  await act(() => vi.advanceTimersByTimeAsync(200));
-  await act(async () => stopButton.click());
   await act(async () => stopButton.click());
   expect(stop).toHaveBeenCalledOnce();
   expect(mainButton().textContent).toBe('Play');
-
-  // A swipe while waiting queues the next rhythm and the pending stop no longer ends playback.
-  await act(async () => mainButton().click());
-  await act(() => vi.advanceTimersByTimeAsync(200));
-  await act(async () => stopButton.click());
-  await swipe(stopButton, 80);
-  await act(async () => finish(false));
-  expect(document.body.textContent).not.toContain('Zastaví sa po skončení patternu');
-  expect(mainButton().textContent).toContain('Next');
+  expect(stopButton.disabled).toBe(true);
 });
 
 it('selects rhythms by swiping Play while stopped, then Play starts the selected one', async () => {

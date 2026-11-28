@@ -96,10 +96,7 @@ patternu (opakované potiahnutie pokračuje od už zaradeného rytmu), keď nič
 rytmus iba vyberie a Play ho spustí (Stop je vtedy neaktívne). Potiahnutie po Stop
 hranie nezastaví. Funguje v hlavnom pohľade aj v Živom hraní.
 
-**Stop** na webe podobne počká na koniec patternu: aktuálny pattern dohrá, posledné
-údery prirodzene doznejú a až potom hranie skončí (zobrazí sa „Zastaví sa po skončení
-patternu“). Druhé ťuknutie na Stop počas čakania zastaví hneď. Potiahnutie, Next alebo
-Play počas čakania zastavenie zruší a zaradí ďalší rytmus.
+**Stop** zastaví hranie okamžite, bez čakania na koniec patternu.
 
 Next sa zobrazuje, iba kým je kurzor v hranom (alebo zaradenom) rytme a text sa
 nezmenil. Po presune kurzora na iný rytmus alebo po úprave YAML sa tlačidlo vráti
