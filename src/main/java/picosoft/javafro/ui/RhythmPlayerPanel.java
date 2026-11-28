@@ -705,8 +705,8 @@ public final class RhythmPlayerPanel extends JPanel {
         if (draftStore == null) return;
         try {
             draftStore.save(snapshotDraft(), false);
-            headerStatus.setMessage(HeaderStatus.Slot.DRAFT, (currentFile == null ? "rytmus.yaml" : currentFile.getFileName().toString())
-                    + (snapshotDraft().dirty() ? " · rozpracovaný koncept uložený" : " · koncept uložený"), false);
+            // A successful autosave stays silent; it only clears an earlier draft error.
+            headerStatus.setMessage(HeaderStatus.Slot.DRAFT, "", false);
         } catch (IOException exception) { draftError(exception); }
     }
 
@@ -748,10 +748,11 @@ public final class RhythmPlayerPanel extends JPanel {
 
     private boolean confirmDocumentChange() {
         return DocumentGuard.approve(snapshotDraft().dirty(), () -> {
-            Object[] options = {"Zrušiť", "Uložiť a pokračovať", "Pokračovať bez uloženia"};
-            int choice = JOptionPane.showOptionDialog(this, "Dokument má neuložené zmeny.", "Rozpracovaný rytmus",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-            return switch (choice) { case 1 -> DocumentGuard.Decision.SAVE; case 2 -> DocumentGuard.Decision.DISCARD; default -> DocumentGuard.Decision.CANCEL; };
+            Object[] options = {"Áno", "Nie", "Zrušiť"};
+            int choice = JOptionPane.showOptionDialog(this, "Máš neuložené zmeny. Chceš ich uložiť?", "Neuložené zmeny",
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            // Closing the dialog with × or Esc returns CLOSED_OPTION and cancels, like Zrušiť.
+            return switch (choice) { case 0 -> DocumentGuard.Decision.SAVE; case 1 -> DocumentGuard.Decision.DISCARD; default -> DocumentGuard.Decision.CANCEL; };
         }, () -> saveDocument(false));
     }
 
@@ -814,7 +815,19 @@ public final class RhythmPlayerPanel extends JPanel {
 
     public boolean requestClose() {
         if (!confirmDocumentChange()) return false;
-        flushDraft(); stopPlayback(); return true;
+        // Still dirty after the dialog means "Nie": the declined changes must not come back on the next start.
+        if (snapshotDraft().dirty()) discardDraftChanges(); else flushDraft();
+        stopPlayback(); return true;
+    }
+
+    /** Replaces the recovery draft with the last opened or saved version; the editor itself is left as it is. */
+    void discardDraftChanges() {
+        draftTimer.stop();
+        if (draftStore == null) return;
+        Draft current = snapshotDraft();
+        String saved = current.savedSource();
+        try { draftStore.save(new Draft(saved, current.file(), Math.min(current.caret(), saved.length()), saved, null), false); }
+        catch (IOException exception) { draftError(exception); }
     }
 
     public void flushDraft() { draftTimer.stop(); persistDraft(); }

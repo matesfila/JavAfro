@@ -90,6 +90,22 @@ public class DesktopEditingTest {
         assertEquals(YAML, restored.savedSource()); assertTrue(restored.dirty());
     }
 
+    @Test public void closingWithoutSavingLeavesACleanDraftForTheNextStart() throws Exception {
+        var directory = temporary.newFolder("discard").toPath();
+        SwingUtilities.invokeAndWait(() -> {
+            var panel = new RhythmPlayerPanel(YAML); panel.enableDraftRecovery(directory, null);
+            var editor = (RSyntaxTextArea) find(panel, "yamlEditor");
+            editor.setText("declined: ["); editor.setCaretPosition(9); panel.flushDraft();
+            panel.discardDraftChanges();
+        });
+        var restored = new DesktopDraftStore(directory).current();
+        assertEquals(YAML, restored.source()); assertFalse(restored.dirty());
+        SwingUtilities.invokeAndWait(() -> {
+            var next = new RhythmPlayerPanel(""); next.enableDraftRecovery(directory, null);
+            assertFalse(next.snapshotDraft().dirty());
+        });
+    }
+
     @Test public void aConflictingWindowShowsAnErrorAndKeepsBothVersionsSafe() throws Exception {
         var directory = temporary.newFolder("conflict").toPath();
         SwingUtilities.invokeAndWait(() -> {

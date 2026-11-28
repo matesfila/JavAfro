@@ -381,8 +381,10 @@ samostatné panely a testy nepoužívajú používateľské úložisko. Bez argu
 koncept; explicitný súbor uloží predchádzajúci koncept do jednej zálohy. Debounce 400 ms
 a `flushDraft()` pri deaktivácii/zatvorení uložia aj neplatný či prázdny text. `saveTo()`
 zapíše súbor cez dočasný súbor; pôvodný editor a uložená základná verzia sa aktualizujú
-až po úspechu. Zápis súboru a záznamu konceptu sú oddelené, stav aj chyby konceptu sa zobrazia
-v hlavičke (`HeaderStatus`, slot `DRAFT`). `requestClose()` pri zrušení alebo neúspešnom uložení ponechá okno otvorené.
+až po úspechu. Zápis súboru a záznamu konceptu sú oddelené; úspešné ukladanie konceptu je tiché
+a v hlavičke (`HeaderStatus`, slot `DRAFT`) sa zobrazia len jeho chyby. `requestClose()` pri zrušení alebo neúspešnom uložení ponechá okno otvorené.
+Ak používateľ pri zatváraní zvolí „Nie“, `discardDraftChanges()` prepíše koncept uloženou verziou, aby sa odmietnuté
+zmeny pri ďalšom štarte neobnovili; po páde alebo násilnom ukončení sa koncept obnoví ako predtým.
 
 ## 5. Dátový formát a pravidlá pri zmenách
 
