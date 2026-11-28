@@ -79,28 +79,20 @@ rovnakými rytmami a samplami, nepretržitým prehrávaním, tempom, humanizáci
 a dialectom. Spustenie: `cd web`, `npm ci`, `npm run dev`.
 Nepotrebuje Java backend; produkčný build vytvorí statický adresár `web/dist`.
 
-### Next, predchádzajúci rytmus a Živé hranie (web)
+### Ďalší, predchádzajúci rytmus a Živé hranie (web)
 
-Keď rytmus hrá, tlačidlo **Play** sa zmení na **Next** (dvojitá šípka). Next zaradí
-rytmus, ktorý v súbore nasleduje po práve hranom, na koniec aktuálneho patternu,
-rovnako ako Play počas hrania. **Dvojklik / dvojťuk** na Next (dve stlačenia do 350 ms)
-zaradí namiesto toho **predchádzajúci** rytmus. Jedno stlačenie sa preto vykoná až
-po 350 ms, keď je isté, že druhé neprišlo; pri dvojťuku sa nasledujúci rytmus
-vôbec nezaradí ani nezobrazí. Poradie je poradie hlavných kľúčov
-v YAML a dookola: po poslednom rytme nasleduje prvý, pred prvým posledný.
-Kurzor editora sa presunie na zaradený rytmus.
+Tlačidlo **Play** ostáva Play aj počas hrania: zaradí rytmus pod kurzorom (prípadne
+úpravy YAML) na koniec aktuálneho patternu.
 
-**Potiahnutie prstom (alebo myšou) po tlačidle Play/Next alebo Stop** prepína hneď, bez čakania:
+**Potiahnutie prstom (alebo myšou) po tlačidle Play alebo Stop** prepína hneď, bez čakania:
 doprava = nasledujúci rytmus, doľava = predchádzajúci. Počas hrania ho zaradí na koniec
 patternu (opakované potiahnutie pokračuje od už zaradeného rytmu), keď nič nehrá,
 rytmus iba vyberie a Play ho spustí (Stop je vtedy neaktívne). Potiahnutie po Stop
-hranie nezastaví. Funguje v hlavnom pohľade aj v Živom hraní.
+hranie nezastaví. Funguje v hlavnom pohľade aj v Živom hraní. Poradie je poradie
+hlavných kľúčov v YAML a dookola: po poslednom rytme nasleduje prvý, pred prvým posledný.
+Kurzor editora sa presunie na zaradený rytmus.
 
 **Stop** zastaví hranie okamžite, bez čakania na koniec patternu.
-
-Next sa zobrazuje, iba kým je kurzor v hranom (alebo zaradenom) rytme a text sa
-nezmenil. Po presune kurzora na iný rytmus alebo po úprave YAML sa tlačidlo vráti
-na **Play**: zaradí rytmus pod kurzorom, prípadne úpravy, tak ako doteraz.
 
 Tlačidlo **Live!** v hlavičke (vpravo vedľa **Súbor**) otvorí **Živé hranie**, celú obrazovku s jediným veľkým tlačidlom:
 keď nič nehrá, je to **Play** (spustí rytmus), počas hrania **Stop**. Rytmy sa

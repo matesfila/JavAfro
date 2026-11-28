@@ -74,6 +74,7 @@ nebude ich posielať nikam na žiadny server, bude zaručené že to je iba u ni
   (zostáva ručné overenie na telefóne)
 - [x] Panel na živé hranie - veľké buttony na play, stop, next rhythm, speed up, break...
   - web: play/next/predchádzajúci a stop hotové ([Živé hranie](web-dalsi-rytmus-zive-hranie.md)), zostáva speed up, break...
+- [x] Web: malé Play sa počas hrania nemení na Next (ostáva Play, rytmy sa prepínajú potiahnutím)
 - [x] Desktop: tlačidlo Next/predchádzajúci (dvojklik) a pohľad Živé hranie ako vo webe
 - [x] Medzery v zápise patternu by sa mali ignorovať (umožní to vizuálne si prispôsobiť zápis)
 

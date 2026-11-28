@@ -479,60 +479,29 @@ async function pressMain(wait = 400) {
   await act(() => vi.advanceTimersByTimeAsync(wait));
 }
 
-it('turns Play into Next and plays the following rhythms in file order, wrapping at the end', async () => {
+it('keeps Play while playing; Play queues the rhythm under the caret', async () => {
   const start = await renderPlaying();
   expect(startedIds(start)).toEqual(['One']);
-  expect(mainButton().textContent).toBe('Next');
+  expect(mainButton().textContent).toBe('Play');
   await pressMain();
+  expect(startedIds(start)).toEqual(['One', 'One']);
+  await act(() => editor().dispatch({ selection: { anchor: three.indexOf('Three:') } }));
   await pressMain();
-  await pressMain();
-  expect(startedIds(start)).toEqual(['One', 'Two', 'Three', 'One']);
-  expect(document.querySelector('h1')?.textContent).toBe('One');
-  // The caret follows the queued rhythm, so the button stays Next.
-  expect(editor().state.selection.main.head).toBe(0);
-  expect(mainButton().textContent).toBe('Next');
+  expect(startedIds(start)).toEqual(['One', 'One', 'Three']);
+  expect(mainButton().textContent).toBe('Play');
 });
 
-it('plays next to a broken rhythm; Next onto it stops playback and shows its error', async () => {
+it('plays next to a broken rhythm; swiping onto it stops playback and shows its error', async () => {
   const start = await renderPlaying(three.replace('Two:\n  tracks: {djembe: "b.tt..s."}', 'Two:\n  tracks: {djembe: "b.tt..x."}'));
   const stop = vi.mocked(AudioEngine.prototype.stop);
   expect(startedIds(start)).toEqual(['One']);
   expect(document.querySelector('.site-header > .header-status')?.textContent).toBe('');
-  await pressMain();
+  await swipe(mainButton(), 80);
   expect(startedIds(start)).toEqual(['One']);
   expect(stop).toHaveBeenCalled();
   expect(mainButton().textContent).toBe('Play');
   expect(document.querySelector('.playback-message')?.textContent).toContain('Two');
   expect(editor().state.doc.toString().slice(editor().state.selection.main.head).startsWith('Two:')).toBe(true);
-});
-
-it('plays only the previous rhythm on a double tap of Next, without first switching to the next one', async () => {
-  const start = await renderPlaying(three.replace(/\n/g, '\r\n'), 'Two');
-  const caretAt = (name: string) => editor().state.doc.toString().slice(editor().state.selection.main.head).startsWith(name + ':');
-  await act(async () => mainButton().click());
-  await act(() => vi.advanceTimersByTimeAsync(100));
-  // A single tap waits for a possible second one: nothing has changed yet.
-  expect(startedIds(start)).toEqual(['Two']);
-  expect(caretAt('Two')).toBe(true);
-  await act(async () => mainButton().click());
-  expect(startedIds(start)).toEqual(['Two', 'One']);
-  expect(caretAt('One')).toBe(true);
-  await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(startedIds(start)).toEqual(['Two', 'One']);
-  await act(async () => mainButton().click());
-  await act(() => vi.advanceTimersByTimeAsync(100));
-  await act(async () => mainButton().click());
-  await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(startedIds(start)).toEqual(['Two', 'One', 'Three']);
-});
-
-it('does not play a delayed Next tap after Stop', async () => {
-  const start = await renderPlaying();
-  await act(async () => mainButton().click());
-  await act(async () => document.querySelector<HTMLButtonElement>('.transport button.stop')!.click());
-  await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(startedIds(start)).toEqual(['One']);
-  expect(mainButton().textContent).toBe('Play');
 });
 
 function swipe(button: HTMLButtonElement, dx: number, dy = 0) {
@@ -552,12 +521,10 @@ it('switches rhythms by swiping Play while playing: right = next, left = previou
   await swipe(mainButton(), -80);
   await swipe(mainButton(), -80);
   expect(startedIds(start)).toEqual(['One', 'Two', 'Three', 'Two', 'One']);
-  // Too short or mostly vertical drags stay taps (here Next after the double-tap delay).
+  // Too short or mostly vertical drags stay taps: Play replays the caret rhythm, which followed the swipes.
   await swipe(mainButton(), 30);
-  await act(() => vi.advanceTimersByTimeAsync(400));
   await swipe(mainButton(), 80, 60);
-  await act(() => vi.advanceTimersByTimeAsync(400));
-  expect(startedIds(start)).toEqual(['One', 'Two', 'Three', 'Two', 'One', 'Two', 'Three']);
+  expect(startedIds(start)).toEqual(['One', 'Two', 'Three', 'Two', 'One', 'One', 'One']);
 });
 
 it('switches rhythms by swiping Stop while playing, without stopping; a tap still stops', async () => {
@@ -603,22 +570,6 @@ it('selects rhythms by swiping Play while stopped, then Play starts the selected
   await act(async () => primary.click());
   await act(() => vi.advanceTimersByTimeAsync(400));
   expect(startedIds(start)).toEqual(['Two']);
-});
-
-it('goes back to Play after an edit or when the caret moves to another rhythm', async () => {
-  const start = await renderPlaying();
-  const view = editor();
-  await act(() => view.dispatch({ selection: { anchor: three.indexOf('Three:') } }));
-  expect(mainButton().textContent).toBe('Play');
-  await pressMain();
-  expect(startedIds(start)).toEqual(['One', 'Three']);
-  expect(mainButton().textContent).toBe('Next');
-  await act(() => view.dispatch({ changes: { from: view.state.doc.length, insert: '# edit\n' } }));
-  await act(() => vi.advanceTimersByTimeAsync(200));
-  expect(mainButton().textContent).toBe('Play');
-  await pressMain();
-  expect(startedIds(start)).toEqual(['One', 'Three', 'Three']);
-  expect(mainButton().textContent).toBe('Next');
 });
 
 it('uses one big Play/Stop button in Živé hranie and switches rhythms by swiping it', async () => {
